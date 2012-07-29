@@ -25,7 +25,7 @@ Ladder.controllers :search do
       @facets.each do |ns, facet|
         facet.each do |f|
           # TODO: prepend namespace to facet somehow to avoid collisions
-          search.facet(f) { terms (ns + '.' + f + '.raw').to_sym}
+          search.facet(f) { terms (ns.to_s + '.' + f + '.raw').to_sym}
         end
       end
     end

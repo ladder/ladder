@@ -7,14 +7,14 @@
 #search_facets
   %table{:border => "1", :style => "table-layout:fixed; width:100%; word-wrap:break-word;"}
     %tr{:style => "font-weight: bold;"}
-      - @facets['dcterms'].each do |facet|
+      - @facets[:dcterms].each do |facet|
         %td
           - if facet.size < 4
             = facet.upcase    # hackey-hack for acronyms
           - else
             = facet.capitalize
     %tr
-      - @facets['dcterms'].each do |facet|
+      - @facets[:dcterms].each do |facet|
         %td
           %ul
           - @search.results.facets[facet]['terms'].each do |f|
