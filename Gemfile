@@ -1,0 +1,47 @@
+source :rubygems
+
+# Server requirements
+# gem 'thin' # or mongrel
+# gem 'trinidad', :platform => 'jruby'
+
+# Project requirements
+gem 'rake'
+gem 'sinatra-flash', :require => 'sinatra/flash'
+
+# Component requirements
+#gem 'SystemTimer', :require => "system_timer"
+gem 'haml'
+gem 'bson_ext', :require => "mongo"
+gem 'nokogiri' # xml manipulation
+gem 'parallel' # multi-core processing
+gem 'iso-639' # english/french lists
+
+# model gems
+gem 'mongoid', '2.4.12'   # mongodb
+gem 'tire'      # elasticsearch
+gem 'kaminari'  # paging for the above
+#gem 'mongoid_touch'
+
+# linked data gems
+gem 'rdf'
+gem 'easel', :path => "vendor/easel"
+
+# gems for importing existing data
+gem 'marc'
+gem 'gyoku'
+
+# gems for service endpoints
+#gem 'zoom'
+
+# Test requirements
+
+# Padrino Stable Gem
+gem 'padrino', '0.10.7'
+
+# Or Padrino Edge
+# gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
+
+# Or Individual Gems
+# %w(core gen helpers cache mailer admin).each do |g|
+#   gem 'padrino-' + g, '0.10.7'
+# end

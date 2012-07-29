@@ -1,0 +1,16 @@
+!!!
+%html{ :xmlns => "http://www.w3.org/1999/xhtml", :lang => "en", "xml:lang" => "en"}
+  %head
+    %title= @title
+    %meta{"http-equiv" => "Content-Type", :content => "text/html; charset=utf-8"}
+    %link{"rel" => "stylesheet", "href" => "main.css", "type" => "text/css"}
+    %link{"rel" => "stylesheet", "href" => "http://yandex.st/highlightjs/7.0/styles/github.min.css"}
+    %script{"src" => "http://yandex.st/highlightjs/7.0/highlight.min.js"}
+    <script>hljs.initHighlightingOnLoad();</script>
+  %body
+    #header
+      %h1= @title
+    #search_form
+      %form(action='/search/' method='GET')
+        %input(type='text' name='q')
+        %input(type='submit')

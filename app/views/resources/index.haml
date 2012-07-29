@@ -1,0 +1,29 @@
+!!!
+%html{ :xmlns => "http://www.w3.org/1999/xhtml", :lang => "en", "xml:lang" => "en"}
+  %head
+    %title Ladder Search
+    %meta{"http-equiv" => "Content-Type", :content => "text/html; charset=utf-8"}
+    %link{"rel" => "stylesheet", "href" => "main.css", "type" => "text/css"}
+    %link{"rel" => "stylesheet", "href" => "http://yandex.st/highlightjs/7.0/styles/github.min.css"}
+    %script{"src" => "http://yandex.st/highlightjs/7.0/highlight.min.js"}
+    <script>hljs.initHighlightingOnLoad();</script>
+  %body
+    #header
+      %h1 Resource #{@resource.id}
+    #resource
+      %table{:border => "1", :style => "table-layout:fixed; width:100%; word-wrap:break-word;"}
+        %tr
+          %td{:valign => "top", :class => "json"}
+            <pre><code>
+            = JSON.pretty_generate(MARC::Record.new_from_marc(@resource.marc).to_hash)
+            </code></pre>
+          %td{:valign => "top", :class => "json"}
+            <pre><code>
+            &= @resource.mods
+            </pre></code>
+          %td{:valign => "top", :class => "json"}
+            <pre><code>
+            -#= JSON.pretty_generate(@resource.as_json(:except => [:marc, :mods]))
+            = JSON.pretty_generate(@resource.dcterms.as_json(:except => :_id).reject! {|k,v| v.nil?})
+            = JSON.pretty_generate(@resource.bibo.as_json(:except => :_id).reject! {|k,v| v.nil?})
+            </code></pre>

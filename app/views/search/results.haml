@@ -1,0 +1,35 @@
+- @title = "Ladder Results"
+= partial 'search/header'
+
+#result_info
+  %p Showing <b>#{@search.results.size}</b> of <b>#{@search.results.total}</b> results
+
+#search_facets
+  %table{:border => "1", :style => "table-layout:fixed; width:100%; word-wrap:break-word;"}
+    %tr{:style => "font-weight: bold;"}
+      - @facets['dcterms'].each do |facet|
+        %td
+          - if facet.size < 4
+            = facet.upcase    # hackey-hack for acronyms
+          - else
+            = facet.capitalize
+    %tr
+      - @facets['dcterms'].each do |facet|
+        %td
+          %ul
+          - @search.results.facets[facet]['terms'].each do |f|
+            - if 'language' == facet
+              %li #{ISO_639.find(f['term']).english_name} (#{f['count']})
+            - else
+              %li #{f['term']} (#{f['count']})
+
+#search_results
+  %table{:border => "1", :style => "table-layout:fixed; width:100%; word-wrap:break-word;"}
+    - @search.results.each do |doc|
+      %tr
+        %td{:valign => "top", :class => "json"}
+          #{link_to doc.id, url_for(:resources, :index, :id => doc.id)}
+          <pre><code>
+          = JSON.pretty_generate(doc.dcterms.as_json.reject! {|k,v| v.nil?})
+          = JSON.pretty_generate(doc.bibo.as_json.reject! {|k,v| v.nil?})
+          </code></pre>
