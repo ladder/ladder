@@ -22,7 +22,7 @@ Ladder.controllers :search do
         query.filtered do |filtered|
 
           filtered.query do |querystring|
-            querystring.string @querystring
+            querystring.string @querystring, :default_operator => 'AND'
           end
 
           @filters.each do |ns, filter|
