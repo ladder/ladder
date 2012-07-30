@@ -7,8 +7,3 @@
     = javascript_include_tag 'highlight.pack.js', 'bootstrap,min.js'
     <script>hljs.initHighlightingOnLoad();</script>
   %body
-    %br
-    #search_form{:style => 'width: 50%; margin-left: auto; margin-right: auto;'}
-      %form(action='/search' method='get')
-        %input(type='text' name='q' value=@querystring style='width: 80%; font-size: 1.5em;')
-        %input(type='submit' value='Search' style='font-size: 1.2em; vertical-align: 10%')

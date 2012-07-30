@@ -1,11 +1,17 @@
-- @title = "Ladder Results"
+- @title = "Results for '#{@querystring}'"
 = partial 'search/header'
+
+- if !@filters.empty?
+  #filters{:class => "json", :style =>'width: 50%;  word-wrap:break-word;'}
+    <pre><code>
+    = JSON.pretty_generate(@filters)
+    </pre></code>
 
 #result_info
   %p Showing <b>#{@search.results.size}</b> of <b>#{@search.results.total}</b> results
 
 #search_facets
-  %table{:border => "1", :style => "table-layout:fixed; width:100%; word-wrap:break-word;"}
+  %table{:border => "1", :style => "table-layout:fixed; width:99%; word-wrap:break-word;"}
     %tr{:style => "font-weight: bold;"}
       - @facets[:dcterms].each do |facet|
         %td
@@ -18,18 +24,21 @@
         %td
           %ul
           - @search.results.facets[facet]['terms'].each do |f|
-            - if 'language' == facet
-              %li #{ISO_639.find(f['term']).english_name} (#{f['count']})
-            - else
-              %li #{f['term']} (#{f['count']})
+            - if @filters[:dcterms].nil? or (@filters[:dcterms][facet.to_sym].nil? or f['term'] != @filters[:dcterms][facet.to_sym])
+              - if 'language' == facet
+                %li= link_to ISO_639.find(f['term']).nil? ? f['term'] + " (#{f['count']})" : ISO_639.find(f['term']).english_name + " (#{f['count']})",
+                      url_for(:search, :index, :q => @querystring,
+                                               :f => @filters.deep_merge({:dcterms => {facet.to_sym => f['term']}}))
+              - else
+                %li= link_to f['term'] + " (#{f['count']})",
+                      url_for(:search, :index, :q => @querystring,
+                                               :f => @filters.deep_merge({:dcterms => {facet.to_sym => f['term']}}))
 
 #search_results
-  %table{:border => "1", :style => "table-layout:fixed; width:100%; word-wrap:break-word;"}
-    - @search.results.each do |doc|
-      %tr
-        %td{:valign => "top", :class => "json"}
-          #{link_to doc.id, url_for(:resources, :index, :id => doc.id)}
-          <pre><code>
-          = JSON.pretty_generate(doc.dcterms.as_json.reject! {|k,v| v.nil?})
-          = JSON.pretty_generate(doc.bibo.as_json.reject! {|k,v| v.nil?})
-          </code></pre>
+- @search.results.each do |doc|
+  #search_result{:class => "json", :style =>'width: 99%;  word-wrap:break-word;'}
+    #{link_to doc.id, url_for(:resource, :index, :id => doc.id)}
+    <pre><code>
+    = JSON.pretty_generate(doc.dcterms.as_json.reject! {|k,v| v.nil?})
+    = JSON.pretty_generate(doc.bibo.as_json.reject! {|k,v| v.nil?})
+    </code></pre>

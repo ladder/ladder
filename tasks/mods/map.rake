@@ -51,7 +51,7 @@ namespace :mods do
 
         prism = {}
 
-        dcterms = {:title => mods.xpath_map('titleInfo'),
+        dcterms = {:title => mods.xpath_map('titleInfo[not(@type = "alternative")]'),
                    :alternative => mods.xpath_map('titleInfo[@type = "alternative"]'),
                    :issued => mods.xpath_map('originInfo/dateIssued'),
                    :format => mods.xpath_map('physicalDescription/form'),
@@ -62,7 +62,7 @@ namespace :mods do
                    :identifier => mods.xpath_map('identifier[not(@type)]'),
 
                    # agent access points
-                   :creator => mods.xpath_map('name/namePart'),
+                   :creator => mods.xpath_map('name/namePart[not(@type = "date")]'),
                    :publisher => mods.xpath_map('originInfo/publisher'),
 
                    # concept access points

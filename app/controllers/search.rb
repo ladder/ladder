@@ -4,21 +4,34 @@ Ladder.controllers :search do
     if params[:q].nil?
       redirect url("/")
     else
-      redirect url(:search, :index, :querystring => params[:q])
+      redirect url(:search, :index, :querystring => params[:q], :filters => params[:f])
     end
   end
 
   get :index, :with => :querystring do
 
-    @querystring = params[:querystring]
+    @querystring = params[:querystring] || ''
+    @filters = params[:filters] || {}
 
     @facets = {:dcterms => ['issued', 'format', 'language',       # descriptive facets
                              'creator', 'publisher',               # agent facets
                              'subject', 'spatial', 'DDC', 'LCC'] } # concept facets
 
-    @search = Tire.search do |search|
+    @search = Tire.search 'resources' do |search|
       search.query do |query|
-        query.string @querystring, :default_operator => 'AND'
+        query.filtered do |filtered|
+
+          filtered.query do |querystring|
+            querystring.string @querystring
+          end
+
+          @filters.each do |ns, filter|
+            filter.each do |f, v|
+              filtered.filter :term, ns.to_s + '.' + f.to_s + '.raw' => v
+            end
+          end
+
+        end
       end
 
       # descriptive facets

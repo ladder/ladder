@@ -1,4 +1,4 @@
-Ladder.controllers :resources do
+Ladder.controllers :resource do
 
 #  provides :json, :xml
 
@@ -8,6 +8,6 @@ Ladder.controllers :resources do
 #      when :json, :xml then @resource.send("to_#{content_type}")
 #      when :html then render 'resources/index'
 #    end
-    render 'resources/index'
+    render 'resource/index'
   end
 end
