@@ -5,4 +5,4 @@ en:
       last: "Last &raquo;"
       previous: "&lsaquo; Prev"
       next: "Next &rsaquo;"
-      truncate: "..."
+      truncate: "&hellip;"

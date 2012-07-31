@@ -11,20 +11,20 @@ gem 'sinatra-flash', :require => 'sinatra/flash'
 # Component requirements
 #gem 'SystemTimer', :require => "system_timer"
 gem 'haml'
-gem 'bson_ext', :require => "mongo"
+gem 'bson_ext', :require => 'mongo'
 gem 'nokogiri' # xml manipulation
 gem 'parallel' # multi-core processing
 gem 'iso-639' # english/french lists
 
 # model gems
+#gem 'mongoid_touch'
 gem 'mongoid', '2.4.12'   # mongodb
 gem 'tire'      # elasticsearch
-gem 'kaminari', :require => 'kaminari/sinatra'  # paging for the above
-#gem 'mongoid_touch'
+gem 'kaminari', :path => 'vendor/kaminari', :require => 'kaminari/sinatra'
 
 # linked data gems
 gem 'rdf'
-gem 'easel', :path => "vendor/easel"
+gem 'easel', :path => 'vendor/easel'
 
 # gems for importing existing data
 gem 'marc'

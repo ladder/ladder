@@ -5,34 +5,43 @@
   = paginate @results
   %p <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
 
-- if !@filters.empty?
-  #filters{:class => "json", :style =>'width: 50%;  word-wrap:break-word;'}
-    <pre><code>
-    = JSON.pretty_generate(@filters)
-    </pre></code>
-
 #search_facets
   %table{:border => "1", :style => "table-layout:fixed; width:99%; word-wrap:break-word;"}
     %tr{:style => "font-weight: bold;"}
-      - @facets[:dcterms].each do |facet|
-        %td
-          - if facet.size < 4
-            = facet.upcase    # hackey-hack for acronyms
-          - else
-            = facet.capitalize
-    %tr
-      - @facets[:dcterms].each do |facet|
-        %td
-          %ul
-          - @results.facets[facet]['terms'].each do |f|
-            - if @filters[:dcterms].nil? or (@filters[:dcterms][facet.to_sym].nil? or f['term'] != @filters[:dcterms][facet.to_sym])
-              - if 'language' == facet
-                %li= link_to ISO_639.find(f['term']).nil? ? f['term'] + " (#{f['count']})" : ISO_639.find(f['term']).english_name + " (#{f['count']})",
-                      url_for(:search, :index, :q => @querystring, :p => @page,
-                                               :f => @filters.deep_merge({:dcterms => {facet.to_sym => f['term']}}))
+      - @facets.each do |ns, fields|
+        - fields.each do |facet|
+          - if !@results.facets[facet]['terms'].empty?
+            %td
+              - if facet.size < 4
+                = facet.upcase    # hackey-hack for acronyms
               - else
-                %li= link_to f['term'] + " (#{f['count']})",
-                      url_for(:search, :index, :q => @querystring, :p => @page,
-                                               :f => @filters.deep_merge({:dcterms => {facet.to_sym => f['term']}}))
+                = facet.capitalize
+    %tr
+      - @facets.each do |ns, fields|
+        - fields.each do |facet|
+          - if !@results.facets[facet]['terms'].empty?
+            %td{:style => "vertical-align: top;"}
+              %ul
+              - @results.facets[facet]['terms'].each do |f|
+
+                -### TODO: make this a helper method
+                - if @filters[ns].nil? or @filters[ns][facet].nil? or !@filters[ns][facet].to_a.include?(f['term'])
+                  - if !@filters[ns].nil?
+                    - @new_fi = @filters.deep_merge({ns => {facet => @filters[ns][facet].to_a | f['term'].to_a}})
+                  - else
+                    - @new_fi = @filters.deep_merge({ns => {facet => f['term'].to_a}})
+
+                  - if 'language' == facet
+                    %li= link_to ISO_639.find(f['term']).nil? ? f['term'] + " (#{f['count']})" : ISO_639.find(f['term']).english_name + " (#{f['count']})",
+                          url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
+                  - else
+                    %li= link_to f['term'] + " (#{f['count']})",
+                          url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
+                - else
+                  - if 'language' == facet
+                    %li{:style => "font-weight: bold;"}= ISO_639.find(f['term']).nil? ? f['term'] + " (x)" : ISO_639.find(f['term']).english_name + " (x)"
+                  - else
+                    %li{:style => "font-weight: bold;"}= f['term'] + " (x)"
+                -### END TODO
 
 #search_results= partial 'search/result', :collection => @results
