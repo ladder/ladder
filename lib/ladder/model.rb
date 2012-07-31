@@ -12,6 +12,11 @@ module LadderModel
       # ElasticSearch integration
       base.send :include, Tire::Model::Search
       base.send :include, Tire::Model::Callbacks
+
+      # Pagination
+      base.send :include, Kaminari::MongoidExtension::Criteria
+      base.send :include, Kaminari::MongoidExtension::Document
+
 =begin
       # dynamic templates to store un-analyzed values for faceting
       base.send :mapping, :dynamic_templates => [{
@@ -40,7 +45,7 @@ module LadderModel
 =end
     end
 
-    # TODO: implement recursive null removal
+    # TODO: implement recursive null removal?
 #    def to_indexed_json
 #
 #    end

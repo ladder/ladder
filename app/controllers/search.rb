@@ -4,7 +4,7 @@ Ladder.controllers :search do
     if params[:q].nil?
       redirect url("/")
     else
-      redirect url(:search, :index, :querystring => params[:q], :filters => params[:f])
+      redirect url(:search, :index, :querystring => params[:q], :filters => params[:f], :page => params[:p])
     end
   end
 
@@ -12,12 +12,14 @@ Ladder.controllers :search do
 
     @querystring = params[:querystring] || ''
     @filters = params[:filters] || {}
+    @page = params[:page] || 1          # start on the first page, duh
+    @per_page = params[:per_page] || 10 # default to 10 per page
 
     @facets = {:dcterms => ['issued', 'format', 'language',       # descriptive facets
                              'creator', 'publisher',               # agent facets
                              'subject', 'spatial', 'DDC', 'LCC'] } # concept facets
 
-    @search = Tire.search 'resources' do |search|
+    @results = Resource.tire.search(:page => @page, :per_page => @per_page) do |search|
       search.query do |query|
         query.filtered do |filtered|
 

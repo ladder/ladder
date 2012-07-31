@@ -19,7 +19,7 @@ gem 'iso-639' # english/french lists
 # model gems
 gem 'mongoid', '2.4.12'   # mongodb
 gem 'tire'      # elasticsearch
-gem 'kaminari'  # paging for the above
+gem 'kaminari', :require => 'kaminari/sinatra'  # paging for the above
 #gem 'mongoid_touch'
 
 # linked data gems
@@ -37,6 +37,7 @@ gem 'gyoku'
 
 # Padrino Stable Gem
 gem 'padrino', '0.10.7'
+gem 'padrino-helpers'
 
 # Or Padrino Edge
 # gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'

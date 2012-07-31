@@ -156,6 +156,7 @@ DEPENDENCIES
   mongoid (= 2.4.12)
   nokogiri
   padrino (= 0.10.7)
+  padrino-helpers
   parallel
   rake
   rdf
