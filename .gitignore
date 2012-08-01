@@ -1,7 +1,8 @@
 .DS_Store
 log/**/*
 tmp/**/*
-bin/*
-vendor/*
-.sass-cache/*
-.idea/*
+bin/
+vendor/
+.sass-cache/
+.idea/
+.bundle/
