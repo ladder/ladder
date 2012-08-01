@@ -20,11 +20,11 @@ gem 'iso-639' # english/french lists
 #gem 'mongoid_touch'
 gem 'mongoid', '2.4.12'   # mongodb
 gem 'tire'      # elasticsearch
-gem 'kaminari', :path => 'vendor/kaminari', :require => 'kaminari/sinatra'
+gem 'kaminari', :git => 'git://github.com/mjsuhonos/kaminari.git', :require => 'kaminari/sinatra'
 
 # linked data gems
 gem 'rdf'
-gem 'easel', :path => 'vendor/easel'
+gem 'easel', :git => 'git://github.com/mtrudel/easel.git'
 
 # gems for importing existing data
 gem 'marc'

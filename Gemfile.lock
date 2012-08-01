@@ -1,18 +1,20 @@
-PATH
-  remote: vendor/easel
+GIT
+  remote: git://github.com/mjsuhonos/kaminari.git
+  revision: bf16d204a4d4dbbfd5e6338e948aeecee05c0c74
+  specs:
+    kaminari (0.13.0)
+      actionpack (>= 3.0.0)
+      activesupport (>= 3.0.0)
+
+GIT
+  remote: git://github.com/mtrudel/easel.git
+  revision: f5b875c769aa2bc0e540931ec6a69c1310738d61
   specs:
     easel (0.0.5)
       activesupport
       mongoid
       rdf
       rdf-xml
-
-PATH
-  remote: vendor/kaminari
-  specs:
-    kaminari (0.13.0)
-      actionpack (>= 3.0.0)
-      activesupport (>= 3.0.0)
 
 GEM
   remote: http://rubygems.org/
