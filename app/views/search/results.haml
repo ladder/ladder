@@ -1,47 +1,169 @@
-- @title = "Results for '#{@querystring}'"
-= partial 'search/header'
+!!! 5
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %title= @title
+    %meta{:content => "", :name => "description"}/
+    %meta{:content => "", :name => "author"}/
+    / Le HTML5 shim, for IE6-8 support of HTML elements
+    /[if lt IE 9]
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    / Le styles
+    = stylesheet_link_tag 'bootstrap.css'
+    :css
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    = stylesheet_link_tag 'bootstrap-responsive.css'
 
-#result_info{:style => 'width: 60%; margin-left: auto; margin-right: auto; text-align: center;'}
-  = paginate @results
-  %p <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
+    = stylesheet_link_tag 'github.css'
+    = javascript_include_tag 'highlight.pack.js'
+    <script>hljs.initHighlightingOnLoad();</script>
 
-#search_facets
-  %table{:border => "1", :style => "table-layout:fixed; width:99%; word-wrap:break-word;"}
-    %tr{:style => "font-weight: bold;"}
-      - @facets.each do |ns, fields|
-        - fields.each do |facet|
-          - if !@results.facets[facet]['terms'].empty?
-            %td
-              - if facet.size < 4
-                = facet.upcase    # hackey-hack for acronyms
-              - else
-                = facet.capitalize
-    %tr
-      - @facets.each do |ns, fields|
-        - fields.each do |facet|
-          - if !@results.facets[facet]['terms'].empty?
-            %td{:style => "vertical-align: top;"}
-              %ul
-              - @results.facets[facet]['terms'].each do |f|
+    / Le fav and touch icons
+    %link{:href => "images/favicon.ico", :rel => "shortcut icon"}/
+    %link{:href => "images/apple-touch-icon.png", :rel => "apple-touch-icon"}/
+    %link{:href => "images/apple-touch-icon-72x72.png", :rel => "apple-touch-icon", :sizes => "72x72"}/
+    %link{:href => "images/apple-touch-icon-114x114.png", :rel => "apple-touch-icon", :sizes => "114x114"}/
+  %body
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          %a.btn.btn-navbar{"data-target" => ".nav-collapse", "data-toggle" => "collapse"}
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+          %a.brand{:href => "#"} Ladder
+          .nav-collapse
+            %ul.nav
+              %li.active
+                %a{:href => "#"} Home
+              %li
+                %a{:href => "#about"} About
+              %li
+                %a{:href => "#contact"} Contact
+            %p.navbar-text.pull-right
+              Logged in as
+              %a{:href => "#"} username
+          / /.nav-collapse
+    .container-fluid
+      .row-fluid
+        .span3
+          .well.sidebar-nav
+            %ul.nav.nav-list
+              - @facets.each do |ns, fields|
+                - fields.each do |facet|
+                  - if !@results.facets[facet]['terms'].empty?
+                    %li.nav-header= facet.size < 4 ? facet.upcase : facet.capitalize
 
-                -### TODO: make this a helper method
-                - if @filters[ns].nil? or @filters[ns][facet].nil? or !@filters[ns][facet].to_a.include?(f['term'])
-                  - if !@filters[ns].nil?
-                    - @new_fi = @filters.deep_merge({ns => {facet => @filters[ns][facet].to_a | f['term'].to_a}})
-                  - else
-                    - @new_fi = @filters.deep_merge({ns => {facet => f['term'].to_a}})
+                    - @results.facets[facet]['terms'].each do |f|
 
-                  - if 'language' == facet
-                    %li= link_to ISO_639.find(f['term']).nil? ? f['term'] + " (#{f['count']})" : ISO_639.find(f['term']).english_name + " (#{f['count']})",
-                          url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
-                  - else
-                    %li= link_to f['term'] + " (#{f['count']})",
-                          url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
-                - else
-                  - if 'language' == facet
-                    %li{:style => "font-weight: bold;"}= ISO_639.find(f['term']).nil? ? f['term'] + " (x)" : ISO_639.find(f['term']).english_name + " (x)"
-                  - else
-                    %li{:style => "font-weight: bold;"}= f['term'] + " (x)"
-                -### END TODO
+                      -### TODO: make this a helper method
+                      - if @filters[ns].nil? or @filters[ns][facet].nil? or !@filters[ns][facet].to_a.include?(f['term'])
+                        - if !@filters[ns].nil?
+                          - @new_fi = @filters.deep_merge({ns => {facet => @filters[ns][facet].to_a | f['term'].to_a}})
+                        - else
+                          - @new_fi = @filters.deep_merge({ns => {facet => f['term'].to_a}})
 
-#search_results= partial 'search/result', :collection => @results
+                        - if 'language' == facet
+                          %li= link_to ISO_639.find(f['term']).nil? ? f['term'] + " (#{f['count']})" : ISO_639.find(f['term']).english_name + " (#{f['count']})",
+                                url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
+                        - else
+                          %li= link_to f['term'] + " (#{f['count']})",
+                                url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
+                      - else
+                        - if 'language' == facet
+                          %li.active
+                            %a= ISO_639.find(f['term']).nil? ? f['term']: ISO_639.find(f['term']).english_name
+                        - else
+                          %li.active
+                            %a= f['term']
+                      -### END TODO
+
+          / /.well
+        / /span
+        .span9
+          -#.hero-unit
+            %h1 Hello, world!
+            %p This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.
+            %p
+              %a.btn.btn-primary.btn-large Learn more &raquo;
+
+          .TESTING
+            - form_tag '/search', :method => 'get' do
+              = text_field_tag :q, :value => @querystring, :autofocus => true, :style => 'width: 90%; font-size: 1.5em;'
+              = submit_tag 'Search', :class => 'btn btn-primary', :style => 'vertical-align: top;'
+
+              .pagination-centered
+                = paginate @results
+                <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
+
+          =partial 'search/result', :collection => @results
+
+          -#.row-fluid
+            .span4
+              %h2 Heading
+              %p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+              %p
+                %a.btn{:href => "#"} View details &raquo;
+            / /span
+            .span4
+              %h2 Heading
+              %p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+              %p
+                %a.btn{:href => "#"} View details &raquo;
+            / /span
+            .span4
+              %h2 Heading
+              %p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+              %p
+                %a.btn{:href => "#"} View details &raquo;
+            / /span
+          / /row
+          -#.row-fluid
+            .span4
+              %h2 Heading
+              %p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+              %p
+                %a.btn{:href => "#"} View details &raquo;
+            / /span
+            .span4
+              %h2 Heading
+              %p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+              %p
+                %a.btn{:href => "#"} View details &raquo;
+            / /span
+            .span4
+              %h2 Heading
+              %p Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+              %p
+                %a.btn{:href => "#"} View details &raquo;
+            / /span
+          / /row
+        / /span
+      / /row
+      %hr/
+      %footer
+        %p &copy; Deliberate Data 2012
+    / /.fluid-container
+    /
+      Le javascript
+      \==================================================
+    / Placed at the end of the document so the pages load faster
+    %script{:src => "/javascripts/jquery.js"}
+    %script{:src => "/javascripts/bootstrap-transition.js"}
+    %script{:src => "/javascripts/bootstrap-alert.js"}
+    %script{:src => "/javascripts/bootstrap-modal.js"}
+    %script{:src => "/javascripts/bootstrap-dropdown.js"}
+    %script{:src => "/javascripts/bootstrap-scrollspy.js"}
+    %script{:src => "/javascripts/bootstrap-tab.js"}
+    %script{:src => "/javascripts/bootstrap-tooltip.js"}
+    %script{:src => "/javascripts/bootstrap-popover.js"}
+    %script{:src => "/javascripts/bootstrap-button.js"}
+    %script{:src => "/javascripts/bootstrap-collapse.js"}
+    %script{:src => "/javascripts/bootstrap-carousel.js"}
+    %script{:src => "/javascripts/bootstrap-typeahead.js"}

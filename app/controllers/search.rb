@@ -2,9 +2,9 @@ Ladder.controllers :search do
 
   get :index do
     if params[:q].nil?
-      redirect url("/")
+      render 'search/form'
     else
-      redirect url(:search, :index, :q => params[:q], :fi => params[:fi], :page => params[:page])
+      redirect url(:search_index, :q => params[:q], :fi => params[:fi], :page => params[:page])
     end
   end
 
@@ -52,6 +52,7 @@ Ladder.controllers :search do
       redirect url(:search, :index, :q => params[:q], :fi => params[:fi], :page => 1)
     end
 
+    @title = "Results for '#{@querystring}'"
     render 'search/results'
   end
 

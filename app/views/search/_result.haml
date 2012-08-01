@@ -1,6 +1,12 @@
-#search_result{:class => "json", :style =>'width: 99%;  word-wrap:break-word;'}
-  #{link_to result.id, url_for(:resource, :index, :id => result.id)} (#{result._score})
-  <pre><code>
-  = JSON.pretty_generate(result.dcterms.as_json.reject! {|k,v| v.nil?})
-  = JSON.pretty_generate(result.bibo.as_json.reject! {|k,v| v.nil?})
-  </code></pre>
+.row-fluid
+  .span12
+    %h2 #{link_to result.id, url_for(:resource, :index, :id => result.id)} (#{result._score})
+    .json{:style => 'overflow: auto; height: 200px;'}
+      <pre><code>
+      = JSON.pretty_generate(result.dcterms.as_json.reject! {|k,v| v.nil?})
+      = JSON.pretty_generate(result.bibo.as_json.reject! {|k,v| v.nil?})
+      </code></pre>
+    %p
+      %a.btn{:href => "#"} View details &raquo;
+  / /span
+/ /row
