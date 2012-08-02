@@ -5,10 +5,27 @@ namespace :mods do
 
     resources = Resource.where(:mods.exists => true)
 
-    resources.each do |resource|
-      resource.unset(:dcterms)
-      resource.unset(:bibo)
-      resource.unset(:prism)
+    puts "Resetting #{resources.size} Resources with MODS records using #{Parallel.processor_count} processors..."
+
+    # break resources into chunks for multi-processing
+    options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(resources)}
+
+    chunks = []
+    while chunk = resources.page(options[:chunk_num]).per(options[:per_chunk]) \
+                            and chunk.size(true) > 0
+      chunks << chunk
+      options[:chunk_num] += 1
+    end
+
+    Parallel.each(chunks) do |chunk|
+
+      chunk.each do |resource|
+
+        resource.unset(:dcterms)
+        resource.unset(:bibo)
+        resource.unset(:prism)
+
+      end
     end
 
     Rake::Task['mods:map'].execute

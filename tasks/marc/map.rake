@@ -3,10 +3,27 @@ desc "Map/Re-map Resources from MARC data"
 namespace :marc do
   task :remap => :environment do
 
-    resources = Resource.where(:marc.exists => true)
+    resources = Resource.where(:marc.exists => true, :mods.exists => true)
 
-    resources.each do |resource|
+    puts "Resetting #{resources.size} Resources with MARC records using #{Parallel.processor_count} processors..."
+
+    # break resources into chunks for multi-processing
+    options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(resources)}
+
+    chunks = []
+    while chunk = resources.page(options[:chunk_num]).per(options[:per_chunk]) \
+                            and chunk.size(true) > 0
+      chunks << chunk
+      options[:chunk_num] += 1
+    end
+
+    Parallel.each(chunks) do |chunk|
+
+      chunk.each do |resource|
+
         resource.unset(:mods)
+
+      end
     end
 
     Rake::Task['marc:map'].execute
@@ -22,7 +39,7 @@ namespace :marc do
 
     exit if resources.empty?
 
-    puts "Mapping #{resources.size} Resources from MARC records with #{Parallel.processor_count} processors..."
+    puts "Mapping #{resources.size} Resources from MARC records using #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
     options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(resources)}

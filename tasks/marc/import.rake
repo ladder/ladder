@@ -15,7 +15,7 @@ namespace :marc do
       files = [path]
     end
 
-    puts "Importing records from #{files.size} MARC file(s)..."
+    puts "Importing records from #{files.size} MARC file(s) using #{Parallel.processor_count} processors..."
 
     Parallel.each(files) do |file|
 
@@ -48,6 +48,8 @@ namespace :marc do
 
       # make sure we insert anything left over from the last chunk
       Resource.collection.insert(resources)
+
+      puts "Finished importing: #{file}"
     end
   end
 end
