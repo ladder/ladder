@@ -1,0 +1,5 @@
+- @title = "Ladder Search"
+
+- form_tag '/search', :method => 'get', :class => 'search' do
+  = text_field_tag :q, :value => @querystring, :autofocus => true, :style => 'width: 90%; font-size: 1.5em;'
+  = submit_tag 'Search', :style => 'font-size: 1.2em; vertical-align: 10%'

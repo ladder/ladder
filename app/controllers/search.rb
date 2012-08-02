@@ -12,8 +12,8 @@ Ladder.controllers :search do
 
     @querystring = params[:q]
     @filters = params[:fi] || {}
-    @page = params[:page] || 1    # start on the first page, duh
-    @per_page = params[:pp] || 10 # default to 10 per page
+    @page = params[:page] || 1
+    @per_page = params[:pp] || 10
 
     @facets = {'dcterms' => ['issued', 'format', 'language',       # descriptive facets
                              'creator', 'publisher',               # agent facets
@@ -53,7 +53,7 @@ Ladder.controllers :search do
     end
 
     @title = "Results for '#{@querystring}'"
-    render 'search/results'
+    render 'search/index'
   end
 
 end
