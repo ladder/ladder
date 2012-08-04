@@ -1,26 +1,26 @@
 desc "Index/Re-Index models, optionally only for [model]"
 
 namespace :tire do
-  task :reindex, [:model] => :environment do |t, params|
+  task :reindex, [:model] => :environment do |t, args|
 
-    params.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
+    args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
 
     # once for each model specified
-    params.model.each do |model|
+    args.model.each do |model|
       # delete existing index
       index = Tire::Index.new(model.underscore.pluralize)
       index.delete if index.exists?
     end
 
-    Rake::Task['tire:index'].execute#(:model => params.model) #TODO: fixme!
+    Rake::Task['tire:index'].execute#(:model => args.model) #TODO: fixme!
   end
 
-  task :index, [:model] => :environment do |t, params|
+  task :index, [:model] => :environment do |t, args|
 
-    params.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
+    args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
 
     # once for each model specified
-    params.model.each do |model|
+    args.model.each do |model|
 
       klass  = model.classify.constantize
       break if klass.empty? # nothing to index
@@ -55,12 +55,12 @@ namespace :tire do
       next if collection.empty?
 
       # do not include explicitly-mapped fields
-      collection = collection.only(klass.tire.mapping_to_hash[:resource][:properties].keys)
+      collection = collection.only(klass.tire.mapping_to_hash[model.underscore.to_sym][:properties].keys)
 
       puts "Indexing #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
-      options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(collection)}
+      options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(collection, Parallel.processor_count * 2)}
 
       chunks = []
       while chunk = collection.page(options[:chunk_num]).per(options[:per_chunk]) \
@@ -69,7 +69,12 @@ namespace :tire do
         options[:chunk_num] += 1
       end
 
+      # queries are executed in sequence, so traverse last-to-first
+      chunks.reverse!
+
       Parallel.each(chunks) do |chunk|
+        # Make sure to reconnect after forking a new process
+        Mongoid.reconnect!
 
         # Import the documents
         options = options.merge({:page => 1, :per_page => 1000})

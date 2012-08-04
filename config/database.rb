@@ -14,3 +14,5 @@ Mongoid.database = Mongo::Connection.new(
   port,
   {:pool_size => Parallel.physical_processor_count}
 ).db(database_name)
+
+Mongoid.max_retries_on_connection_failure = 2

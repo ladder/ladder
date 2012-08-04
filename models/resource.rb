@@ -29,36 +29,12 @@ class Resource
   embeds_one :bibo,    class_name: "Bibo"
   embeds_one :prism,   class_name: "Prism"
 
+  # index embedded documents
+  mapping indexes :dcterms, :type => 'object'
+  mapping indexes :bibo,    :type => 'object'
+  mapping indexes :prism,   :type => 'object'
+
   # model relations
   has_and_belongs_to_many :agents
   has_and_belongs_to_many :concepts
-
-  # TODO: move this into LadderModel::Core
-  mapping :dynamic_templates => [{
-    :test => {
-        :match => '*',
-        :mapping => {
-            :type => 'multi_field',
-            :fields => {
-                '{name}' => {
-                    :type => '{dynamic_type}',
-                    :index => 'analyzed'
-                },
-                :raw => {
-                    :type => '{dynamic_type}',
-                    :index => 'not_analyzed'
-                }
-            }
-        }
-    }
-  }] do
-    indexes :created_at,  :type => 'date'
-    indexes :updated_at,  :type => 'date'
-    indexes :deleted_at,  :type => 'date'
-    # END OF STUFF TO MOVE
-
-    indexes :bibo,        :type => 'object'
-    indexes :prism,       :type => 'object'
-    indexes :dcterms,     :type => 'object'
-  end
 end

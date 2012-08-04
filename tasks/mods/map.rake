@@ -1,50 +1,24 @@
 desc "Map/Re-map Resources from MODS data"
 
 namespace :mods do
-  task :remap => :environment do
 
-    resources = Resource.where(:mods.exists => true)
+  task :map, [:remap] => :environment do |t, args|
 
-    puts "Resetting #{resources.size} Resources with MODS records using #{Parallel.processor_count} processors..."
+    args.with_defaults(:remap => false)
 
-    # break resources into chunks for multi-processing
-    options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(resources)}
-
-    chunks = []
-    while chunk = resources.page(options[:chunk_num]).per(options[:per_chunk]) \
-                            and chunk.size(true) > 0
-      chunks << chunk
-      options[:chunk_num] += 1
+    resources = Resource.only(:mods).where(:mods.exists => true)
+    # only select resources which have not already been mapped
+    unless args.remap
+      resources = resources.where(:dcterms.exists => false, \
+                                  :bibo.exists => false, \
+                                  :prism.exists => false)
     end
-
-    Parallel.each(chunks) do |chunk|
-
-      chunk.each do |resource|
-
-        resource.unset(:dcterms)
-        resource.unset(:bibo)
-        resource.unset(:prism)
-
-      end
-    end
-
-    Rake::Task['mods:map'].execute
-  end
-
-  task :map => :environment do
-
-    resources = Resource.only(:mods).where(:mods.exists => true, \
-                :dcterms.exists => false, \
-                :bibo.exists => false, \
-                :prism.exists => false)
-
     exit if resources.empty?
 
-    puts "Mapping #{resources.size} Resources from MODS records with #{Parallel.processor_count} processors..."
+    puts "Mapping #{resources.size(true)} Resources from MODS records with #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
     options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(resources)}
-
     chunks = []
     while chunk = resources.page(options[:chunk_num]).per(options[:per_chunk]) \
                             and chunk.size(true) > 0
@@ -52,7 +26,12 @@ namespace :mods do
       options[:chunk_num] += 1
     end
 
+    # queries are executed in sequence, so traverse last-to-first
+    chunks.reverse!
+
     Parallel.each(chunks) do |chunk|
+      # Make sure to reconnect after forking a new process
+      Mongoid.reconnect!
 
       chunk.each do |resource|
 
