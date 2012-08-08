@@ -62,7 +62,9 @@
 
       =partial 'search/result', :collection => @results
 
-      %hr
+      .pagination-centered
+        = paginate @results
+
       %footer
         %p &copy; Deliberate Data 2012
     %script{:src => "/javascripts/jquery.js"}

@@ -1,12 +1,10 @@
 .row-fluid
   .span12
     %h2 #{link_to result.id, url_for(:resource, :index, :id => result.id)} (#{result._score})
-    .json{:style => 'overflow: auto; height: 200px;'}
+    .json
       <pre><code>
-      = JSON.pretty_generate(result.dcterms.as_json.reject! {|k,v| v.nil?})
-      = JSON.pretty_generate(result.bibo.as_json.reject! {|k,v| v.nil?})
+      = JSON.generate(result.dcterms.as_json, :object_nl => "\n")
+      = JSON.generate(result.bibo.as_json, :object_nl => "\n")
       </code></pre>
-    %p
-      %a.btn{:href => "#"} View details &raquo;
   / /span
 / /row

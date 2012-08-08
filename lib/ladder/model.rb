@@ -42,6 +42,15 @@ module LadderModel
         base.send :indexes, :updated_at,  :type => 'date'
       end
 
+      def to_indexed_json
+        mapping = self.class.tire.mapping
+
+        # Reject keys not declared in mapping
+        hash = self.attributes.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
+
+        hash.to_json
+      end
+
     end
   end
 

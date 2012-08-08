@@ -16,8 +16,8 @@ class LadderHelper
     max_per_proc = (klass_or_collection.size(true).to_f / Parallel.processor_count.to_f)
     max_per_free = mem_free_bytes.to_f / (stats['avgObjSize'].to_f * Parallel.processor_count.to_f)
 
-    # minimum chunk size is 10000; less causes problems
-    chunk_size = [([max_per_proc.to_f, max_per_free.to_f].min + 1).ceil, 10000].max / factor
+    # minimum chunk size is 1000
+    chunk_size = [([max_per_proc.to_f, max_per_free.to_f].min + 1).ceil / factor, 1000].max
     num_chunks = (klass_or_collection.size(true).to_f / chunk_size.to_f).ceil
 
     puts "Using #{num_chunks} chunks of #{chunk_size} objects..."
