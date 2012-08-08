@@ -6,3 +6,4 @@ vendor/
 .sass-cache/
 .idea/
 .bundle/
+.powenv

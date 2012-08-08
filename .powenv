@@ -1,0 +1,12 @@
+export PATH ; PATH="/Users/mj/.rvm/gems/ruby-1.9.3-p194/bin:/Users/mj/.rvm/gems/ruby-1.9.3-p194@global/bin:/Users/mj/.rvm/rubies/ruby-1.9.3-p194/bin:/Users/mj/.rvm/bin:$PATH"
+export rvm_env_string ; rvm_env_string='ruby-1.9.3-p194'
+export rvm_path ; rvm_path='/Users/mj/.rvm'
+export rvm_ruby_string ; rvm_ruby_string='ruby-1.9.3-p194'
+unset rvm_gemset_name
+export RUBY_VERSION ; RUBY_VERSION='ruby-1.9.3-p194'
+export GEM_HOME ; GEM_HOME='/Users/mj/.rvm/gems/ruby-1.9.3-p194'
+export GEM_PATH ; GEM_PATH='/Users/mj/.rvm/gems/ruby-1.9.3-p194:/Users/mj/.rvm/gems/ruby-1.9.3-p194@global'
+export MY_RUBY_HOME ; MY_RUBY_HOME='/Users/mj/.rvm/rubies/ruby-1.9.3-p194'
+export IRBRC ; IRBRC='/Users/mj/.rvm/rubies/ruby-1.9.3-p194/.irbrc'
+unset MAGLEV_HOME
+unset RBXOPT
