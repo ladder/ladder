@@ -72,9 +72,9 @@ namespace :mods do
         }.reject! { |k, v| v.nil? }
 
         # atomic set doesn't trigger callbacks (eg. index)
-        resource.set(:dcterms, DublinCore.new(dcterms, :without_protection => true).as_document)
-        resource.set(:bibo, Bibo.new(bibo, :without_protection => true).as_document)
-        resource.set(:prism, Prism.new(prism, :without_protection => true).as_document)
+        resource.set(:dcterms, DublinCore.new(dcterms, :without_protection => true).as_document) unless dcterms.empty?
+        resource.set(:bibo, Bibo.new(bibo, :without_protection => true).as_document) unless bibo.empty?
+        resource.set(:prism, Prism.new(prism, :without_protection => true).as_document) unless prism.empty?
         resource.set(:updated_at, Time.now)
       end
 
