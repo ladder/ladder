@@ -43,11 +43,11 @@
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
                   - else
                     - if 'language' == facet
-                      %li.active
-                        %a= ISO_639.find(f['term']).nil? ? f['term']: ISO_639.find(f['term']).english_name
+                      %li.active= link_to ISO_639.find(f['term']).nil? ? f['term']: ISO_639.find(f['term']).english_name,
+                                  url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
                     - else
-                      %li.active
-                        %a= f['term']
+                      %li.active= link_to f['term'],
+                                  url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
 
     .span9
 
