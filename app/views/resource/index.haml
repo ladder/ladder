@@ -9,15 +9,16 @@
     %tr
       %td{:valign => "top", :class => "json"}
         <pre><code>
-        = JSON.pretty_generate(MARC::Record.new_from_marc(@resource.marc).to_hash)
+        = JSON.pretty_generate(MARC::Record.new_from_marc(@resource.marc).to_hash) if @resource.marc
         </code></pre>
       %td{:valign => "top", :class => "xml"}
         <pre><code>
-        &= @resource.mods
+        &= @resource.mods if @resource.mods
         </pre></code>
       %td{:valign => "top", :class => "json"}
         <pre><code>
         -#= JSON.pretty_generate(@resource.as_json(:except => [:marc, :mods]))
-        = JSON.pretty_generate(@resource.dcterms.as_json(:except => :_id).reject! {|k,v| v.nil?})
-        = JSON.pretty_generate(@resource.bibo.as_json(:except => :_id).reject! {|k,v| v.nil?})
+        = JSON.pretty_generate(@resource.dcterms.as_json(:except => :_id).reject! {|k,v| v.nil?}) if @resource.dcterms
+        = JSON.pretty_generate(@resource.bibo.as_json(:except => :_id).reject! {|k,v| v.nil?}) if @resource.bibo
+        = JSON.pretty_generate(@resource.prism.as_json(:except => :_id).reject! {|k,v| v.nil?}) if @resource.prism
         </code></pre>

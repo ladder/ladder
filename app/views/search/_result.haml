@@ -3,8 +3,9 @@
     %h2 #{link_to result.id, url_for(:resource, :index, :id => result.id)} (#{result._score})
     .json
       <pre><code>
-      = JSON.generate(result.dcterms.as_json, :object_nl => "\n")
-      = JSON.generate(result.bibo.as_json, :object_nl => "\n")
+      = JSON.generate(result.dcterms.as_json, :object_nl => "\n") if result.dcterms
+      = JSON.generate(result.bibo.as_json, :object_nl => "\n") if result.bibo
+      = JSON.generate(result.prism.as_json, :object_nl => "\n") if result.prism
       </code></pre>
   / /span
 / /row

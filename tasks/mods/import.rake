@@ -1,6 +1,6 @@
-desc "Import data from MARC binary file(s)"
+desc "Import data from MODS XML file(s)"
 
-namespace :marc do
+namespace :mods do
   task :import, [:file] => :environment do |t, args|
 
     if args.file.nil?
@@ -11,30 +11,27 @@ namespace :marc do
 
     if File::directory? path
       files = Dir.entries(path).reject! {|s| s =~ /^\./}  # don't include dotfiles
-      # order largest files first so processes aren't blocking
+                                                          # order largest files first so processes aren't blocking
       files = files.sort_by {|filename| File.size(File.expand_path(filename, args.file)) }.reverse
     else
       files = [path]
     end
 
-    puts "Importing records from #{files.size} MARC file(s) using #{Parallel.processor_count} processors..."
+    puts "Importing records from #{files.size} MODS file(s) using #{Parallel.processor_count} processors..."
 
     Parallel.each(files) do |file|
       # Make sure to reconnect after forking a new process
       Mongoid.reconnect!
 
-      # load records from file
-      reader = MARC::Reader.new(File.join(path, file))
-
       resources = []
       size = 0
 
-      reader.each do |record|
+      files.each do |file|
 
-        # create a new resource for this MARC record
+        # create a new resource for this MODS file
         resource = Resource.new
         resource.set_created_at
-        resource.marc = record.to_marc
+        resource.mods = IO.read(file)
 
         # add resource to mongoid bulk stack
         r = resource.as_document

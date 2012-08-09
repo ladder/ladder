@@ -36,45 +36,26 @@ namespace :mods do
       chunk.each do |resource|
 
         # load MODS XML document
-        mods = Nokogiri::XML(resource.mods).remove_namespaces!.root
+        xml = Nokogiri::XML(resource.mods).remove_namespaces!
 
-        # dereferenceable identifiers
-        bibo = {:isbn => mods.xpath_map('identifier[@type = "isbn"]'),
-                :issn => mods.xpath_map('identifier[@type = "issn"]'),
-                :lccn => mods.xpath_map('identifier[@type = "lccn"]'),
-                :oclc => mods.xpath_map('identifier[@type = "oclc"]'),
-        }.reject! { |k, v| v.nil? }
-
-        prism = {}
-
-        dcterms = {:title => mods.xpath_map('titleInfo[not(@type = "alternative")]'),
-                   :alternative => mods.xpath_map('titleInfo[@type = "alternative"]'),
-                   :issued => mods.xpath_map('originInfo/dateIssued'),
-                   :format => mods.xpath_map('physicalDescription/form'),
-                   :extent => mods.xpath_map('physicalDescription/extent'),
-                   :language => mods.xpath_map('language/languageTerm'),
-
-                   # dereferenceable identifiers
-                   :identifier => mods.xpath_map('identifier[not(@type)]'),
-
-                   # agent access points
-                   :creator => mods.xpath_map('name/namePart[not(@type = "date")]'),
-                   :publisher => mods.xpath_map('originInfo/publisher'),
-
-                   # concept access points
-                   :subject => mods.xpath_map('subject/topic'),
-                   :spatial => mods.xpath_map('subject/geographic'),
-                   :DDC => mods.xpath_map('classification[@authority="ddc"]'),
-                   :LCC => mods.xpath_map('classification[@authority="lcc"]'),
-
-                   # indexable textual content
-                   :tableOfContents => mods.xpath_map('tableOfContents'),
-        }.reject! { |k, v| v.nil? }
+        vocabs = LadderMapping::MODS::map_vocabs(xml.xpath('//mods').first)
 
         # atomic set doesn't trigger callbacks (eg. index)
-        resource.set(:dcterms, DublinCore.new(dcterms, :without_protection => true).as_document) unless dcterms.empty?
-        resource.set(:bibo, Bibo.new(bibo, :without_protection => true).as_document) unless bibo.empty?
-        resource.set(:prism, Prism.new(prism, :without_protection => true).as_document) unless prism.empty?
+        vocabs.each do |vocab, mapped|
+          resource.set(vocab, mapped.as_document)
+        end
+=begin
+        children = LadderMapping::MODS::map_related(xml.xpath('//relatedItem'))
+
+        children.each do |child|
+          child.parentize(resource)
+          child.save
+        end
+=end
+        # TODO
+#        map_concepts
+#        map_agents
+
         resource.set(:updated_at, Time.now)
       end
 
