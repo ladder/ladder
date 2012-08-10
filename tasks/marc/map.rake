@@ -7,10 +7,10 @@ namespace :marc do
     args.with_defaults(:remap => false)
 
     resources = Resource.only(:marc).where(:marc.exists => true)
+
     # only select resources which have not already been mapped
-    unless args.remap
-      resources = resources.where(:mods.exists => false)
-    end
+    resources = resources.where(:mods.exists => false) unless args.remap
+
     exit if resources.empty?
 
     puts "Mapping #{resources.size(true)} Resources from MARC records using #{Parallel.processor_count} processors..."
@@ -31,6 +31,9 @@ namespace :marc do
     # queries are executed in sequence, so traverse last-to-first
     chunks.reverse!
 
+    # disable callbacks for versioning, indexing on save
+    Resource.reset_callbacks(:save)
+
     Parallel.each(chunks) do |chunk|
       # Make sure to reconnect after forking a new process
       Mongoid.reconnect!
@@ -38,18 +41,11 @@ namespace :marc do
       chunk.each do |resource|
 
         # create MODS XML from MARC record
-        # TODO: should this be on import for better performance?
-        if resource.marc.force_encoding('UTF-8').valid_encoding?
-          marc = resource.marc
-        else
-          marc = resource.marc.encode!('UTF-8', 'UTF-8', :invalid => :replace)
-        end
+        marc = MARC::Record.new_from_marc(resource.marc, :forgiving => true)
 
-        marc = MARC::Record.new_from_marc(marc, :forgiving => true)
-        mods = xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash)))
+        resource.mods = xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash))).to_s
 
-        # atomic set doesn't trigger callbacks (eg. index)
-        resource.set(:mods, CompressedBinary.new.serialize(mods.to_s))
+        resource.save
       end
 
     end

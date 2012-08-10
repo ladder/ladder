@@ -9,7 +9,7 @@
     %tr
       %td{:valign => "top", :class => "json"}
         <pre><code>
-        = JSON.pretty_generate(MARC::Record.new_from_marc(@resource.marc).to_hash) if @resource.marc
+        = JSON.generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n") if @resource.marc
         </code></pre>
       %td{:valign => "top", :class => "xml"}
         <pre><code>
@@ -17,8 +17,5 @@
         </pre></code>
       %td{:valign => "top", :class => "json"}
         <pre><code>
-        -#= JSON.pretty_generate(@resource.as_json(:except => [:marc, :mods]))
-        = JSON.pretty_generate(@resource.dcterms.as_json(:except => :_id).reject! {|k,v| v.nil?}) if @resource.dcterms
-        = JSON.pretty_generate(@resource.bibo.as_json(:except => :_id).reject! {|k,v| v.nil?}) if @resource.bibo
-        = JSON.pretty_generate(@resource.prism.as_json(:except => :_id).reject! {|k,v| v.nil?}) if @resource.prism
+        = JSON.generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n")
         </code></pre>

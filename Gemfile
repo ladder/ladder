@@ -17,10 +17,12 @@ gem 'parallel' # multi-core processing
 gem 'iso-639' # english/french lists
 
 # model gems
+gem 'tire'              # elasticsearch
+gem 'mongoid', '2.4.12' # mongodb
 #gem 'mongoid_touch'
-gem 'mongoid', '2.4.12'   # mongodb
-gem 'tire'      # elasticsearch
-gem 'kaminari', :git => 'git://github.com/mjsuhonos/kaminari.git', :require => 'kaminari/sinatra'
+#gem 'mongoid-history'
+gem 'mongoid-tree', :require => 'mongoid/tree', :git => 'git://github.com/benedikt/mongoid-tree.git', 'branch' => 'mongoid-2.0'
+gem 'kaminari', :require => 'kaminari/sinatra', :git => 'git://github.com/mjsuhonos/kaminari.git'
 
 # linked data gems
 gem 'rdf'

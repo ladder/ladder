@@ -7,12 +7,13 @@ namespace :mods do
     args.with_defaults(:remap => false)
 
     resources = Resource.only(:mods).where(:mods.exists => true)
+
     # only select resources which have not already been mapped
-    unless args.remap
-      resources = resources.where(:dcterms.exists => false, \
-                                  :bibo.exists => false, \
-                                  :prism.exists => false)
-    end
+    resources = resources.where(:dcterms.exists => false, \
+                                :bibo.exists => false, \
+                                :prism.exists => false) \
+                                unless args.remap
+
     exit if resources.empty?
 
     puts "Mapping #{resources.size(true)} Resources from MODS records with #{Parallel.processor_count} processors..."
@@ -29,6 +30,9 @@ namespace :mods do
     # queries are executed in sequence, so traverse last-to-first
     chunks.reverse!
 
+    # disable callbacks for versioning, indexing on save
+    Resource.reset_callbacks(:save)
+
     Parallel.each(chunks) do |chunk|
       # Make sure to reconnect after forking a new process
       Mongoid.reconnect!
@@ -38,25 +42,31 @@ namespace :mods do
         # load MODS XML document
         xml = Nokogiri::XML(resource.mods).remove_namespaces!
 
-        vocabs = LadderMapping::MODS::map_vocabs(xml.xpath('//mods').first)
+        # map MODS elements to embedded vocabs
+        resource.update_attributes(LadderMapping::MODS::map_vocabs(xml.xpath('//mods').first))
 
-        # atomic set doesn't trigger callbacks (eg. index)
-        vocabs.each do |vocab, mapped|
-          resource.set(vocab, mapped.as_document)
-        end
-=begin
-        children = LadderMapping::MODS::map_related(xml.xpath('//relatedItem'))
+        # map related resources as tree hierarchy
+        relations = LadderMapping::MODS::map_relations(xml.xpath('//relatedItem'))
 
-        children.each do |child|
-          child.parentize(resource)
-          child.save
+        unless relations[:parent].nil?
+          relations[:parent].save
+          resource.parent = relations[:parent]
         end
-=end
+
+        # FIXME: object must have a parent to assign siblings
+        # just assign them as children for now
+        resource.children = relations[:children] + relations[:siblings]
+
+        # store relation types in vocab fields
+        unless relations[:fields].empty?
+          resource.update_attributes(relations[:fields])
+        end
+
         # TODO
-#        map_concepts
-#        map_agents
+        #concepts = LadderMapping::MODS::map_concepts(xml.xpath('SOME_PATH'))
+        #agents = LadderMapping::MODS::map_agents(xml.xpath('SOME_PATH'))
 
-        resource.set(:updated_at, Time.now)
+        resource.save
       end
 
     end

@@ -12,6 +12,10 @@ module LadderMapping
                  :extent => xml_element.xpath_map('physicalDescription/extent'),
                  :language => xml_element.xpath_map('language/languageTerm'),
 
+                 # indexable textual content
+                 :abstract => xml_element.xpath_map('abstract'),
+                 :tableOfContents => xml_element.xpath_map('tableOfContents'),
+
                  # dereferenceable identifiers
                  :identifier => xml_element.xpath_map('identifier[not(@type)]'),
 
@@ -26,39 +30,74 @@ module LadderMapping
                  :spatial => xml_element.xpath_map('subject/geographic'),
                  :DDC => xml_element.xpath_map('classification[@authority="ddc"]'),
                  :LCC => xml_element.xpath_map('classification[@authority="lcc"]'),
-
-                 # indexable textual content
-                 :abstract => xml_element.xpath_map('abstract'),
-                 :tableOfContents => xml_element.xpath_map('tableOfContents'),
       }.reject! { |k, v| v.nil? }
 
       # dereferenceable identifiers
       bibo = {:isbn => xml_element.xpath_map('identifier[@type = "isbn"]'),
-                       :issn => xml_element.xpath_map('identifier[@type = "issn"]'),
-                       :lccn => xml_element.xpath_map('identifier[@type = "lccn"]'),
-                       :oclc => xml_element.xpath_map('identifier[@type = "oclc"]'),
+              :issn => xml_element.xpath_map('identifier[@type = "issn"]'),
+              :lccn => xml_element.xpath_map('identifier[@type = "lccn"]'),
+              :oclcnum => xml_element.xpath_map('identifier[@type = "oclc"]'),
       }.reject! { |k, v| v.nil? }
 
       # TODO: prism mapping
 
-      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) unless dcterms.empty?
-      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) unless bibo.empty?
+      vocabs[:dcterms] = DublinCore.new(dcterms) unless dcterms.empty?
+      vocabs[:bibo] = Bibo.new(bibo) unless bibo.empty?
 
       vocabs
     end
 
-    def self.map_related(xml_nodeset)
-      children = []
+    def self.map_relations(xml_nodeset)
+      relations = {:children => [], :siblings => [], :fields => {}}
 
       xml_nodeset.each do |node|
+
         # apply vocab mapping to each related resource
-        resource = Resource.new(LadderMapping::MODS::map_vocabs(node))
+        resource = Resource.new(self.map_vocabs(node))
         resource.set_created_at
 
-        children << resource
+        case node['type']
+          when 'host'
+            relations[:parent] = resource
+          when 'series'
+            relations[:parent] = resource
+            (relations[:fields][:'dcterms.isPartOf'] ||= []).push(resource.id)
+
+          when 'constituent'
+            relations[:children].push(resource)
+            (relations[:fields][:'dcterms.hasPart'] ||= []).push(resource.id)
+
+          when 'otherVersion'
+            relations[:siblings].push(resource)
+            (relations[:fields][:'dcterms.hasVersion'] ||= []).push(resource.id)
+          when 'otherFormat'
+            relations[:siblings].push(resource)
+            (relations[:fields][:'dcterms.hasFormat'] ||= []).push(resource.id)
+          when 'isReferencedBy'
+            relations[:siblings].push(resource)
+            (relations[:fields][:'dcterms.isReferencedBy'] ||= []).push(resource.id)
+          when 'references'
+            relations[:siblings].push(resource)
+            (relations[:fields][:'dcterms.references'] ||= []).push(resource.id)
+          when 'original'
+            relations[:siblings].push(resource)
+            (relations[:fields][:'dcterms.hasPreviousVersion'] ||= []).push(resource.id)
+
+          else
+            relations[:siblings].push(resource)
         end
 
-      children
+      end
+
+      relations
+    end
+
+    def self.map_agents(xml_nodeset)
+      agents = []
+    end
+
+    def self.map_concepts(xml_nodeset)
+      concepts = []
     end
 
   end

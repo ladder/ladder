@@ -34,7 +34,15 @@ namespace :marc do
         # create a new resource for this MARC record
         resource = Resource.new
         resource.set_created_at
-        resource.marc = record.to_marc
+
+        # ensure we are importing valid UTF-8 MARC
+        marc = record.to_marc
+
+        if marc.force_encoding('UTF-8').valid_encoding?
+          resource.marc = marc
+        else
+          resource.marc = marc.encode!('UTF-8', 'UTF-8', :invalid => :replace)
+        end
 
         # add resource to mongoid bulk stack
         r = resource.as_document

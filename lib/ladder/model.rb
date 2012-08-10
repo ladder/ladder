@@ -6,8 +6,7 @@ module LadderModel
       # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
       base.send :include, Mongoid::Paranoia # soft deletes
       base.send :include, Mongoid::Timestamps
-      base.send :include, Mongoid::Hierarchy
-      base.send :include, Mongoid::Versioning
+      base.send :include, Mongoid::Tree
 
       # ElasticSearch integration
       base.send :include, Tire::Model::Search
@@ -57,9 +56,6 @@ module LadderModel
   module Embedded
     def self.included(base)
       base.send :include, Mongoid::Document
-
-      # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
-      base.send :include, Mongoid::Versioning
       base.send :include, Easel::Bindable
     end
   end
