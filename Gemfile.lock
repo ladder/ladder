@@ -142,6 +142,7 @@ GEM
     tzinfo (0.3.33)
     url_mount (0.2.1)
       rack
+    yajl-ruby (1.1.0)
 
 PLATFORMS
   ruby
@@ -164,3 +165,4 @@ DEPENDENCIES
   rdf
   sinatra-flash
   tire
+  yajl-ruby

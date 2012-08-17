@@ -54,7 +54,7 @@ namespace :tire do
       puts "Indexing #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
-      options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(collection, Parallel.processor_count)}
+      options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(collection)}
 
       chunks = []
       while chunk = collection.page(options[:chunk_num]).per(options[:per_chunk]) \

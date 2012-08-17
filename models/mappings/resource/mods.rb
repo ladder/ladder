@@ -41,8 +41,8 @@ module LadderMapping
 
       # TODO: prism mapping
 
-      vocabs[:dcterms] = DublinCore.new(dcterms) unless dcterms.empty?
-      vocabs[:bibo] = Bibo.new(bibo) unless bibo.empty?
+      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) unless dcterms.nil? || dcterms.empty?
+      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) unless bibo.nil? || bibo.empty?
 
       vocabs
     end
@@ -53,38 +53,42 @@ module LadderMapping
       xml_nodeset.each do |node|
 
         # apply vocab mapping to each related resource
-        resource = Resource.new(self.map_vocabs(node))
-        resource.set_created_at
+        mapped = self.map_vocabs(node)
 
-        case node['type']
-          when 'host'
-            relations[:parent] = resource
-          when 'series'
-            relations[:parent] = resource
-            (relations[:fields][:'dcterms.isPartOf'] ||= []).push(resource.id)
+        unless mapped.empty?
+          resource = Resource.new(mapped)
+          resource.set_created_at
 
-          when 'constituent'
-            relations[:children].push(resource)
-            (relations[:fields][:'dcterms.hasPart'] ||= []).push(resource.id)
+          case node['type']
+            when 'host'
+              relations[:parent] = resource
+            when 'series'
+              relations[:parent] = resource
+              (relations[:fields][:'dcterms.isPartOf'] ||= []).push(resource.id)
 
-          when 'otherVersion'
-            relations[:siblings].push(resource)
-            (relations[:fields][:'dcterms.hasVersion'] ||= []).push(resource.id)
-          when 'otherFormat'
-            relations[:siblings].push(resource)
-            (relations[:fields][:'dcterms.hasFormat'] ||= []).push(resource.id)
-          when 'isReferencedBy'
-            relations[:siblings].push(resource)
-            (relations[:fields][:'dcterms.isReferencedBy'] ||= []).push(resource.id)
-          when 'references'
-            relations[:siblings].push(resource)
-            (relations[:fields][:'dcterms.references'] ||= []).push(resource.id)
-          when 'original'
-            relations[:siblings].push(resource)
-            (relations[:fields][:'dcterms.hasPreviousVersion'] ||= []).push(resource.id)
+            when 'constituent'
+              relations[:children].push(resource)
+              (relations[:fields][:'dcterms.hasPart'] ||= []).push(resource.id)
 
-          else
-            relations[:siblings].push(resource)
+            when 'otherVersion'
+              relations[:siblings].push(resource)
+              (relations[:fields][:'dcterms.hasVersion'] ||= []).push(resource.id)
+            when 'otherFormat'
+              relations[:siblings].push(resource)
+              (relations[:fields][:'dcterms.hasFormat'] ||= []).push(resource.id)
+            when 'isReferencedBy'
+              relations[:siblings].push(resource)
+              (relations[:fields][:'dcterms.isReferencedBy'] ||= []).push(resource.id)
+            when 'references'
+              relations[:siblings].push(resource)
+              (relations[:fields][:'dcterms.references'] ||= []).push(resource.id)
+            when 'original'
+              relations[:siblings].push(resource)
+              (relations[:fields][:'dcterms.hasPreviousVersion'] ||= []).push(resource.id)
+
+            else
+              relations[:siblings].push(resource)
+          end
         end
 
       end

@@ -24,6 +24,14 @@ class Resource
   field :marc, :type => CompressedBinary
   field :mods, :type => CompressedBinary
 
+  def self.marc
+    only(:marc).where(:marc.exists => true)
+  end
+
+  def self.mods
+    only(:mods).where(:mods.exists => true)
+  end
+
   # embedded RDF vocabularies
   embeds_one :dcterms, class_name: "DublinCore"
   embeds_one :bibo,    class_name: "Bibo"

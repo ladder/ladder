@@ -6,7 +6,7 @@ namespace :mods do
 
     args.with_defaults(:remap => false)
 
-    resources = Resource.only(:mods).where(:mods.exists => true)
+    resources = Resource.mods
 
     # only select resources which have not already been mapped
     resources = resources.where(:dcterms.exists => false, \
@@ -48,25 +48,23 @@ namespace :mods do
         # map related resources as tree hierarchy
         relations = LadderMapping::MODS::map_relations(xml.xpath('//relatedItem'))
 
+        relations[:children].map { |child| child.parent = resource }
+
         unless relations[:parent].nil?
           relations[:parent].save
           resource.parent = relations[:parent]
+          relations[:siblings].map { |sibling| sibling.parent = relations[:parent] }
         end
 
-        # FIXME: object must have a parent to assign siblings
-        # just assign them as children for now
-        resource.children = relations[:children] + relations[:siblings]
+        # if resource does not have a parent, assign siblings as children
+        relations[:siblings].map { |child| child.parent = resource } if relations[:parent].nil?
 
         # store relation types in vocab fields
-        unless relations[:fields].empty?
-          resource.update_attributes(relations[:fields])
-        end
+        resource.update_attributes(relations[:fields]) unless relations[:fields].empty?
 
         # TODO
         #concepts = LadderMapping::MODS::map_concepts(xml.xpath('SOME_PATH'))
         #agents = LadderMapping::MODS::map_agents(xml.xpath('SOME_PATH'))
-
-        resource.save
       end
 
     end

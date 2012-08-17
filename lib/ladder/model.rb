@@ -36,9 +36,16 @@ module LadderModel
           }
         }], :_source => { :compress => true } do
 
+        # Timestamp information
         base.send :indexes, :created_at,  :type => 'date'
         base.send :indexes, :deleted_at,  :type => 'date'
         base.send :indexes, :updated_at,  :type => 'date'
+
+        # Relation information
+        base.send :indexes, :parent_id,   :type => 'string'
+        base.send :indexes, :parent_ids,  :type => 'string'
+        base.send :indexes, :agent_ids,   :type => 'string'
+        base.send :indexes, :concept_ids, :type => 'string'
       end
 
       def to_indexed_json

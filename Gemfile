@@ -11,6 +11,7 @@ gem 'sinatra-flash', :require => 'sinatra/flash'
 # Component requirements
 #gem 'SystemTimer', :require => "system_timer"
 gem 'haml'
+gem 'yajl-ruby', :require => 'yajl/json_gem'
 gem 'bson_ext', :require => 'mongo'
 gem 'nokogiri' # xml manipulation
 gem 'parallel' # multi-core processing

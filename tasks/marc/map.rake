@@ -6,7 +6,7 @@ namespace :marc do
 
     args.with_defaults(:remap => false)
 
-    resources = Resource.only(:marc).where(:marc.exists => true)
+    resources = Resource.marc
 
     # only select resources which have not already been mapped
     resources = resources.where(:mods.exists => false) unless args.remap
