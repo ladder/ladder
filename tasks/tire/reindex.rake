@@ -8,9 +8,11 @@ namespace :tire do
     # once for each model specified
     args.model.to_a.each do |model|
 
+      klass  = model.classify.constantize
+
       # delete existing index
-      index = Tire::Index.new(model.underscore.pluralize)
-      index.delete if index.exists?
+      klass.tire.index.delete if klass.tire.index.exists?
+      klass.tire.create_elasticsearch_index
     end
 
     Rake::Task['tire:index'].execute#(:model => args.model)
