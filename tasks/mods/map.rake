@@ -50,14 +50,14 @@ namespace :mods do
 
         relations[:children].map { |child| child.parent = resource }
 
-        unless relations[:parent].nil?
+        if relations[:parent].nil?
+          # if resource does not have a parent, assign siblings as children
+          relations[:siblings].map { |child| child.parent = resource }
+        else
           relations[:parent].save
           resource.parent = relations[:parent]
           relations[:siblings].map { |sibling| sibling.parent = relations[:parent] }
         end
-
-        # if resource does not have a parent, assign siblings as children
-        relations[:siblings].map { |child| child.parent = resource } if relations[:parent].nil?
 
         # store relation types in vocab fields
         resource.update_attributes(relations[:fields]) unless relations[:fields].empty?

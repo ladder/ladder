@@ -1,26 +1,12 @@
-desc "Index/Re-Index models, optionally only for [model]"
+desc "Add model documents to index, optionally only for [model]"
 
 namespace :tire do
-  task :reindex, [:model] => :environment do |t, args|
-
-    args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
-
-    # once for each model specified
-    args.model.each do |model|
-      # delete existing index
-      index = Tire::Index.new(model.underscore.pluralize)
-      index.delete if index.exists?
-    end
-
-    Rake::Task['tire:index'].execute#(:model => args.model) #TODO: fixme!
-  end
-
   task :index, [:model] => :environment do |t, args|
 
-    args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
+    args.with_defaults(:model => ['Resource', 'Agent', 'Concept']) if args.nil?
 
     # once for each model specified
-    args.model.each do |model|
+    args.model.to_a.each do |model|
 
       klass  = model.classify.constantize
       break if klass.empty? # nothing to index

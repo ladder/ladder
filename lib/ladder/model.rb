@@ -54,6 +54,9 @@ module LadderModel
         # Reject keys not declared in mapping
         hash = self.attributes.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
 
+        # Reject empty values
+        hash = self.attributes.reject { |key, value| value.kind_of? Enumerable and value.empty? }
+
         hash.to_json
       end
 
