@@ -5,7 +5,7 @@
         %span.icon-bar
         %span.icon-bar
         %span.icon-bar
-      %a.brand{:href => "#"} Ladder
+      %a.brand{:href => "/"} Ladder
       .nav-collapse
         %ul.nav
           %li.active
@@ -51,14 +51,14 @@
 
     .span9
 
-      .TESTING
-        - form_tag '/search', :method => 'get' do
-          = text_field_tag :q, :value => @querystring, :autofocus => true, :style => 'width: 90%; font-size: 1.5em;'
-          = submit_tag 'Search', :class => 'btn btn-primary', :style => 'vertical-align: top;'
+      .pagination-centered
+        - form_tag '/search', :method => 'get', :class => 'form-search' do
+          = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring, :autofocus => true
+          = submit_tag 'Search', :class => 'btn'
 
-          .pagination-centered
-            = paginate @results
-            <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
+      .pagination-centered
+        = paginate @results
+        <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
 
       =partial 'search/result', :collection => @results
 
