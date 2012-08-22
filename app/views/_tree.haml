@@ -1,0 +1,9 @@
+%ul
+  %li
+    %a{:href => url_for(:resource, :index, :id => tree.id)}
+      - if self_id == tree.id
+        %b= tree.id
+      - else
+        = tree.id
+    - tree.children.each do |child|
+      = partial 'tree', :object => child, :locals => {:self_id => self_id}
