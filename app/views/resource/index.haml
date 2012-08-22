@@ -1,10 +1,14 @@
 - @title = "Resource #{@resource.id}"
-= partial 'resource/header'
 
 .container
   .row
     .span12
       %h1 Resource #{@resource.id}
+
+  - unless @resource.root?
+    .row
+      .span12.tree.sidebar-nav
+        = partial 'tree', :object => @resource.root, :locals => {:self_id => @resource.id}
 
   .row
     -#.span4.json
@@ -12,7 +16,7 @@
         %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
     .span6.xml
       %pre
-        %code&= @resource.mods if @resource.mods
+        %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods if @resource.mods
     .span6.json
       %pre
-        %code= JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
+        %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")

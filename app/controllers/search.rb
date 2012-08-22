@@ -52,7 +52,6 @@ Ladder.controllers :search do
       redirect url(:search, :index, :q => params[:q], :fi => params[:fi], :page => 1)
     end
 
-    @title = "Results for '#{@querystring}'"
     render 'search/results'
   end
 
