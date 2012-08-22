@@ -1,21 +1,18 @@
 - @title = "Resource #{@resource.id}"
 = partial 'resource/header'
 
-#header
-  %h1 Resource #{@resource.id}
+.container
+  .row
+    .span12
+      %h1 Resource #{@resource.id}
 
-#resource
-  %table{:border => "1", :style => "table-layout:fixed; width:100%; word-wrap:break-word;"}
-    %tr
-      %td{:valign => "top", :class => "json"}
-        <pre><code>
-        = JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
-        </code></pre>
-      %td{:valign => "top", :class => "xml"}
-        <pre><code>
-        &= @resource.mods if @resource.mods
-        </pre></code>
-      %td{:valign => "top", :class => "json"}
-        <pre><code>
-        = JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
-        </code></pre>
+  .row
+    -#.span4.json
+      %pre
+        %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
+    .span6.xml
+      %pre
+        %code&= @resource.mods if @resource.mods
+    .span6.json
+      %pre
+        %code= JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")

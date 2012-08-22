@@ -1,8 +1,5 @@
 .row-fluid
-  .span12
-    %h2 #{link_to result.id, url_for(:resource, :index, :id => result.id)} (#{result._score})
-    .json
-      %pre
-        %code= JSON.fast_generate(result.as_json, :object_nl => "\n", :indent => " ")
-  / /span
-/ /row
+  .span12.json
+    %h3 #{link_to result.id, url_for(:resource, :index, :id => result.id)} (#{result._score})
+    %pre
+      %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(result.as_json, :object_nl => "\n", :indent => " ")
