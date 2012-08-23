@@ -20,7 +20,7 @@ namespace :tire do
       end
 
       if 0 == search.results.total # nothing indexed yet
-        collection = klass
+        collection = klass.all
       else
         # get last updated timestamp in the index
         search = Tire.search(model.underscore.pluralize) do
@@ -34,7 +34,7 @@ namespace :tire do
 
       next if collection.empty?
 
-      # do not include explicitly-mapped fields
+      # only retrieve fields that are mapped in index
       collection = collection.only(klass.mapping_to_hash[model.underscore.to_sym][:properties].keys)
 
       puts "Indexing #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
