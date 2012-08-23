@@ -33,6 +33,7 @@ namespace :marc do
 
     # disable callbacks for indexing on save
     Resource.reset_callbacks(:save)
+    Resource.reset_callbacks(:validate)
 
     Parallel.each(chunks) do |chunk|
       # Make sure to reconnect after forking a new process

@@ -39,8 +39,9 @@ module LadderMapping
               :oclcnum => xml_element.xpath_map('identifier[@type = "oclc"]'),
       }.reject! { |k, v| v.nil? }
 
-      vocabs[:dcterms] = dcterms unless dcterms.empty?
-      vocabs[:bibo] = bibo unless bibo.empty?
+      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) unless dcterms.nil? || dcterms.empty?
+      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) unless bibo.nil? || bibo.empty?
+
       # TODO: prism mapping
 
       vocabs
@@ -59,6 +60,7 @@ module LadderMapping
           resource = Resource.new(mapped)
           resource.set_created_at
 
+          # TODO: map inverse relations on created Resources?
           case node['type']
             when 'host'
               relations[:parent] = resource

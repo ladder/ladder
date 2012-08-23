@@ -55,7 +55,7 @@ module LadderModel
         hash = self.attributes.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
 
         # Reject empty values
-        hash = self.attributes.reject { |key, value| value.kind_of? Enumerable and value.empty? }
+        hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }
 
         hash.to_json
       end
