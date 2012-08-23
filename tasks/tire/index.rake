@@ -1,4 +1,4 @@
-desc "Add model documents to index, optionally only for [model]"
+desc "Add documents to index, optionally only for [model]"
 
 namespace :tire do
   task :index, [:model] => :environment do |t, args|
@@ -9,7 +9,7 @@ namespace :tire do
     args.model.to_a.each do |model|
 
       klass  = model.classify.constantize
-      break if klass.empty? # nothing to index
+      next if klass.empty? # nothing to index
 
       # create the index if it doesn't exist
       klass.tire.create_elasticsearch_index

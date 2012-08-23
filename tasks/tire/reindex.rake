@@ -1,4 +1,4 @@
-desc "Re-index all model documents, optionally only for [model]"
+desc "Re-index all documents, optionally only for [model]"
 
 namespace :tire do
   task :reindex, [:model] => :environment do |t, args|
