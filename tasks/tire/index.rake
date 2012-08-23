@@ -11,31 +11,12 @@ namespace :tire do
       klass  = model.classify.constantize
       next if klass.empty? # nothing to index
 
-      # create the index if it doesn't exist
+      # delete and re-create the index
+      klass.tire.index.delete if klass.tire.index.exists?
       klass.tire.create_elasticsearch_index
 
-      # check whether anything is indexed already
-      search = Tire.search(model.underscore.pluralize, :search_type => 'count') do
-        query { all }
-      end
-
-      if 0 == search.results.total # nothing indexed yet
-        collection = klass.all
-      else
-        # get last updated timestamp in the index
-        search = Tire.search(model.underscore.pluralize) do
-          query { all }
-          sort { by :updated_at, 'desc' }
-        end
-
-        timestamp = search.results[0].updated_at
-        collection = klass.where(:updated_at.gte => Time.parse(timestamp) + 1)
-      end
-
-      next if collection.empty?
-
       # only retrieve fields that are mapped in index
-      collection = collection.only(klass.mapping_to_hash[model.underscore.to_sym][:properties].keys)
+      collection = klass.only(klass.mapping_to_hash[model.underscore.to_sym][:properties].keys)
 
       puts "Indexing #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
