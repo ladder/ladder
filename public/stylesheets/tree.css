@@ -36,8 +36,7 @@
 
     transition: all 0.5s;
     -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-}
+    -moz-transition: all 0.5s;}
 
 /*We will use ::before and ::after to draw the connectors*/
 

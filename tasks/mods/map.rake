@@ -49,7 +49,10 @@ namespace :mods do
         relations = LadderMapping::MODS::map_relations(xml.xpath('//relatedItem'))
 
         # store relation types in vocab fields
+<<<<<<< HEAD
         # FIXME: :without_protection => true doesn't work on embeddeds here
+=======
+>>>>>>> master
         resource.update_attributes(vocabs.deep_merge(relations[:fields]))
 
         if relations[:parent].nil?
