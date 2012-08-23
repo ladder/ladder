@@ -5,10 +5,11 @@
     .span12
       %h1 Resource #{@resource.id}
 
-  - unless @resource.root?
+  - if @resource.parent or @resource.children
     .row
-      .span12.tree.sidebar-nav
-        = partial 'tree', :object => @resource.root, :locals => {:self_id => @resource.id}
+      .span12
+        .tree{:style => 'float: left;'}
+          %ul= partial 'tree', :collection => @resource.root.to_a, :locals => {:self_id => @resource.id}
 
   .row
     -#.span4.json

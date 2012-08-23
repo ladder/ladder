@@ -30,8 +30,8 @@ namespace :mods do
     # queries are executed in sequence, so traverse last-to-first
     chunks.reverse!
 
-    # disable callbacks for versioning, indexing on save
-    Resource.reset_callbacks(:save)
+    # disable callbacks for indexing on save
+    Resource.after_save.clear
 
     Parallel.each(chunks) do |chunk|
       # Make sure to reconnect after forking a new process
@@ -43,28 +43,30 @@ namespace :mods do
         xml = Nokogiri::XML(resource.mods).remove_namespaces!
 
         # map MODS elements to embedded vocabs
-        resource.update_attributes(LadderMapping::MODS::map_vocabs(xml.xpath('//mods').first))
+        vocabs = LadderMapping::MODS::map_vocabs(xml.xpath('//mods').first)
 
         # map related resources as tree hierarchy
         relations = LadderMapping::MODS::map_relations(xml.xpath('//relatedItem'))
 
-        relations[:children].map { |child| child.parent = resource }
+        # store relation types in vocab fields
+        resource.update_attributes(vocabs.deep_merge(relations[:fields]))
 
         if relations[:parent].nil?
           # if resource does not have a parent, assign siblings as children
-          relations[:siblings].map { |child| child.parent = resource }
+          relations[:siblings].each { |child| resource.children << child }
         else
           relations[:parent].save
           resource.parent = relations[:parent]
-          relations[:siblings].map { |sibling| sibling.parent = relations[:parent] }
+          relations[:siblings].each { |sibling| resource.parent.children << sibling }
         end
 
-        # store relation types in vocab fields
-        resource.update_attributes(relations[:fields]) unless relations[:fields].empty?
+        resource.children << relations[:children]
 
         # TODO
         #concepts = LadderMapping::MODS::map_concepts(xml.xpath('SOME_PATH'))
         #agents = LadderMapping::MODS::map_agents(xml.xpath('SOME_PATH'))
+
+        resource.save
       end
 
     end

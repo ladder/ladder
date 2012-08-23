@@ -31,8 +31,8 @@ namespace :marc do
     # queries are executed in sequence, so traverse last-to-first
     chunks.reverse!
 
-    # disable callbacks for versioning, indexing on save
-    Resource.reset_callbacks(:save)
+    # disable callbacks for indexing on save
+    Resource.after_save.clear
 
     Parallel.each(chunks) do |chunk|
       # Make sure to reconnect after forking a new process

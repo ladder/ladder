@@ -39,16 +39,16 @@ module LadderMapping
               :oclcnum => xml_element.xpath_map('identifier[@type = "oclc"]'),
       }.reject! { |k, v| v.nil? }
 
+      vocabs[:dcterms] = dcterms unless dcterms.empty?
+      vocabs[:bibo] = bibo unless bibo.empty?
       # TODO: prism mapping
-
-      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) unless dcterms.nil? || dcterms.empty?
-      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) unless bibo.nil? || bibo.empty?
 
       vocabs
     end
 
     def self.map_relations(xml_nodeset)
-      relations = {:children => [], :siblings => [], :fields => {}}
+      relations = {:children => [], :siblings => [],
+                   :fields => {:dcterms => {}, :bibo => {}}}
 
       xml_nodeset.each do |node|
 
@@ -64,27 +64,27 @@ module LadderMapping
               relations[:parent] = resource
             when 'series'
               relations[:parent] = resource
-              (relations[:fields][:'dcterms.isPartOf'] ||= []).push(resource.id)
+              (relations[:fields][:dcterms][:isPartOf] ||= []).push(resource.id)
 
             when 'constituent'
               relations[:children].push(resource)
-              (relations[:fields][:'dcterms.hasPart'] ||= []).push(resource.id)
+              (relations[:fields][:dcterms][:hasPart] ||= []).push(resource.id)
 
             when 'otherVersion'
               relations[:siblings].push(resource)
-              (relations[:fields][:'dcterms.hasVersion'] ||= []).push(resource.id)
+              (relations[:fields][:dcterms][:hasVersion] ||= []).push(resource.id)
             when 'otherFormat'
               relations[:siblings].push(resource)
-              (relations[:fields][:'dcterms.hasFormat'] ||= []).push(resource.id)
+              (relations[:fields][:dcterms][:hasFormat] ||= []).push(resource.id)
             when 'isReferencedBy'
               relations[:siblings].push(resource)
-              (relations[:fields][:'dcterms.isReferencedBy'] ||= []).push(resource.id)
+              (relations[:fields][:dcterms][:isReferencedBy] ||= []).push(resource.id)
             when 'references'
               relations[:siblings].push(resource)
-              (relations[:fields][:'dcterms.references'] ||= []).push(resource.id)
+              (relations[:fields][:dcterms][:references] ||= []).push(resource.id)
             when 'original'
               relations[:siblings].push(resource)
-              (relations[:fields][:'dcterms.hasPreviousVersion'] ||= []).push(resource.id)
+              (relations[:fields][:dcterms][:hasPreviousVersion] ||= []).push(resource.id)
 
             else
               relations[:siblings].push(resource)

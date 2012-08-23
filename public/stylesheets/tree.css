@@ -25,15 +25,18 @@
 }
 
 .tree li {
-    float: left; text-align: center;
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: top;
+    margin: 0 -2px 0 -2px;
+    text-align: center;
     list-style-type: none;
     position: relative;
     padding: 20px 5px 0 5px;
 
     transition: all 0.5s;
     -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-}
+    -moz-transition: all 0.5s;}
 
 /*We will use ::before and ::after to draw the connectors*/
 
