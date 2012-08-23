@@ -48,11 +48,7 @@ module LadderMapping
 
     def self.map_relations(xml_nodeset)
       relations = {:children => [], :siblings => [],
-<<<<<<< HEAD
                    :fields => {:dcterms => {}, :bibo => {}, :prism => {}}}
-=======
-                   :fields => {:dcterms => {}, :bibo => {}}}
->>>>>>> master
 
       xml_nodeset.each do |node|
 
