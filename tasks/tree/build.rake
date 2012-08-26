@@ -36,7 +36,7 @@ namespace :tree do
         Mongoid.reconnect!
 
         # save each document; this will only update the hierarchy
-        chunk.map(&:save)
+        chunk.each_entry(&:save)
 
         # Make sure to flush the GC when done a chunk
         GC.start
