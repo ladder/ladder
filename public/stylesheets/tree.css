@@ -92,7 +92,7 @@ right connector from last child*/
     text-decoration: none;
     color: #666;
     font-family: arial, verdana, tahoma;
-#    font-size: 11px;
+    font-size: 16px;
     display: inline-block;
 
     border-radius: 5px;
@@ -102,6 +102,11 @@ right connector from last child*/
     transition: all 0.5s;
     -webkit-transition: all 0.5s;
     -moz-transition: all 0.5s;
+}
+
+.tree li a.active{
+    font-weight: bold;
+    background: #c8e4f8;
 }
 
 /*Time for some hover effects*/

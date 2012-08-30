@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: git://github.com/mjsuhonos/tire.git
-  revision: 450fc1c187bf95638ae7b10d636421b78fc59262
+  revision: aacec862f9bdeebbc55921a25409415e4050a39d
   specs:
     tire (0.4.2)
       activemodel (>= 3.0)
@@ -63,6 +63,7 @@ GEM
     gyoku (0.4.6)
       builder (>= 2.1.2)
     haml (3.1.7)
+    hashdiff (0.0.5)
     hashr (0.0.22)
     hike (1.2.1)
     http_router (0.10.2)
@@ -157,6 +158,7 @@ DEPENDENCIES
   easel!
   gyoku
   haml
+  hashdiff
   iso-639
   kaminari!
   marc

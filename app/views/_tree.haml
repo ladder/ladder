@@ -1,6 +1,6 @@
 %li
   - if self_id == tree.id
-    %a{:style => 'font-weight: bold;'}= tree.id
+    %a.active= tree.id
   - else
     %a{:href => url_for(:resource, :index, :id => tree.id)}= tree.id
 

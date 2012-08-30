@@ -1,23 +1,38 @@
 - @title = "Resource #{@resource.id}"
+- @similar = @resource.find_similar
 
 .container
   .row
     .span12
       %h1 Resource #{@resource.id}
 
-  - if @resource.parent or @resource.children
+  - unless @resource.parent.nil? and @resource.children.empty?
     .row
       .span12
-        .tree{:style => 'float: left;'}
+        .tree
+          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Relations
           %ul= partial 'tree', :collection => @resource.root.to_a, :locals => {:self_id => @resource.id}
 
+  - unless @similar.empty?
+    .row
+      .span12
+        .tree
+          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar/Same
+          %ul
+            =list_of(@similar) do |similar|
+              - if 0 == @size = @resource.diff(similar).size
+                %a.active{:href => url_for(:resource, :index, :id => similar.id)} #{similar.id}
+              - else
+                %a{:href => url_for(:resource, :index, :id => similar.id)} #{similar.id} (#{@size})
+
   .row
-    -#.span4.json
-      %pre
-        %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
-    .span6.xml
-      %pre
-        %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods if @resource.mods
     .span6.json
       %pre
         %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
+    -if @resource.mods
+      .span6.xml
+        %pre
+          %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods
+    -#.span4.json
+      %pre
+        %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
