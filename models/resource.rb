@@ -32,6 +32,12 @@ class Resource
     only(:mods).where(:mods.exists => true)
   end
 
+  def heading
+    fields = ['dcterms.title',
+              'dcterms.alternative']
+    self.get_first_field(fields)
+  end
+
   # embedded RDF vocabularies
   embeds_one :dcterms, class_name: "DublinCore"
   embeds_one :bibo,    class_name: "Bibo"

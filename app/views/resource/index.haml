@@ -1,10 +1,10 @@
-- @title = "Resource #{@resource.id}"
+- @title = @resource.heading
 - @similar = @resource.find_similar
 
 .container
   .row
     .span12
-      %h1 Resource #{@resource.id}
+      %h1= @resource.heading
 
   - unless @resource.parent.nil? and @resource.children.empty?
     .row
@@ -17,13 +17,24 @@
     .row
       .span12
         .tree
-          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar/Same
+          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar
           %ul
+            -# TODO: clean up this code; move to partial
+            - @scores = @similar.map(&:_score)
+
             =list_of(@similar) do |similar|
-              - if 0 == @size = @resource.diff(similar).size
-                %a.active{:href => url_for(:resource, :index, :id => similar.id)} #{similar.id}
+              - @size = @resource.diff(similar).size
+              - @fields = similar.to_hash.reject { |key, value| !value.is_a? Hash }.values.map(&:values).flatten.size
+              - @diff = (@fields - @size/2.to_f)/@fields * similar._score/@scores.max * 100
+
+              - if 100 == @diff
+                %a.active{:href => url_for(:resource, :index, :id => similar.id)}
+                  #{similar.load.heading}
+                  %br (#{@diff.round}%)
               - else
-                %a{:href => url_for(:resource, :index, :id => similar.id)} #{similar.id} (#{@size})
+                %a{:href => url_for(:resource, :index, :id => similar.id)}
+                  #{similar.load.heading}
+                  %br (#{@diff.round}%)
 
   .row
     .span6.json

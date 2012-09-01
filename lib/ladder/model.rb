@@ -120,6 +120,22 @@ module LadderModel
         HashDiff.diff(test1, test2)
       end
 
+      def get_first_field(fields_array)
+        target = nil
+
+        fields_array.each do |target_field|
+          ns = target_field.split('.').first
+          field = target_field.split('.').last
+
+          target = @attributes[ns][field]
+          target = target.first if target.is_a? Array
+
+          break if target
+        end
+
+        target
+      end
+
     end
   end
 
