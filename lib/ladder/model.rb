@@ -76,7 +76,7 @@ module LadderModel
         hash = self.dup.as_document.delete_if { |k,v| !v.is_a?(Hash) }
         id = self.id
 
-        results = Resource.tire.search do
+        results = self.class.tire.search do
           query do
             boolean do
               hash.each do |vocab, vals|
@@ -104,7 +104,7 @@ module LadderModel
         results
       end
 
-      def diff(resource)
+      def diff(model)
         # strip id field and symbolize all keys
         normalize = lambda do |hash|
           hash.symbolize_keys!
@@ -114,7 +114,7 @@ module LadderModel
         end
 
         test1 = normalize.call(self.as_document.reject { |key, value| !value.is_a? Hash })
-        test2 = normalize.call(resource.to_hash.reject { |key, value| !value.is_a? Hash })
+        test2 = normalize.call(model.to_hash.reject { |key, value| !value.is_a? Hash })
 
         # return the diff comparison
         HashDiff.diff(test1, test2)

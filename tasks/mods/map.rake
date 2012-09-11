@@ -71,6 +71,8 @@ namespace :mods do
         resource.save
       end
 
+      # Make sure to flush the GC when done a chunk
+      GC.start
     end
 
   end

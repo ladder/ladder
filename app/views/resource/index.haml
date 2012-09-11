@@ -27,7 +27,7 @@
               - @fields = similar.to_hash.reject { |key, value| !value.is_a? Hash }.values.map(&:values).flatten.size
               - @diff = (@fields - @size/2.to_f)/@fields * similar._score/@scores.max * 100
 
-              - if 100 == @diff
+              - if 0 == @size
                 %a.active{:href => url_for(:resource, :index, :id => similar.id)}
                   #{similar.load.heading}
                   %br (#{@diff.round}%)
