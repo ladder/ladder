@@ -1,7 +1,7 @@
 source :rubygems
 
 # Server requirements
-# gem 'thin' # or mongrel
+gem 'unicorn'
 # gem 'trinidad', :platform => 'jruby'
 
 # Project requirements
