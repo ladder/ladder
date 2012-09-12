@@ -30,8 +30,6 @@ set :deploy_to, "/srv/#{application}"
 set :unicorn_conf, "#{deploy_to}/current/config/unicorn.rb"
 set :unicorn_pid, "#{deploy_to}/shared/pids/unicorn.pid"
 
-set :public_children, ["img","js","css"]
-
 namespace :deploy do
 
   task :restart do
