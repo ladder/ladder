@@ -1,63 +1,77 @@
 module LadderMapping
-  class MODS
+  class Mapping
 
-    def self.map_vocabs(xml_element)
+    def self.map_xpath(xml_node, hash)
+      mapped = {}
+
+      hash.each do |symbol, xpath|
+        nodes = xml_node.xpath_map(xpath)
+        mapped[symbol] = nodes unless nodes.nil?
+      end
+
+      mapped
+    end
+
+  end
+
+  class MODS < Mapping
+
+    def self.vocabs(node)
       vocabs = {}
 
-      dcterms = {# descriptive elements
-                 :title => xml_element.xpath_map('titleInfo[not(@type = "alternative")]'),
-                 :alternative => xml_element.xpath_map('titleInfo[@type = "alternative"]'),
-                 :issued => xml_element.xpath_map('originInfo/dateIssued'),
-                 :format => xml_element.xpath_map('physicalDescription/form'),
-                 :extent => xml_element.xpath_map('physicalDescription/extent'),
-                 :language => xml_element.xpath_map('language/languageTerm'),
+      dcterms = map_xpath node, {
+        # descriptive elements
+        :title         => 'titleInfo[not(@type = "alternative")]',
+        :alternative   => 'titleInfo[@type = "alternative"]',
+        :issued        => 'originInfo/dateIssued',
+        :format        => 'physicalDescription/form',
+        :extent        => 'physicalDescription/extent',
+        :language      => 'language/languageTerm',
+        # dereferenceable identifiers
+        :identifier    => 'identifier[not(@type)]',
+        # indexable textual content
+        :abstract        => 'abstract',
+        :tableOfContents => 'tableOfContents',
 
-                 # indexable textual content
-                 :abstract => xml_element.xpath_map('abstract'),
-                 :tableOfContents => xml_element.xpath_map('tableOfContents'),
+        # agent access points
+        # TODO: move these to agents
+        :creator       => 'name/namePart[not(@type = "date")]',
+        :publisher     => 'originInfo/publisher',
 
-                 # dereferenceable identifiers
-                 :identifier => xml_element.xpath_map('identifier[not(@type)]'),
+        # concept access points
+        # TODO: move these to concepts
+        :subject       => 'subject/topic',
+        :spatial       => 'subject/geographic',
+        :DDC           => 'classification[@authority="ddc"]',
+        :LCC           => 'classification[@authority="lcc"]',
+      }
 
-                 # agent access points
-                 # TODO: move these to map_agents
-                 :creator => xml_element.xpath_map('name/namePart[not(@type = "date")]'),
-                 :publisher => xml_element.xpath_map('originInfo/publisher'),
-
-                 # concept access points
-                 # TODO: move these to map_concepts
-                 :subject => xml_element.xpath_map('subject/topic'),
-                 :spatial => xml_element.xpath_map('subject/geographic'),
-                 :DDC => xml_element.xpath_map('classification[@authority="ddc"]'),
-                 :LCC => xml_element.xpath_map('classification[@authority="lcc"]'),
-      }.reject! { |k, v| v.nil? }
-
-      # dereferenceable identifiers
-      bibo = {:isbn => xml_element.xpath_map('identifier[@type = "isbn"]'),
-              :issn => xml_element.xpath_map('identifier[@type = "issn"]'),
-              :lccn => xml_element.xpath_map('identifier[@type = "lccn"]'),
-              :oclcnum => xml_element.xpath_map('identifier[@type = "oclc"]'),
-      }.reject! { |k, v| v.nil? }
-
-      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) unless dcterms.nil? || dcterms.empty?
-      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) unless bibo.nil? || bibo.empty?
+      bibo = map_xpath node, {
+        # dereferenceable identifiers
+        :isbn     => 'identifier[@type = "isbn"]',
+        :issn     => 'identifier[@type = "issn"]',
+        :lccn     => 'identifier[@type = "lccn"]',
+        :oclcnum  => 'identifier[@type = "oclc"]',
+      }
 
       # TODO: prism mapping
+      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) unless dcterms.empty?
+      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) unless bibo.empty?
 
       vocabs
     end
 
-    def self.map_relations(xml_nodeset)
+    def self.relations(xml_nodeset)
       relations = {:children => [], :siblings => [],
                    :fields => {:dcterms => {}, :bibo => {}, :prism => {}}}
 
       xml_nodeset.each do |node|
 
         # apply vocab mapping to each related resource
-        mapped = self.map_vocabs(node)
+        vocabs = self.vocabs(node)
 
-        unless mapped.empty?
-          resource = Resource.new(mapped)
+        unless vocabs.empty?
+          resource = Resource.new(vocabs)
           resource.set_created_at
 
           # TODO: map inverse relations on created Resources?
@@ -69,28 +83,29 @@ module LadderMapping
               (relations[:fields][:dcterms][:isPartOf] ||= []).push(resource.id)
 
             when 'constituent'
-              relations[:children].push(resource)
+              relations[:children] << resource
               (relations[:fields][:dcterms][:hasPart] ||= []).push(resource.id)
 
             when 'otherVersion'
-              relations[:siblings].push(resource)
+              relations[:siblings] << resource
               (relations[:fields][:dcterms][:hasVersion] ||= []).push(resource.id)
             when 'otherFormat'
-              relations[:siblings].push(resource)
+              relations[:siblings] << resource
               (relations[:fields][:dcterms][:hasFormat] ||= []).push(resource.id)
             when 'isReferencedBy'
-              relations[:siblings].push(resource)
+              relations[:siblings] << resource
               (relations[:fields][:dcterms][:isReferencedBy] ||= []).push(resource.id)
             when 'references'
-              relations[:siblings].push(resource)
+              relations[:siblings] << resource
               (relations[:fields][:dcterms][:references] ||= []).push(resource.id)
             when 'original'
-              relations[:siblings].push(resource)
+              relations[:siblings] << resource
               (relations[:fields][:prism][:hasPreviousVersion] ||= []).push(resource.id)
 
             else
               relations[:siblings].push(resource)
           end
+
         end
 
       end
@@ -98,11 +113,37 @@ module LadderMapping
       relations
     end
 
-    def self.map_agents(xml_nodeset)
-      agents = []
+    def self.agents(xml_nodeset)
+      agents = {:agents => [],
+                :fields => {:dcterms => {}, :bibo => {}, :prism => {}}}
+
+      xml_nodeset.each do |node|
+        vocabs = {}
+
+        foaf = map_xpath node, {
+            # TODO: additional parsing/mapping
+            :name     => 'namePart[not(@type = "date")]',
+            :birthday => 'namePart[@type = "date"]',
+        }
+
+        # TODO: this structure is just to copy that above; refactor together
+        vocabs[:foaf] = FOAF.new(foaf, :without_protection => true)
+
+        unless foaf.empty?
+          agent = Agent.new(vocabs)
+          agent.set_created_at
+
+          # FIXME: assume that all agents are creators?
+          agents[:agents] << agent
+          (agents[:fields][:dcterms][:creator] ||= []).push(agent.id)
+        end
+
+      end
+
+      agents
     end
 
-    def self.map_concepts(xml_nodeset)
+    def self.concepts(xml_nodeset)
       concepts = []
     end
 

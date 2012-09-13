@@ -45,28 +45,32 @@ namespace :mods do
         xml = Nokogiri::XML(resource.mods).remove_namespaces!
 
         # map MODS elements to embedded vocabs
-        resource.assign_attributes(LadderMapping::MODS::map_vocabs(xml.xpath('//mods').first))
+        resource.vocabs = LadderMapping::MODS::vocabs(xml.xpath('/mods').first)
 
         # map related resources as tree hierarchy
-        relations = LadderMapping::MODS::map_relations(xml.xpath('//relatedItem'))
-
-        # store relation types in vocab fields
+        relations = LadderMapping::MODS::relations(xml.xpath('/mods/relatedItem'))
         resource.assign_attributes(relations[:fields])
 
         if relations[:parent].nil?
           # if resource does not have a parent, assign siblings as children
-          relations[:siblings].each { |child| resource.children << child }
+          children = relations[:siblings]
         else
+          children = []
+
           relations[:parent].save
           resource.parent = relations[:parent]
           relations[:siblings].each { |sibling| resource.parent.children << sibling }
         end
 
-        resource.children << relations[:children]
+        resource.children = children + relations[:children]
+
+        # store relation types in vocab fields
+        agents = LadderMapping::MODS::agents(xml.xpath('/mods/name'))
+        resource.assign_attributes(agents[:fields])
+        resource.agents << agents[:agents]
 
         # TODO
-        #concepts = LadderMapping::MODS::map_concepts(xml.xpath('SOME_PATH'))
-        #agents = LadderMapping::MODS::map_agents(xml.xpath('SOME_PATH'))
+        #concepts = LadderMapping::MODS::concepts(xml.xpath('SOME_PATH'))
 
         resource.save
       end

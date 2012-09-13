@@ -48,31 +48,33 @@ module LadderModel
         base.send :indexes, :concept_ids, :type => 'string'
       end
 
-      def to_indexed_json
-        mapping = self.class.tire.mapping
-
-        # Reject keys not declared in mapping
-        hash = self.attributes.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
-
-        # Reject empty values
-        hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }
-
-        hash.to_json
-      end
-
+      # Retrieve a hash of field names and embedded vocab objects
       def vocabs
         embeddeds = self.reflect_on_all_associations(*[:embeds_one])
 
-        vocabs = []
+        vocabs = {}
         embeddeds.each do |embedded|
           vocab = self.method(embedded.key).call
-          vocabs << vocab unless vocab.nil?
+          vocabs[embedded.key.to_sym] = vocab unless vocab.nil?
         end
 
         vocabs
       end
 
-      def find_similar
+      # Assign model vocab objects by a hash of field names
+      def vocabs=(hash)
+        hash.each do |field, object|
+          if self.respond_to? field
+            self.method(field.to_s + '=').call(object)
+          end
+        end
+      end
+
+      # Search the index and return a Tire::Collection of documents
+      # that have a similarity score
+      def similar(query=false)
+        return @similar unless query || @similar.nil?
+
         hash = self.dup.as_document.delete_if { |k,v| !v.is_a?(Hash) }
         id = self.id
 
@@ -81,8 +83,10 @@ module LadderModel
             boolean do
               hash.each do |vocab, vals|
                 vals.each do |field, value|
+
+                  # don't include object IDs and arrays of object IDs
                   next if value.is_a?(BSON::ObjectId)
-#                  next if value.flatten.delete_if { |x| x.is_a?(BSON::ObjectId) }.empty?
+                  next if value.flatten.delete_if { |x| x.is_a?(BSON::ObjectId) }.empty?
 
                   fieldname = "#{vocab}.#{field}"
                   query_string = value.join(' ').gsub(/[-+!\(\)\{\}\[\]^"~*?:;,.\\]|&&|\|\|/, '')
@@ -90,6 +94,7 @@ module LadderModel
                   should do
                     text fieldname.to_sym, query_string
                   end
+
                   must_not do
                     term :_id, id
                   end
@@ -101,9 +106,10 @@ module LadderModel
           min_score 1
         end
 
-        results
+        @similar = results
       end
 
+      # Return a HashDiff array computed between the two model instances
       def diff(model)
         # strip id field and symbolize all keys
         normalize = lambda do |hash|
@@ -120,6 +126,7 @@ module LadderModel
         HashDiff.diff(test1, test2)
       end
 
+      # Search an array of model fields in order and return the first non-empty value
       def get_first_field(fields_array)
         target = nil
 
@@ -127,7 +134,7 @@ module LadderModel
           ns = target_field.split('.').first
           field = target_field.split('.').last
 
-          target = @attributes[ns][field]
+          target = @attributes[ns][field] unless @attributes[ns].nil?
           target = target.first if target.is_a? Array
 
           break if target
@@ -137,6 +144,19 @@ module LadderModel
       end
 
     end
+
+    def to_indexed_json
+      mapping = self.class.tire.mapping
+
+      # Reject keys not declared in mapping
+      hash = self.attributes.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
+
+      # Reject empty values
+      hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }
+
+      hash.to_json
+    end
+
   end
 
   module Embedded

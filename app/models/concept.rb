@@ -1,6 +1,6 @@
 class SKOS
   include LadderModel::Embedded
-  bind_to RDF::SKOS
+  bind_to RDF::SKOS, :type => Array
   embedded_in :concept
 end
 
