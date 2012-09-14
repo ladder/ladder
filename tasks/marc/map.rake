@@ -36,8 +36,6 @@ namespace :marc do
     Resource.reset_callbacks(:validate)
 
     Parallel.each(chunks) do |chunk|
-      # Make sure to reconnect after forking a new process
-      Mongoid.reconnect!
 
       chunk.each do |resource|
 

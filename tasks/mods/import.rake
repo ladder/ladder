@@ -20,8 +20,6 @@ namespace :mods do
     puts "Importing records from #{files.size} MODS file(s) using #{Parallel.processor_count} processors..."
 
     Parallel.each(files) do |file|
-      # Make sure to reconnect after forking a new process
-      Mongoid.reconnect!
 
       resources = []
       size = 0

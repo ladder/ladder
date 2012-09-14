@@ -14,20 +14,18 @@
           %ul= partial 'tree', :collection => @resource.root.to_a, :locals => {:self_id => @resource.id}
 
   - unless @similar.empty?
+    - @same = @resource.same
     .row
       .span12
         .tree
           %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar
           %ul
-            -# TODO: clean up this code; move to partial
-            - @scores = @similar.map(&:_score)
-
             =list_of(@similar) do |similar|
-              - @size = @resource.diff(similar).size
+              - # TODO: clean up this code; move to partial
               - @fields = similar.to_hash.reject { |key, value| !value.is_a? Hash }.values.map(&:values).flatten.size
-              - @diff = (@fields - @size/2.to_f)/@fields * similar._score/@scores.max * 100
+              - @diff = (@fields - @resource.diff(similar).size/2.to_f)/@fields * similar._score/@similar.map(&:_score).max * 100
 
-              - if 0 == @size
+              - if @same.include? similar
                 %a.active{:href => url_for(:resource, :index, :id => similar.id)}
                   #{similar.load.heading}
                   %br (#{@diff.round}%)

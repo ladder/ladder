@@ -109,6 +109,19 @@ module LadderModel
         @similar = results
       end
 
+      # Check similar documents and return an array of the subset that are identical
+      def same(query=false)
+        return @same unless query || @same.nil?
+
+        @same = []
+
+        self.similar(query).each do |similar|
+          @same << similar if 0 == self.diff(similar).size
+        end
+
+        @same
+      end
+
       # Return a HashDiff array computed between the two model instances
       def diff(model)
         # strip id field and symbolize all keys

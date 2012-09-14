@@ -20,8 +20,6 @@ namespace :marc do
     puts "Importing records from #{files.size} MARC file(s) using #{Parallel.processor_count} processors..."
 
     Parallel.each(files) do |file|
-      # Make sure to reconnect after forking a new process
-      Mongoid.reconnect!
 
       # load records from file
       reader = MARC::Reader.new(File.join(path, file))

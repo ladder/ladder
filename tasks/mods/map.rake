@@ -35,9 +35,11 @@ namespace :mods do
     Resource.reset_callbacks(:validate)
     Resource.reset_callbacks(:validation)
 
+    Agent.reset_callbacks(:save)
+    Agent.reset_callbacks(:validate)
+    Agent.reset_callbacks(:validation)
+
     Parallel.each(chunks) do |chunk|
-      # Make sure to reconnect after forking a new process
-      Mongoid.reconnect!
 
       chunk.each do |resource|
 

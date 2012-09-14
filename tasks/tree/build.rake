@@ -32,8 +32,6 @@ namespace :tree do
       chunks.reverse!
 
       Parallel.each(chunks) do |chunk|
-        # Make sure to reconnect after forking a new process
-        Mongoid.reconnect!
 
         # save each document; this will only update the hierarchy
         chunk.each(&:save)

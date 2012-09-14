@@ -16,7 +16,7 @@ namespace :tire do
       klass.tire.create_elasticsearch_index
 
       # only retrieve fields that are mapped in index
-      collection = klass.only(klass.mapping_to_hash[model.underscore.to_sym][:properties].keys)
+      collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
 
       puts "Indexing #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
@@ -37,8 +37,6 @@ namespace :tire do
       klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30
 
       Parallel.each(chunks) do |chunk|
-        # Make sure to reconnect after forking a new process
-        Mongoid.reconnect!
 
         klass.tire.index.bulk_store chunk
 
