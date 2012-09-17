@@ -49,6 +49,11 @@ namespace :mods do
         # map MODS elements to embedded vocabs
         resource.vocabs = LadderMapping::MODS::vocabs(xml.xpath('/mods').first)
 
+        # NB: there might be a better way to assign embedded attributes
+#        vocabs.each do |ns, vocab|
+#          resource.write_attribute(ns, vocab)
+#        end
+
         # map related resources as tree hierarchy
         relations = LadderMapping::MODS::relations(xml.xpath('/mods/relatedItem'))
         resource.assign_attributes(relations[:fields])
@@ -66,13 +71,15 @@ namespace :mods do
 
         resource.children = children + relations[:children]
 
-        # store relation types in vocab fields
+        # map encoded agents to related Agent models; store relation types in vocab fields
         agents = LadderMapping::MODS::agents(xml.xpath('/mods/name'))
         resource.assign_attributes(agents[:fields])
         resource.agents << agents[:agents]
 
-        # TODO
-        #concepts = LadderMapping::MODS::concepts(xml.xpath('SOME_PATH'))
+        # map encoded agents to related Agent models; store relation types in vocab fields
+#        concepts = LadderMapping::MODS::concepts(xml.xpath('/mods/name'))
+#        resource.assign_attributes(concepts[:fields])
+#        resource.concepts << concepts[:concepts]
 
         resource.save
       end

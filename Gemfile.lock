@@ -58,7 +58,7 @@ GEM
     bson (1.7.0)
     bson_ext (1.7.0)
       bson (~> 1.7.0)
-    builder (3.0.2)
+    builder (3.0.3)
     erubis (2.7.0)
     gyoku (0.4.6)
       builder (>= 2.1.2)
