@@ -17,20 +17,7 @@ namespace :model do
       puts "Merging #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
-      options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(collection)}
-
-      chunks = []
-      while chunk = collection.page(options[:chunk_num]).per(options[:per_chunk]) \
-                            and chunk.size(true) > 0
-        chunks << chunk
-        options[:chunk_num] += 1
-      end
-
-      # queries are executed in sequence, so traverse last-to-first
-      chunks.reverse!
-
-      # suppress indexing on save
-      klass.skip_callback(:save, :after, :update_index)
+      chunks = LadderHelper::chunkify(collection)
 
       # disable callbacks for indexing and tree generation on save
       klass.reset_callbacks(:save)

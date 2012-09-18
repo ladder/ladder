@@ -14,25 +14,17 @@ namespace :map do
 
     puts "Mapping #{resources.size(true)} Resources from MARC records using #{Parallel.processor_count} processors..."
 
-    # load MARC2MODS XSL once
-    xslt_file = File.join(File.expand_path('../../../../lib/xslt', __FILE__), 'MARC21slim2MODS3-4.xsl')
-    xslt = Nokogiri::XSLT(File.read(xslt_file))
-
     # break resources into chunks for multi-processing
-    options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(resources)}
-    chunks = []
-    while chunk = resources.page(options[:chunk_num]).per(options[:per_chunk]) \
-                            and chunk.size(true) > 0
-      chunks << chunk
-      options[:chunk_num] += 1
-    end
-
-    # queries are executed in sequence, so traverse last-to-first
-    chunks.reverse!
+    chunks = LadderHelper::chunkify(resources)
 
     # disable callbacks for indexing on save
     Resource.reset_callbacks(:save)
     Resource.reset_callbacks(:validate)
+    Resource.reset_callbacks(:validation)
+
+    # load MARC2MODS XSL once
+    xslt_file = File.join(File.expand_path('../../../../lib/xslt', __FILE__), 'MARC21slim2MODS3-4.xsl')
+    xslt = Nokogiri::XSLT(File.read(xslt_file))
 
     Parallel.each(chunks) do |chunk|
 

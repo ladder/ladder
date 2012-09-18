@@ -24,4 +24,20 @@ class LadderHelper
 
     chunk_size
   end
+
+  def self.chunkify(klass_or_collection, opts = {})
+
+    options = {:chunk_num => 1, :per_chunk => dynamic_chunk(klass_or_collection)}.merge(opts)
+
+    chunks = []
+    while chunk = klass_or_collection.page(options[:chunk_num]).per(options[:per_chunk]) \
+                            and chunk.size(true) > 0
+      chunks << chunk
+      options[:chunk_num] += 1
+    end
+
+    # queries are executed in sequence, so traverse last-to-first
+    chunks.reverse
+  end
+
 end

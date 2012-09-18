@@ -18,16 +18,7 @@ namespace :map do
     puts "Mapping #{resources.size(true)} Resources from MODS records with #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
-    options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(resources)}
-    chunks = []
-    while chunk = resources.page(options[:chunk_num]).per(options[:per_chunk]) \
-                            and chunk.size(true) > 0
-      chunks << chunk
-      options[:chunk_num] += 1
-    end
-
-    # queries are executed in sequence, so traverse last-to-first
-    chunks.reverse!
+    chunks = LadderHelper::chunkify(resources)
 
     # disable callbacks for indexing and tree generation on save
     Resource.reset_callbacks(:save)
@@ -46,7 +37,7 @@ namespace :map do
         xml = Nokogiri::XML(resource.mods).remove_namespaces!
 
         # map MODS elements to embedded vocabs
-        resource.vocabs = MODS::vocabs(xml.xpath('/mods').first)
+        resource.vocabs = LadderMapping::MODS::vocabs(xml.xpath('/mods').first)
 
         # NB: there might be a better way to assign embedded attributes
 #        vocabs.each do |ns, vocab|
@@ -54,7 +45,7 @@ namespace :map do
 #        end
 
         # map related resources as tree hierarchy
-        relations = MODS::relations(xml.xpath('/mods/relatedItem'))
+        relations = LadderMapping::MODS::relations(xml.xpath('/mods/relatedItem'))
         resource.assign_attributes(relations[:fields])
 
         if relations[:parent].nil?
@@ -71,12 +62,12 @@ namespace :map do
         resource.children = children + relations[:children]
 
         # map encoded agents to related Agent models; store relation types in vocab fields
-        agents = MODS::agents(xml.xpath('/mods/name'))
+        agents = LadderMapping::MODS::agents(xml.xpath('/mods/name'))
         resource.assign_attributes(agents[:fields])
         resource.agents << agents[:agents]
 
         # map encoded agents to related Agent models; store relation types in vocab fields
-#        concepts = MODS::concepts(xml.xpath('/mods/name'))
+#        concepts = LadderMapping::MODS::concepts(xml.xpath('/mods/name'))
 #        resource.assign_attributes(concepts[:fields])
 #        resource.concepts << concepts[:concepts]
 

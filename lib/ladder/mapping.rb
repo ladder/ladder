@@ -1,4 +1,5 @@
 module LadderMapping
+
   class Mapping
 
     def self.map_xpath(xml_node, hash)

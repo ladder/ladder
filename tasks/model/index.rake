@@ -17,17 +17,7 @@ namespace :model do
       puts "Indexing #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
-      options = {:chunk_num => 1, :per_chunk => LadderHelper::dynamic_chunk(collection)}
-
-      chunks = []
-      while chunk = collection.page(options[:chunk_num]).per(options[:per_chunk]) \
-                            and chunk.size(true) > 0
-        chunks << chunk
-        options[:chunk_num] += 1
-      end
-
-      # queries are executed in sequence, so traverse last-to-first
-      chunks.reverse!
+      chunks = LadderHelper::chunkify(collection)
 
       # delete and re-create the index
       klass.tire.index.delete if klass.tire.index.exists?
