@@ -11,4 +11,5 @@ class CompressedBinary
     # decompress string
     compressed ? ActiveSupport::Gzip.decompress(Base64.decode64(compressed)) : compressed
   end
+
 end

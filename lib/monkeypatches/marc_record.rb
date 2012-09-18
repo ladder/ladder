@@ -59,4 +59,5 @@ class MARC::Record
       },
     }
   end
+
 end
