@@ -1,8 +1,7 @@
 desc "Map/Re-map Resources from MODS data"
 
-namespace :mods do
-
-  task :map, [:remap] => :environment do |t, args|
+namespace :map do
+  task :mods, [:remap] => :environment do |t, args|
 
     args.with_defaults(:remap => false)
 
@@ -47,7 +46,7 @@ namespace :mods do
         xml = Nokogiri::XML(resource.mods).remove_namespaces!
 
         # map MODS elements to embedded vocabs
-        resource.vocabs = LadderMapping::MODS::vocabs(xml.xpath('/mods').first)
+        resource.vocabs = MODS::vocabs(xml.xpath('/mods').first)
 
         # NB: there might be a better way to assign embedded attributes
 #        vocabs.each do |ns, vocab|
@@ -55,7 +54,7 @@ namespace :mods do
 #        end
 
         # map related resources as tree hierarchy
-        relations = LadderMapping::MODS::relations(xml.xpath('/mods/relatedItem'))
+        relations = MODS::relations(xml.xpath('/mods/relatedItem'))
         resource.assign_attributes(relations[:fields])
 
         if relations[:parent].nil?
@@ -72,12 +71,12 @@ namespace :mods do
         resource.children = children + relations[:children]
 
         # map encoded agents to related Agent models; store relation types in vocab fields
-        agents = LadderMapping::MODS::agents(xml.xpath('/mods/name'))
+        agents = MODS::agents(xml.xpath('/mods/name'))
         resource.assign_attributes(agents[:fields])
         resource.agents << agents[:agents]
 
         # map encoded agents to related Agent models; store relation types in vocab fields
-#        concepts = LadderMapping::MODS::concepts(xml.xpath('/mods/name'))
+#        concepts = MODS::concepts(xml.xpath('/mods/name'))
 #        resource.assign_attributes(concepts[:fields])
 #        resource.concepts << concepts[:concepts]
 

@@ -1,7 +1,7 @@
 desc "Import data from MODS XML file(s)"
 
-namespace :mods do
-  task :import, [:file] => :environment do |t, args|
+namespace :import do
+  task :mods, [:file] => :environment do |t, args|
 
     if args.file.nil?
       abort('No filename specified.')
@@ -11,7 +11,7 @@ namespace :mods do
 
     if File::directory? path
       files = Dir.entries(path).reject! {|s| s =~ /^\./}  # don't include dotfiles
-                                                          # order largest files first so processes aren't blocking
+      # order largest files first so processes aren't blocking
       files = files.sort_by {|filename| File.size(File.expand_path(filename, args.file)) }.reverse
     else
       files = [path]

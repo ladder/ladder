@@ -1,8 +1,7 @@
 desc "Map/Re-map Resources from MARC data"
 
-namespace :marc do
-
-  task :map, [:remap] => :environment do |t, args|
+namespace :map do
+  task :marc, [:remap] => :environment do |t, args|
 
     args.with_defaults(:remap => false)
 
@@ -16,7 +15,7 @@ namespace :marc do
     puts "Mapping #{resources.size(true)} Resources from MARC records using #{Parallel.processor_count} processors..."
 
     # load MARC2MODS XSL once
-    xslt_file = File.join(File.expand_path('../../../lib/xslt', __FILE__), 'MARC21slim2MODS3-4.xsl')
+    xslt_file = File.join(File.expand_path('../../../../lib/xslt', __FILE__), 'MARC21slim2MODS3-4.xsl')
     xslt = Nokogiri::XSLT(File.read(xslt_file))
 
     # break resources into chunks for multi-processing

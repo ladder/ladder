@@ -1,7 +1,7 @@
 desc "Import data from MARC binary file(s)"
 
-namespace :marc do
-  task :import, [:file] => :environment do |t, args|
+namespace :import do
+  task :marc, [:file] => :environment do |t, args|
 
     if args.file.nil?
       abort('No filename specified.')

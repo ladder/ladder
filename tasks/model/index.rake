@@ -1,6 +1,6 @@
 desc "Add documents to index, optionally only for [model]"
 
-namespace :tire do
+namespace :model do
   task :index, [:model] => :environment do |t, args|
 
     args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
@@ -10,10 +10,6 @@ namespace :tire do
 
       klass  = model.classify.constantize
       next if klass.empty? # nothing to index
-
-      # delete and re-create the index
-      klass.tire.index.delete if klass.tire.index.exists?
-      klass.tire.create_elasticsearch_index
 
       # only retrieve fields that are mapped in index
       collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
@@ -32,6 +28,10 @@ namespace :tire do
 
       # queries are executed in sequence, so traverse last-to-first
       chunks.reverse!
+
+      # delete and re-create the index
+      klass.tire.index.delete if klass.tire.index.exists?
+      klass.tire.create_elasticsearch_index
 
       # temporary settings to improve indexing performance
       klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30

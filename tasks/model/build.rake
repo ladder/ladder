@@ -1,6 +1,6 @@
 desc "Build tree hierarchy for documents, optionally only for [model]"
 
-namespace :tree do
+namespace :model do
   task :build, [:model] => :environment do |t, args|
 
     args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
@@ -9,11 +9,9 @@ namespace :tree do
     args.model.to_a.each do |model|
 
       klass  = model.classify.constantize
-      next if klass.empty? # nothing to rebuild
+      next if klass.empty? # nothing to process
 
-      # suppress indexing on save
-      klass.skip_callback(:save, :after, :update_index)
-
+      # only retrieve fields required for hierarchy
       collection = klass.roots.only(:id, :parent_id, :parent_ids)
 
       puts "Building #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
@@ -30,6 +28,9 @@ namespace :tree do
 
       # queries are executed in sequence, so traverse last-to-first
       chunks.reverse!
+
+      # suppress indexing on save
+      klass.skip_callback(:save, :after, :update_index)
 
       Parallel.each(chunks) do |chunk|
 

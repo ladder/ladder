@@ -1,6 +1,6 @@
 desc "Merge duplicate documents, optionally only for [model]"
 
-namespace :tree do
+namespace :model do
   task :merge, [:model] => :environment do |t, args|
 
     args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
@@ -9,7 +9,7 @@ namespace :tree do
     args.model.to_a.each do |model|
 
       klass  = model.classify.constantize
-      next if klass.empty? # nothing to rebuild
+      next if klass.empty? # nothing to process
 
       # only retrieve fields that are mapped in index
       collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
