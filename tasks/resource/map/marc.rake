@@ -22,22 +22,16 @@ namespace :map do
     Resource.reset_callbacks(:validate)
     Resource.reset_callbacks(:validation)
 
-    # load MARC2MODS XSL once
-    xslt_file = File.join(File.expand_path('../../../../lib/xslt', __FILE__), 'MARC21slim2MODS3-4.xsl')
-    xslt = Nokogiri::XSLT(File.read(xslt_file))
+    mapping = LadderMapping::MARC.new
 
     Parallel.each(chunks) do |chunk|
 
       chunk.each do |resource|
-
-        # create MODS XML from MARC record
-        marc = MARC::Record.new_from_marc(resource.marc, :forgiving => true)
-
-        resource.mods = xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash))).to_s
-
-        resource.save
+        mapping.map(resource).save
       end
 
+      # Make sure to flush the GC when done a chunk
+      GC.start
     end
 
   end

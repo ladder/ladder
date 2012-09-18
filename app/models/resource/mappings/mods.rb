@@ -3,7 +3,7 @@ module LadderMapping
   class MODS
 
     # TODO: abstract to generic mapping module/class
-    def self.map_xpath(xml_node, hash)
+    def map_xpath(xml_node, hash)
       mapped = {}
 
       hash.each do |symbol, xpath|
@@ -14,7 +14,7 @@ module LadderMapping
       mapped
     end
 
-    def self.vocabs(node)
+    def vocabs(node)
       vocabs = {}
 
       dcterms = map_xpath node, {
@@ -59,14 +59,14 @@ module LadderMapping
       vocabs
     end
 
-    def self.relations(xml_nodeset)
+    def relations(xml_nodeset)
       relations = {:children => [], :siblings => [],
                    :fields => {:dcterms => {}, :bibo => {}, :prism => {}}}
 
       xml_nodeset.each do |node|
 
         # apply vocab mapping to each related resource
-        vocabs = self.vocabs(node)
+        vocabs = vocabs(node)
 
         unless vocabs.empty?
           resource = Resource.new(vocabs)
@@ -111,7 +111,7 @@ module LadderMapping
       relations
     end
 
-    def self.agents(xml_nodeset)
+    def agents(xml_nodeset)
       agents = {:agents => [],
                 :fields => {:dcterms => {}, :bibo => {}, :prism => {}}}
 
@@ -141,8 +141,58 @@ module LadderMapping
       agents
     end
 
-    def self.concepts(xml_nodeset)
+    def concepts(xml_nodeset)
       concepts = []
+    end
+
+    def map(resource)
+      @resource = resource
+
+      # load MODS XML document
+      xml = Nokogiri::XML(@resource.mods).remove_namespaces!
+
+      # map MODS elements to embedded vocabs
+      @resource.vocabs = vocabs(xml.xpath('/mods').first)
+
+      # NB: there might be a better way to assign embedded attributes
+      #        vocabs.each do |ns, vocab|
+      #          @resource.write_attribute(ns, vocab)
+      #        end
+
+      # map related resources as tree hierarchy
+      relations = relations(xml.xpath('/mods/relatedItem'))
+      @resource.assign_attributes(relations[:fields])
+
+      if relations[:parent].nil?
+        # if resource does not have a parent, assign siblings as children
+        children = relations[:siblings]
+      else
+        children = []
+
+        relations[:parent].save
+        @resource.parent = relations[:parent]
+        relations[:siblings].each do |sibling|
+          @resource.parent.children << sibling
+        end
+      end
+
+      @resource.children = children + relations[:children]
+
+      # map encoded agents to related Agent models; store relation types in vocab fields
+      agents = agents(xml.xpath('/mods/name'))
+      @resource.assign_attributes(agents[:fields])
+      @resource.agents << agents[:agents]
+
+      # map encoded agents to related Agent models; store relation types in vocab fields
+#        concepts = concepts(xml.xpath('/mods/name'))
+#        @resource.assign_attributes(concepts[:fields])
+#        @resource.concepts << concepts[:concepts]
+
+      @resource
+    end
+
+    def save
+      @resource.save
     end
 
   end

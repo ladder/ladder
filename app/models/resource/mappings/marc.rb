@@ -1,3 +1,25 @@
+module LadderMapping
+
+  class MARC
+
+    def initialize
+      # load MARC2MODS XSL
+      @xslt = Nokogiri::XSLT(File.read(Padrino.root('lib/xslt', 'MARC21slim2MODS3-4.xsl')))
+    end
+
+    def map(resource)
+      # create MODS XML from MARC record
+      marc = ::MARC::Record.new_from_marc(resource.marc, :forgiving => true)
+
+      resource.mods = @xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash))).to_s
+
+      resource
+    end
+
+  end
+
+end
+
 #
 # Add a method to MARC::Record to export a Gyoku-compatible hash
 # for converting to well-formed but possibly invalid MARCXML
@@ -32,11 +54,11 @@ class MARC::Record
 
         datafields << { :subfield => subfields,
                         :attributes! => {
-                          :subfield => {
-                            :code => subfield_codes,
-                           }
+                            :subfield => {
+                                :code => subfield_codes,
+                            }
                         }
-                      }
+        }
       end
     end
 
@@ -45,17 +67,17 @@ class MARC::Record
         :controlfield => controlfields,
         :datafield => datafields,
         :attributes! => {
-          :controlfield => {
-            :tag => controlfield_tags },
-          :datafield => {
-            :tag => datafield_tags,
-            :ind1 => datafield_ind1,
-            :ind2 => datafield_ind2,
-          },
+            :controlfield => {
+                :tag => controlfield_tags },
+            :datafield => {
+                :tag => datafield_tags,
+                :ind1 => datafield_ind1,
+                :ind2 => datafield_ind2,
+            },
         },
-      },
+    },
       :attributes! => {
-        :record => { :xmlns => 'http://www.loc.gov/MARC21/slim'},
+          :record => { :xmlns => 'http://www.loc.gov/MARC21/slim'},
       },
     }
   end
