@@ -5,13 +5,10 @@ namespace :map do
 
     args.with_defaults(:remap => false)
 
-    resources = Resource.mods
+    resources = Resource.mods.only(:mods)
 
     # only select resources which have not already been mapped
-    resources = resources.where(:dcterms.exists => false, \
-                                :bibo.exists => false, \
-                                :prism.exists => false) \
-                                unless args.remap
+    resources = resources.dcterms(false).bibo(false).prism(false) unless args.remap
 
     exit if resources.empty?
 

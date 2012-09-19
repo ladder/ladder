@@ -155,9 +155,9 @@ module LadderMapping
       @resource.vocabs = vocabs(xml.xpath('/mods').first)
 
       # NB: there might be a better way to assign embedded attributes
-      #        vocabs.each do |ns, vocab|
-      #          @resource.write_attribute(ns, vocab)
-      #        end
+#        vocabs.each do |ns, vocab|
+#          @resource.write_attribute(ns, vocab)
+#        end
 
       # map related resources as tree hierarchy
       relations = relations(xml.xpath('/mods/relatedItem'))

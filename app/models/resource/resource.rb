@@ -24,20 +24,6 @@ class Resource
   field :marc, :type => CompressedBinary
   field :mods, :type => CompressedBinary
 
-  def self.marc
-    only(:marc).where(:marc.exists => true)
-  end
-
-  def self.mods
-    only(:mods).where(:mods.exists => true)
-  end
-
-  def heading
-    fields = ['dcterms.title',
-              'dcterms.alternative']
-    self.get_first_field(fields)
-  end
-
   # embedded RDF vocabularies
   embeds_one :dcterms, class_name: "DublinCore"
   embeds_one :bibo,    class_name: "Bibo"
@@ -51,4 +37,32 @@ class Resource
   # model relations
   has_and_belongs_to_many :agents
   has_and_belongs_to_many :concepts
+
+  # FIXME: refactor to use #method_missing?
+  def self.marc(exists = true)
+    where(:marc.exists => exists)
+  end
+
+  def self.mods(exists = true)
+    where(:mods.exists => exists)
+  end
+
+  def self.dcterms(exists = true)
+    where(:dcterms.exists => exists)
+  end
+
+  def self.bibo(exists = true)
+    where(:bibo.exists => exists)
+  end
+
+  def self.prism(exists = true)
+    where(:prism.exists => exists)
+  end
+
+  def heading
+    fields = ['dcterms.title',
+              'dcterms.alternative']
+    self.get_first_field(fields)
+  end
+
 end

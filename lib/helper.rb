@@ -1,3 +1,8 @@
+#
+# Static class for helper methods
+# FIXME: refactor these into the appropriate classes if possible
+#
+
 class LadderHelper
 
   def self.dynamic_chunk(klass_or_collection, factor = 1)

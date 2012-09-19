@@ -1,3 +1,7 @@
+#
+# Application-specific RDF::Vocabulary definitions
+#
+
 module LadderVocab
   ##
   # Bibliographic Ontology (Bibo) vocabulary.
