@@ -14,8 +14,41 @@ module LadderMapping
       mapped
     end
 
-    def vocabs(node)
-      vocabs = {}
+    def map(resource)
+      @resource = resource
+
+      # load MODS XML document
+      xml = Nokogiri::XML(@resource.mods).remove_namespaces!
+
+      # map MODS elements to embedded vocabs
+      @resource.vocabs = map_vocabs(xml.xpath('/mods').first)
+
+      # map related resources as tree hierarchy
+      relations = map_relations(xml.xpath('/mods/relatedItem'))
+
+      @resource.parent = relations[:parent]
+      @resource.parent.children << relations[:siblings] unless @resource.parent.nil?
+      @resource.children << relations[:children]
+
+      # map encoded agents to related Agent models
+      @resource.agents << map_agents(xml.xpath('/mods/name'), {:dcterms => :creator})
+      @resource.agents << map_agents(xml.xpath('/mods/originInfo/publisher'), {:dcterms => :publisher})
+
+      # map encoded concepts to related Concept models
+      #@resource.concepts << concepts(xml.xpath('/mods/subject'))
+
+      @resource
+    end
+
+    def save
+#     @resource.children.map(&:save)
+      @resource.parent.save unless @resource.parent.nil?
+      @resource.set_updated_at
+      @resource.save
+    end
+
+    def map_vocabs(node)
+      vocabs = {:dcterms => {}, :bibo => {}, :prism => {}}
 
       dcterms = map_xpath node, {
           # descriptive elements
@@ -30,11 +63,6 @@ module LadderMapping
           # indexable textual content
           :abstract        => 'abstract',
           :tableOfContents => 'tableOfContents',
-
-          # agent access points
-          # TODO: move these to agents
-          :creator       => 'name/namePart[not(@type = "date")]',
-          :publisher     => 'originInfo/publisher',
 
           # concept access points
           # TODO: move these to concepts
@@ -52,71 +80,82 @@ module LadderMapping
           :oclcnum  => 'identifier[@type = "oclc"]',
       }
 
-      # TODO: prism mapping
-      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) unless dcterms.empty?
-      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) unless bibo.empty?
+      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true)# unless dcterms.empty?
+      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true)# unless bibo.empty?
+      vocabs[:prism] = {} # TODO: prism mapping
 
       vocabs
     end
 
-    def relations(xml_nodeset)
-      relations = {:children => [], :siblings => [],
-                   :fields => {:dcterms => {}, :bibo => {}, :prism => {}}}
+    def map_relations(node_set)
+      relations = {:parent => nil, :children => [], :siblings => []}
 
-      xml_nodeset.each do |node|
+      node_set.each do |node|
 
         # apply vocab mapping to each related resource
-        vocabs = vocabs(node)
+        vocabs = map_vocabs(node)
 
+        # FIXME: how to handle "empty" vocabs
         unless vocabs.empty?
           resource = Resource.new(vocabs)
           resource.set_created_at
 
-          # TODO: map inverse relations on created Resources?
           case node['type']
-            when 'host'
-              relations[:parent] = resource
+            # parent relationships
             when 'series'
               relations[:parent] = resource
-              (relations[:fields][:dcterms][:isPartOf] ||= []).push(resource.id)
+              (@resource.dcterms.isPartOf ||= []) << resource.id
+              (resource.dcterms.hasPart ||= []) << @resource.id
+            when 'host'
+              relations[:parent] = resource
 
-            when 'constituent'
-              relations[:children] << resource
-              (relations[:fields][:dcterms][:hasPart] ||= []).push(resource.id)
-
+            # sibling-like relationships
             when 'otherVersion'
               relations[:siblings] << resource
-              (relations[:fields][:dcterms][:hasVersion] ||= []).push(resource.id)
+              (@resource.dcterms.hasVersion ||= []) << resource.id
+              (resource.dcterms.isVersionOf ||= []) << @resource.id
             when 'otherFormat'
               relations[:siblings] << resource
-              (relations[:fields][:dcterms][:hasFormat] ||= []).push(resource.id)
+              (@resource.dcterms.hasFormat ||= []) << resource.id
+              (resource.dcterms.isFormatOf ||= []) << @resource.id
             when 'isReferencedBy'
               relations[:siblings] << resource
-              (relations[:fields][:dcterms][:isReferencedBy] ||= []).push(resource.id)
+              (@resource.dcterms.isReferencedBy ||= []) << resource.id
+              (resource.dcterms.references ||= []) << @resource.id
             when 'references'
               relations[:siblings] << resource
-              (relations[:fields][:dcterms][:references] ||= []).push(resource.id)
+              (@resource.dcterms.references ||= []) << resource.id
+              (resource.dcterms.isReferencedBy ||= []) << @resource.id
             when 'original'
               relations[:siblings] << resource
-              (relations[:fields][:prism][:hasPreviousVersion] ||= []).push(resource.id)
+              (@resource.prism.hasPreviousVersion ||= []) << resource.id
 
+            # child relationship
+            when 'constituent'
+              relations[:children] << resource
+              (@resource.dcterms.hasPart ||= []) << resource.id
+              (resource.dcterms.isPartOf ||= []) << @resource.id
+
+            # undefined relationship
             else
-              relations[:siblings].push(resource)
+              relations[:siblings] << resource
           end
-
         end
 
+      end
+
+      if relations[:parent].nil? and !relations[:siblings].empty?
+        relations[:children] << relations[:siblings]
+        relations[:siblings] = []
       end
 
       relations
     end
 
-    def agents(xml_nodeset)
-      agents = {:agents => [],
-                :fields => {:dcterms => {}, :bibo => {}, :prism => {}}}
+    def map_agents(node_set, field = {})
+      agents = []
 
-      xml_nodeset.each do |node|
-        vocabs = {}
+      node_set.each do |node|
 
         foaf = map_xpath node, {
             # TODO: additional parsing/mapping
@@ -124,16 +163,15 @@ module LadderMapping
             :birthday => 'namePart[@type = "date"]',
         }
 
-        # TODO: this structure is just to copy that above; refactor together
-        vocabs[:foaf] = FOAF.new(foaf, :without_protection => true)
-
+        # FIXME: how to handle "empty" vocabs
         unless foaf.empty?
-          agent = Agent.new(vocabs)
+          agent = Agent.new({:foaf => FOAF.new(foaf)})
           agent.set_created_at
+          agents << agent
 
-          # FIXME: assume that all agents are creators?
-          agents[:agents] << agent
-          (agents[:fields][:dcterms][:creator] ||= []).push(agent.id)
+          value = @resource.send(field.keys.first).send(field.values.first)
+          value << agent.id rescue value = [agent.id]
+          @resource.send(field.keys.first).send((field.values.first.to_s + "=").to_sym, value)
         end
 
       end
@@ -143,56 +181,6 @@ module LadderMapping
 
     def concepts(xml_nodeset)
       concepts = []
-    end
-
-    def map(resource)
-      @resource = resource
-
-      # load MODS XML document
-      xml = Nokogiri::XML(@resource.mods).remove_namespaces!
-
-      # map MODS elements to embedded vocabs
-      @resource.vocabs = vocabs(xml.xpath('/mods').first)
-
-      # NB: there might be a better way to assign embedded attributes
-#        vocabs.each do |ns, vocab|
-#          @resource.write_attribute(ns, vocab)
-#        end
-
-      # map related resources as tree hierarchy
-      relations = relations(xml.xpath('/mods/relatedItem'))
-      @resource.assign_attributes(relations[:fields])
-
-      if relations[:parent].nil?
-        # if resource does not have a parent, assign siblings as children
-        children = relations[:siblings]
-      else
-        children = []
-
-        relations[:parent].save
-        @resource.parent = relations[:parent]
-        relations[:siblings].each do |sibling|
-          @resource.parent.children << sibling
-        end
-      end
-
-      @resource.children = children + relations[:children]
-
-      # map encoded agents to related Agent models; store relation types in vocab fields
-      agents = agents(xml.xpath('/mods/name'))
-      @resource.assign_attributes(agents[:fields])
-      @resource.agents << agents[:agents]
-
-      # map encoded agents to related Agent models; store relation types in vocab fields
-#        concepts = concepts(xml.xpath('/mods/name'))
-#        @resource.assign_attributes(concepts[:fields])
-#        @resource.concepts << concepts[:concepts]
-
-      @resource
-    end
-
-    def save
-      @resource.save
     end
 
   end

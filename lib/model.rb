@@ -75,9 +75,7 @@ module LadderModel
     # Assign model vocab objects by a hash of field names
     def vocabs=(hash)
       hash.each do |field, object|
-        if self.respond_to? field
-          self.method(field.to_s + '=').call(object)
-        end
+        self.send(field.to_s + '=', object) if self.respond_to? field
       end
     end
 
@@ -150,6 +148,7 @@ module LadderModel
     end
 
     # Search an array of model fields in order and return the first non-empty value
+    # NB: check use of @attributes
     def get_first_field(fields_array)
       target = nil
 

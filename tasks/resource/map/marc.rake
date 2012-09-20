@@ -27,7 +27,9 @@ namespace :map do
     Parallel.each(chunks) do |chunk|
 
       chunk.each do |resource|
-        mapping.map(resource).save
+        resource = mapping.map(resource)
+        resource.set_updated_at
+        resource.save
       end
 
       # Make sure to flush the GC when done a chunk
