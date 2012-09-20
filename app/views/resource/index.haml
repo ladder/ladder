@@ -20,7 +20,7 @@
         .tree
           %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar
           %ul
-            =list_of(@similar) do |similar|
+            = list_of(@similar) do |similar|
               - # TODO: clean up this code; move to partial
               - @fields = similar.to_hash.reject { |key, value| !value.is_a? Hash }.values.map(&:values).flatten.size
               - @diff = (@fields - @resource.diff(similar).size/2.to_f)/@fields * similar._score/@similar.map(&:_score).max * 100
@@ -38,6 +38,13 @@
     .span6.json
       %pre
         %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
+
+      - unless @resource.agents.empty?
+        %h3{:style => 'margin: 0; padding: 0; display: inline;'} Agents
+      - @resource.agents.each do |agent|
+        %pre
+          %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(agent.as_document.as_json, :object_nl => "\n", :indent => " ")
+
     -if @resource.mods
       .span6.xml
         %pre

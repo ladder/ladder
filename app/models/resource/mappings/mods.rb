@@ -31,8 +31,10 @@ module LadderMapping
       @resource.children << relations[:children]
 
       # map encoded agents to related Agent models
-      @resource.agents << map_agents(xml.xpath('/mods/name'), {:dcterms => :creator})
-      @resource.agents << map_agents(xml.xpath('/mods/originInfo/publisher'), {:dcterms => :publisher})
+      @resource.agents << map_agents(xml.xpath('/mods/name'), 'dcterms.creator')
+
+      # FIXME: this won't match the agent mapping
+      @resource.agents << map_agents(xml.xpath('/mods/originInfo/publisher'), 'dcterms.publisher')
 
       # map encoded concepts to related Concept models
       #@resource.concepts << concepts(xml.xpath('/mods/subject'))
@@ -97,8 +99,9 @@ module LadderMapping
 
         # FIXME: how to handle "empty" vocabs
         unless vocabs.empty?
-          resource = Resource.new(vocabs)
+          resource = Resource.new
           resource.set_created_at
+          resource.vocabs = vocabs
 
           case node['type']
             # parent relationships
@@ -152,26 +155,31 @@ module LadderMapping
       relations
     end
 
-    def map_agents(node_set, field = {})
+    def map_agents(node_set, target_field)
       agents = []
+
+      ns = target_field.split('.').first
+      field = target_field.split('.').last
 
       node_set.each do |node|
 
         foaf = map_xpath node, {
             # TODO: additional parsing/mapping
-            :name     => 'namePart[not(@type = "date")]',
+            :name     => 'namePart[not(@type)]',
             :birthday => 'namePart[@type = "date"]',
+            :title    => 'namePart[@type = "termsOfAddress"]',
         }
 
         # FIXME: how to handle "empty" vocabs
         unless foaf.empty?
-          agent = Agent.new({:foaf => FOAF.new(foaf)})
+          agent = Agent.new
           agent.set_created_at
+          agent.vocabs = {:foaf => FOAF.new(foaf)}
           agents << agent
 
-          value = @resource.send(field.keys.first).send(field.values.first)
+          value = @resource.send(ns).send(field)
           value << agent.id rescue value = [agent.id]
-          @resource.send(field.keys.first).send((field.values.first.to_s + "=").to_sym, value)
+          @resource.send(ns).send(field + "=", value)
         end
 
       end

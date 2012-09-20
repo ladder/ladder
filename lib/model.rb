@@ -132,10 +132,16 @@ module LadderModel
 
     # Return a HashDiff array computed between the two model instances
     def diff(model)
-      # strip id field and symbolize all keys
       normalize = lambda do |hash|
         hash.symbolize_keys!
-        hash.except!(:_id)
+
+        # strip id field
+        hash.except! :_id
+
+        # don't include object-id references in comparisons
+        # NB: have to use regexp matching for Tire Items
+        hash.delete_if {|key, value| value.flatten.delete_if { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
+
         hash.values.select{|v| v.is_a? Hash}.each{|h| normalize.call(h)}
         hash
       end
@@ -148,7 +154,6 @@ module LadderModel
     end
 
     # Search an array of model fields in order and return the first non-empty value
-    # NB: check use of @attributes
     def get_first_field(fields_array)
       target = nil
 
@@ -156,7 +161,7 @@ module LadderModel
         ns = target_field.split('.').first
         field = target_field.split('.').last
 
-        target = @attributes[ns][field] unless @attributes[ns].nil?
+        target = self.send(ns).send(field)
         target = target.first if target.is_a? Array
 
         break if target

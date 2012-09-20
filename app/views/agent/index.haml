@@ -1,5 +1,6 @@
 - @title = @agent.heading
 - @similar = @agent.similar
+- @resources = Resource.where(agent_ids: @agent.id)
 
 .container
   .row
@@ -38,3 +39,9 @@
     .span6.json
       %pre
         %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@agent.as_document.as_json, :object_nl => "\n", :indent => " ")
+
+      - unless @resources.empty?
+        %h3{:style => 'margin: 0; padding: 0; display: inline;'} Resources
+      - @resources.each do |resource|
+        %pre
+          %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")

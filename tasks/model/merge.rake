@@ -40,7 +40,6 @@ namespace :model do
             next if check.empty?
 
             item = check.first
-#            item = duplicate.load
 
             # == TODO: refactor this into a LadderModel method
 
@@ -50,7 +49,7 @@ namespace :model do
               c.save
             end
 
-            doc.save
+            # TODO: remove relations: agents, concepts, etc
 
             # mark duplicate as deleted in mongo and remove from index
             item.remove
@@ -60,7 +59,7 @@ namespace :model do
 
             deleted << duplicate.id
 
-            puts "Merged #{duplicate.id} into #{doc.id}"
+            puts "Merged #{duplicate.id} into #{doc.id} (#{item.heading})"
           end
 
         end
