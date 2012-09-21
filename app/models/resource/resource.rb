@@ -38,31 +38,8 @@ class Resource
   has_and_belongs_to_many :agents
   has_and_belongs_to_many :concepts
 
-  # FIXME: refactor to use #method_missing?
-  def self.marc(exists = true)
-    where(:marc.exists => exists)
-  end
-
-  def self.mods(exists = true)
-    where(:mods.exists => exists)
-  end
-
-  def self.dcterms(exists = true)
-    where(:dcterms.exists => exists)
-  end
-
-  def self.bibo(exists = true)
-    where(:bibo.exists => exists)
-  end
-
-  def self.prism(exists = true)
-    where(:prism.exists => exists)
-  end
-
   def heading
-    fields = ['dcterms.title',
-              'dcterms.alternative']
-    self.get_first_field(fields)
+    get_first_field(['dcterms.title', 'dcterms.alternative'])
   end
 
 end

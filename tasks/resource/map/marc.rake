@@ -5,10 +5,10 @@ namespace :map do
 
     args.with_defaults(:remap => false)
 
-    resources = Resource.marc.only(:marc)
+    resources = Resource.where(:marc.exists => true).only(:marc)
 
     # only select resources which have not already been mapped
-    resources = resources.mods(false) unless args.remap
+    resources = resources.where(:mods.exists => false) unless args.remap
 
     exit if resources.empty?
 

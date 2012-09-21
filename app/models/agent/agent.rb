@@ -8,10 +8,7 @@ class Agent
   include LadderModel::Core
 
   def heading
-    fields = ['foaf.name',
-              'foaf.givenName',
-              'foaf.givenname']
-    self.get_first_field(fields)
+    get_first_field(['foaf.name', 'foaf.givenName', 'foaf.givenname'])
   end
 
   # embedded RDF vocabularies

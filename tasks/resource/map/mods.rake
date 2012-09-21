@@ -5,10 +5,13 @@ namespace :map do
 
     args.with_defaults(:remap => false)
 
-    resources = Resource.mods.only(:mods)
+    resources = Resource.where(:mods.exists => true).only(:mods)
 
     # only select resources which have not already been mapped
-    resources = resources.dcterms(false).bibo(false).prism(false) unless args.remap
+    resources = resources.where(:dcterms.exists => false) \
+                         .where(:bibo.exists => false) \
+                         .where(:prism.exists => false) \
+                         unless args.remap
 
     exit if resources.empty?
 
@@ -25,7 +28,7 @@ namespace :map do
       chunk.each do |resource|
         mapping.map(resource)
         mapping.save
-        
+
         # ensure similarity searches are fresh
         resource.tire.index.refresh
       end
