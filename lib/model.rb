@@ -6,6 +6,22 @@ module LadderModel
 
   module Core
 
+    module ClassMethods
+
+      # allow looking for an existing model object on creation
+      def new_or_existing(*args, &block)
+        # if a duplicate exists, return that
+        test = self.new(args.first)
+        return test.same.first.load unless test.same.empty?
+
+        # otherwise do the usual
+        obj = self.allocate
+        obj.send :initialize, *args, &block
+        obj
+      end
+
+    end
+
     def self.included(base)
       base.send :include, Mongoid::Document
 
@@ -56,6 +72,9 @@ module LadderModel
         base.send :indexes, :agent_ids,     :type => 'string'
         base.send :indexes, :concept_ids,   :type => 'string'
         base.send :indexes, :resource_ids,  :type => 'string'
+
+        # add useful class methods
+        base.extend ClassMethods
       end
 
     end

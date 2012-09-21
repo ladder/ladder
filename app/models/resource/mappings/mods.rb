@@ -97,7 +97,7 @@ module LadderMapping
 
         # FIXME: how to handle "empty" vocabs
         unless vocabs.empty?
-          resource = Resource.new(vocabs)
+          resource = Resource.new_or_existing(vocabs)
 
           case node['type']
             # parent relationships
@@ -139,6 +139,11 @@ module LadderMapping
             else
               relations[:siblings] << resource
           end
+
+          # TODO: use some recursion here
+          resource.agents << map_agents(node.xpath('name'), 'dcterms.creator')
+
+          resource.save
         end
 
       end
@@ -168,9 +173,15 @@ module LadderMapping
 
         # FIXME: how to handle "empty" vocabs
         unless foaf.empty?
-          agent = Agent.new(:foaf => FOAF.new(foaf))
+          agent = Agent.new_or_existing(:foaf => FOAF.new(foaf))
+
+          # ensure similarity searches are fresh
+          agent.save
+          agent.tire.index.refresh
+
           agents << agent
 
+          # append agent id to specified field
           value = @resource.send(ns).send(field)
           value << agent.id rescue value = [agent.id]
           @resource.send(ns).send(field + "=", value)
