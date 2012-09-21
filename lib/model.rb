@@ -26,6 +26,7 @@ module LadderModel
       base.send :mapping, :dynamic_templates => [{
           :test => {
               :match => '*',
+              :match_mapping_type => 'string',
               :mapping => {
                   :type => 'multi_field',
                   :fields => {
@@ -175,7 +176,7 @@ module LadderModel
       mapping = self.class.tire.mapping
 
       # Reject keys not declared in mapping
-      hash = self.attributes.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
+      hash = self.as_document.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
 
       # Reject empty values
       hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }

@@ -43,9 +43,7 @@ module LadderMapping
     end
 
     def save
-#     @resource.children.map(&:save)
       @resource.parent.save unless @resource.parent.nil?
-      @resource.set_updated_at
       @resource.save
     end
 
@@ -82,8 +80,8 @@ module LadderMapping
           :oclcnum  => 'identifier[@type = "oclc"]',
       }
 
-      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true)# unless dcterms.empty?
-      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true)# unless bibo.empty?
+      vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) #unless dcterms.empty?
+      vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) #unless bibo.empty?
       vocabs[:prism] = {} # TODO: prism mapping
 
       vocabs
@@ -99,9 +97,7 @@ module LadderMapping
 
         # FIXME: how to handle "empty" vocabs
         unless vocabs.empty?
-          resource = Resource.new
-          resource.set_created_at
-          resource.vocabs = vocabs
+          resource = Resource.new(vocabs)
 
           case node['type']
             # parent relationships
@@ -172,9 +168,7 @@ module LadderMapping
 
         # FIXME: how to handle "empty" vocabs
         unless foaf.empty?
-          agent = Agent.new
-          agent.set_created_at
-          agent.vocabs = {:foaf => FOAF.new(foaf)}
+          agent = Agent.new(:foaf => FOAF.new(foaf))
           agents << agent
 
           value = @resource.send(ns).send(field)

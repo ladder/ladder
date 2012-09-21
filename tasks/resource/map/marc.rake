@@ -17,19 +17,16 @@ namespace :map do
     # break resources into chunks for multi-processing
     chunks = LadderHelper::chunkify(resources)
 
-    # disable callbacks for indexing on save
-    Resource.reset_callbacks(:save)
-    Resource.reset_callbacks(:validate)
-    Resource.reset_callbacks(:validation)
+    # suppress indexing on save
+    Resource.skip_callback(:save, :after, :update_index)
 
+    # instantiate mapping object
     mapping = LadderMapping::MARC.new
 
     Parallel.each(chunks) do |chunk|
 
       chunk.each do |resource|
-        resource = mapping.map(resource)
-        resource.set_updated_at
-        resource.save
+        mapping.map(resource).save
       end
 
       # Make sure to flush the GC when done a chunk
