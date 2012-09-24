@@ -150,27 +150,66 @@ module LadderModel
       @same
     end
 
+    def normalize(hash)
+      hash.symbolize_keys!
+
+      # strip id field
+      hash.except! :_id
+
+      # don't include object-id references in comparisons
+      # NB: have to use regexp matching for Tire Items
+      hash.delete_if {|key, value| value.flatten.delete_if { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
+
+      hash.values.select{|v| v.is_a? Hash}.each{|h| normalize(h)}
+      hash
+    end
+
     # Return a HashDiff array computed between the two model instances
     def diff(model)
-      normalize = lambda do |hash|
-        hash.symbolize_keys!
-
-        # strip id field
-        hash.except! :_id
-
-        # don't include object-id references in comparisons
-        # NB: have to use regexp matching for Tire Items
-        hash.delete_if {|key, value| value.flatten.delete_if { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
-
-        hash.values.select{|v| v.is_a? Hash}.each{|h| normalize.call(h)}
-        hash
+      # use the right type for masqueraded search results
+      if model.is_a? Tire::Results::Item
+        compare = model.to_hash
+      else
+        compare = model.as_document
       end
 
-      test1 = normalize.call(self.as_document.reject { |key, value| !value.is_a? Hash })
-      test2 = normalize.call(model.to_hash.reject { |key, value| !value.is_a? Hash })
+      test1 = normalize(self.as_document.reject { |key, value| !value.is_a? Hash })
+      test2 = normalize(compare.reject { |key, value| !value.is_a? Hash })
 
       # return the diff comparison
       HashDiff.diff(test1, test2)
+    end
+
+    def amatch(model, opts={})
+      options = {:hamming_similar => true,
+                 :jaro_similar => true,
+                 :jarowinkler_similar => true,
+                 :levenshtein_similar => true,
+                 :longest_subsequence_similar => true,
+                 :longest_substring_similar => true,
+                 :pair_distance_similar => true}
+
+      # if we have selected specific comparisons, use those
+      options = opts unless opts.empty?
+
+      # use the right type for masqueraded search results
+      if model.is_a? Tire::Results::Item
+        compare = model.to_hash
+      else
+        compare = model.as_document
+      end
+
+      test1 = normalize(self.as_document.reject { |key, value| !value.is_a? Hash })
+      test2 = normalize(compare.reject { |key, value| !value.is_a? Hash })
+
+      p1 = test1.values.map(&:values).sort!.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p2 = test2.values.map(&:values).sort!.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+
+      options.each do |sim, bool|
+        options[sim] = p1.send(sim, p2) if bool
+      end
+
+      options
     end
 
     # Search an array of model fields in order and return the first non-empty value

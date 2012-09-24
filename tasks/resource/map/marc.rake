@@ -18,7 +18,10 @@ namespace :map do
     chunks = LadderHelper::chunkify(resources)
 
     # suppress indexing on save
-    Resource.skip_callback(:save, :after, :update_index)
+#    Resource.skip_callback(:save, :after, :update_index)
+    Resource.reset_callbacks(:save)
+    Resource.reset_callbacks(:validate)
+    Resource.reset_callbacks(:validation)
 
     # instantiate mapping object
     mapping = LadderMapping::MARC.new

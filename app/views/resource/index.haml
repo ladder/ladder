@@ -20,19 +20,20 @@
         .tree
           %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar
           %ul
-            = list_of(@similar) do |similar|
+            =list_of(@similar) do |similar|
               - # TODO: clean up this code; move to partial
-              - @fields = similar.to_hash.reject { |key, value| !value.is_a? Hash }.values.map(&:values).flatten.size
-              - @diff = (@fields - @resource.diff(similar).size/2.to_f)/@fields * similar._score/@similar.map(&:_score).max * 100
+              - @amatch = @resource.amatch(similar)
+              - @amatch[:hamming_similar] = 1-@amatch[:hamming_similar] unless @amatch[:hamming_similar].nil?
+              - @diff1 = (@amatch.values.sum / @amatch.size) * 100
 
               - if @same.include? similar
                 %a.active{:href => url_for(:resource, :index, :id => similar.id)}
                   #{similar.load.heading}
-                  %br (#{@diff.round}%)
+                  %br (#{@diff1.round}%)
               - else
                 %a{:href => url_for(:resource, :index, :id => similar.id)}
                   #{similar.load.heading}
-                  %br (#{@diff.round}%)
+                  %br (#{@diff1.round}%)
 
   .row
     .span6.json

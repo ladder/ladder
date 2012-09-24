@@ -17,6 +17,7 @@ gem 'nokogiri' # xml manipulation
 gem 'parallel' # multi-core processing
 gem 'iso-639'  # english/french lists
 gem 'hashdiff' # hash comparison
+gem 'amatch'   # string comparison
 
 # model gems
 gem 'mongoid', '2.4.12'
