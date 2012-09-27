@@ -26,8 +26,12 @@ module LadderMapping
       # map related resources as tree hierarchy
       relations = map_relations(xml.xpath('/mods/relatedItem'))
 
-      @resource.parent = relations[:parent]
-      @resource.parent.children << relations[:siblings] unless @resource.parent.nil?
+      unless relations[:parent].nil?
+        @resource.parent = relations[:parent]
+        @resource.parent.save
+        @resource.parent.children << relations[:siblings]
+      end
+
       @resource.children << relations[:children]
 
       # map encoded agents to related Agent models
@@ -42,14 +46,7 @@ module LadderMapping
       @resource
     end
 
-    def save
-      @resource.parent.save unless @resource.parent.nil?
-      @resource.save
-    end
-
     def map_vocabs(node)
-      vocabs = {:dcterms => {}, :bibo => {}, :prism => {}}
-
       dcterms = map_xpath node, {
           # descriptive elements
           :title         => 'titleInfo[not(@type = "alternative")]',
@@ -80,9 +77,10 @@ module LadderMapping
           :oclcnum  => 'identifier[@type = "oclc"]',
       }
 
+      vocabs = {}
       vocabs[:dcterms] = DublinCore.new(dcterms, :without_protection => true) #unless dcterms.empty?
       vocabs[:bibo] = Bibo.new(bibo, :without_protection => true) #unless bibo.empty?
-      vocabs[:prism] = {} # TODO: prism mapping
+      vocabs[:prism] = Prism.new # TODO: prism mapping
 
       vocabs
     end
@@ -99,51 +97,51 @@ module LadderMapping
         unless vocabs.empty?
           resource = Resource.new_or_existing(vocabs)
 
+          # TODO: use some recursion here
+#          (resource.agents ||= []) << map_agents(node.xpath('name'), 'dcterms.creator')
+
           case node['type']
             # parent relationships
             when 'series'
-              relations[:parent] = resource
               (@resource.dcterms.isPartOf ||= []) << resource.id
               (resource.dcterms.hasPart ||= []) << @resource.id
+              relations[:parent] = resource
             when 'host'
               relations[:parent] = resource
 
             # sibling-like relationships
             when 'otherVersion'
-              relations[:siblings] << resource
               (@resource.dcterms.hasVersion ||= []) << resource.id
               (resource.dcterms.isVersionOf ||= []) << @resource.id
-            when 'otherFormat'
               relations[:siblings] << resource
+            when 'otherFormat'
               (@resource.dcterms.hasFormat ||= []) << resource.id
               (resource.dcterms.isFormatOf ||= []) << @resource.id
-            when 'isReferencedBy'
               relations[:siblings] << resource
+            when 'isReferencedBy'
               (@resource.dcterms.isReferencedBy ||= []) << resource.id
               (resource.dcterms.references ||= []) << @resource.id
-            when 'references'
               relations[:siblings] << resource
+            when 'references'
               (@resource.dcterms.references ||= []) << resource.id
               (resource.dcterms.isReferencedBy ||= []) << @resource.id
-            when 'original'
               relations[:siblings] << resource
+            when 'original'
               (@resource.prism.hasPreviousVersion ||= []) << resource.id
+              relations[:siblings] << resource
 
             # child relationship
             when 'constituent'
-              relations[:children] << resource
               (@resource.dcterms.hasPart ||= []) << resource.id
               (resource.dcterms.isPartOf ||= []) << @resource.id
+              relations[:children] << resource
 
             # undefined relationship
             else
               relations[:siblings] << resource
           end
 
-          # TODO: use some recursion here
-          resource.agents << map_agents(node.xpath('name'), 'dcterms.creator')
-
-          resource.save
+#          resource.save
         end
 
       end
@@ -174,10 +172,7 @@ module LadderMapping
         # FIXME: how to handle "empty" vocabs
         unless foaf.empty?
           agent = Agent.new_or_existing(:foaf => FOAF.new(foaf))
-
-          # ensure similarity searches are fresh
           agent.save
-          agent.tire.index.refresh
 
           agents << agent
 
@@ -189,7 +184,7 @@ module LadderMapping
 
       end
 
-      agents
+      agents#.uniq
     end
 
     def concepts(xml_nodeset)

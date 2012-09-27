@@ -26,11 +26,7 @@ namespace :map do
     Parallel.each(chunks) do |chunk|
 
       chunk.each do |resource|
-        mapping.map(resource)
-        mapping.save
-
-        # ensure similarity searches are fresh
-        resource.tire.index.refresh
+        mapping.map(resource).save
       end
 
       # Make sure to flush the GC when done a chunk

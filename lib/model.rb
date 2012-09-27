@@ -151,21 +151,39 @@ module LadderModel
     end
 
     def normalize(hash)
-      hash.symbolize_keys!
+      # use a deep clone of the hash
+      hash = Marshal.load(Marshal.dump(hash))
 
-      # strip id field
-      hash.except! :_id
+      # Reject keys not declared in mapping
+      mapping = self.class.tire.mapping
+      hash.reject! { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
 
-      # don't include object-id references in comparisons
-      # NB: have to use regexp matching for Tire Items
-      hash.delete_if {|key, value| value.flatten.delete_if { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
+      # Self-contained recursive lambda
+      normal = lambda do |hash|
+        hash.symbolize_keys!
 
-      hash.values.select{|v| v.is_a? Hash}.each{|h| normalize(h)}
-      hash
+        # Strip id field
+        hash.except! :_id
+
+        # Reject Object ID references in comparisons
+        # NB: have to use regexp matching for Tire Items
+        hash.reject! {|key, value| value.is_a? BSON::ObjectId || value.to_s.match(/^[0-9a-f]{24}$/) }
+        hash.reject! {|key, value| value.is_a? Array and value.flatten.reject { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
+
+        # Reject empty values
+        hash.reject! { |key, value| value.kind_of? Enumerable and value.empty? }
+
+        hash.values.select{|value| value.is_a? Hash}.each{|h| normal.call(h)}
+
+        hash
+      end
+
+      normal.call(hash.reject { |key, value| !value.is_a? Hash })
     end
 
     # Return a HashDiff array computed between the two model instances
     def diff(model)
+
       # use the right type for masqueraded search results
       if model.is_a? Tire::Results::Item
         compare = model.to_hash
@@ -173,11 +191,8 @@ module LadderModel
         compare = model.as_document
       end
 
-      test1 = normalize(self.as_document.reject { |key, value| !value.is_a? Hash })
-      test2 = normalize(compare.reject { |key, value| !value.is_a? Hash })
-
       # return the diff comparison
-      HashDiff.diff(test1, test2)
+      HashDiff.diff(normalize(self.as_document), normalize(compare))
     end
 
     def amatch(model, opts={})
@@ -199,11 +214,8 @@ module LadderModel
         compare = model.as_document
       end
 
-      test1 = normalize(self.as_document.reject { |key, value| !value.is_a? Hash })
-      test2 = normalize(compare.reject { |key, value| !value.is_a? Hash })
-
-      p1 = test1.values.map(&:values).sort!.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
-      p2 = test2.values.map(&:values).sort!.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p1 = normalize(self.as_document).values.map(&:values).sort!.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p2 = normalize(compare).values.map(&:values).sort!.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
 
       options.each do |sim, bool|
         options[sim] = p1.send(sim, p2) if bool
