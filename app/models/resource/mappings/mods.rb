@@ -179,12 +179,12 @@ module LadderMapping
           # append agent id to specified field
           value = @resource.send(ns).send(field)
           value << agent.id rescue value = [agent.id]
-          @resource.send(ns).send(field + "=", value)
+          @resource.send(ns).send(field + "=", value).uniq!
         end
 
       end
 
-      agents#.uniq
+      agents.uniq
     end
 
     def concepts(xml_nodeset)

@@ -19,8 +19,7 @@ namespace :model do
       # break collection into chunks for multi-processing
       chunks = LadderHelper::chunkify(collection)
 
-      # delete and re-create the index
-      klass.tire.index.delete if klass.tire.index.exists?
+      # ensure the index exists
       klass.tire.create_elasticsearch_index
 
       # temporary settings to improve indexing performance

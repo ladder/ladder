@@ -12,7 +12,7 @@ namespace :map do
 
     exit if resources.empty?
 
-    puts "Mapping #{resources.size(true)} Resources from MARC records using #{Parallel.processor_count} processors..."
+    puts "Mapping #{resources.size(true)} MARC records using #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
     chunks = LadderHelper::chunkify(resources)

@@ -17,7 +17,7 @@ namespace :import do
       files = [path]
     end
 
-    puts "Importing records from #{files.size} MODS file(s) using #{Parallel.processor_count} processors..."
+    puts "Importing #{files.size} MODS file(s) using #{Parallel.processor_count} processors..."
 
     Parallel.each(files) do |file|
 

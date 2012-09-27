@@ -15,10 +15,14 @@ namespace :map do
 
     exit if resources.empty?
 
-    puts "Mapping #{resources.size(true)} Resources from MODS records with #{Parallel.processor_count} processors..."
+    puts "Mapping #{resources.size(true)} MODS records with #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
     chunks = LadderHelper::chunkify(resources)
+
+    # suppress indexing on save
+    Resource.skip_callback(:save, :after, :update_index)
+    Agent.skip_callback(:save, :after, :update_index)
 
     # instantiate mapping object
     mapping = LadderMapping::MODS.new

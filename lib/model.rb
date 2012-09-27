@@ -11,8 +11,8 @@ module LadderModel
       # allow looking for an existing model object on creation
       def new_or_existing(*args, &block)
         # if a duplicate exists, return that
-        test = self.new(args.first)
-        return test.same.first.load unless test.same.empty?
+        obj = self.new(args.first)
+        return obj.same.first unless obj.same.empty?
 
         # otherwise do the usual
         obj = self.allocate
@@ -103,29 +103,20 @@ module LadderModel
     def similar(query=false)
       return @similar unless query || @similar.nil?
 
-      hash = self.dup.as_document.delete_if { |k,v| !v.is_a?(Hash) }
+      hash = normalize(self.as_document)
       id = self.id
 
       results = self.class.tire.search do
         query do
           boolean do
+            # do not include self
+            must_not { term :_id, id }
+
             hash.each do |vocab, vals|
               vals.each do |field, value|
 
-                # don't include object IDs and arrays of object IDs
-                next if value.is_a?(BSON::ObjectId)
-                next if value.flatten.delete_if { |x| x.is_a?(BSON::ObjectId) }.empty?
-
-                fieldname = "#{vocab}.#{field}"
                 query_string = value.join(' ').gsub(/[-+!\(\)\{\}\[\]^"~*?:;,.\\]|&&|\|\|/, '')
-
-                should do
-                  text fieldname.to_sym, query_string
-                end
-
-                must_not do
-                  term :_id, id
-                end
+                should { text "#{vocab}.#{field}", query_string }
 
               end
             end
@@ -143,8 +134,20 @@ module LadderModel
 
       @same = []
 
-      self.similar(query).each do |similar|
-        @same << similar if 0 == self.diff(similar).size
+      hash = normalize(self.as_document)
+
+      unless hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }.empty?
+
+        # select all documents of the same class except self
+        collection = self.class.excludes(:id => self.id)
+
+        hash.each do |vocab, vals|
+          vals.each do |field, value|
+            collection = collection.all_of("#{vocab}.#{field}" => value)
+          end
+        end
+
+        @same = collection
       end
 
       @same
