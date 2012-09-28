@@ -3,53 +3,48 @@
 
 .container
   .row
-    .span12
-      %h1= @resource.heading
+    .span3
+      .well.sidebar-nav
+        %ul.nav.nav-list
 
-  - unless @resource.parent.nil? and @resource.children.empty?
-    .row
-      .span12
-        .tree
-          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Relations
-          %ul= partial 'tree', :collection => @resource.root.to_a, :locals => {:self_id => @resource.id}
+          -# RELATION TREE
+          - unless @resource.parent.nil? and @resource.children.empty?
+            %li.nav-header Relations
+            = partial 'tree', :collection => @resource.root.to_a, :locals => {:self_id => @resource.id}
 
-  - unless @similar.empty?
-    - @same = @resource.same
-    .row
-      .span12
-        .tree
-          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar
-          %ul
+          -# RELATED AGENTS
+          - unless @resource.agents.empty?
+            %li.nav-header Agents
+            =list_of(@resource.agents) do |agent|
+              %a{:href => url_for(:agent, :index, :id => agent.id)}
+                #{agent.heading}
+
+          -# SIMILAR ITEMS
+          - unless @similar.empty?
+            - @same = @resource.same
+            %li.nav-header Similar
+
+            - # TODO: clean up this code; move to partial
             =list_of(@similar) do |similar|
-              - # TODO: clean up this code; move to partial
+
               - @amatch = @resource.amatch(similar)
               - @amatch[:hamming_similar] = 1-@amatch[:hamming_similar] unless @amatch[:hamming_similar].nil?
               - @diff1 = (@amatch.values.sum / @amatch.size) * 100
 
               - if @same.include? similar
+                .active
                 %a.active{:href => url_for(:resource, :index, :id => similar.id)}
-                  #{similar.load.heading}
-                  %br (#{@diff1.round}%)
+                  #{similar.load.heading} (#{@diff1.round}%)
               - else
                 %a{:href => url_for(:resource, :index, :id => similar.id)}
-                  #{similar.load.heading}
-                  %br (#{@diff1.round}%)
-
-  .row
-    .span6.json
+                  #{similar.load.heading} (#{@diff1.round}%)
+    .span9
+      %h1= @resource.heading
       %pre
         %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
-
-      - unless @resource.agents.empty?
-        %h3{:style => 'margin: 0; padding: 0; display: inline;'} Agents
-      - @resource.agents.each do |agent|
-        %pre
-          %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(agent.as_document.as_json, :object_nl => "\n", :indent => " ")
-
-    -if @resource.mods
-      .span6.xml
+      -if @resource.mods
         %pre
           %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods
-    -#.span4.json
-      %pre
-        %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
+      -#if @resource.marc
+        %pre
+          %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc

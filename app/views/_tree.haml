@@ -1,8 +1,10 @@
-%li
-  - if self_id == tree.id
-    %a.active= tree.heading
-  - else
+- if self_id == tree.id
+  %li.active
+    %a= tree.heading
+- else
+  %li
     %a{:href => url_for(:resource, :index, :id => tree.id)}= tree.heading
 
-  - if tree.children.size > 0
-    %ul= partial 'tree', :collection => tree.children, :locals => {:self_id => self_id}
+- if tree.children.size > 0
+  %ul.nav.nav-list
+    = partial 'tree', :collection => tree.children, :locals => {:self_id => self_id}

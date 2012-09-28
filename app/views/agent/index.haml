@@ -1,48 +1,45 @@
 - @title = @agent.heading
 - @similar = @agent.similar
-- @resources = Resource.where(agent_ids: @agent.id)
 
 .container
   .row
-    .span12
-      %h1= @agent.heading
+    .span3
+      .well.sidebar-nav
+        %ul.nav.nav-list
 
-  - unless @agent.parent.nil? and @agent.children.empty?
-    .row
-      .span12
-        .tree
-          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Relations
-          %ul= partial 'tree', :collection => @agent.root.to_a, :locals => {:self_id => @agent.id}
+          -# RELATION TREE
+          - unless @agent.parent.nil? and @agent.children.empty?
+            %li.nav-header Relations
+            = partial 'tree', :collection => @agent.root.to_a, :locals => {:self_id => @agent.id}
 
-  - unless @similar.empty?
-    - @same = @agent.same
-    .row
-      .span12
-        .tree
-          %h3{:style => 'margin: 0; padding: 0; display: inline;'} Similar
-          %ul
+          -# RELATED RESOURCES
+          - unless @agent.resources.empty?
+            %li.nav-header Resources
+            =list_of(@agent.resources) do |resource|
+              %a{:href => url_for(:resource, :index, :id => resource.id)}
+                #{resource.heading}
+
+
+          -# SIMILAR ITEMS
+          - unless @similar.empty?
+            - @same = @agent.same
+            %li.nav-header Similar
+
+            - # TODO: clean up this code; move to partial
             =list_of(@similar) do |similar|
-              - # TODO: clean up this code; move to partial
+
               - @amatch = @agent.amatch(similar)
               - @amatch[:hamming_similar] = 1-@amatch[:hamming_similar] unless @amatch[:hamming_similar].nil?
               - @diff1 = (@amatch.values.sum / @amatch.size) * 100
 
               - if @same.include? similar
+                .active
                 %a.active{:href => url_for(:agent, :index, :id => similar.id)}
-                  #{similar.load.heading}
-                  %br (#{@diff1.round}%)
+                  #{similar.load.heading} (#{@diff1.round}%)
               - else
                 %a{:href => url_for(:agent, :index, :id => similar.id)}
-                  #{similar.load.heading}
-                  %br (#{@diff1.round}%)
-
-  .row
-    .span6.json
+                  #{similar.load.heading} (#{@diff1.round}%)
+    .span9
+      %h1= @agent.heading
       %pre
         %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@agent.as_document.as_json, :object_nl => "\n", :indent => " ")
-
-      - unless @resources.empty?
-        %h3{:style => 'margin: 0; padding: 0; display: inline;'} Resources
-      - @resources.each do |resource|
-        %pre
-          %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
