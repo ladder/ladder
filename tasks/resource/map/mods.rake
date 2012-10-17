@@ -20,6 +20,7 @@ namespace :map do
     # suppress indexing on save
     Resource.skip_callback(:save, :after, :update_index)
     Agent.skip_callback(:save, :after, :update_index)
+    Concept.skip_callback(:save, :after, :update_index)
 
     # instantiate mapping object
     mapping = LadderMapping::MODS.new

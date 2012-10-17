@@ -1,0 +1,45 @@
+- @title = @concept.heading
+- @similar = @concept.similar
+
+.container
+  .row
+    .span3
+      .well.sidebar-nav
+        %ul.nav.nav-list
+
+          -# RELATION TREE
+          - unless @concept.parent.nil? and @concept.children.empty?
+            %li.nav-header Relations
+            = partial 'tree', :collection => @concept.root.to_a, :locals => {:self_id => @concept.id}
+
+          -# RELATED RESOURCES
+          - unless @concept.resources.empty?
+            %li.nav-header Resources
+            =list_of(@concept.resources) do |resource|
+              %a{:href => url_for(:resource, :index, :id => resource.id)}
+                #{resource.heading}
+
+
+          -# SIMILAR ITEMS
+          - unless @similar.empty?
+            - @same = @concept.same
+            %li.nav-header Similar
+
+            - # TODO: clean up this code; move to partial
+            =list_of(@similar) do |similar|
+
+              - @amatch = @concept.amatch(similar)
+              - @amatch[:hamming_similar] = 1-@amatch[:hamming_similar] unless @amatch[:hamming_similar].nil?
+              - @diff1 = (@amatch.values.sum / @amatch.size) * 100
+
+              - if @same.include? similar
+                .active
+                %a.active{:href => url_for(:concept, :index, :id => similar.id)}
+                  #{similar.load.heading} (#{@diff1.round}%)
+              - else
+                %a{:href => url_for(:concept, :index, :id => similar.id)}
+                  #{similar.load.heading} (#{@diff1.round}%)
+    .span9
+      %h1= @concept.heading
+      %pre
+        %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@concept.as_document.as_json, :object_nl => "\n", :indent => " ")

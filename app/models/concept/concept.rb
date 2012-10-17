@@ -7,6 +7,10 @@ end
 class Concept
   include LadderModel::Core
 
+  def heading
+    get_first_field(['skos.prefLabel', 'skos.altLabel', 'skos.hiddenLabel'])
+  end
+
   # embedded RDF vocabularies
   embeds_one :skos, class_name: "SKOS"
 

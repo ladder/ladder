@@ -1,6 +1,8 @@
 - @title = "Results for '#{@querystring}'"
 -# NB: this will break on creator values that are non-objectID
 - @creators = Agent.find(@results.facets['creator']['terms'].map{|k| k.values_at("term")}.flatten)
+-# NB: this will break on subject values that are non-objectID OR non-Concept
+- @subjects = Concept.find(@results.facets['subject']['terms'].map{|k| k.values_at("term")}.flatten)
 
 .container
   .row
@@ -26,6 +28,9 @@
                     - elsif 'creator' == facet
                       %li= link_to @creators[@creators.index{|doc| doc.id.to_s == f['term']}].heading + " (#{f['count']})",
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
+                    - elsif 'subject' == facet
+                      %li= link_to @subjects[@subjects.index{|doc| doc.id.to_s == f['term']}].heading + " (#{f['count']})",
+                            url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
                     - else
                       %li= link_to f['term'] + " (#{f['count']})",
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
@@ -35,6 +40,9 @@
                                   url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
                     - elsif 'creator' == facet
                       %li.active= link_to @creators[@creators.index{|doc| doc.id.to_s == f['term']}].heading,
+                                  url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
+                    - elsif 'subject' == facet
+                      %li.active= link_to @subjects[@subjects.index{|doc| doc.id.to_s == f['term']}].heading,
                                   url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
                     - else
                       %li.active= link_to f['term'],

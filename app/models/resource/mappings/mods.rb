@@ -19,12 +19,13 @@ module LadderMapping
 
       # load MODS XML document
       xml = Nokogiri::XML(@resource.mods).remove_namespaces!
+      node = xml.xpath('/mods').first   # NB: not sure if this is the best selector
 
       # map MODS elements to embedded vocabs
-      @resource.vocabs = map_vocabs(xml.xpath('/mods').first)
+      @resource.vocabs = map_vocabs(node)
 
       # map related resources as tree hierarchy
-      relations = map_relations(xml.xpath('/mods/relatedItem'))
+      relations = map_relations(node.xpath('relatedItem'))
 
       unless relations[:parent].nil?
         @resource.parent = relations[:parent]
@@ -35,13 +36,13 @@ module LadderMapping
       @resource.children << relations[:children]
 
       # map encoded agents to related Agent models
-      @resource.agents << map_agents(xml.xpath('/mods/name'), 'dcterms.creator')
+      @resource.agents << map_agents(node.xpath('name'), 'dcterms.creator')
 
       # FIXME: this won't match the agent mapping
-      @resource.agents << map_agents(xml.xpath('/mods/originInfo/publisher'), 'dcterms.publisher')
+#      @resource.agents << map_agents(node.xpath('originInfo/publisher'), 'dcterms.publisher')
 
       # map encoded concepts to related Concept models
-      #@resource.concepts << concepts(xml.xpath('/mods/subject'))
+      @resource.concepts << map_concepts(node.xpath('subject'), 'dcterms.subject')
 
       @resource
     end
@@ -63,8 +64,6 @@ module LadderMapping
 
           # concept access points
           # TODO: move these to concepts
-          :subject       => 'subject/topic',
-          :spatial       => 'subject/geographic',
           :DDC           => 'classification[@authority="ddc"]',
           :LCC           => 'classification[@authority="lcc"]',
       }
@@ -172,23 +171,61 @@ module LadderMapping
         # FIXME: how to handle "empty" vocabs
         unless foaf.empty?
           agent = Agent.new_or_existing(:foaf => FOAF.new(foaf))
-          agent.save
+          break if agents.include? agent
 
+          agent.save
           agents << agent
 
           # append agent id to specified field
           value = @resource.send(ns).send(field)
           value << agent.id rescue value = [agent.id]
-          @resource.send(ns).send(field + "=", value).uniq!
+          @resource.send(ns).send(field + "=", value)
         end
 
       end
 
-      agents.uniq
+      agents
     end
 
-    def concepts(xml_nodeset)
+    def map_concepts(node_set, target_field)
       concepts = []
+
+      ns = target_field.split('.').first
+      field = target_field.split('.').last
+
+      node_set.each do |node|
+
+        # in MODS, each subject access point is usually composed of multiple
+        # ordered sub-elements; so that's what we process
+        # see: http://www.loc.gov/standards/mods/userguide/subject.html
+
+        skos = map_xpath node, {:prefLabel  => '*'}
+
+        # FIXME: how to handle "empty" vocabs
+        unless skos.empty?
+          concept = Concept.new_or_existing(:skos => SKOS.new(skos))
+
+          break if concepts.include? concept
+
+          concept.save
+          concepts << concept
+
+          # append concept id to specified field
+          value = @resource.send(ns).send(field)
+          value << concept.id rescue value = [concept.id]
+          @resource.send(ns).send(field + "=", value)
+        end
+
+=begin
+        node.element_children.each do |subnode|
+          if subnode.name == 'name'
+            # TODO: agent mapping
+          end
+        end
+=end
+      end
+
+      concepts
     end
 
   end

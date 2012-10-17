@@ -29,7 +29,7 @@ module LadderModel
       base.send :include, Mongoid::Paranoia # soft deletes
       base.send :include, Mongoid::Timestamps
       base.send :include, Mongoid::Tree
-      base.send :include, Mongoid::Tree::Ordering
+#      base.send :include, Mongoid::Tree::Ordering
 
       # ElasticSearch integration
       base.send :include, Tire::Model::Search

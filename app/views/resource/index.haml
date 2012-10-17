@@ -19,6 +19,13 @@
               %a{:href => url_for(:agent, :index, :id => agent.id)}
                 #{agent.heading}
 
+          -# RELATED CONCEPTS
+          - unless @resource.concepts.empty?
+            %li.nav-header Concepts
+            =list_of(@resource.concepts) do |concept|
+              %a{:href => url_for(:concept, :index, :id => concept.id)}
+                #{concept.heading}
+
           -# SIMILAR ITEMS
           - unless @similar.empty?
             - @same = @resource.same
