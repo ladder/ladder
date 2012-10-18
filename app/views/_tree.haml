@@ -3,8 +3,8 @@
     %a= tree.heading
 - else
   %li
-    %a{:href => url_for(:resource, :index, :id => tree.id)}= tree.heading
+    %a{:href => url_for(model, :index, :id => tree.id)}= tree.heading
 
 - if tree.children.size > 0
   %ul.nav.nav-list
-    = partial 'tree', :collection => tree.children, :locals => {:self_id => self_id}
+    = partial 'tree', :collection => tree.children, :locals => {:model => model, :self_id => self_id}

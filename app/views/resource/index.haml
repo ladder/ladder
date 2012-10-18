@@ -10,7 +10,7 @@
           -# RELATION TREE
           - unless @resource.parent.nil? and @resource.children.empty?
             %li.nav-header Relations
-            = partial 'tree', :collection => @resource.root.to_a, :locals => {:self_id => @resource.id}
+            = partial 'tree', :collection => @resource.root.to_a, :locals => {:model => :resource, :self_id => @resource.id}
 
           -# RELATED AGENTS
           - unless @resource.agents.empty?
@@ -24,7 +24,7 @@
             %li.nav-header Concepts
             =list_of(@resource.concepts) do |concept|
               %a{:href => url_for(:concept, :index, :id => concept.id)}
-                #{concept.heading}
+                #{concept.skos.hiddenLabel.join('--')}
 
           -# SIMILAR ITEMS
           - unless @similar.empty?

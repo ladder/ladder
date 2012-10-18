@@ -10,7 +10,7 @@
           -# RELATION TREE
           - unless @concept.parent.nil? and @concept.children.empty?
             %li.nav-header Relations
-            = partial 'tree', :collection => @concept.root.to_a, :locals => {:self_id => @concept.id}
+            = partial 'tree', :collection => @concept.root.to_a, :locals => {:model => :concept, :self_id => @concept.id}
 
           -# RELATED RESOURCES
           - unless @concept.resources.empty?

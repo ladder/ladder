@@ -19,7 +19,7 @@ module LadderMapping
 
       # load MODS XML document
       xml = Nokogiri::XML(@resource.mods).remove_namespaces!
-      node = xml.xpath('/mods').first   # NB: not sure if this is the best selector
+      node = xml.at_xpath('/mods')
 
       # map MODS elements to embedded vocabs
       @resource.vocabs = map_vocabs(node)
@@ -38,11 +38,8 @@ module LadderMapping
       # map encoded agents to related Agent models
       @resource.agents << map_agents(node.xpath('name'), 'dcterms.creator')
 
-      # FIXME: this won't match the agent mapping
-#      @resource.agents << map_agents(node.xpath('originInfo/publisher'), 'dcterms.publisher')
-
       # map encoded concepts to related Concept models
-      @resource.concepts << map_concepts(node.xpath('subject'), 'dcterms.subject')
+      @resource.concepts << map_concepts(node.xpath('subject[@authority]'), 'dcterms.subject')
 
       @resource
     end
@@ -61,6 +58,8 @@ module LadderMapping
           # indexable textual content
           :abstract        => 'abstract',
           :tableOfContents => 'tableOfContents',
+
+:publisher => 'originInfo/publisher',
 
           # concept access points
           # TODO: move these to concepts
@@ -199,30 +198,41 @@ module LadderMapping
         # ordered sub-elements; so that's what we process
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
 
-        skos = map_xpath node, {:prefLabel  => '*'}
+        root = nil
+        current = nil
 
-        # FIXME: how to handle "empty" vocabs
-        unless skos.empty?
+        node.element_children.each do |subnode|
+
+          full ||= node.element_children.map(&:text).map(&:strip).uniq
+          skos = {:prefLabel => [subnode.text.strip],
+                  :hiddenLabel => full}
+
           concept = Concept.new_or_existing(:skos => SKOS.new(skos))
-
           break if concepts.include? concept
 
           concept.save
-          concepts << concept
 
-          # append concept id to specified field
-          value = @resource.send(ns).send(field)
-          value << concept.id rescue value = [concept.id]
-          @resource.send(ns).send(field + "=", value)
-        end
-
-=begin
-        node.element_children.each do |subnode|
-          if subnode.name == 'name'
-            # TODO: agent mapping
+          if root.nil?
+            root = concept
+          else
+            current.children << concept
           end
+
+          current = concept
         end
-=end
+
+        concepts << current
+
+if root.nil?
+  p @resource.id
+  p node
+  p node.element_children
+  next
+end
+        # append concept id to specified field
+        value = @resource.send(ns).send(field)
+        value << root.id rescue value = [root.id]
+        @resource.send(ns).send(field + "=", value)
       end
 
       concepts
