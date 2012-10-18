@@ -24,7 +24,7 @@
             %li.nav-header Concepts
             =list_of(@resource.concepts) do |concept|
               %a{:href => url_for(:concept, :index, :id => concept.id)}
-                #{concept.skos.hiddenLabel.join('--')}
+                #{concept.heading}
 
           -# SIMILAR ITEMS
           - unless @similar.empty?

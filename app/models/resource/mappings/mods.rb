@@ -7,7 +7,7 @@ module LadderMapping
       mapped = {}
 
       hash.each do |symbol, xpath|
-        nodes = xml_node.xpath(xpath).map(&:text).map(&:strip).uniq
+        nodes = xml_node.xpath(xpath).map(&:inner_text).map(&:strip).uniq
         mapped[symbol] = nodes unless nodes.empty?
       end
 
@@ -59,10 +59,11 @@ module LadderMapping
           :abstract        => 'abstract',
           :tableOfContents => 'tableOfContents',
 
-:publisher => 'originInfo/publisher',
+          # attribution; possibly map this to Agents
+          :publisher => 'originInfo/publisher',
 
           # concept access points
-          # TODO: move these to concepts
+          # TODO: move these to Concepts
           :DDC           => 'classification[@authority="ddc"]',
           :LCC           => 'classification[@authority="lcc"]',
       }
@@ -90,56 +91,52 @@ module LadderMapping
 
         # apply vocab mapping to each related resource
         vocabs = map_vocabs(node)
+        next if vocabs.empty? # FIXME: how to handle "empty" vocabs
 
-        # FIXME: how to handle "empty" vocabs
-        unless vocabs.empty?
-          resource = Resource.new_or_existing(vocabs)
+        resource = Resource.new_or_existing(vocabs)
 
-          # TODO: use some recursion here
-#          (resource.agents ||= []) << map_agents(node.xpath('name'), 'dcterms.creator')
+        # TODO: use some recursion here
+        # (resource.agents ||= []) << map_agents(node.xpath('name'), 'dcterms.creator')
 
-          case node['type']
-            # parent relationships
-            when 'series'
-              (@resource.dcterms.isPartOf ||= []) << resource.id
-              (resource.dcterms.hasPart ||= []) << @resource.id
-              relations[:parent] = resource
-            when 'host'
-              relations[:parent] = resource
+        case node['type']
+          # parent relationships
+          when 'series'
+            (@resource.dcterms.isPartOf ||= []) << resource.id
+            (resource.dcterms.hasPart ||= []) << @resource.id
+            relations[:parent] = resource
+          when 'host'
+            relations[:parent] = resource
 
-            # sibling-like relationships
-            when 'otherVersion'
-              (@resource.dcterms.hasVersion ||= []) << resource.id
-              (resource.dcterms.isVersionOf ||= []) << @resource.id
-              relations[:siblings] << resource
-            when 'otherFormat'
-              (@resource.dcterms.hasFormat ||= []) << resource.id
-              (resource.dcterms.isFormatOf ||= []) << @resource.id
-              relations[:siblings] << resource
-            when 'isReferencedBy'
-              (@resource.dcterms.isReferencedBy ||= []) << resource.id
-              (resource.dcterms.references ||= []) << @resource.id
-              relations[:siblings] << resource
-            when 'references'
-              (@resource.dcterms.references ||= []) << resource.id
-              (resource.dcterms.isReferencedBy ||= []) << @resource.id
-              relations[:siblings] << resource
-            when 'original'
-              (@resource.prism.hasPreviousVersion ||= []) << resource.id
-              relations[:siblings] << resource
+          # sibling-like relationships
+          when 'otherVersion'
+            (@resource.dcterms.hasVersion ||= []) << resource.id
+            (resource.dcterms.isVersionOf ||= []) << @resource.id
+            relations[:siblings] << resource
+          when 'otherFormat'
+            (@resource.dcterms.hasFormat ||= []) << resource.id
+            (resource.dcterms.isFormatOf ||= []) << @resource.id
+            relations[:siblings] << resource
+          when 'isReferencedBy'
+            (@resource.dcterms.isReferencedBy ||= []) << resource.id
+            (resource.dcterms.references ||= []) << @resource.id
+            relations[:siblings] << resource
+          when 'references'
+            (@resource.dcterms.references ||= []) << resource.id
+            (resource.dcterms.isReferencedBy ||= []) << @resource.id
+            relations[:siblings] << resource
+          when 'original'
+            (@resource.prism.hasPreviousVersion ||= []) << resource.id
+            relations[:siblings] << resource
 
-            # child relationship
-            when 'constituent'
-              (@resource.dcterms.hasPart ||= []) << resource.id
-              (resource.dcterms.isPartOf ||= []) << @resource.id
-              relations[:children] << resource
+          # child relationship
+          when 'constituent'
+            (@resource.dcterms.hasPart ||= []) << resource.id
+            (resource.dcterms.isPartOf ||= []) << @resource.id
+            relations[:children] << resource
 
-            # undefined relationship
-            else
-              relations[:siblings] << resource
-          end
-
-#          resource.save
+          # undefined relationship
+          else
+            relations[:siblings] << resource
         end
 
       end
@@ -167,20 +164,18 @@ module LadderMapping
             :title    => 'namePart[@type = "termsOfAddress"]',
         }
 
-        # FIXME: how to handle "empty" vocabs
-        unless foaf.empty?
-          agent = Agent.new_or_existing(:foaf => FOAF.new(foaf))
-          break if agents.include? agent
+        next if foaf.empty? # FIXME: how to handle "empty" vocabs
 
-          agent.save
-          agents << agent
+        agent = Agent.new_or_existing(:foaf => FOAF.new(foaf))
+        next if agents.include? agent
 
-          # append agent id to specified field
-          value = @resource.send(ns).send(field)
-          value << agent.id rescue value = [agent.id]
-          @resource.send(ns).send(field + "=", value)
-        end
+        agent.save
+        agents << agent
 
+        # append agent id to specified field
+        value = @resource.send(ns).send(field)
+        value << agent.id rescue value = [agent.id]
+        @resource.send(ns).send(field + "=", value)
       end
 
       agents
@@ -193,27 +188,23 @@ module LadderMapping
       field = target_field.split('.').last
 
       node_set.each do |node|
-
         # in MODS, each subject access point is usually composed of multiple
-        # ordered sub-elements; so that's what we process
+        # ordered sub-elements; so that's what we process for hierarchy
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
-
         root = nil
         current = nil
 
         node.element_children.each do |subnode|
 
-          full ||= node.element_children.map(&:text).map(&:strip).uniq
-          skos = {:prefLabel => [subnode.text.strip],
-                  :hiddenLabel => full}
+          # NB: this xpath is slightly slower due to repetition, but simpler
+          skos = map_xpath subnode, {:prefLabel  => 'preceding-sibling::* | .'}
+          next if skos.empty? # FIXME: how to handle "empty" vocabs
 
           concept = Concept.new_or_existing(:skos => SKOS.new(skos))
-          break if concepts.include? concept
-
-          concept.save
 
           if root.nil?
             root = concept
+            root.save
           else
             current.children << concept
           end
@@ -221,17 +212,14 @@ module LadderMapping
           current = concept
         end
 
+        next if concepts.include? current
+
+        current.save
         concepts << current
 
-if root.nil?
-  p @resource.id
-  p node
-  p node.element_children
-  next
-end
         # append concept id to specified field
         value = @resource.send(ns).send(field)
-        value << root.id rescue value = [root.id]
+        value << current.id rescue value = [current.id]
         @resource.send(ns).send(field + "=", value)
       end
 

@@ -8,7 +8,9 @@ class Concept
   include LadderModel::Core
 
   def heading
-    get_first_field(['skos.prefLabel', 'skos.altLabel', 'skos.hiddenLabel'])
+#    get_first_field(['skos.prefLabel', 'skos.altLabel', 'skos.hiddenLabel'])
+#    self.skos.prefLabel.join('--')
+    self.skos.prefLabel.last
   end
 
   # embedded RDF vocabularies

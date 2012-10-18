@@ -131,4 +131,53 @@ module LadderVocab
     property :TGN
     property :UDC
   end
+
+  ##
+  # VCard vocabulary
+  #
+  # @see http://semanticweb.org/wiki/HCard or http://microformats.org/wiki/hcard
+  class VCard < RDF::Vocabulary("http://www.w3.org/2006/vcard/ns")
+    property :fn
+    property :'family-name'#; alias :familyName :'family-name'
+    property :'given-name'#; alias :givenName :'given-name'
+    property :'additional-name'#; alias :additionalName :'additional-name'
+    property :'honorific-prefix'#; alias :honorificPrefix :'honorific-prefix'
+    property :'honorific-suffix'#; alias :honorificSuffix :'honorific-suffix'
+    property :'post-office-box'#; alias :postOfficeBox :'post-office-box'
+    property :'extended-address'#; alias :extendedAddress :'extended-address'
+    property :'street-address'#; alias :streetAddress :'street-address'
+    property :locality
+    property :region
+    property :'postal-code'#; alias :postalCode :'postal-code'
+    property :'country-name'#; alias :countryName :'country-name'
+    property :type
+    property :value
+    property :agent
+    property :bday
+    property :category
+    property :class
+    property :email
+    property :geo
+    property :latitude
+    property :longitude
+    property :key
+    property :label
+    property :logo
+    property :mailer
+    property :nickname
+    property :note
+    property :'organization-name'#; alias :organizationName :'organization-name'
+    property :'organization-unit'#; alias :organizationUnit :'organization-unit'
+    property :photo
+    property :rev
+    property :role
+    property :'sort-string'#; alias :sortString :'sort-string'
+    property :sound
+    property :tel
+    property :title
+    property :tz
+    property :uid
+    property :url
+  end
+
 end
