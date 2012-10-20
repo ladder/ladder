@@ -1,0 +1,14 @@
+%table.table.table-bordered.table-striped
+  - item.normalize(item.as_document).each do |vocab, fields|
+    - next if fields.empty?
+    %tr
+      %th{:colspan => 2, :style => 'text-transform: uppercase; background-color: #c8e4f8;'}
+        = vocab
+    - fields.each do |name, value|
+      %tr
+        %td{:style => 'text-transform: capitalize;'}= name
+        %td= value.join('<br/>')
+
+-#%pre
+  %code{:style => 'background-color: #F4F4F4;'}
+    = JSON.fast_generate(item.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
