@@ -7,11 +7,6 @@
       .well.sidebar-nav
         %ul.nav.nav-list
 
-          -# RELATION TREE
-          - unless @agent.parent.nil? and @agent.children.empty?
-            %li.nav-header Relations
-            = partial 'tree', :collection => @agent.root.to_a, :locals => {:self_id => @agent.id}
-
           -# RELATED RESOURCES
           - unless @agent.resources.empty?
             %li.nav-header Resources
@@ -19,6 +14,10 @@
               %a{:href => url_for(:resource, :index, :id => resource.id)}
                 #{resource.heading}
 
+          -# RELATION TREE
+          - unless @agent.parent.nil? and @agent.children.empty?
+            %li.nav-header Relations
+            = partial 'tree', :collection => @agent.root.to_a, :locals => {:self_id => @agent.id}
 
           -# SIMILAR ITEMS
           - unless @similar.empty?
@@ -40,5 +39,4 @@
                   #{similar.load.heading} (#{@diff1.round}%)
     .span9
       %h1= @agent.heading
-      %pre
-        %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@agent.as_document.as_json, :object_nl => "\n", :indent => " ")
+      = partial 'item', :object => @agent

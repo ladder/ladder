@@ -7,17 +7,17 @@
       .well.sidebar-nav
         %ul.nav.nav-list
 
-          -# RELATION TREE
-          - unless @concept.parent.nil? and @concept.children.empty?
-            %li.nav-header Relations
-            = partial 'tree', :collection => @concept.root.to_a, :locals => {:model => :concept, :self_id => @concept.id}
-
           -# RELATED RESOURCES
           - unless @concept.resources.empty?
             %li.nav-header Resources
             =list_of(@concept.resources) do |resource|
               %a{:href => url_for(:resource, :index, :id => resource.id)}
                 #{resource.heading}
+
+          -# RELATION TREE
+          - unless @concept.parent.nil? and @concept.children.empty?
+            %li.nav-header Relations
+            = partial 'tree', :collection => @concept.root.to_a, :locals => {:model => :concept, :self_id => @concept.id}
 
           -# SIMILAR ITEMS
           - unless @similar.empty?
@@ -39,5 +39,4 @@
                   #{similar.load.heading} (#{@diff1.round}%)
     .span9
       %h1= @concept.heading
-      %pre
-        %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@concept.as_document.as_json, :object_nl => "\n", :indent => " ")
+      = partial 'item', :object => @concept

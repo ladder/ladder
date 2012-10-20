@@ -1,5 +1,5 @@
 .row-fluid
   .span12.json
-    %h3 #{link_to result.load.heading, url_for(:resource, :index, :id => result.id)} (#{result._score})
-    %pre
-      %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(result.as_json, :object_nl => "\n", :indent => " ")
+    - @result = result.load #NB: this incurrs a performance hit for querying mongo
+    %h3 #{link_to @result.heading, url_for(:resource, :index, :id => result.id)} (#{result._score})
+    = partial 'item', :object => @result

@@ -7,11 +7,6 @@
       .well.sidebar-nav
         %ul.nav.nav-list
 
-          -# RELATION TREE
-          - unless @resource.parent.nil? and @resource.children.empty?
-            %li.nav-header Relations
-            = partial 'tree', :collection => @resource.root.to_a, :locals => {:model => :resource, :self_id => @resource.id}
-
           -# RELATED AGENTS
           - unless @resource.agents.empty?
             %li.nav-header Agents
@@ -25,6 +20,11 @@
             =list_of(@resource.concepts) do |concept|
               %a{:href => url_for(:concept, :index, :id => concept.id)}
                 #{concept.heading}
+
+          -# RELATION TREE
+          - unless @resource.parent.nil? and @resource.children.empty?
+            %li.nav-header Relations
+            = partial 'tree', :collection => @resource.root.to_a, :locals => {:model => :resource, :self_id => @resource.id}
 
           -# SIMILAR ITEMS
           - unless @similar.empty?
@@ -46,11 +46,12 @@
                   #{similar.load.heading} (#{@diff1.round}%)
     .span9
       %h1= @resource.heading
-      %pre
-        %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(@resource.as_document.as_json(:except => ['marc', 'mods']), :object_nl => "\n", :indent => " ")
-      -if @resource.mods
+      = partial 'item', :object => @resource
+
+      -# "advanced/admin" data view
+        - if @resource.mods
         %pre
           %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods
-      -#if @resource.marc
+        - if @resource.marc
         %pre
           %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc

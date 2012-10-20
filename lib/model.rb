@@ -161,9 +161,7 @@ module LadderModel
 
         # Reject empty values
         hash.reject! { |key, value| value.kind_of? Enumerable and value.empty? }
-
         hash.values.select{|value| value.is_a? Hash}.each{|h| normal.call(h)}
-
         hash
       end
 
@@ -172,7 +170,6 @@ module LadderModel
 
     # Return a HashDiff array computed between the two model instances
     def diff(model)
-
       # use the right type for masqueraded search results
       if model.is_a? Tire::Results::Item
         compare = model.to_hash
