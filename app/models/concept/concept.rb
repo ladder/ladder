@@ -9,8 +9,8 @@ class Concept
 
   def heading
 #    get_first_field(['skos.prefLabel', 'skos.altLabel', 'skos.hiddenLabel'])
-#    self.skos.prefLabel.join('--')
-    self.skos.prefLabel.last
+    self.skos.prefLabel.join('--')
+#    self.skos.prefLabel.last
   end
 
   # embedded RDF vocabularies
@@ -21,4 +21,5 @@ class Concept
 
   # model relations
   has_and_belongs_to_many :resources
+  has_and_belongs_to_many :agents
 end

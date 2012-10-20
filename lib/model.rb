@@ -8,15 +8,25 @@ module LadderModel
 
     module ClassMethods
 
-      # allow looking for an existing model object on creation
-      def new_or_existing(*args, &block)
-        # if a duplicate exists, return that
-        obj = self.new(args.first)
-        return obj.same.first unless obj.same.empty?
+      # Override Mongoid #find_or_create_by
+      # @see: http://rdoc.info/github/mongoid/mongoid/Mongoid/Finders
 
-        # otherwise do the usual
-        obj = self.allocate
-        obj.send :initialize, *args, &block
+      def find_or_create_by(attrs = {}, &block)
+
+        # build a query based on nested fields
+        query = self
+        attrs.each do |vocab, vals|
+          vals.each do |field, value|
+            query = query.all_of("#{vocab}.#{field}" => value)
+          end
+        end
+
+        # if a document exists, return that
+        return query.first unless query.empty?
+
+        # otherwise create and return a new object
+        obj = self.new(attrs)
+        obj.save
         obj
       end
 
@@ -127,31 +137,6 @@ module LadderModel
       end
 
       @similar = results
-    end
-
-    # Check similar documents and return an array of the subset that are identical
-    def same(query=false)
-      return @same unless query || @same.nil?
-
-      @same = []
-
-      hash = normalize(self.as_document)
-
-      unless hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }.empty?
-
-        # select all documents of the same class except self
-        collection = self.class.excludes(:id => self.id)
-
-        hash.each do |vocab, vals|
-          vals.each do |field, value|
-            collection = collection.all_of("#{vocab}.#{field}" => value)
-          end
-        end
-
-        @same = collection
-      end
-
-      @same
     end
 
     def normalize(hash)

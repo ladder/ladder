@@ -28,7 +28,6 @@
 
           -# SIMILAR ITEMS
           - unless @similar.empty?
-            - @same = @resource.same
             %li.nav-header Similar
 
             - # TODO: clean up this code; move to partial
@@ -38,7 +37,7 @@
               - @amatch[:hamming_similar] = 1-@amatch[:hamming_similar] unless @amatch[:hamming_similar].nil?
               - @diff1 = (@amatch.values.sum / @amatch.size) * 100
 
-              - if @same.include? similar
+              - if @diff1 > 90
                 .active
                 %a.active{:href => url_for(:resource, :index, :id => similar.id)}
                   #{similar.load.heading} (#{@diff1.round}%)

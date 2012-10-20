@@ -22,13 +22,17 @@ namespace :map do
     Agent.skip_callback(:save, :after, :update_index)
     Concept.skip_callback(:save, :after, :update_index)
 
-    # instantiate mapping object
-    mapping = LadderMapping::MODS.new
-
+    # NB: this benefits a bit (~10% on a 2HT CPU) from using more processes
+    # eg. 2x 50%-size chunks and 2x processes; but at the cost of 2x memory
     Parallel.each(chunks) do |chunk|
 
       chunk.each do |resource|
-        mapping.map(resource).save
+        # load MODS XML document
+        xml = Nokogiri::XML(resource.mods).remove_namespaces!
+
+        # instantiate mapping object
+        mapping = LadderMapping::MODS.new
+        mapping.map(resource, xml.at_xpath('/mods'))
       end
 
       # Make sure to flush the GC when done a chunk

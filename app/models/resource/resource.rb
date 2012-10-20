@@ -2,6 +2,7 @@ class DublinCore
   include LadderModel::Embedded
   bind_to RDF::DC, :type => Array
   bind_to LadderVocab::DCVocab, :type => Array
+  attr_accessible :identifier
   embedded_in :resource
 end
 

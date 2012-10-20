@@ -25,8 +25,6 @@ class LadderHelper
     chunk_size = [([max_per_proc.to_f, max_per_free.to_f].min + 1).ceil / factor, 1000].max
     num_chunks = (klass_or_collection.size(true).to_f / chunk_size.to_f).ceil
 
-    puts "Using #{num_chunks} chunks of #{chunk_size} objects..."
-
     chunk_size
   end
 
@@ -40,6 +38,8 @@ class LadderHelper
       chunks << chunk
       options[:chunk_num] += 1
     end
+
+    puts "Using #{chunks.size} chunks of #{options[:per_chunk]} objects..."
 
     # queries are executed in sequence, so traverse last-to-first
     chunks.reverse
