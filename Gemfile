@@ -38,6 +38,7 @@ gem 'gyoku'
 #gem 'zoom'
 
 # Test requirements
+gem 'pry'
 
 # Padrino Stable Gem
 gem 'padrino', '0.10.7'

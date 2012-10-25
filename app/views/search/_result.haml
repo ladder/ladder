@@ -1,5 +1,6 @@
 .row-fluid
   .span12.json
-    - @result = result.load #NB: this incurrs a performance hit for querying mongo
-    %h3 #{link_to @result.heading, url_for(:resource, :index, :id => result.id)} (#{result._score})
-    = partial 'item', :object => @result
+    %h3
+      #{link_to result.heading, url_for(:resource, :index, :id => result.id)}
+      %small (#{result._score})
+    = partial 'item', :object => Resource.normalize(result.to_hash)

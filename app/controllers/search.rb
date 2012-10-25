@@ -10,10 +10,14 @@ Ladder.controllers :search do
 
   get :index, :with => :q do
 
-    @querystring = params[:q]
+    @querystring = params[:q] || session[:querystring]
+#    @filters = params[:fi] || JSON.load(session[:filters]) || {}
     @filters = params[:fi] || {}
     @page = params[:page] || 1
-    @per_page = params[:pp] || 10
+    @per_page = params[:pp] || 25
+
+    session[:querystring] = @querystring
+#    session[:filters] = JSON.dump(@filters)
 
     @facets = {'dcterms' => ['issued', 'format', 'language',       # descriptive facets
                              'creator', 'publisher',               # agent facets

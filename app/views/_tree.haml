@@ -1,9 +1,9 @@
 - if self_id == tree.id
   %li.active
-    %a= tree.heading
+    %a= tree.heading.last #FIXME
 - else
   %li
-    %a{:href => url_for(model, :index, :id => tree.id)}= tree.heading
+    %a{:href => url_for(model, :index, :id => tree.id)}= tree.heading.last #FIXME
 
 - if tree.children.size > 0
   %ul.nav.nav-list

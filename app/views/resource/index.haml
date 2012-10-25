@@ -1,4 +1,4 @@
-- @title = @resource.heading
+- @title = @resource.heading.first
 - @similar = @resource.similar
 
 .container
@@ -12,14 +12,14 @@
             %li.nav-header Agents
             =list_of(@resource.agents) do |agent|
               %a{:href => url_for(:agent, :index, :id => agent.id)}
-                #{agent.heading}
+                #{agent.heading.first}
 
           -# RELATED CONCEPTS
           - unless @resource.concepts.empty?
             %li.nav-header Concepts
             =list_of(@resource.concepts) do |concept|
-              %a{:href => url_for(:concept, :index, :id => concept.id)}
-                #{concept.heading}
+              = partial 'stem', :locals => {:stem => (Concept.find(concept.parent_ids) + [concept]).reverse!, :model => :concept}
+              %li.divider
 
           -# RELATION TREE
           - unless @resource.parent.nil? and @resource.children.empty?
@@ -40,18 +40,19 @@
               - if @diff1 > 90
                 .active
                 %a.active{:href => url_for(:resource, :index, :id => similar.id)}
-                  #{similar.load.heading} (#{@diff1.round}%)
+                  #{similar.load.heading.first} (#{@diff1.round}%)
               - else
                 %a{:href => url_for(:resource, :index, :id => similar.id)}
-                  #{similar.load.heading} (#{@diff1.round}%)
+                  #{similar.load.heading.first} (#{@diff1.round}%)
     .span9
-      %h1= @resource.heading
-      = partial 'item', :object => @resource
+      %h1.page-header= @title
+      = partial 'item', :object => Resource.normalize(@resource.as_document)
 
-      -# "advanced/admin" data view
-        - if @resource.mods
+      - if @resource.mods
         %pre
           %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods
-        - if @resource.marc
+      -# if @resource.marc
         %pre
           %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
+
+      %footer &copy; 2012 Deliberate Data

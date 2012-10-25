@@ -1,0 +1,12 @@
+- node = stem.pop
+
+- if stem.empty?
+  %li.active
+    %a{:href => url_for(model, :index, :id => node.id)}= node.heading.last #FIXME
+- else
+  %li
+    %a{:href => url_for(model, :index, :id => node.id)}= node.heading.last #FIXME
+
+- unless stem.empty?
+  %ul.nav.nav-list
+    = partial 'stem', :locals => {:stem => stem, :model => :concept}

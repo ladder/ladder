@@ -1,4 +1,4 @@
-- @title = @concept.heading
+- @title = @concept.heading.join('--')
 - @similar = @concept.similar
 
 .container
@@ -12,7 +12,7 @@
             %li.nav-header Resources
             =list_of(@concept.resources) do |resource|
               %a{:href => url_for(:resource, :index, :id => resource.id)}
-                #{resource.heading}
+                #{resource.heading.first}
 
           -# RELATION TREE
           - unless @concept.parent.nil? and @concept.children.empty?
@@ -33,10 +33,12 @@
               - if @diff1 > 90
                 .active
                 %a.active{:href => url_for(:concept, :index, :id => similar.id)}
-                  #{similar.load.heading} (#{@diff1.round}%)
+                  #{similar.load.heading.join('--')} (#{@diff1.round}%)
               - else
                 %a{:href => url_for(:concept, :index, :id => similar.id)}
-                  #{similar.load.heading} (#{@diff1.round}%)
+                  #{similar.load.heading.join('--')} (#{@diff1.round}%)
     .span9
-      %h1= @concept.heading
-      = partial 'item', :object => @concept
+      %h1.page-header= @title
+      = partial 'item', :object => Concept.normalize(@concept.as_document)
+
+      %footer &copy; 2012 Deliberate Data

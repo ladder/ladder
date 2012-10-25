@@ -1,4 +1,9 @@
 #search_form {
-  width: 60%;
-  margin: 0 auto;
+    width: 60%;
+    margin: 0 auto;
+}
+
+.nav-list > .active > a,
+.nav-list > .active > a:hover {
+    opacity: 0.75;
 }

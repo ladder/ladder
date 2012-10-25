@@ -24,6 +24,7 @@ module LadderMapping
         return if vocabs.values.map(&:values).flatten.empty?
         resource.vocabs = vocabs
       end
+binding.pry if resource.dcterms.nil?
 
       # map encoded agents to related Agent models
       agents = map_agents(node.xpath('name'))
@@ -89,6 +90,7 @@ module LadderMapping
     end
 
     def map_relations(node_set)
+      # @see: http://www.loc.gov/standards/mods/userguide/relateditem.html
       relations = []
 
       node_set.each do |node|
@@ -138,6 +140,7 @@ module LadderMapping
             relations << resource
 
           # undefined relationship
+          # preceding, succeeding, reviewOf
           else
             relations << resource
         end
@@ -176,8 +179,7 @@ module LadderMapping
         # in MODS, each subject access point is usually composed of multiple
         # ordered sub-elements; so that's what we process for hierarchy
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
-=begin
-        root = nil
+
         current = nil
 
         node.element_children.each do |subnode|
@@ -188,26 +190,13 @@ module LadderMapping
 
           concept = Concept.find_or_create_by(:skos => skos)
 
-          if root.nil?
-            root = concept
-          else
-            current.children << concept
-          end
-
+          current.children << concept unless current.nil?
           current = concept
         end
 
         next if @resource.concepts.include? current
 
         concepts << current
-=end
-        skos = map_xpath node, {:prefLabel  => '*'}
-        next if skos.values.flatten.empty?
-
-        concept = Concept.find_or_create_by(:skos => skos)
-        next if @resource.concepts.include? concept
-
-        concepts << concept
       end
 
       concepts

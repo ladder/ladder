@@ -15,15 +15,14 @@ namespace :map do
     puts "Mapping #{resources.size(true)} MODS records with #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
-    chunks = LadderHelper::chunkify(resources)
+    # only use chunks of 1000 to avoid mongo cursor timeouts for large sets
+    chunks = LadderHelper::chunkify(resources, {:per_chunk => 1000})
 
     # suppress indexing on save
     Resource.skip_callback(:save, :after, :update_index)
     Agent.skip_callback(:save, :after, :update_index)
     Concept.skip_callback(:save, :after, :update_index)
 
-    # NB: this benefits a bit (~10% on a 2HT CPU) from using more processes
-    # eg. 2x 50%-size chunks and 2x processes; but at the cost of 2x memory
     Parallel.each(chunks) do |chunk|
 
       chunk.each do |resource|

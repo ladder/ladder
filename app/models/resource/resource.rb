@@ -49,6 +49,6 @@ class Resource
   has_and_belongs_to_many :concepts
 
   def heading
-    get_first_field(['dcterms.title', 'dcterms.alternative'])
+    get_first_field(['dcterms.title', 'dcterms.alternative']) || ['untitled']
   end
 end

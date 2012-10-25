@@ -61,6 +61,7 @@ GEM
     bson_ext (1.7.0)
       bson (~> 1.7.0)
     builder (3.0.4)
+    coderay (1.0.8)
     erubis (2.7.0)
     gyoku (0.4.6)
       builder (>= 2.1.2)
@@ -80,6 +81,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     marc (0.5.0)
+    method_source (0.8.1)
     mime-types (1.19)
     mongo (1.3.1)
       bson (>= 1.3.1)
@@ -118,6 +120,10 @@ GEM
       padrino-core (= 0.10.7)
     parallel (0.5.19)
     polyglot (0.3.3)
+    pry (0.9.10)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.3.1)
     rack (1.4.1)
     rack-cache (1.2)
       rack (>= 0.4)
@@ -140,6 +146,7 @@ GEM
       tilt (~> 1.3, >= 1.3.3)
     sinatra-flash (0.3.0)
       sinatra (>= 1.0.0)
+    slop (3.3.3)
     sprockets (2.1.3)
       hike (~> 1.2)
       rack (~> 1.0)
@@ -178,6 +185,7 @@ DEPENDENCIES
   padrino (= 0.10.7)
   padrino-helpers
   parallel
+  pry
   rake
   rdf
   sinatra-flash

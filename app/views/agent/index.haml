@@ -1,4 +1,4 @@
-- @title = @agent.heading
+- @title = @agent.heading.first
 - @similar = @agent.similar
 
 .container
@@ -12,7 +12,7 @@
             %li.nav-header Resources
             =list_of(@agent.resources) do |resource|
               %a{:href => url_for(:resource, :index, :id => resource.id)}
-                #{resource.heading}
+                #{resource.heading.first}
 
           -# RELATION TREE
           - unless @agent.parent.nil? and @agent.children.empty?
@@ -33,10 +33,12 @@
               - if @diff1 > 90
                 .active
                 %a.active{:href => url_for(:agent, :index, :id => similar.id)}
-                  #{similar.load.heading} (#{@diff1.round}%)
+                  #{similar.load.heading.first} (#{@diff1.round}%)
               - else
                 %a{:href => url_for(:agent, :index, :id => similar.id)}
-                  #{similar.load.heading} (#{@diff1.round}%)
+                  #{similar.load.heading.first} (#{@diff1.round}%)
     .span9
-      %h1= @agent.heading
-      = partial 'item', :object => @agent
+      %h1.page-header= @title
+      = partial 'item', :object => Agent.normalize(@agent.as_document)
+
+      %footer &copy; 2012 Deliberate Data

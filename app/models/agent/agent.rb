@@ -30,7 +30,7 @@ class Agent
   include LadderModel::Core
 
   def heading
-    get_first_field(['foaf.name', 'foaf.givenName', 'foaf.givenname'])
+    get_first_field(['foaf.name', 'foaf.givenName', 'foaf.givenname']) || ['untitled']
   end
 
   # embedded RDF vocabularies

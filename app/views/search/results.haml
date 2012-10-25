@@ -26,10 +26,10 @@
                       %li= link_to ISO_639.find(f['term']).nil? ? f['term'] + " (#{f['count']})" : ISO_639.find(f['term']).english_name + " (#{f['count']})",
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
                     - elsif 'creator' == facet
-                      %li= link_to @creators[@creators.index{|doc| doc.id.to_s == f['term']}].heading + " (#{f['count']})",
+                      %li= link_to @creators[@creators.index{|doc| doc.id.to_s == f['term']}].heading.first + " (#{f['count']})",
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
                     - elsif 'subject' == facet
-                      %li= link_to @subjects[@subjects.index{|doc| doc.id.to_s == f['term']}].heading + " (#{f['count']})",
+                      %li= link_to @subjects[@subjects.index{|doc| doc.id.to_s == f['term']}].heading.join('--') + " (#{f['count']})",
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
                     - else
                       %li= link_to f['term'] + " (#{f['count']})",
@@ -49,22 +49,14 @@
                                   url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
 
     .span9
-
-      .pagination-centered
-        - form_tag '/search', :method => 'get', :class => 'form-search' do
-          = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring, :autofocus => true
-          = submit_tag 'Search', :class => 'btn'
-
-      .pagination-centered
-        = paginate @results
-        <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
+      <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
 
       =partial 'search/result', :collection => @results
 
       .pagination-centered
         = paginate @results
 
-      %footer{:style => 'font-size: 1.1em;'} &copy; 2012 Deliberate Data
+      %footer &copy; 2012 Deliberate Data
 
     %script{:src => "/javascripts/jquery.js"}
     %script{:src => "/javascripts/bootstrap.js"}
