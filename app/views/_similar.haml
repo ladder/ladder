@@ -1,0 +1,21 @@
+%li.nav-header Similar
+=list_of(document.similar) do |similar|
+
+  - @amatch = document.amatch(similar)
+  - @amatch[:hamming_similar] = 1-@amatch[:hamming_similar] unless @amatch[:hamming_similar].nil?
+  - @amatch.delete(:longest_substring_similar)
+  - @diff1 = (@amatch.values.sum / @amatch.size) * 100
+
+  - if @diff1 > 80
+    %li.active
+      %a.active{:href => url_for(model, :index, :id => similar.id)}
+        #{similar.load.heading.last} (#{@diff1.round}%)
+  - else
+    %a{:href => url_for(model, :index, :id => similar.id)}
+      #{similar.load.heading.last} (#{@diff1.round}%)
+  -#
+    - @hashdiff = document.diff(similar)
+    - @flattened = document.class.normalize(document.as_document).values.map(&:values).flatten
+    - @diff2 = (@flattened.size - @hashdiff.size) / @hashdiff.size.to_f * 100
+
+    = [@diff1 + @diff2/2, 100].min.round
