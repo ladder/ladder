@@ -17,7 +17,7 @@ module LadderModel
         query = self
         attrs.each do |vocab, vals|
           vals.each do |field, value|
-            query = query.all_of("#{vocab}.#{field}" => value)
+            query = query.all_of("#{vocab}.#{field}" => value) unless value.empty?
           end
         end
 
@@ -35,8 +35,7 @@ module LadderModel
         hash = Marshal.load(Marshal.dump(hash))
 
         # Reject keys not declared in mapping
-        mapping = self.tire.mapping
-        hash.reject! { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
+        hash.reject! { |key, value| ! self.tire.mapping.keys.map(&:to_s).include?(key.to_s) }
 
         # Self-contained recursive lambda
         normal = lambda do |hash|
@@ -45,14 +44,9 @@ module LadderModel
           # Strip id field
           hash.except! :_id
 
-          # Reject Object ID references in comparisons
-          # NB: have to use regexp matching for Tire Items
-#          hash.reject! {|key, value| value.is_a? BSON::ObjectId || value.to_s.match(/^[0-9a-f]{24}$/) }
-#          hash.reject! {|key, value| value.is_a? Array and value.flatten.reject { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
-
           # Reject empty values
           hash.reject! { |key, value| value.kind_of? Enumerable and value.empty? }
-          hash.values.select{|value| value.is_a? Hash}.each{|h| normal.call(h)}
+          hash.values.select { |value| value.is_a? Hash }.each{ |h| normal.call(h) }
           hash
         end
 
@@ -200,8 +194,14 @@ module LadderModel
         compare = model.as_document
       end
 
-      p1 = self.class.normalize(self.as_document).values.map(&:values).join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
-      p2 = self.class.normalize(compare).values.map(&:values).join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p1 = self.class.normalize(self.as_document).values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p2 = self.class.normalize(compare).values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+
+      # Reject Object ID references in comparisons
+      # NB: have to use regexp matching for Tire Items
+      #
+      # hash.reject! {|key, value| value.is_a? BSON::ObjectId || value.to_s.match(/^[0-9a-f]{24}$/) }
+      # hash.reject! {|key, value| value.is_a? Array and value.flatten.reject { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
 
       options.each do |sim, bool|
         options[sim] = p1.send(sim, p2) if bool
@@ -219,7 +219,6 @@ module LadderModel
         field = target_field.split('.').last
 
         target = self.send(ns).send(field)
-#        target = target.first if target.is_a? Array
 
         break if target
       end

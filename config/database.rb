@@ -12,7 +12,12 @@ end
 Mongoid.database = Mongo::Connection.new(
   host,
   port,
-  {:pool_size => Parallel.physical_processor_count}
+  {:pool_size => Parallel.physical_processor_count,
+#   :logger => Padrino.logger
+  }
 ).db(database_name)
 
 Mongoid.max_retries_on_connection_failure = 2
+
+# @see: http://martinfowler.com/eaaCatalog/identityMap.html
+#Mongoid.identity_map_enabled = true

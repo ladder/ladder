@@ -24,16 +24,17 @@ module LadderMapping
         return if vocabs.values.map(&:values).flatten.empty?
         resource.vocabs = vocabs
       end
-binding.pry if resource.dcterms.nil?
+# TODO: FIX SETTING ERROR HERE
+#binding.pry if resource.dcterms.nil?
 
       # map encoded agents to related Agent models
       agents = map_agents(node.xpath('name'))
-      resource.dcterms.creator = agents.map(&:id)
+      resource.dcterms.creator = agents.map(&:id) unless agents.empty?
       resource.agents << agents unless agents.empty?
 
       # map encoded concepts to related Concept models
       concepts = map_concepts(node.xpath('subject[@authority]'))
-      resource.dcterms.subject = concepts.map(&:id)
+      resource.dcterms.subject = concepts.map(&:id) unless concepts.empty?
       resource.concepts << concepts unless concepts.empty?
 
       # map related resources as tree hierarchy
@@ -164,7 +165,8 @@ binding.pry if resource.dcterms.nil?
         next if foaf.values.flatten.empty?
 
         agent = Agent.find_or_create_by(:foaf => foaf)
-        next if @resource.agents.include? agent
+
+        next if !@resource.agent_ids.nil? and !@resource.agent_ids.empty? and @resource.agents.include? agent
 
         agents << agent
       end
@@ -194,7 +196,7 @@ binding.pry if resource.dcterms.nil?
           current = concept
         end
 
-        next if @resource.concepts.include? current
+        next if !@resource.concept_ids.nil? and !@resource.concept_ids.empty? and @resource.concepts.include? current
 
         concepts << current
       end
