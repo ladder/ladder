@@ -24,8 +24,6 @@ module LadderMapping
         return if vocabs.values.map(&:values).flatten.empty?
         resource.vocabs = vocabs
       end
-# TODO: FIX SETTING ERROR HERE
-#binding.pry if resource.dcterms.nil?
 
       # map encoded agents to related Agent models
       agents = map_agents(node.xpath('name'))
@@ -97,11 +95,12 @@ module LadderMapping
       node_set.each do |node|
         # create/map related resource
         vocabs = map_vocabs(node)
+
         next if vocabs.values.map(&:values).flatten.empty?
 
         # recursively map related resources
         mapping = LadderMapping::MODS.new
-        resource = Resource.find_or_create_by(vocabs.to_hash)
+        resource = Resource.find_or_create_by(vocabs)
         resource = mapping.map(resource, node)
 
         case node['type']
