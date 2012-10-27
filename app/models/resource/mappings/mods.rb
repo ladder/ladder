@@ -24,18 +24,20 @@ module LadderMapping
         return if vocabs.values.map(&:values).flatten.empty?
         resource.vocabs = vocabs
       end
-# TODO: FIX SETTING ERROR HERE
-#binding.pry if resource.dcterms.nil?
 
       # map encoded agents to related Agent models
       agents = map_agents(node.xpath('name'))
-      resource.dcterms.creator = agents.map(&:id) unless agents.empty?
-      resource.agents << agents unless agents.empty?
+      unless agents.empty?
+        resource.dcterms.creator = agents.map(&:id)
+        resource.agents << agents
+      end
 
       # map encoded concepts to related Concept models
       concepts = map_concepts(node.xpath('subject[@authority]'))
-      resource.dcterms.subject = concepts.map(&:id) unless concepts.empty?
-      resource.concepts << concepts unless concepts.empty?
+      unless concepts.empty?
+        resource.dcterms.subject = concepts.map(&:id)
+        resource.concepts << concepts
+      end
 
       # map related resources as tree hierarchy
       relations = map_relations(node.xpath('relatedItem'))
@@ -97,11 +99,12 @@ module LadderMapping
       node_set.each do |node|
         # create/map related resource
         vocabs = map_vocabs(node)
+
         next if vocabs.values.map(&:values).flatten.empty?
 
         # recursively map related resources
         mapping = LadderMapping::MODS.new
-        resource = Resource.find_or_create_by(vocabs.to_hash)
+        resource = Resource.find_or_create_by(vocabs)
         resource = mapping.map(resource, node)
 
         case node['type']
@@ -165,6 +168,12 @@ module LadderMapping
         next if foaf.values.flatten.empty?
 
         agent = Agent.find_or_create_by(:foaf => foaf)
+
+#p agents.include? agent
+#p @resource.agent_ids.nil? #next if true
+#p @resource.agent_ids.map(&:to_s).include? agent.id.to_s #next if true
+#p @resource.agents.in_memory.empty? #next if true
+#p @resource.agents.include? agent #next if true
 
         next if !@resource.agent_ids.nil? and !@resource.agent_ids.empty? and @resource.agents.include? agent
 

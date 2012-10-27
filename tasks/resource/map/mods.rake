@@ -12,7 +12,7 @@ namespace :map do
 
     exit if resources.empty?
 
-    puts "Mapping #{resources.size(true)} MODS records with #{Parallel.processor_count} processors..."
+    puts "Mapping #{resources.size} MODS records with #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
     # only use chunks of 1000 to avoid mongo cursor timeouts for large sets
