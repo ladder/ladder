@@ -14,28 +14,15 @@ module LadderModel
       def find_or_create_by(attrs = {}, &block)
 
         # build a query based on nested fields
-        query = self.limit(1)
-
+        query = self
         attrs.each do |vocab, vals|
-
-          # if we have an empty vocab, instantiate a new embedded object
-          if vals.empty?
-            @embeddeds ||= self.reflect_on_all_associations(*[:embeds_one])
-
-            index = @embeddeds.index {|v| v.name == vocab}
-            klass = @embeddeds[index].class_name.classify.constantize
-            attrs[vocab] = klass.new
-
-            next
-          end
-
           vals.each do |field, value|
-            query = query.all_of("#{vocab}.#{field}" => value) #unless value.empty?
+            query = query.all_of("#{vocab}.#{field}" => value) unless value.empty?
           end
         end
 
         # if a document exists, return that
-        return query.first unless query.field_list.nil? or query.empty?
+        return query.first unless query.empty?
 
         # otherwise create and return a new object
         obj = self.new(attrs)
