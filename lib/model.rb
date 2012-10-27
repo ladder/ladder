@@ -14,7 +14,7 @@ module LadderModel
       def find_or_create_by(attrs = {}, &block)
 
         # build a query based on nested fields
-        query = self
+        query = self.limit(1)
 
         attrs.each do |vocab, vals|
 
@@ -30,12 +30,12 @@ module LadderModel
           end
 
           vals.each do |field, value|
-            query = query.all_of("#{vocab}.#{field}" => value) unless value.empty?
+            query = query.all_of("#{vocab}.#{field}" => value) #unless value.empty?
           end
         end
 
         # if a document exists, return that
-        return query.limit(1).first unless query.instance_of? Class or query.empty?
+        return query.first unless query.field_list.nil? or query.empty?
 
         # otherwise create and return a new object
         obj = self.new(attrs)
