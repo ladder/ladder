@@ -14,10 +14,10 @@ namespace :model do
       # only retrieve fields required for hierarchy
       collection = klass.roots.only(:id, :parent_id, :parent_ids)
 
-      puts "Building #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
+      puts "Building #{collection.size} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
-      chunks = LadderHelper::chunkify(collection)
+      chunks = collection.chunkify
 
       # suppress indexing on save
       klass.skip_callback(:save, :after, :update_index)

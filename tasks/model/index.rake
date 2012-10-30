@@ -14,10 +14,10 @@ namespace :model do
       # only retrieve fields that are mapped in index
       collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
 
-      puts "Indexing #{collection.count} #{model.pluralize} with #{Parallel.processor_count} processors..."
+      puts "Indexing #{collection.size} #{model.pluralize} with #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
-      chunks = LadderHelper::chunkify(collection)
+      chunks = collection.chunkify
 
       # ensure the index exists
       klass.tire.create_elasticsearch_index

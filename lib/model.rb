@@ -58,6 +58,10 @@ module LadderModel
         normal.call(hash.reject { |key, value| !value.is_a? Hash })
       end
 
+      def chunkify(opts = {})
+        Mongoid::Criteria.new(self).chunkify(opts)
+      end
+
     end
 
     def self.included(base)
