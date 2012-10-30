@@ -1,13 +1,13 @@
 #! /bin/bash
 
 curl -XDELETE http://localhost:9200/    # clear ES index
-padrino rake mi:drop                    # clear mongodb
+padrino rake -e production mi:drop                    # clear mongodb
 
 for f in $*
 do
-    time padrino -e production rake import:marc["$f"]
-    time padrino -e production rake map:marc
-    time padrino -e production rake map:mods
+    time padrino rake -e production import:marc["$f"]
+    time padrino rake -e production map:marc
+    time padrino rake -e production map:mods
 done
 
-time padrino -e production rake model:index           # reindex everything
+time padrino rake -e production model:index           # reindex everything
