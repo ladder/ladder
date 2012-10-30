@@ -30,18 +30,20 @@ class Agent
   include LadderModel::Core
 
   def heading
-    get_first_field(['foaf.name', 'foaf.givenName', 'foaf.givenname']) || ['untitled']
+    get_first_field(['foaf.name']) || ['untitled']
   end
 
   # embedded RDF vocabularies
   embeds_one :foaf, class_name: "FOAF"
   embeds_one :vcard, class_name: "VCard"
 
-  # index embedded documents
-  mapping indexes :foaf, :type => 'object'
-  mapping indexes :vcard, :type => 'object'
+  # scopes
+  define_scopes
+
+  # mongoid indexing
+  define_indexes({:foaf => [:name, :birthday, :title]})
 
   # model relations
-  has_and_belongs_to_many :resources
-  has_and_belongs_to_many :concepts
+  has_and_belongs_to_many :resources, index: true
+  has_and_belongs_to_many :concepts, index: true
 end

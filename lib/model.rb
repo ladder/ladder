@@ -8,9 +8,38 @@ module LadderModel
 
     module ClassMethods
 
+      def define_scopes
+        embeddeds = self.reflect_on_all_associations(*[:embeds_one])
+
+        embeddeds.each do |embed|
+          scope embed.name, ->(exists=true) { where(embed.name.exists => exists) }
+        end
+      end
+
+      def define_indexes(vocabs = {})
+        embeddeds = self.reflect_on_all_associations(*[:embeds_one])
+
+        embeddeds.each do |embed|
+
+          # mongodb index definitions
+          embed.class_name.constantize.fields.each do |field|
+
+            if field.is_a? Array and !vocabs[embed.name].nil?
+              # only index defined fields
+              if vocabs[embed.name].include? field.first.to_sym
+                index [["#{embed.key}.#{field.first}", Mongo::ASCENDING]]
+              end
+            end
+          end
+
+          # elasticsearch index definitions
+          mapping indexes embed.name, :type => 'object'
+        end
+
+      end
+
       # Override Mongoid #find_or_create_by
       # @see: http://rdoc.info/github/mongoid/mongoid/Mongoid/Finders
-
       def find_or_create_by(attrs = {}, &block)
 
         # build a query based on nested fields
@@ -73,13 +102,13 @@ module LadderModel
       base.send :include, Mongoid::Tree
 #      base.send :include, Mongoid::Tree::Ordering
 
-      # ElasticSearch integration
-      base.send :include, Tire::Model::Search
-      base.send :include, Tire::Model::Callbacks
-
       # Pagination
       base.send :include, Kaminari::MongoidExtension::Criteria
       base.send :include, Kaminari::MongoidExtension::Document
+
+      # ElasticSearch integration
+      base.send :include, Tire::Model::Search
+      base.send :include, Tire::Model::Callbacks
 
       # dynamic templates to store un-analyzed values for faceting
       base.send :mapping, :dynamic_templates => [{
@@ -102,25 +131,25 @@ module LadderModel
           }
         }], :_source => { :compress => true } do
 
-        # Timestamp information
-        base.send :indexes, :created_at,    :type => 'date'
-        base.send :indexes, :deleted_at,    :type => 'date'
-        base.send :indexes, :updated_at,    :type => 'date'
+      # Timestamp information
+      base.send :indexes, :created_at,    :type => 'date'
+      base.send :indexes, :deleted_at,    :type => 'date'
+      base.send :indexes, :updated_at,    :type => 'date'
 
-        # Hierarchy information
-        base.send :indexes, :parent_id,     :type => 'string'
-        base.send :indexes, :parent_ids,    :type => 'string'
+      # Hierarchy information
+      base.send :indexes, :parent_id,     :type => 'string'
+      base.send :indexes, :parent_ids,    :type => 'string'
 
-        # Relation information
-        base.send :indexes, :agent_ids,     :type => 'string'
-        base.send :indexes, :concept_ids,   :type => 'string'
-        base.send :indexes, :resource_ids,  :type => 'string'
+      # Relation information
+      base.send :indexes, :agent_ids,     :type => 'string'
+      base.send :indexes, :concept_ids,   :type => 'string'
+      base.send :indexes, :resource_ids,  :type => 'string'
 
-        # add useful class methods
-        base.extend ClassMethods
-      end
-
+      # add useful class methods
+      base.extend ClassMethods
     end
+
+  end
 
     # Retrieve a hash of field names and embedded vocab objects
     def vocabs
@@ -222,10 +251,10 @@ module LadderModel
       target = nil
 
       fields_array.each do |target_field|
-        ns = target_field.split('.').first
+        vocab = target_field.split('.').first
         field = target_field.split('.').last
 
-        target = self.send(ns).send(field) unless self.send(ns).nil?
+        target = self.send(vocab).send(field) unless self.send(vocab).nil?
 
         break if target
       end

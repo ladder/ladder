@@ -14,7 +14,7 @@ namespace :model do
       # only retrieve fields that are mapped in index
       collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
 
-      puts "Merging #{collection.size} #{model.pluralize} with #{Parallel.processor_count} processors..."
+      puts "Merging #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
       chunks = collection.chunkify

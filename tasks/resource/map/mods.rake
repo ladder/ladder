@@ -8,11 +8,11 @@ namespace :map do
     resources = Resource.mods.only(:mods)
 
     # only select resources which have not already been mapped
-    resources = resources.dcterms(false).bibo(false).prism(false) unless args.remap
+    resources = resources.dcterms(false).bibo(false) unless args.remap
 
     exit if resources.empty?
 
-    puts "Mapping #{resources.size} MODS records with #{Parallel.processor_count} processors..."
+    puts "Mapping #{resources.size} MODS records using #{Parallel.processor_count} processors..."
 
     # break resources into chunks for multi-processing
     chunks = resources.chunkify

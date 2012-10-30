@@ -14,7 +14,7 @@ namespace :model do
       # only retrieve fields required for hierarchy
       collection = klass.roots.only(:id, :parent_id, :parent_ids)
 
-      puts "Building #{collection.size} #{model.pluralize} with #{Parallel.processor_count} processors..."
+      puts "Building #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors..."
 
       # break collection into chunks for multi-processing
       chunks = collection.chunkify

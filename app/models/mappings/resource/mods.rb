@@ -92,12 +92,8 @@ module LadderMapping
           :oclcnum  => 'identifier[@type = "oclc"]',
       }
 
-      # TODO: prism mapping
-      prism = {}
-
       vocabs[:dcterms] = dcterms unless dcterms.empty?
       vocabs[:bibo] = bibo unless bibo.empty?
-      vocabs[:prism] = prism unless prism.empty?
 
       vocabs
     end
@@ -163,8 +159,8 @@ module LadderMapping
             (resource.dcterms.isReferencedBy ||= []) << @resource.id
             relations << resource
           when 'original'
-            @resource.prism = Prism.new if @resource.prism.nil?
-            (@resource.prism.hasPreviousVersion ||= []) << resource.id
+#            @resource.prism = Prism.new if @resource.prism.nil?
+#            (@resource.prism.hasPreviousVersion ||= []) << resource.id
             relations << resource
 
           # undefined relationship

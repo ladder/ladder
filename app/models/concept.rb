@@ -14,10 +14,13 @@ class Concept
   # embedded RDF vocabularies
   embeds_one :skos, class_name: "SKOS"
 
-  # index embedded documents
-  mapping indexes :skos, :type => 'object'
+  # scopes
+  define_scopes
+
+  # mongoid indexing
+  define_indexes({:skos => [:prefLabel]})
 
   # model relations
-  has_and_belongs_to_many :resources
-  has_and_belongs_to_many :agents
+  has_and_belongs_to_many :resources, index: true
+  has_and_belongs_to_many :agents, index: true
 end
