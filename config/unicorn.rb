@@ -15,9 +15,6 @@ pid pid_file
 stderr_path err_log
 stdout_path log_file
 
-# make forks faster
-preload_app true
-
 # make sure that Bundler finds the Gemfile
 before_exec do |server|
   ENV['BUNDLE_GEMFILE'] = File.expand_path('../Gemfile', File.dirname(__FILE__))
