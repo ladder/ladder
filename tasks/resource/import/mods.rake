@@ -11,6 +11,8 @@ namespace :import do
 
     if File::directory? path
       files = Dir.entries(path).reject! {|s| s =~ /^\./}  # don't include dotfiles
+      files.map! {|file| File.join(path, file)}
+
       # order largest files first so processes aren't blocking
       files = files.sort_by {|filename| File.size(File.expand_path(filename, args.file)) }.reverse
     else
