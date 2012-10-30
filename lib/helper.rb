@@ -5,32 +5,15 @@
 
 class LadderHelper
 
-  def self.dynamic_chunk(klass_or_collection, factor = 1)
-
-    # super rough/hacky free mem calculation (includes inactive)
-    mem_total_bytes = `sysctl -n hw.memsize`.to_i
-    return 1000 if 0 == mem_total_bytes
-
-    if klass_or_collection.is_a? Mongoid::Collection
-      stats = klass_or_collection.stats
-    else
-      stats = klass_or_collection.collection.stats
-    end
-
-    mem_used_bytes = `ps -Ao rss=`
-    mem_free_bytes = mem_total_bytes - mem_used_bytes.split.map(&:to_i).inject(&:+).to_i * 1024
-    max_per_proc = (klass_or_collection.size(true).to_f / Parallel.processor_count.to_f)
-    max_per_free = mem_free_bytes.to_f / (stats['avgObjSize'].to_f * Parallel.processor_count.to_f)
-
-    # minimum chunk size is 1000
-    chunk_size = [([max_per_proc.to_f, max_per_free.to_f].min + 1).ceil / factor, 1000].max
-
-    chunk_size
-  end
-
   def self.chunkify(klass_or_collection, opts = {})
 
-    options = {:chunk_num => 1, :per_chunk => dynamic_chunk(klass_or_collection)}.merge(opts)
+    # ensure we are dealing with a Mongoid::Criteria
+    unless klass_or_collection.is_a? Mongoid::Criteria
+      klass_or_collection = Mongoid::Criteria.new(klass_or_collection)
+    end
+
+    # default to chunks of 1000 to avoid mongo cursor timeouts for large sets
+    options = {:chunk_num => 1, :per_chunk => 1000}.merge(opts)
 
     chunks = []
     while chunk = klass_or_collection.page(options[:chunk_num]).per(options[:per_chunk]) \
