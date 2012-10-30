@@ -1,5 +1,8 @@
 #! /bin/bash
 
+curl -XDELETE http://localhost:9200/    # clear ES index
+padrino rake mi:drop                    # clear mongodb
+
 for f in $*
 do
     time padrino rake import:marc["$f"]
@@ -7,3 +10,4 @@ do
     time padrino rake map:mods
 done
 
+time padrino rake model:index           # reindex everything
