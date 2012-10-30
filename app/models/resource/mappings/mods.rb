@@ -28,6 +28,7 @@ module LadderMapping
       # map encoded agents to related Agent models
       agents = map_agents(node.xpath('name'))
       unless agents.empty?
+        resource.dcterms = DublinCore.new if resource.dcterms.nil?
         resource.dcterms.creator = agents.map(&:id)
         resource.agents << agents
       end
@@ -35,6 +36,7 @@ module LadderMapping
       # map encoded concepts to related Concept models
       concepts = map_concepts(node.xpath('subject[@authority]'))
       unless concepts.empty?
+        resource.dcterms = DublinCore.new if resource.dcterms.nil?
         resource.dcterms.subject = concepts.map(&:id)
         resource.concepts << concepts
       end
@@ -55,6 +57,8 @@ module LadderMapping
     end
 
     def map_vocabs(node)
+      vocabs = {}
+
       dcterms = map_xpath node, {
           # descriptive elements
           :title         => 'titleInfo[not(@type = "alternative")]',
@@ -89,7 +93,13 @@ module LadderMapping
       }
 
       # TODO: prism mapping
-      {:dcterms => dcterms, :bibo => bibo, :prism => {}}
+      prism = {}
+
+      vocabs[:dcterms] = dcterms unless dcterms.empty?
+      vocabs[:bibo] = bibo unless bibo.empty?
+      vocabs[:prism] = prism unless prism.empty?
+
+      vocabs
     end
 
     def map_relations(node_set)
@@ -107,10 +117,13 @@ module LadderMapping
         resource = Resource.find_or_create_by(vocabs)
         resource = mapping.map(resource, node)
 
+        # TODO: clean up by abstracting?
         case node['type']
           # parent relationships
           when 'series'
-            (@resource.dcterms.isPartOf ||= []) << resource.id
+            @resource.dcterms = DublinCore.new if @resource.dcterms.nil?
+            resource.dcterms = DublinCore.new if resource.dcterms.nil?
+            (@resource.dcterms.isPartOf ||= []) <<
             (resource.dcterms.hasPart ||= []) << @resource.id
             @resource.parent = resource
           when 'host'
@@ -118,28 +131,39 @@ module LadderMapping
 
           # child relationship
           when 'constituent'
+            @resource.dcterms = DublinCore.new if @resource.dcterms.nil?
+            resource.dcterms = DublinCore.new if resource.dcterms.nil?
             (@resource.dcterms.hasPart ||= []) << resource.id
             (resource.dcterms.isPartOf ||= []) << @resource.id
-            @resource.children << resource
+            resource.parent = @resource
 
           # sibling-like relationships
           when 'otherVersion'
+            @resource.dcterms = DublinCore.new if @resource.dcterms.nil?
+            resource.dcterms = DublinCore.new if resource.dcterms.nil?
             (@resource.dcterms.hasVersion ||= []) << resource.id
             (resource.dcterms.isVersionOf ||= []) << @resource.id
             relations << resource
           when 'otherFormat'
+            @resource.dcterms = DublinCore.new if @resource.dcterms.nil?
+            resource.dcterms = DublinCore.new if resource.dcterms.nil?
             (@resource.dcterms.hasFormat ||= []) << resource.id
             (resource.dcterms.isFormatOf ||= []) << @resource.id
             relations << resource
           when 'isReferencedBy'
+            @resource.dcterms = DublinCore.new if @resource.dcterms.nil?
+            resource.dcterms = DublinCore.new if resource.dcterms.nil?
             (@resource.dcterms.isReferencedBy ||= []) << resource.id
             (resource.dcterms.references ||= []) << @resource.id
             relations << resource
           when 'references'
+            @resource.dcterms = DublinCore.new if @resource.dcterms.nil?
+            resource.dcterms = DublinCore.new if resource.dcterms.nil?
             (@resource.dcterms.references ||= []) << resource.id
             (resource.dcterms.isReferencedBy ||= []) << @resource.id
             relations << resource
           when 'original'
+            @resource.prism = Prism.new if @resource.prism.nil?
             (@resource.prism.hasPreviousVersion ||= []) << resource.id
             relations << resource
 
@@ -169,13 +193,8 @@ module LadderMapping
 
         agent = Agent.find_or_create_by(:foaf => foaf)
 
-#p agents.include? agent
-#p @resource.agent_ids.nil? #next if true
-#p @resource.agent_ids.map(&:to_s).include? agent.id.to_s #next if true
-#p @resource.agents.in_memory.empty? #next if true
-#p @resource.agents.include? agent #next if true
-
-        next if !@resource.agent_ids.nil? and !@resource.agent_ids.empty? and @resource.agents.include? agent
+        next if @resource.agent_ids.nil? or @resource.agent_ids.map(&:to_s).include? agent.id.to_s
+        next if agents.include? agent or @resource.agents.include? agent
 
         agents << agent
       end
@@ -201,11 +220,12 @@ module LadderMapping
 
           concept = Concept.find_or_create_by(:skos => skos)
 
-          current.children << concept unless current.nil?
+          concept.parent = current unless current.nil?
           current = concept
         end
 
-        next if !@resource.concept_ids.nil? and !@resource.concept_ids.empty? and @resource.concepts.include? current
+        next if @resource.concept_ids.nil? or @resource.concept_ids.map(&:to_s).include? current.id.to_s
+        next if concepts.include? current or @resource.concepts.include? current
 
         concepts << current
       end

@@ -17,27 +17,17 @@ module LadderModel
         query = self
 
         attrs.each do |vocab, vals|
-
-          # if we have an empty vocab, instantiate a new embedded object
-          if vals.empty?
-            @embeddeds ||= self.reflect_on_all_associations(*[:embeds_one])
-
-            index = @embeddeds.index {|v| v.name == vocab}
-            klass = @embeddeds[index].class_name.classify.constantize
-            attrs[vocab] = klass.new
-
-            next
-          end
-
           vals.each do |field, value|
             query = query.all_of("#{vocab}.#{field}" => value) unless value.empty?
           end
         end
 
-        # if a document exists, return that
-        result = query.limit(1).first
+        unless query.instance_of? Class
+          # if a document exists, return that
+          result = query.limit(1).first
 
-        return result unless result.nil? or query.instance_of? Class
+          return result unless result.nil?
+        end
 
         # otherwise create and return a new object
         obj = self.new(attrs)
@@ -143,9 +133,7 @@ module LadderModel
 
     # Assign model vocab objects by a hash of field names
     def vocabs=(hash)
-      hash.each do |field, object|
-        self.send(field.to_s + '=', object) if self.respond_to? field
-      end
+      self.update_attributes(hash)
     end
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
@@ -233,7 +221,7 @@ module LadderModel
         ns = target_field.split('.').first
         field = target_field.split('.').last
 
-        target = self.send(ns).send(field)
+        target = self.send(ns).send(field) unless self.send(ns).nil?
 
         break if target
       end

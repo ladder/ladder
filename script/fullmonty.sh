@@ -7,5 +7,4 @@ time padrino rake import:marc[~/Downloads/tmp/]	# import new MARC data
 time padrino rake map:marc		                # XSLT transform
 time padrino rake map:mods --trace              # map XML to vocabs
 
-#time padrino rake model:build					# generate relation hierarchy
-time padrino rake model:index	                # send mongodb data to ES index
+time padrino rake model:index	                # create/update ES index
