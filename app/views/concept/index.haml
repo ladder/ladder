@@ -1,4 +1,4 @@
-- @title = @concept.heading.join('--')
+- @title = @concept.heading.join(' -- ')
 
 .container
   .row
@@ -9,14 +9,13 @@
           -# RELATION TREE
           - unless @concept.parent.nil? and @concept.children.empty?
             %li.nav-header Relations
-            = partial 'tree', :collection => @concept.root.to_a, :locals => {:model => :concept, :self_id => @concept.id}
+            = partial 'tree', :collection => @concept.root.to_a, :locals => {:model => :concept, :self_id => @concept.id, :show => :last}
 
           -# RELATED RESOURCES
           - unless @concept.resources.empty?
             %li.nav-header Resources
             =list_of(@concept.resources) do |resource|
-              %a{:href => url_for(:resource, :index, :id => resource.id)}
-                #{resource.heading.first}
+              #{link_to resource.heading.first, url_for(:resource, :index, :id => resource.id)}
 
           -# SIMILAR ITEMS
           - unless @concept.similar.empty?

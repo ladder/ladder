@@ -53,7 +53,7 @@ module LadderModel
 
         unless query.instance_of? Class
           # if a document exists, return that
-          result = query.limit(1).first
+          result = query.limit(1).cache.first
 
           return result unless result.nil?
         end

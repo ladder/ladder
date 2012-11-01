@@ -46,10 +46,10 @@ module LadderMapping
 
       # assign relations at the right level
       if resource.parent.nil?
-        relations.each {|rel| rel.parent = resource}
+        resource.children << relations
         resource.save
       else
-        relations.each {|rel| rel.parent = resource.parent}
+        resource.parent.children << relations
         resource.parent.save
       end
 
@@ -90,6 +90,7 @@ module LadderMapping
           :issn     => 'identifier[@type = "issn"]',
           :lccn     => 'identifier[@type = "lccn"]',
           :oclcnum  => 'identifier[@type = "oclc"]',
+          :upc      => 'identifier[@type = "upc"]',
       }
 
       vocabs[:dcterms] = dcterms unless dcterms.empty?
@@ -119,11 +120,11 @@ module LadderMapping
           when 'series'
             @resource.dcterms = DublinCore.new if @resource.dcterms.nil?
             resource.dcterms = DublinCore.new if resource.dcterms.nil?
-            (@resource.dcterms.isPartOf ||= []) <<
+            (@resource.dcterms.isPartOf ||= []) << resource.id
             (resource.dcterms.hasPart ||= []) << @resource.id
-            @resource.parent = resource
+            resource.children << @resource
           when 'host'
-            @resource.parent = resource
+            resource.children << @resource
 
           # child relationship
           when 'constituent'
@@ -131,7 +132,7 @@ module LadderMapping
             resource.dcterms = DublinCore.new if resource.dcterms.nil?
             (@resource.dcterms.hasPart ||= []) << resource.id
             (resource.dcterms.isPartOf ||= []) << @resource.id
-            resource.parent = @resource
+            @resource.children << resource
 
           # sibling-like relationships
           when 'otherVersion'
@@ -159,8 +160,8 @@ module LadderMapping
             (resource.dcterms.isReferencedBy ||= []) << @resource.id
             relations << resource
           when 'original'
-#            @resource.prism = Prism.new if @resource.prism.nil?
-#            (@resource.prism.hasPreviousVersion ||= []) << resource.id
+            @resource.prism = Prism.new if @resource.prism.nil?
+            (@resource.prism.hasPreviousVersion ||= []) << resource.id
             relations << resource
 
           # undefined relationship
@@ -216,7 +217,7 @@ module LadderMapping
 
           concept = Concept.find_or_create_by(:skos => skos)
 
-          concept.parent = current unless current.nil?
+          current.children << concept unless current.nil?
           current = concept
         end
 

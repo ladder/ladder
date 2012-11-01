@@ -35,6 +35,7 @@ Bundler.require(:default, PADRINO_ENV)
 #
 Padrino.before_load do
   I18n.locale = :en  # default to English
+  OpenURI::Cache.cache_path = File.join(PADRINO_ROOT, '/tmp/open-uri')
 end
 
 ##

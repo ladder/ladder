@@ -23,6 +23,8 @@ Ladder.controllers :search do
                              'creator', 'publisher',               # agent facets
                              'subject', 'spatial', 'DDC', 'LCC'] } # concept facets
 
+#    @fields = {:dcterms => [:issued, :format, :language, :creator, :publisher, :subject]}
+
     @results = Resource.tire.search(:page => @page, :per_page => @per_page) do |search|
       search.query do |query|
         query.filtered do |filtered|
@@ -41,6 +43,8 @@ Ladder.controllers :search do
 
         end
       end
+
+#      search.fields @fields
 
       # descriptive facets
       @facets.each do |ns, facet|

@@ -9,35 +9,42 @@
           -# RELATION TREE
           - unless @resource.parent.nil? and @resource.children.empty?
             %li.nav-header Relations
-            = partial 'tree', :collection => @resource.root.to_a, :locals => {:model => :resource, :self_id => @resource.id}
+            - if @resource.parent_ids.empty?
+              = partial 'tree', :collection => @resource.root.to_a, :locals => {:model => :resource, :self_id => @resource.id, :show => :first}
+            - else
+              = partial 'stem', :locals => {:stem => ([@resource] + Resource.find(@resource.parent_ids)), :model => :resource, :show => :first}
 
           -# RELATED AGENTS
           - unless @resource.agents.empty?
             %li.nav-header Agents
             =list_of(@resource.agents) do |agent|
-              %a{:href => url_for(:agent, :index, :id => agent.id)}
-                #{agent.heading.first}
+              #{link_to agent.heading.first, url_for(:agent, :index, :id => agent.id)}
 
           -# RELATED CONCEPTS
           - unless @resource.concepts.empty?
             %li.nav-header Concepts
             =list_of(@resource.concepts) do |concept|
-              = partial 'stem', :locals => {:stem => (Concept.find(concept.parent_ids) + [concept]).reverse!, :model => :concept}
-              %li.divider
+              = partial 'stem', :locals => {:stem => (Concept.find(concept.parent_ids) + [concept]).reverse!, :model => :concept, :show => :last}
 
           -# SIMILAR ITEMS
           - unless @resource.similar.empty?
-            = partial 'similar', :locals => {:document => @resource, :model => :resource}
+            = partial 'similar', :locals => {:document => @resource, :model => :resource, :show => :first}
 
     .span9
       %h1.page-header= @title
-      = partial 'item', :object => Resource.normalize(@resource.as_document)
+
+      .row-fluid
+        .span2
+          -#%img{:src => url_for(:image_index, :model => :resource, :id => @resource.id)}
+
+        .span10
+          = partial 'item', :object => Resource.normalize(@resource.as_document)
 
       - if @resource.mods
         %pre
           %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods
       -# if @resource.marc
         %pre
-          %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
+          %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
 
       %footer &copy; 2012 Deliberate Data

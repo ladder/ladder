@@ -1,3 +1,5 @@
+- show = :join if show.nil?
+
 %li.nav-header Similar
 =list_of(document.similar) do |similar|
 
@@ -9,10 +11,10 @@
   - if @diff1 > 80
     %li.active
       %a.active{:href => url_for(model, :index, :id => similar.id)}
-        #{similar.load.heading.last} (#{@diff1.round}%)
+        #{similar.load.heading.send(show)} (#{@diff1.round}%)
   - else
     %a{:href => url_for(model, :index, :id => similar.id)}
-      #{similar.load.heading.last} (#{@diff1.round}%)
+      #{similar.load.heading.send(show)} (#{@diff1.round}%)
   -#
     - @hashdiff = document.diff(similar)
     - @flattened = document.class.normalize(document.as_document).values.map(&:values).flatten

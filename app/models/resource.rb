@@ -28,7 +28,7 @@ class Resource
   # embedded RDF vocabularies
   embeds_one :dcterms, class_name: "DublinCore"
   embeds_one :bibo,    class_name: "Bibo"
-#  embeds_one :prism,   class_name: "Prism"
+  embeds_one :prism,   class_name: "Prism"
 
   # scopes
   define_scopes
@@ -36,7 +36,7 @@ class Resource
   scope :mods, ->(exists=true) { where(:mods.exists => exists) }
 
   # mongoid indexing
-  define_indexes({:dcterms => [:title, :alternative, :issued, :format, :extent, :language, :identifier, :abstract, :tableOfContents, :publisher, :DDC, :LCC],
+  define_indexes({:dcterms => [:title, :alternative, :issued, :format, :extent, :language, :identifier, :abstract, :tableOfContents, :creator, :publisher, :subject, :DDC, :LCC],
                   :bibo => [:isbn, :issn, :lccn, :oclcnum]})
 
   # model relations

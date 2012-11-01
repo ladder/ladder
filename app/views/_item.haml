@@ -1,10 +1,33 @@
 %table.table.table-bordered.table-striped.table-condensed
   - item.each do |vocab, fields|
     - next if fields.empty?
+
     %tr
       %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}
         = vocab
-    - fields.each do |name, value|
+
+    - fields.each do |name, values|
       %tr
         %td.span2{:style => 'text-transform: capitalize;'}= name
-        %td= value.join('<br/>')
+        %td
+          - values.each do |value|
+
+            - if value.is_a? BSON::ObjectId or !!value.to_s.match(/^[0-9a-f]{24}$/)
+
+              -# TODO: move this into a lookup list on page load
+              -# @see eg: search/results.html :3-6
+              - search = Tire.search { query { string "_id:#{value}" } }
+
+              - if 'concept' == search.results.first.type
+                #{link_to search.results.first.heading.join(' -- '), url_for(search.results.first.type.to_sym, :index, :id => search.results.first.id)}
+              - else
+                #{link_to search.results.first.heading.first, url_for(search.results.first.type.to_sym, :index, :id => search.results.first.id)}
+
+            - elsif :language == name
+              = ISO_639.find(value).english_name
+
+            - else
+              = value
+
+            - unless values.last == value
+              %br

@@ -16,6 +16,7 @@ gem 'parallel' # multi-core processing
 gem 'iso-639'  # english/french lists
 gem 'hashdiff' # hash comparison
 gem 'amatch'   # string comparison
+gem 'open-uri-cached', :require => 'open-uri/cached'
 
 # model gems
 gem 'mongoid', '2.4.12'

@@ -1,12 +1,14 @@
+- show = :join if show.nil?
 - node = stem.pop
 
-- if stem.empty?
+-# highlight if we are at the bottom of a stem
+- if stem.empty? and !node.parent_ids.empty?
   %li.active
-    %a{:href => url_for(model, :index, :id => node.id)}= node.heading.last #FIXME
+    %a{:href => url_for(model, :index, :id => node.id)}= node.heading.send(show)
 - else
   %li
-    %a{:href => url_for(model, :index, :id => node.id)}= node.heading.last #FIXME
+    %a{:href => url_for(model, :index, :id => node.id)}= node.heading.send(show)
 
 - unless stem.empty?
   %ul.nav.nav-list
-    = partial 'stem', :locals => {:stem => stem, :model => :concept}
+    = partial 'stem', :locals => {:stem => stem, :model => model, :show => show}

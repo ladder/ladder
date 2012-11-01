@@ -1,6 +1,14 @@
+%hr{:style => 'margin: 9px 0;'}
+
 .row-fluid
-  .span12.json
+  .span12
     %h3
       #{link_to result.heading, url_for(:resource, :index, :id => result.id)}
       %small (#{result._score})
+
+.row-fluid
+  .span2
+    -#%img{:src => url_for(:image_index, :model => :resource, :id => result.id)}
+
+  .span10
     = partial 'item', :object => Resource.normalize(result.to_hash)

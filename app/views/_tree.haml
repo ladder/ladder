@@ -1,10 +1,12 @@
+- show = :join if show.nil?
+
 - if self_id == tree.id
   %li.active
-    %a= tree.heading.last #FIXME
+    %a= tree.heading.send(show)
 - else
   %li
-    %a{:href => url_for(model, :index, :id => tree.id)}= tree.heading.last #FIXME
+    %a{:href => url_for(model, :index, :id => tree.id)}= tree.heading.send(show)
 
 - if tree.children.size > 0
   %ul.nav.nav-list
-    = partial 'tree', :collection => tree.children, :locals => {:model => model, :self_id => self_id}
+    = partial 'tree', :collection => tree.children, :locals => {:model => model, :self_id => self_id, :show => show}
