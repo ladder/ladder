@@ -16,11 +16,11 @@ set(:run_method) { use_sudo ? :sudo : :run }
 
 default_run_options[:pty] = true
 
-set :user, "deployer"
+set :user, "ladder"
 set :group, user
 set :runner, user
 
-set :host, "#{user}@ministryofcomputation.com"
+set :host, "#{user}@mytpl.ca"
 role :web, host
 role :app, host
 
