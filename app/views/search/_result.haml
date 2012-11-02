@@ -12,4 +12,8 @@
       %img{:src => url_for(:image, :index, :id => result.id)}
 
   .span10
-    = partial 'item', :object => Resource.normalize(result.to_hash)
+    -# TODO: abstract/parameterize this
+    - item = result.to_hash.except(:bibo)
+    - item[:dcterms] = item[:dcterms].slice(:creator, :format, :issued, :publisher, :language, :subject)
+
+    = partial 'item', :object => Resource.normalize(item)

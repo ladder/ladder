@@ -13,7 +13,7 @@
           - @facets.each do |ns, fields|
             - fields.each do |facet|
               - if !@results.facets[facet]['terms'].empty?
-                %li.nav-header= facet.size < 4 ? facet.upcase : facet.capitalize
+                %li.nav-header= facet
 
                 - @results.facets[facet]['terms'].each do |f|
 
@@ -33,7 +33,7 @@
                       %li= link_to @subjects[@subjects.index{|doc| doc.id.to_s == f['term']}].heading.dashjoin + " (#{f['count']})",
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
                     - else
-                      %li= link_to f['term'] + " (#{f['count']})",
+                      %li{:style => 'text-transform: capitalize;'}= link_to f['term'] + " (#{f['count']})",
                             url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
                   - else
                     - if 'language' == facet
@@ -46,7 +46,7 @@
                       %li.active= link_to @subjects[@subjects.index{|doc| doc.id.to_s == f['term']}].heading.dashjoin,
                                   url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
                     - else
-                      %li.active= link_to f['term'],
+                      %li.active{:style => 'text-transform: capitalize;'}= link_to f['term'],
                                   url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
 
     .span9
