@@ -19,7 +19,7 @@
               - search = Tire.search { query { string "_id:#{value}" } }
 
               - if 'concept' == search.results.first.type
-                #{link_to search.results.first.heading.join(' -- '), url_for(search.results.first.type.to_sym, :index, :id => search.results.first.id)}
+                #{link_to search.results.first.heading.dashjoin, url_for(search.results.first.type.to_sym, :index, :id => search.results.first.id)}
               - else
                 #{link_to search.results.first.heading.first, url_for(search.results.first.type.to_sym, :index, :id => search.results.first.id)}
 

@@ -12,6 +12,7 @@
 }
 
 .nav-list li a {
+    # FIXME: this is like a nav-pill?
     margin: auto;
     padding-left: 9px;
     -webkit-border-radius: 3px;

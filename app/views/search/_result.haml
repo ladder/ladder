@@ -8,7 +8,7 @@
 
 .row-fluid
   .span2
-    %a{:href => url_for(:resource, :index, :id => result.id)}
+    %a.thumbnail{:href => url_for(:resource, :index, :id => result.id)}
       %img{:src => url_for(:image, :index, :id => result.id)}
 
   .span10

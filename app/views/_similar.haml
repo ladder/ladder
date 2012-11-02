@@ -1,35 +1,28 @@
 - show = :join if show.nil?
 
-- all_similar = document.similar.to_a.sort! do |a,b|
-  - a_match = document.amatch(a)
-  - b_match = document.amatch(b)
-  - b_match.values.sum / b_match.size <=> a_match.values.sum / a_match.size
+- docs = document.similar.to_a
+- docs.each do |doc|
+  - match = document.amatch(doc)
+  - match[:hamming_similar] = 1 - match[:hamming_similar]
+  - match.delete(:longest_substring_similar)
+  - doc.attributes[:diff] = match.values.sum / match.size
 
 %li.nav-header Similar
-=list_of(all_similar) do |similar|
+%ul
+- docs.sort {|a, b| b.diff <=> a.diff}.each do |similar|
 
-  - @amatch = document.amatch(similar)
-  - @amatch[:hamming_similar] = 1-@amatch[:hamming_similar] unless @amatch[:hamming_similar].nil?
-  - @amatch.delete(:longest_substring_similar)
-  - @diff1 = (@amatch.values.sum / @amatch.size) * 100
-
-  - if @diff1 > 80
+  - if similar.diff > 80
     %li.active{:style => 'margin-bottom: 9px;'}
-      %a.active.thumbnail{:href => url_for(model, :index, :id => similar.id)}
+      %a.active{:href => url_for(model, :index, :id => similar.id)}
         - if document.is_a? Resource # FIXME: just for now
-          %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S)}
-        #{similar.load.heading.send(show)} (#{@diff1.round}%)
+          %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
+        #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
+        .clearfix
 
   - else
     %li{:style => 'margin-bottom: 9px;'}
-      %a.thumbnail{:href => url_for(model, :index, :id => similar.id)}
+      %a{:href => url_for(model, :index, :id => similar.id)}
         - if document.is_a? Resource # FIXME: just for now
-          %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S)}
-        #{similar.load.heading.send(show)} (#{@diff1.round}%)
-
-  -#
-    - @hashdiff = document.diff(similar)
-    - @flattened = document.class.normalize(document.as_document).values.map(&:values).flatten
-    - @diff2 = (@flattened.size - @hashdiff.size) / @hashdiff.size.to_f * 100
-
-    = [@diff1 + @diff2/2, 100].min.round
+          %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
+        #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
+        .clearfix

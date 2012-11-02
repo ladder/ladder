@@ -1,4 +1,4 @@
-- @title = @concept.heading.join(' -- ')
+- @title = @concept.heading.dashjoin
 
 .container
   .row
@@ -16,13 +16,14 @@
             %li.nav-header Resources
             =list_of(@concept.resources) do |resource|
               .null{:style => 'margin-bottom: 9px;'}
-              %a.thumbnail{:href => url_for(:resource, :index, :id => resource.id)}
-                %img.pull-left{:src => url_for(:image, :index, :id => resource.id, :size => :S)}
+              %a{:href => url_for(:resource, :index, :id => resource.id)}
+                %img.pull-left{:src => url_for(:image, :index, :id => resource.id, :size => :S), :style => 'margin-right: 9px;'}
                 #{resource.heading.first}
+                .clearfix
 
           -# SIMILAR ITEMS
           - unless @concept.similar.empty?
-            = partial 'similar', :locals => {:document => @concept, :model => :concept}
+            = partial 'similar', :locals => {:document => @concept, :model => :concept, :show => :dashjoin}
 
     .span9
       %h1.page-header= @title
