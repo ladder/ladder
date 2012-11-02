@@ -2,6 +2,7 @@ source :rubygems
 
 # Server requirements
 gem 'unicorn'
+gem 'rvm-capistrano'
 
 # Project requirements
 gem 'rake'
