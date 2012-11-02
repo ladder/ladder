@@ -2,7 +2,7 @@
 
 .container
   .row{ :style => 'margin-top: 100px' }
-    .span7.offset3
+    .span8.offset2
       - form_tag '/search', :method => 'get', :class => 'form-search' do
         = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring, :autofocus => true
-        = submit_tag 'Search', :class => 'btn'
+        = submit_tag 'Search', :class => 'btn span2'

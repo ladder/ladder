@@ -230,8 +230,11 @@ module LadderModel
         compare = model.as_document
       end
 
-      p1 = self.class.normalize(self.as_document).values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
-      p2 = self.class.normalize(compare).values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p1 = self.class.normalize(self.as_document)
+      p2 = self.class.normalize(compare)
+
+      p1 = p1.values.map(&:values).flatten.map(&:to_s).join#(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p2 = p2.values.map(&:values).flatten.map(&:to_s).join#(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
 
       # Reject Object ID references in comparisons
       # NB: have to use regexp matching for Tire Items
@@ -239,6 +242,7 @@ module LadderModel
       # hash.reject! {|key, value| value.is_a? BSON::ObjectId || value.to_s.match(/^[0-9a-f]{24}$/) }
       # hash.reject! {|key, value| value.is_a? Array and value.flatten.reject { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
 
+      # calculate amatch score for each algorithm
       options.each do |sim, bool|
         options[sim] = p1.send(sim, p2) if bool
       end
