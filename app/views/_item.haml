@@ -8,7 +8,7 @@
 
     - fields.each do |name, values|
       %tr
-        %td.span2{:style => 'text-transform: capitalize;'}= name
+        %td.span2= name.to_s.underscore.humanize
         %td
           - values.each do |value|
 

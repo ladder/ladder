@@ -3,8 +3,13 @@
 
 -# highlight if we are at the bottom of a stem
 - if stem.empty? and !node.parent_ids.empty?
-  %li.active
+  %li.active{:style => 'margin-bottom: 9px;'}
     %a{:href => url_for(model, :index, :id => node.id)}= node.heading.send(show)
+
+- elsif stem.empty?
+  %li{:style => 'margin-bottom: 9px;'}
+    %a{:href => url_for(model, :index, :id => node.id)}= node.heading.send(show)
+
 - else
   %li
     %a{:href => url_for(model, :index, :id => node.id)}= node.heading.send(show)

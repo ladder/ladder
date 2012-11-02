@@ -16,7 +16,7 @@
       .sidebar-nav {
         padding: 9px 0;
       }
-    = javascript_include_tag 'jquery.js', 'bootstrap.js', 'highlight.pack.js'
+    = javascript_include_tag 'jquery.js', 'bootstrap-min.js', 'bootstrap-collapse.js', 'highlight.pack.js'
     <script>hljs.initHighlightingOnLoad();</script>
   %body
     %header
@@ -37,7 +37,7 @@
                 %li
                   %a{:href => "#contact"} Contact
               - form_tag '/search', :method => 'get', :class => 'navbar-search' do
-                = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring, :autofocus => true
+                = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring
                 = submit_tag 'Search', :class => 'btn btn-small'
               %p.navbar-text.pull-right
                 Logged in as

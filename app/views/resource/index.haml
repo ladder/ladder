@@ -35,16 +35,25 @@
 
       .row-fluid
         .span2
-          -#%img{:src => url_for(:image_index, :model => :resource, :id => @resource.id)}
+          %img{:src => url_for(:image, :index, :id => @resource.id)}
 
         .span10
           = partial 'item', :object => Resource.normalize(@resource.as_document)
 
       - if @resource.mods
-        %pre
-          %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods
-      -# if @resource.marc
-        %pre
-          %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
+        .row-fluid
+          .span2
+            %a.pull-right{:'data-toggle' => "collapse", :href => '#collapseMODS'} MODS
+          .span10
+            %pre.accordion-body.collapse#collapseMODS
+              %code{:style => 'background-color: #F4F4F4;'}&= @resource.mods
+
+      - if @resource.marc
+        .row-fluid
+          .span2
+            %a.pull-right{:'data-toggle' => "collapse", :href => '#collapseMARC'} MARC
+          .span10
+            %pre.accordion-body.collapse#collapseMARC
+              %code{:style => 'background-color: #F4F4F4;'}= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc).to_hash, :object_nl => "\n", :indent => " ") if @resource.marc
 
       %footer &copy; 2012 Deliberate Data

@@ -19,11 +19,15 @@ Ladder.controllers :search do
     session[:querystring] = @querystring
 #    session[:filters] = JSON.dump(@filters)
 
-    @facets = {'dcterms' => ['issued', 'format', 'language',       # descriptive facets
+    @facets = {'dcterms' => ['format', 'language', 'issued',       # descriptive facets
                              'creator', 'publisher',               # agent facets
                              'subject', 'spatial', 'DDC', 'LCC'] } # concept facets
 
+    # TODO: filter nested fields; have to modify/update Tire
 #    @fields = {:dcterms => [:issued, :format, :language, :creator, :publisher, :subject]}
+
+    # TODO: boost results in Model.heading fields (title, atlernative, etc)
+    # TODO: multi-index search?
 
     @results = Resource.tire.search(:page => @page, :per_page => @per_page) do |search|
       search.query do |query|

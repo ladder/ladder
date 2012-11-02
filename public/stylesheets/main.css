@@ -3,7 +3,30 @@
     margin: 0 auto;
 }
 
-.nav-list > .active > a,
-.nav-list > .active > a:hover {
+.nav-list > .active > a {
     opacity: 0.75;
+}
+
+.nav-list > .active > a:hover {
+    opacity: 1;
+}
+
+.nav-list li a {
+    margin: auto;
+    padding-left: 9px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.nav-list li a.thumbnail img.pull-left {
+    margin-right: 9px;
+}
+
+.nav-list li:nth-last-child(odd):not(.active) a {
+    background-color: #f9f9f9;
+}
+
+.nav-list li:nth-last-child(odd):not(.active) a:hover {
+    background-color: #e5e5e5;
 }

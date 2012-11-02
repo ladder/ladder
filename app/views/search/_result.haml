@@ -8,7 +8,8 @@
 
 .row-fluid
   .span2
-    -#%img{:src => url_for(:image_index, :model => :resource, :id => result.id)}
+    %a{:href => url_for(:resource, :index, :id => result.id)}
+      %img{:src => url_for(:image, :index, :id => result.id)}
 
   .span10
     = partial 'item', :object => Resource.normalize(result.to_hash)
