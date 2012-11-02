@@ -39,8 +39,9 @@
               - form_tag '/search', :method => 'get', :class => 'navbar-search' do
                 = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring
                 = submit_tag 'Search', :class => 'btn btn-small'
-              %p.navbar-text.pull-right
-                Logged in as
-                %a{:href => "#"} username
-    #main= yield
+              -#
+                %p.navbar-text.pull-right
+                  Logged in as
+                  %a{:href => "#"} username
+    #main.container= yield
     %footer
