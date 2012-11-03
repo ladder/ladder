@@ -3,6 +3,8 @@ module Tire
 
     class Item
 
+      attr_reader :attributes
+
       def class
         defined?(::Padrino) && @attributes[:_type] ? @attributes[:_type].camelize.constantize : super
       rescue NameError
@@ -10,22 +12,26 @@ module Tire
       end
 
     end
-
   end
+end
 
+module Tire
+  module Search
+
+    class Search
+
+      def min_score(value)
+        @min_score = value
+        self
+      end
+
+    end
+  end
 end
 
 module Tire
   module Model
 
-    # Main module containing the infrastructure for automatic updating
-    # of the _ElasticSearch_ index on model instance create, update or delete.
-    #
-    # Include it in your model: `include Tire::Model::Callbacks`
-    #
-    # The model must respond to `after_save` and `after_destroy` callbacks
-    # (ActiveModel and ActiveRecord models do so, by default).
-    #
     module Callbacks2
       extend ActiveSupport::Concern
 
