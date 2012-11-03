@@ -1,23 +1,4 @@
 GIT
-  remote: git://github.com/mjsuhonos/kaminari.git
-  revision: bf16d204a4d4dbbfd5e6338e948aeecee05c0c74
-  specs:
-    kaminari (0.13.0)
-      actionpack (>= 3.0.0)
-      activesupport (>= 3.0.0)
-
-GIT
-  remote: git://github.com/mjsuhonos/tire.git
-  revision: 2a909ced4bc728275028b6e5f953d89e758eb247
-  specs:
-    tire (0.4.2)
-      activemodel (>= 3.0)
-      hashr (~> 0.0.19)
-      multi_json (~> 1.0)
-      rake
-      rest-client (~> 1.6)
-
-GIT
   remote: git://github.com/mtrudel/easel.git
   revision: f5b875c769aa2bc0e540931ec6a69c1310738d61
   specs:
@@ -73,6 +54,9 @@ GEM
     i18n (0.6.1)
     iso-639 (0.1.0)
     journey (1.0.4)
+    kaminari (0.14.1)
+      actionpack (>= 3.0.0)
+      activesupport (>= 3.0.0)
     kgio (2.7.4)
     mail (2.3.3)
       i18n (>= 0.4.0)
@@ -149,8 +133,6 @@ GEM
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
       tilt (~> 1.3, >= 1.3.3)
-    sinatra-flash (0.3.0)
-      sinatra (>= 1.0.0)
     sprockets (2.1.3)
       hike (~> 1.2)
       rack (~> 1.0)
@@ -158,6 +140,12 @@ GEM
     thor (0.15.4)
     tilt (1.3.3)
     tins (0.6.0)
+    tire (0.4.3)
+      activemodel (>= 3.0)
+      hashr (~> 0.0.19)
+      multi_json (~> 1.0)
+      rake
+      rest-client (~> 1.6)
     treetop (1.4.12)
       polyglot
       polyglot (>= 0.3.1)
@@ -181,7 +169,7 @@ DEPENDENCIES
   haml
   hashdiff
   iso-639
-  kaminari!
+  kaminari
   marc
   mongoid (= 2.4.12)
   mongoid-tree (= 0.7.0)
@@ -191,9 +179,7 @@ DEPENDENCIES
   padrino-helpers
   parallel
   rake
-  rdf
   rvm-capistrano
-  sinatra-flash
-  tire!
+  tire
   unicorn
   yajl-ruby

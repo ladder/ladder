@@ -108,7 +108,7 @@ module LadderModel
 
       # ElasticSearch integration
       base.send :include, Tire::Model::Search
-      base.send :include, Tire::Model::Callbacks
+      base.send :include, Tire::Model::Callbacks2 # local patched version
 
       # dynamic templates to store un-analyzed values for faceting
       base.send :mapping, :dynamic_templates => [{

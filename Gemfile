@@ -6,28 +6,24 @@ gem 'rvm-capistrano'
 
 # Project requirements
 gem 'rake'
-gem 'sinatra-flash', :require => 'sinatra/flash'
+gem 'haml'
 
 # Component requirements
-gem 'haml'
-gem 'yajl-ruby', :require => 'yajl/json_gem'
-gem 'bson_ext', :require => 'mongo'
 gem 'nokogiri' # xml manipulation
 gem 'parallel' # multi-core processing
 gem 'iso-639'  # english/french lists
 gem 'hashdiff' # hash comparison
 gem 'amatch'   # string comparison
-gem 'open-uri-cached', :require => 'open-uri/cached'
+gem 'yajl-ruby', :require => 'yajl/json_gem'
 
 # model gems
 gem 'mongoid', '2.4.12'
 gem 'mongoid-tree', '0.7.0', :require => 'mongoid/tree'
-#gem 'mongoid-history'
-gem 'kaminari', :require => 'kaminari/sinatra', :git => 'git://github.com/mjsuhonos/kaminari.git'
-gem 'tire', :git => 'git://github.com/mjsuhonos/tire.git'
+gem 'bson_ext', :require => 'mongo'
+gem 'kaminari', :require => 'kaminari/sinatra'
+gem 'tire'
 
 # linked data gems
-gem 'rdf'
 gem 'easel', :git => 'git://github.com/mtrudel/easel.git'
 
 # gems for importing existing data
@@ -36,6 +32,7 @@ gem 'gyoku'
 
 # gems for service endpoints
 #gem 'zoom'
+gem 'open-uri-cached', :require => 'open-uri/cached'
 
 # Test/debug requirements
 #gem 'pry'
