@@ -1,7 +1,8 @@
 #! /bin/bash
 
-curl -XDELETE http://localhost:9200/    # clear ES index
-padrino rake -e production mi:drop                    # clear mongodb
+curl -XDELETE http://localhost:9200/
+padrino rake -e production mi:drop
+padrino rake -e production mi:create_indexes
 
 for f in $*
 do
@@ -10,4 +11,4 @@ do
     time padrino rake -e production map:mods
 done
 
-time padrino rake -e production model:index           # reindex everything
+time padrino rake -e production model:index
