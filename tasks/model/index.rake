@@ -26,6 +26,8 @@ namespace :model do
       klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30
 
       Parallel.each(chunks) do |chunk|
+        # force mongoid to create a new session for each chunk
+        Mongoid::Sessions.clear
 
         klass.tire.index.bulk_store chunk
 

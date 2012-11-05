@@ -23,6 +23,8 @@ namespace :map do
     Concept.skip_callback(:save, :after, :update_index)
 
     Parallel.each(chunks) do |chunk|
+      # force mongoid to create a new session for each chunk
+      Mongoid::Sessions.clear
 
       chunk.each do |resource|
         # load MODS XML document

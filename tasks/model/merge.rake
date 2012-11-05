@@ -25,6 +25,9 @@ namespace :model do
       klass.reset_callbacks(:validation)
 
       Parallel.each(chunks) do |chunk|
+        # force mongoid to create a new session for each chunk
+        Mongoid::Sessions.clear
+
         deleted = []
 
         chunk.each do |doc|

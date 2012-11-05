@@ -17,9 +17,10 @@ gem 'amatch'   # string comparison
 gem 'yajl-ruby', :require => 'yajl/json_gem'
 
 # model gems
-gem 'mongoid', '2.4.12'
-gem 'mongoid-tree', '0.7.0', :require => 'mongoid/tree'
 gem 'bson_ext', :require => 'mongo'
+gem 'mongo', :require => 'mongo'
+gem 'mongoid', '~> 3.0.0'
+gem 'mongoid-tree', :require => 'mongoid/tree'
 gem 'kaminari', :require => 'kaminari/sinatra'
 gem 'tire'
 
@@ -28,7 +29,7 @@ gem 'easel', :git => 'git://github.com/mtrudel/easel.git'
 
 # gems for importing existing data
 gem 'marc'
-gem 'gyoku'
+gem 'gyoku' # NB: this can cause bundle update problems
 
 # gems for service endpoints
 #gem 'zoom'
@@ -37,6 +38,6 @@ gem 'open-uri-cached', :require => 'open-uri/cached'
 # Test/debug requirements
 #gem 'pry'
 
-# Padrino Stable Gem
-gem 'padrino', '0.10.7'
+# Padrino master branch
+gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
 gem 'padrino-helpers'

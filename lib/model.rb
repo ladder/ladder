@@ -27,7 +27,7 @@ module LadderModel
             if field.is_a? Array and !vocabs[embed.name].nil?
               # only index defined fields
               if vocabs[embed.name].include? field.first.to_sym
-                index [["#{embed.key}.#{field.first}", Mongo::ASCENDING]]
+                index "#{embed.key}.#{field.first}" => 1
               end
             end
           end
@@ -53,7 +53,7 @@ module LadderModel
 
         unless query.instance_of? Class
           # if a document exists, return that
-          result = query.limit(1).cache.first
+          result = query.limit(1).first
 
           return result unless result.nil?
         end
@@ -95,7 +95,6 @@ module LadderModel
 
     def self.included(base)
       base.send :include, Mongoid::Document
-      base.send :cache
 
       # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
       base.send :include, Mongoid::Paranoia # soft deletes
@@ -301,16 +300,45 @@ end
 #
 
 class CompressedBinary
-  include Mongoid::Fields::Serializable
 
-  def serialize(string)
-    # compress string for storage
-    string ? Base64.encode64(ActiveSupport::Gzip.compress(string)) : string
+  attr_reader :bytestream
+
+  def initialize(bytestream)
+    @bytestream = bytestream
   end
 
-  def deserialize(compressed)
-    # decompress string
-    compressed ? ActiveSupport::Gzip.decompress(Base64.decode64(compressed)) : compressed
+  # Converts an object of this instance into a database friendly value.
+  def mongoize
+    Base64.encode64(ActiveSupport::Gzip.compress(@bytestream))
+  end
+
+  class << self
+
+    # Get the string as it was stored in the database, and instantiate
+    # this custom class from it.
+    def demongoize(encoded)
+      CompressedBinary.new(ActiveSupport::Gzip.decompress(Base64.decode64(encoded))).bytestream
+    end
+
+    # Takes any possible object and converts it to how it would be
+    # stored in the database.
+    def mongoize(object)
+      case object
+        when CompressedBinary then object.mongoize
+        when String then CompressedBinary.new(object).mongoize
+        else object
+      end
+    end
+
+    # Converts the object that was supplied to a criteria and converts it
+    # into a database friendly form.
+    def evolve(object)
+      case object
+        when CompressedBinary then object.mongoize
+        else object
+      end
+    end
+
   end
 
 end

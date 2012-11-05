@@ -26,6 +26,8 @@ namespace :import do
       # load records from file
       reader = MARC::Reader.new(file)
 
+      resources = []
+
       reader.each do |record|
 
         # ensure we are importing valid UTF-8 MARC
@@ -38,8 +40,20 @@ namespace :import do
         end
 
         # create a new resource for this MARC record
-        Resource.new({:marc => marc}).save
+        resource = Resource.new(:marc => marc)
+        resource.set_created_at
+
+        # add resource to mongoid bulk stack
+        resources << resource.as_document
+
+        if resources.size > 1000
+          Resource.collection.insert(resources)
+          resources = []
+        end
       end
+
+      # make sure we insert anything left over from the last chunk
+      Resource.collection.insert(resources)
 
       puts "Finished importing: #{file}"
     end

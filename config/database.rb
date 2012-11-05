@@ -9,16 +9,10 @@ database_name = case Padrino.env
   when :test        then 'ladder_test'
 end
 
-Mongoid.database = Mongo::Connection.new(
-  host,
-  port,
-  # NB: this causes problems when deploying to Unicorn
-#  {:pool_size => Parallel.physical_processor_count,
-#   :logger => Padrino.logger
-#  }
-).db(database_name)
+Mongoid::Config.sessions = {default: {hosts: ["#{host}:#{port}"], database: database_name}}
 
-Mongoid.max_retries_on_connection_failure = 2
+# @see: http://mongoid.org/en/mongoid/docs/installation.html#configuration
+#Mongoid::Config.options  = {identity_map_enabled: true}
 
-# @see: http://martinfowler.com/eaaCatalog/identityMap.html
-#Mongoid.identity_map_enabled = true
+#Mongoid.logger = Padrino.logger
+#Moped.logger = Padrino.logger

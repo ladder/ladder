@@ -23,6 +23,8 @@ namespace :model do
       klass.skip_callback(:save, :after, :update_index)
 
       Parallel.each(chunks) do |chunk|
+        # force mongoid to create a new session for each chunk
+        Mongoid::Sessions.clear
 
         # save each document; this will only update the hierarchy
         chunk.each(&:save)

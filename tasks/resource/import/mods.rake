@@ -24,6 +24,7 @@ namespace :import do
     Parallel.each(files) do |file|
 
       # create a new resource for this MODS file
+      # NB: we don't do this in batch because files may be large (multiple MB)
       Resource.new({:mods => IO.read(file)}).save
 
       puts "Finished importing: #{file}"

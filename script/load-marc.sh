@@ -4,7 +4,7 @@
 env="development"
 
 padrino rake -e $env tire:index:drop INDEX=agents,concepts,resources
-padrino rake -e $env mi:drop
+padrino rake -e $env mi:purge
 padrino rake -e $env mi:create_indexes
 
 for f in $*
