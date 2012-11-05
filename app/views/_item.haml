@@ -2,13 +2,15 @@
   - item.each do |vocab, fields|
     - next if fields.empty?
 
-    %tr
-      %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}
-        = vocab
+    - if !heading.nil?
+      %tr
+        %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}
+          = vocab
 
     - fields.each do |name, values|
       %tr
-        %td.span2= name.to_s.underscore.humanize
+        %td.span2
+          %strong= name.to_s.underscore.humanize
         %td
           - values.each do |value|
 

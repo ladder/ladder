@@ -190,7 +190,7 @@ module LadderMapping
 
         agent = Agent.find_or_create_by(:foaf => foaf)
 
-        next if @resource.agent_ids.nil? or @resource.agent_ids.map(&:to_s).include? agent.id.to_s
+        next if !@resource.agent_ids.nil? and @resource.agent_ids.map(&:to_s).include? agent.id.to_s
         next if agents.include? agent or @resource.agents.include? agent
 
         agents << agent
@@ -221,7 +221,7 @@ module LadderMapping
           current = concept
         end
 
-        next if @resource.concept_ids.nil? or @resource.concept_ids.map(&:to_s).include? current.id.to_s
+        next if !@resource.concept_ids.nil? and @resource.concept_ids.map(&:to_s).include? current.id.to_s
         next if concepts.include? current or @resource.concepts.include? current
 
         concepts << current

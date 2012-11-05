@@ -3,7 +3,6 @@ log/**/*
 tmp/**/*
 bin/
 vendor/
-public/uri-cache/
 .sass-cache/
 .idea/
 .bundle/

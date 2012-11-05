@@ -8,7 +8,7 @@
 .container
   .row
     .span3
-      .well.sidebar-nav
+      .well.sidebar-nav.hidden-phone
         %ul.nav.nav-list
           - @facets.each do |ns, fields|
             - fields.each do |facet|

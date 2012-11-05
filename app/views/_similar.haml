@@ -2,27 +2,31 @@
 
 - docs = document.similar.to_a
 - docs.each do |doc|
-  - match = document.amatch(doc)
-  - match[:hamming_similar] = 1 - match[:hamming_similar]
-  - match.delete(:longest_substring_similar)
+  - match = document.amatch(doc, {:jaro_similar => true,
+                                  :jarowinkler_similar => true,
+                                  :levenshtein_similar => true,
+                                  :longest_subsequence_similar => true,
+                                  :pair_distance_similar => true})
   - doc.attributes[:diff] = match.values.sum / match.size
+- docs.delete_if {|doc| doc.diff < 0.5}
 
-%li.nav-header Similar
-%ul
-- docs.sort {|a, b| b.diff <=> a.diff}.each do |similar|
+- unless docs.empty?
+  %li.nav-header Similar
+  %ul
+  - docs.sort {|a, b| b.diff <=> a.diff}.each do |similar|
 
-  - if similar.diff > 80
-    %li.active{:style => 'margin-bottom: 9px;'}
-      %a.active{:href => url_for(model, :index, :id => similar.id)}
-        - if document.is_a? Resource # FIXME: just for now
-          %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
-        #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
-        .clearfix
+    - if similar.diff > 0.8
+      %li.active{:style => 'margin-bottom: 9px;'}
+        %a.active{:href => url_for(model, :index, :id => similar.id)}
+          - if document.is_a? Resource # FIXME: just for now
+            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
+          #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
+          .clearfix
 
-  - else
-    %li{:style => 'margin-bottom: 9px;'}
-      %a{:href => url_for(model, :index, :id => similar.id)}
-        - if document.is_a? Resource # FIXME: just for now
-          %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
-        #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
-        .clearfix
+    - else
+      %li{:style => 'margin-bottom: 9px;'}
+        %a{:href => url_for(model, :index, :id => similar.id)}
+          - if document.is_a? Resource # FIXME: just for now
+            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
+          #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
+          .clearfix

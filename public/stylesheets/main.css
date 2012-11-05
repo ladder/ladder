@@ -31,3 +31,7 @@
 .nav-list li:nth-last-child(odd):not(.active) a:hover {
     background-color: #e5e5e5;
 }
+
+pre.accordion-body.collapse code {
+    background-color: #F4F4F4;
+}

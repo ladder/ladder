@@ -233,8 +233,8 @@ module LadderModel
       p1 = self.class.normalize(self.as_document)
       p2 = self.class.normalize(compare)
 
-      p1 = p1.values.map(&:values).flatten.map(&:to_s).join#(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
-      p2 = p2.values.map(&:values).flatten.map(&:to_s).join#(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\]|&&|\|\|/, '')
+      p1 = p1.values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
+      p2 = p2.values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
 
       # Reject Object ID references in comparisons
       # NB: have to use regexp matching for Tire Items
@@ -317,7 +317,10 @@ class CompressedBinary
     # Get the string as it was stored in the database, and instantiate
     # this custom class from it.
     def demongoize(encoded)
-      CompressedBinary.new(ActiveSupport::Gzip.decompress(Base64.decode64(encoded))).bytestream
+      case encoded
+        when encoded.nil? then nil
+        else CompressedBinary.new(ActiveSupport::Gzip.decompress(Base64.decode64(encoded.to_s))).bytestream
+      end
     end
 
     # Takes any possible object and converts it to how it would be
@@ -325,8 +328,7 @@ class CompressedBinary
     def mongoize(object)
       case object
         when CompressedBinary then object.mongoize
-        when String then CompressedBinary.new(object).mongoize
-        else object
+        else CompressedBinary.new(object).mongoize
       end
     end
 

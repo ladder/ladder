@@ -1,19 +1,17 @@
 %hr{:style => 'margin: 9px 0;'}
 
 .row-fluid
-  .span12
-    %h3
-      #{link_to result.heading.first, url_for(:resource, :index, :id => result.id)}
-      %small (#{result._score})
-
-.row-fluid
   .span2
     %a.thumbnail{:href => url_for(:resource, :index, :id => result.id)}
       %img{:src => url_for(:image, :index, :id => result.id)}
 
   .span10
+    %h4
+      #{link_to result.heading.first, url_for(:resource, :index, :id => result.id)}
+      %small (#{result._score})
+
     -# TODO: abstract/parameterize this
     - item = result.to_hash.except(:bibo)
-    - item[:dcterms] = item[:dcterms].slice(:creator, :format, :issued, :publisher, :language, :subject)
+    - item[:dcterms] = item[:dcterms].slice(:creator, :format, :issued, :publisher)
 
     = partial 'item', :object => Resource.normalize(item)
