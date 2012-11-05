@@ -1,14 +1,17 @@
 #! /bin/bash
 
-curl -XDELETE http://localhost:9200/    # clear ES index
-padrino rake mi:drop                    # clear mongodb
-padrino rake mi:create_indexes          # create indexes
+# change to working environment
+env="development"
+
+padrino rake -e $env tire:index:drop INDEX=agents,concepts,resources
+padrino rake -e $env mi:drop
+padrino rake -e $env mi:create_indexes
 
 for f in $*
 do
-    time padrino rake import:marc["$f"]
-    time padrino rake map:marc
-    time padrino rake map:mods
+    time padrino rake -e $env import:marc["$f"]
+    time padrino rake -e $env map:marc
+    time padrino rake -e $env map:mods
 done
 
-time padrino rake model:index           # reindex everything
+time padrino rake -e $env model:index

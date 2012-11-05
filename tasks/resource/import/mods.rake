@@ -19,36 +19,12 @@ namespace :import do
       files = [path]
     end
 
-    puts "Importing #{files.size} MODS file(s) using #{Parallel.processor_count} processors..."
+    puts "Importing #{files.size} MODS file(s) using #{[files.size, Parallel.processor_count].min} processors..."
 
     Parallel.each(files) do |file|
 
-      resources = []
-      size = 0
-
-      files.each do |file|
-
-        # create a new resource for this MODS file
-        resource = Resource.new
-        resource.set_created_at
-        resource.mods = IO.read(file)
-
-        # add resource to mongoid bulk stack
-        r = resource.as_document
-        resources << r
-
-        # use 128KB chunks (empirically seems fastest)
-        size += BSON.serialize(r).size
-        if size > 131000
-          Resource.collection.insert(resources)
-          resources = []
-          size = 0
-        end
-
-      end
-
-      # make sure we insert anything left over from the last chunk
-      Resource.collection.insert(resources)
+      # create a new resource for this MODS file
+      Resource.new({:mods => IO.read(file)}).save
 
       puts "Finished importing: #{file}"
     end

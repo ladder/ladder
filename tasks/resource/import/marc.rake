@@ -19,47 +19,27 @@ namespace :import do
       files = [path]
     end
 
-    puts "Importing #{files.size} MARC file(s) using #{Parallel.processor_count} processors..."
+    puts "Importing #{files.size} MARC file(s) using #{[files.size, Parallel.processor_count].min} processors..."
 
     Parallel.each(files) do |file|
 
       # load records from file
       reader = MARC::Reader.new(file)
 
-      resources = []
-      size = 0
-
       reader.each do |record|
-
-        # create a new resource for this MARC record
-        resource = Resource.new
-        resource.set_created_at
 
         # ensure we are importing valid UTF-8 MARC
         marc = record.to_marc
 
-        if marc.force_encoding('UTF-8').valid_encoding?
-          resource.marc = marc
-        else
-          resource.marc = marc.encode!('UTF-8', 'UTF-8', :invalid => :replace)
+        if !marc.valid_encoding?# or !marc.force_encoding('UTF-8').valid_encoding?
+          puts 'Detected bad encoding, fixing...'
+          marc = marc.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
+          marc = marc.encode!('UTF-8', 'UTF-16')
         end
 
-        # add resource to mongoid bulk stack
-        r = resource.as_document
-        resources << r
-
-        # use 128KB chunks (empirically seems fastest)
-        size += BSON.serialize(r).size
-        if size > 131000
-          Resource.collection.insert(resources)
-          resources = []
-          size = 0
-        end
-
+        # create a new resource for this MARC record
+        Resource.new({:marc => marc}).save
       end
-
-      # make sure we insert anything left over from the last chunk
-      Resource.collection.insert(resources)
 
       puts "Finished importing: #{file}"
     end
