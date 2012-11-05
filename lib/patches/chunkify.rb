@@ -10,10 +10,9 @@ module Mongoid
       options = {:per => 1000}.merge(opts)
 
       chunks = []
-      pages = (self.count / options[:per].to_f).ceil
 
-      for i in 1..pages
-        chunks << self.page(i).per(options[:per])
+      0.step(self.count, options[:per]) do |offset|
+        chunks << self.limit(options[:per]).skip(offset)
       end
 
       puts "Using #{chunks.size} chunks of #{options[:per]} objects..."

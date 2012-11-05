@@ -95,7 +95,7 @@ module LadderModel
 
     def self.included(base)
       base.send :include, Mongoid::Document
-      cache
+      base.send :cache
 
       # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
       base.send :include, Mongoid::Paranoia # soft deletes
