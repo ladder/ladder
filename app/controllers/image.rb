@@ -7,7 +7,7 @@ Ladder.controllers :image do
     @resource = Resource.find(params[:id])
 
     # do lookup on each ISBN in order
-    isbns = @resource.bibo.isbn
+    isbns = @resource.bibo.isbn rescue nil
 
     while !isbns.nil? and !isbns.empty?
       # get a numeric-only ISBN to look up
