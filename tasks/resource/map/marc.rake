@@ -29,6 +29,8 @@ namespace :map do
       # force mongoid to create a new session for each chunk
       Mongoid::Sessions.clear
 
+      # TODO: we could do this in batches of 1000 (like import)
+      # or skip storing the MODS and just map through directly
       chunk.each do |resource|
         mapping.map(resource).save
       end

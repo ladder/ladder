@@ -22,8 +22,8 @@ class Resource
   include LadderModel::Core
 
   # imported data objects
-  field :marc, :type => CompressedBinary
-  field :mods, :type => CompressedBinary
+  field :marc, type: Moped::BSON::Binary
+  field :mods, type: Moped::BSON::Binary
 
   # embedded RDF vocabularies
   embeds_one :dcterms, class_name: "DublinCore"

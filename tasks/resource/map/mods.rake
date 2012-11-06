@@ -28,7 +28,7 @@ namespace :map do
 
       chunk.each do |resource|
         # load MODS XML document
-        xml = Nokogiri::XML(resource.mods).remove_namespaces!
+        xml = Nokogiri::XML(resource.mods.to_s).remove_namespaces!
 
         # instantiate mapping object
         mapping = LadderMapping::MODS.new
