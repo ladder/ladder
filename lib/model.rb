@@ -319,6 +319,7 @@ class CompressedBinary
     def demongoize(encoded)
       case encoded
         when encoded.nil? then nil
+        when encoded.to_s.empty? then nil
         else CompressedBinary.new(ActiveSupport::Gzip.decompress(Base64.decode64(encoded.to_s))).bytestream
       end
     end
