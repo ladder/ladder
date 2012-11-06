@@ -43,6 +43,11 @@ Ladder.controllers :image do
     unless data.nil?
       content_type data.content_type
       body data.read
+    else
+      # send an empty 1x1 GIF
+      content_type 'image/gif'
+      body Base64.decode64('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==')
+      halt 200
     end
 
   end

@@ -317,11 +317,9 @@ class CompressedBinary
     # Get the string as it was stored in the database, and instantiate
     # this custom class from it.
     def demongoize(encoded)
-      case encoded
-        when encoded.nil? then nil
-        when encoded.to_s.empty? then nil
-        else CompressedBinary.new(ActiveSupport::Gzip.decompress(Base64.decode64(encoded.to_s))).bytestream
-      end
+      return nil if encoded.nil?
+
+      CompressedBinary.new(ActiveSupport::Gzip.decompress(Base64.decode64(encoded.to_s))).bytestream
     end
 
     # Takes any possible object and converts it to how it would be
