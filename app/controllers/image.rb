@@ -9,7 +9,7 @@ Ladder.controllers :image do
     # do lookup on each ISBN in order
     isbns = @resource.bibo.isbn
 
-    while !isbns.empty?
+    while !isbns.nil? and !isbns.empty?
       # get a numeric-only ISBN to look up
       isbn = isbns.pop.gsub(/[^0-9]/i, '')
 
