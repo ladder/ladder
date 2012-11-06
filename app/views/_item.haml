@@ -1,3 +1,5 @@
+- heading = nil if heading.nil?
+
 %table.table.table-bordered.table-striped.table-condensed
   - item.each do |vocab, fields|
     - next if fields.empty?
