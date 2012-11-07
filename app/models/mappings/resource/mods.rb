@@ -93,8 +93,13 @@ module LadderMapping
           :upc      => 'identifier[@type = "upc"]',
       }
 
+      prism = map_xpath node, {
+          :edition     => 'originInfo/edition',
+      }
+
       vocabs[:dcterms] = dcterms unless dcterms.empty?
       vocabs[:bibo] = bibo unless bibo.empty?
+      vocabs[:prism] = prism unless prism.empty?
 
       vocabs
     end
@@ -210,6 +215,7 @@ module LadderMapping
         current = nil
 
         node.element_children.each do |subnode|
+          # TODO: if subnode.name is name or titleInfo, link to an Agent or Resource
 
           # NB: this xpath is slightly slower due to repetition, but simpler
           skos = map_xpath subnode, {:prefLabel  => 'preceding-sibling::* | .'}

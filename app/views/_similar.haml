@@ -19,14 +19,16 @@
       %li.active{:style => 'margin-bottom: 9px;'}
         %a.active{:href => url_for(model, :index, :id => similar.id)}
           - if document.is_a? Resource # FIXME: just for now
-            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
-          #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
+            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
+          #{similar.load.heading.send(show)}
+          %small.muted (#{(similar.diff * 100).round}%)
           .clearfix
 
     - else
       %li{:style => 'margin-bottom: 9px;'}
         %a{:href => url_for(model, :index, :id => similar.id)}
           - if document.is_a? Resource # FIXME: just for now
-            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px;'}
-          #{similar.load.heading.send(show)} (#{(similar.diff * 100).round}%)
+            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
+          #{similar.load.heading.send(show)}
+          %small.muted (#{(similar.diff * 100).round}%)
           .clearfix

@@ -37,7 +37,8 @@ class Resource
 
   # mongoid indexing
   define_indexes({:dcterms => [:title, :alternative, :issued, :format, :extent, :language, :identifier, :abstract, :tableOfContents, :creator, :publisher, :subject, :DDC, :LCC],
-                  :bibo => [:isbn, :issn, :lccn, :oclcnum]})
+                  :bibo => [:isbn, :issn, :lccn, :oclcnum],
+                  :prism => [:edition]})
 
   # model relations
   has_and_belongs_to_many :agents, index: true

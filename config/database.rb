@@ -16,3 +16,4 @@ Mongoid::Config.sessions = {default: {hosts: ["#{host}:#{port}"], database: data
 
 #Mongoid.logger = Padrino.logger
 #Moped.logger = Padrino.logger
+#Tire.configure { logger STDERR, level: Padrino.logger.level }
