@@ -40,7 +40,7 @@ namespace :import do
         end
 
         # create a new resource for this MARC record
-        resource = Resource.new(:marc => Moped::BSON::Binary.new(:generic, marc))
+        resource = Resource.new(:marc => marc)
         resource.set_created_at
 
         # add resource to mongoid bulk stack

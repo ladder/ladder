@@ -7,7 +7,7 @@ namespace :mi do
     collections = Mongoid::Sessions.default.collections
 
     collections.each do |collection|
-      puts "Purging collection #{collection.name}..."
+      puts "* Purging collection #{collection.name}..."
       collection.drop
     end
 
