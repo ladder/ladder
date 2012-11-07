@@ -90,6 +90,7 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     kgio (2.7.4)
+    lz4-ruby (0.1.7)
     mail (2.3.3)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
@@ -178,6 +179,7 @@ DEPENDENCIES
   hashdiff
   iso-639
   kaminari
+  lz4-ruby
   marc
   mongo
   mongoid (~> 3.0.0)

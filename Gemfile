@@ -9,6 +9,7 @@ gem 'rake'
 gem 'haml'
 
 # Component requirements
+gem 'lz4-ruby' # binary compression
 gem 'nokogiri' # xml manipulation
 gem 'parallel' # multi-core processing
 gem 'iso-639'  # english/french lists

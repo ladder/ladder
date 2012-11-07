@@ -2,7 +2,9 @@
 # Compress binary objects for storage
 # @see: https://github.com/mongoid/mongoid/issues/2219#issuecomment-7161839
 #
-# Note: Snappy and LZ4 are both about 50% faster, but about 35% larger
+# Note: Snappy and LZ4 are both about 50% faster, but about 35% larger, than zlib
+# Snappy, LZ4 -> 65%  ;  Zlib -> 48%
+#
 # @see: https://github.com/willglynn/snappy-ruby
 # @see: https://github.com/komiya-atsushi/lz4-ruby
 #
@@ -12,12 +14,12 @@ class CompressedBinary
   attr_reader :object
 
   def initialize(object)
-    @object = object#.force_encoding('ASCII-8BIT')
+    @object = object
   end
 
   def mongoize
     return unless self
-    compressed_string = Zlib::Deflate.deflate(@object)
+    compressed_string = LZ4::compress(@object.force_encoding('ASCII-8BIT'))
     serialized_object = Moped::BSON::Binary.new(:generic, compressed_string)
   end
 
@@ -31,7 +33,7 @@ class CompressedBinary
 
   def self.demongoize(serialized_object)
     return unless serialized_object
-    decompressed_string = Zlib::Inflate.inflate(serialized_object.to_s)
+    decompressed_string = LZ4::uncompress(serialized_object.to_s)
     decompressed_string.to_s
   end
 end
