@@ -40,10 +40,17 @@
         .span10
           = partial 'item', :object => Resource.normalize(@resource.as_document), :locals => {:heading => true}
 
+      .row-fluid
+        .span2
+          %a.pull-right{:href => '#collapseRDF', :'data-toggle' => "collapse"} RDF/XML
+        .span10
+          %pre.accordion-body.collapse#collapseRDF
+            %code&= @resource.to_rdfxml(url_for(request.path_info))
+
       - if @resource.mods
         .row-fluid
           .span2
-            %a.pull-right{:'data-toggle' => "collapse", :href => '#collapseMODS'} MODS
+            %a.pull-right{:href => '#collapseMODS', :'data-toggle' => "collapse"} MODS
           .span10
             %pre.accordion-body.collapse#collapseMODS
               %code&= @resource.mods.to_s
@@ -51,7 +58,7 @@
       - if @resource.marc
         .row-fluid
           .span2
-            %a.pull-right{:'data-toggle' => "collapse", :href => '#collapseMARC'} MARC
+            %a.pull-right{:href => '#collapseMARC', :'data-toggle' => "collapse"} MARC
           .span10
             %pre.accordion-body.collapse#collapseMARC
               %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc.to_s).to_hash, :object_nl => "\n", :indent => " ")

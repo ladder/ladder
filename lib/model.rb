@@ -287,6 +287,16 @@ module LadderModel
       hash.to_json
     end
 
+    def to_rdfxml(url)
+      RDF::RDFXML::Writer.buffer do |writer|
+        # get the RDF graph for each vocab
+        self.vocabs.each do |key, object|
+          writer << object.to_rdf(RDF::URI.new(url))
+        end
+
+      end
+    end
+
   end
 
   module Embedded

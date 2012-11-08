@@ -27,6 +27,13 @@
 
     .span9
       %h1.page-header= @title
-      = partial 'item', :object => Agent.normalize(@agent.as_document)
+      = partial 'item', :object => Agent.normalize(@agent.as_document), :locals => {:heading => true}
+
+      .row-fluid
+        .span2
+          %a.pull-right{:href => '#collapseRDF', :'data-toggle' => "collapse"} RDF/XML
+        .span10
+          %pre.accordion-body.collapse#collapseRDF
+            %code&= @agent.to_rdfxml(url_for(request.path_info))
 
       %footer &copy; 2012 Deliberate Data

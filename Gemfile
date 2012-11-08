@@ -27,6 +27,7 @@ gem 'tire'
 
 # linked data gems
 gem 'easel', :git => 'git://github.com/mtrudel/easel.git'
+gem 'rdf-rdfxml'
 
 # gems for importing existing data
 gem 'marc'
@@ -38,6 +39,7 @@ gem 'open-uri-cached', :require => 'open-uri/cached'
 
 # Test/debug requirements
 #gem 'pry'
+gem 'wirble'
 
 # Padrino master branch
 gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
