@@ -19,7 +19,7 @@ class CompressedBinary
 
   def mongoize
     return unless self
-    compressed_string = LZ4::compress(@object.force_encoding('ASCII-8BIT'))
+    compressed_string = LZ4::compress(Marshal.dump(object))
     serialized_object = Moped::BSON::Binary.new(:generic, compressed_string)
   end
 
@@ -34,6 +34,6 @@ class CompressedBinary
   def self.demongoize(serialized_object)
     return unless serialized_object
     decompressed_string = LZ4::uncompress(serialized_object.to_s)
-    decompressed_string.to_s
+    Marshal.load(decompressed_string)
   end
 end
