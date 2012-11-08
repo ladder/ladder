@@ -11,7 +11,7 @@ module Mongoid
 
       chunks = []
 
-      0.step(self.count, options[:per]) do |offset|
+      0.step(self.size, options[:per]) do |offset|
         chunks << self.limit(options[:per]).skip(offset)
       end
 

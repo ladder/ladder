@@ -1,27 +1,18 @@
 class FOAF
   include LadderModel::Embedded
-  bind_to RDF::FOAF, :type => Array
+  bind_to RDF::FOAF, :type => Array, :only => [:name, :birthday, :title]
   embedded_in :agent
 end
 
 class VCard
   include LadderModel::Embedded
-  bind_to LadderVocab::VCard, :type => Array
+  bind_to LadderVocab::VCard, :type => Array, :only => []
 
-  # camelCase aliases
-  alias :familyName :'family-name'
-  alias :givenName :'given-name'
-  alias :additionalName :'additional-name'
-  alias :honorificPrefix :'honorific-prefix'
-  alias :honorificSuffix :'honorific-suffix'
-  alias :postOfficeBox :'post-office-box'
-  alias :extendedAddress :'extended-address'
-  alias :streetAddress :'street-address'
-  alias :postalCode :'postal-code'
-  alias :countryName :'country-name'
-  alias :organizationName :'organization-name'
-  alias :organizationUnit :'organization-unit'
-  alias :sortString :'sort-string'
+  self.fields.map(&:first).map(&:to_sym).each do |field|
+    if field_alias = LadderVocab::VCard.aliases[field]
+      alias_method field_alias, field
+    end
+  end
 
   embedded_in :agent
 end
@@ -41,7 +32,7 @@ class Agent
   define_scopes
 
   # mongoid indexing
-  define_indexes({:foaf => [:name, :birthday, :title]})
+  define_indexes
 
   # model relations
   has_and_belongs_to_many :resources, index: true

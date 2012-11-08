@@ -8,7 +8,7 @@
     %meta{:name => "viewport", :content => "width=device-width"}/
     /[if lt IE 9]
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    = stylesheet_link_tag 'bootstrap.css', 'bootstrap-responsive.css', 'main.css', 'github.css'
+    = stylesheet_link_tag 'bootstrap.min.css', 'bootstrap-responsive.min.css', 'main.css', 'github.css'
     :css
       body {
         padding-top: 60px;
@@ -34,12 +34,9 @@
                 %li.active
                   %a{:href => "#"} Home
                 %li
-                  %a{:href => "#about"} About
-                %li
-                  %a{:href => "#contact"} Contact
+                  %a{:href => "http://www.deliberatedata.com"} Contact
               - form_tag '/search', :method => 'get', :class => 'navbar-search' do
-                = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring
-                = submit_tag 'Search', :class => 'btn btn-small'
+                = text_field_tag :q, :class => 'input-xxlarge search-query', :placeholder => 'Search', :value => @querystring
               -#
                 %p.navbar-text.pull-right
                   Logged in as

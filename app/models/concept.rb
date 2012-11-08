@@ -1,6 +1,6 @@
 class SKOS
   include LadderModel::Embedded
-  bind_to RDF::SKOS, :type => Array
+  bind_to RDF::SKOS, :type => Array, :only => [:prefLabel]
   embedded_in :concept
 end
 
@@ -18,7 +18,7 @@ class Concept
   define_scopes
 
   # mongoid indexing
-  define_indexes({:skos => [:prefLabel]})
+  define_indexes
 
   # model relations
   has_and_belongs_to_many :resources, index: true

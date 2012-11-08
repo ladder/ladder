@@ -1,20 +1,26 @@
 class DublinCore
   include LadderModel::Embedded
-  bind_to RDF::DC, :type => Array
-  bind_to LadderVocab::DCVocab, :type => Array
+  bind_to RDF::DC, :type => Array, :only => [:title, :alternative, :issued, :format,
+                                             :extent, :language, :identifier, :abstract,
+                                             :tableOfContents, :creator, :publisher,
+                                             :subject, :isPartOf, :hasPart, :hasVersion,
+                                             :isVersionOf, :hasFormat, :isFormatOf,
+                                             :isReferencedBy, :references]
+
+  bind_to LadderVocab::DCVocab, :type => Array, :only => [:DDC, :LCC]
   attr_accessible :identifier
   embedded_in :resource
 end
 
 class Bibo
   include LadderModel::Embedded
-  bind_to LadderVocab::Bibo, :type => Array
+  bind_to LadderVocab::Bibo, :type => Array, :only => [:isbn, :issn, :lccn, :oclcnum, :upc]
   embedded_in :resource
 end
 
 class Prism
   include LadderModel::Embedded
-  bind_to LadderVocab::Prism, :type => Array
+  bind_to LadderVocab::Prism, :type => Array, :only => [:edition, :hasPreviousVersion]
   embedded_in :resource
 end
 
@@ -36,9 +42,7 @@ class Resource
   scope :mods, ->(exists=true) { where(:mods.exists => exists) }
 
   # mongoid indexing
-  define_indexes({:dcterms => [:title, :alternative, :issued, :format, :extent, :language, :identifier, :abstract, :tableOfContents, :creator, :publisher, :subject, :DDC, :LCC],
-                  :bibo => [:isbn, :issn, :lccn, :oclcnum],
-                  :prism => [:edition]})
+  define_indexes
 
   # model relations
   has_and_belongs_to_many :agents, index: true

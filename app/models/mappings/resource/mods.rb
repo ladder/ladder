@@ -182,6 +182,7 @@ module LadderMapping
 
     def map_agents(node_set)
       agents = []
+      agent_ids = @resource.agents.map(&:id)
 
       node_set.each do |node|
 
@@ -195,8 +196,7 @@ module LadderMapping
 
         agent = Agent.find_or_create_by(:foaf => foaf)
 
-        next if !@resource.agent_ids.nil? and @resource.agent_ids.map(&:to_s).include? agent.id.to_s
-        next if agents.include? agent or @resource.agents.include? agent
+        next if agents.include? agent or agent_ids.include? agent.id
 
         agents << agent
       end
@@ -206,6 +206,7 @@ module LadderMapping
 
     def map_concepts(node_set)
       concepts = []
+      concept_ids = @resource.concepts.map(&:id)
 
       node_set.each do |node|
         # in MODS, each subject access point is usually composed of multiple
@@ -227,8 +228,7 @@ module LadderMapping
           current = concept
         end
 
-        next if !@resource.concept_ids.nil? and @resource.concept_ids.map(&:to_s).include? current.id.to_s
-        next if concepts.include? current or @resource.concepts.include? current
+        next if concepts.include? current or concept_ids.include? current.id
 
         concepts << current
       end

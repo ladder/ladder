@@ -178,6 +178,24 @@ module LadderVocab
     property :tz
     property :uid
     property :url
+
+    def self.aliases
+      # camelCase aliases
+      map = {:'family-name' => :familyName,
+             :'given-name' => :givenName,
+             :'additional-name' => :additionalName,
+             :'honorific-prefix' => :honorificPrefix,
+             :'honorific-suffix' => :honorificSuffix,
+             :'post-office-box' => :postOfficeBox,
+             :'extended-address' => :extendedAddress,
+             :'street-address' => :streetAddress,
+             :'postal-code' => :postalCode,
+             :'country-name' => :countryName,
+             :'organization-name' => :organizationName,
+             :'organization-unit' => :organizationUnit,
+             :'sort-string' => :sortString
+      }
+    end
   end
 
 end

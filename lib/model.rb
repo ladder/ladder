@@ -24,11 +24,16 @@ module LadderModel
           # mongodb index definitions
           embed.class_name.constantize.fields.each do |field|
 
-            if field.is_a? Array and !vocabs[embed.name].nil?
-              # only index defined fields
-              if vocabs[embed.name].include? field.first.to_sym
+            if field.is_a? Array
+              if vocabs.empty?
+                # default to indexing all fields
+                index "#{embed.key}.#{field.first}" => 1
+
+              elsif !vocabs[embed.name].nil? and vocabs[embed.name].include? field.first.to_sym
+                # only index defined fields
                 index "#{embed.key}.#{field.first}" => 1
               end
+
             end
           end
 
@@ -47,13 +52,13 @@ module LadderModel
 
         attrs.each do |vocab, vals|
           vals.each do |field, value|
-            query = query.all_of("#{vocab}.#{field}" => value) unless value.empty?
+            query = query.and("#{vocab}.#{field}" => value) unless value.empty?
           end
         end
 
         unless query.instance_of? Class
           # if a document exists, return that
-          result = query.limit(1).first
+          result = query.first
 
           return result unless result.nil?
         end
