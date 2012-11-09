@@ -16,16 +16,13 @@
         %td
           - values.each do |value|
 
-            - if value.is_a? BSON::ObjectId or !!value.to_s.match(/^[0-9a-f]{24}$/)
+            - if value.is_a? Hash
+              - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
 
-              -# TODO: move this into a lookup list on page load
-              -# @see eg: search/results.html :3-6
-              - search = Tire.search { query { string "_id:#{value}" } }
-
-              - if 'concept' == search.results.first.type
-                #{link_to search.results.first.heading.dashjoin, url_for(search.results.first.type.to_sym, :index, :id => search.results.first.id)}
+              - if value[:concept]
+                #{link_to heading.dashjoin, url_for(value.keys.first, :index, :id => value.values.first)}
               - else
-                #{link_to search.results.first.heading.first, url_for(search.results.first.type.to_sym, :index, :id => search.results.first.id)}
+                #{link_to heading.first, url_for(value.keys.first, :index, :id => value.values.first)}
 
             - elsif :language == name
               = ISO_639.find(value).english_name

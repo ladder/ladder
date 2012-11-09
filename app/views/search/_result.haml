@@ -1,17 +1,29 @@
 %hr{:style => 'margin: 9px 0;'}
 
 .row-fluid
-  .span2
+  .span2{:style => 'width: 100px;'}
     %a.thumbnail{:href => url_for(:resource, :index, :id => result.id)}
-      %img{:src => url_for(:image, :index, :id => result.id)}
+      %img{:src => url_for(:image, :index, :id => result.id, :size => 'S')}
 
   .span10
     %h4
       #{link_to result.heading.first, url_for(:resource, :index, :id => result.id)}
       %small (#{result._score})
 
-    -# TODO: abstract/parameterize this
-    - item = result.to_hash.except(:bibo)
-    - item[:dcterms] = item[:dcterms].slice(:creator, :format, :issued, :publisher)
+    - item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
 
-    = partial 'item', :object => Resource.normalize(item)
+    - unless item[:dcterms][:creator].nil?
+      - creators = []
+      - item[:dcterms][:creator].each do |creator|
+        - if creator.is_a? Hash
+          - heading = creator.keys.first.to_s.classify.constantize.find(creator.values.first).heading
+          - creators << link_to(heading.first, url_for(creator.keys.first, :index, :id => creator.values.first))
+
+      .creators #{creators.join'; '}
+
+    - desc = []
+    - desc.push ISO_639.find(item[:dcterms][:language].first).english_name rescue nil
+    - desc.push item[:dcterms][:format].first rescue nil
+    - desc.push item[:dcterms][:issued].first rescue nil
+
+    .description #{desc.join(' ').capitalize}

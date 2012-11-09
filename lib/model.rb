@@ -69,27 +69,70 @@ module LadderModel
         obj
       end
 
-      def normalize(hash)
+      def normalize(hash, opts={})
         # use a deep clone of the hash
         hash = Marshal.load(Marshal.dump(hash))
 
+        # store relation ids if we need to resolve them
+        if :resolve == opts[:ids]
+          hash.symbolize_keys!
+
+          opts[:type] = hash[:type] || self.name.underscore
+          opts[:resource_ids] = hash[:resource_ids]
+          opts[:agent_ids] = hash[:agent_ids]
+          opts[:concept_ids] = hash[:concept_ids]
+        end
+
         # Reject keys not declared in mapping
-        hash.reject! { |key, value| ! self.tire.mapping.keys.map(&:to_s).include?(key.to_s) }
+        hash.reject! { |key, value| ! self.tire.mapping.keys.include? key.to_sym }
 
         # Self-contained recursive lambda
-        normal = lambda do |hash|
+        normal = lambda do |hash, opts|
+
           hash.symbolize_keys!
 
           # Strip id field
           hash.except! :_id
 
+          # Modify Object ID references if specified
+          if hash.class == Hash and opts[:ids]
+
+            hash.each do |key, values|
+              values.to_a.each do |value|
+
+                # NB: have to use regexp matching for Tire Items
+                if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+
+                  case opts[:ids]
+                    when :omit then
+                      #hash[key].delete value     # doesn't work as expected?
+                      hash[key][values.index(value)] = nil
+
+                    when :resolve then
+                      model = :resource if opts[:resource_ids].include? value rescue nil
+                      model = :agent if opts[:agent_ids].include? value rescue nil
+                      model = :concept if opts[:concept_ids].include? value rescue nil
+                      model = opts[:type].to_sym if model.nil?
+
+                      hash[key][values.index(value)] = {model => value.to_s}
+                  end
+                end
+              end
+
+              # remove keys that are now empty
+              hash[key].to_a.compact!
+            end
+
+          end
+
           # Reject empty values
           hash.reject! { |key, value| value.kind_of? Enumerable and value.empty? }
-          hash.values.select { |value| value.is_a? Hash }.each{ |h| normal.call(h) }
+
+          hash.values.select { |value| value.is_a? Hash }.each{ |h| normal.call(h, opts) }
           hash
         end
 
-        normal.call(hash.reject { |key, value| !value.is_a? Hash })
+        normal.call(hash.reject { |key, value| !value.is_a? Hash }, opts)
       end
 
       def chunkify(opts = {})
@@ -235,19 +278,14 @@ module LadderModel
         compare = model.as_document
       end
 
-      p1 = self.class.normalize(self.as_document)
-      p2 = self.class.normalize(compare)
+      p1 = self.class.normalize(self.as_document, options.slice(:ids))
+      p2 = self.class.normalize(compare, options.slice(:ids))
 
       p1 = p1.values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
       p2 = p2.values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
 
-      # Reject Object ID references in comparisons
-      # NB: have to use regexp matching for Tire Items
-      #
-      # hash.reject! {|key, value| value.is_a? BSON::ObjectId || value.to_s.match(/^[0-9a-f]{24}$/) }
-      # hash.reject! {|key, value| value.is_a? Array and value.flatten.reject { |x| x.is_a?(BSON::ObjectId) || x.to_s.match(/^[0-9a-f]{24}$/) }.empty?}
-
       # calculate amatch score for each algorithm
+      options.delete :ids
       options.each do |sim, bool|
         options[sim] = p1.send(sim, p2) if bool
       end
@@ -276,7 +314,7 @@ module LadderModel
       mapping = self.class.tire.mapping
 
       # Reject keys not declared in mapping
-      hash = self.as_document.reject { |key, value| ! mapping.keys.map(&:to_s).include?(key.to_s) }
+      hash = self.as_document.reject { |key, value| ! mapping.keys.include? key.to_sym }
 
       # Reject empty values
       hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }
@@ -293,8 +331,31 @@ module LadderModel
         self.vocabs.each do |key, object|
           writer << object.to_rdf(RDF::URI.new(url))
         end
-
       end
+
+=begin
+          graph.each_statement do |statement|
+            statement.object = ''
+
+            # convert embedded object IDs to URIs
+            if statement.object.to_s.match(/^[0-9a-f]{24}$/)
+
+              # TODO: fix me with object ID type
+              # this is really bad and hacky and ... bad.
+              model = nil
+              uri = URI.parse(url)
+
+              model = 'agent' if self.agent_ids.map(&:to_s).include? statement.object.to_s rescue nil
+              model = 'concept' if self.concept_ids.map(&:to_s).include? statement.object.to_s rescue nil
+              model = 'resource' if self.resource_ids.map(&:to_s).include? statement.object.to_s rescue nil
+
+              next if model.nil?
+              statement.object = RDF::URI.new("#{uri.scheme}://#{uri.host}/#{model}/#{statement.object.to_s}")
+            end
+
+          end
+=end
+
     end
 
   end

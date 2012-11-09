@@ -17,7 +17,7 @@
             =list_of(@concept.resources) do |resource|
               .null{:style => 'margin-bottom: 9px;'}
               %a{:href => url_for(:resource, :index, :id => resource.id)}
-                %img.pull-left{:src => url_for(:image, :index, :id => resource.id, :size => :S), :style => 'margin-right: 9px;'}
+                %img.pull-left{:src => url_for(:image, :index, :id => resource.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
                 #{resource.heading.first}
                 .clearfix
 
