@@ -233,7 +233,7 @@ module LadderModel
             hash.each do |vocab, vals|
               vals.each do |field, value|
 
-                query_string = value.join(' ').gsub(/[-+!\(\)\{\}\[\]^"~*?:;,.\\]|&&|\|\|/, '')
+                query_string = value.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
                 should { text "#{vocab}.#{field}", query_string }
 
               end
@@ -326,35 +326,31 @@ module LadderModel
     end
 
     def to_rdfxml(url)
-      RDF::RDFXML::Writer.buffer do |writer|
-        # get the RDF graph for each vocab
-        self.vocabs.each do |key, object|
-          writer << object.to_rdf(RDF::URI.new(url))
+      uri = URI.parse(url)
+
+      # normalize into a hash to resolve ID references
+      normal = self.class.normalize(self.as_document, {:ids => :resolve})
+
+      normal.each do |name, vocab|
+        vocab.each do |field, values|
+          values.each do |value|
+            if value.is_a? Hash
+              # replace ID references with URI references
+              normal[name][field][values.index(value)] = RDF::URI.new("#{uri.scheme}://#{uri.host}/#{value.keys.first}/#{value.values.first}")
+            end
+          end
         end
       end
 
-=begin
-          graph.each_statement do |statement|
-            statement.object = ''
+      # create a new model object from the modified values
+      new_obj = self.class.new(normal)
 
-            # convert embedded object IDs to URIs
-            if statement.object.to_s.match(/^[0-9a-f]{24}$/)
-
-              # TODO: fix me with object ID type
-              # this is really bad and hacky and ... bad.
-              model = nil
-              uri = URI.parse(url)
-
-              model = 'agent' if self.agent_ids.map(&:to_s).include? statement.object.to_s rescue nil
-              model = 'concept' if self.concept_ids.map(&:to_s).include? statement.object.to_s rescue nil
-              model = 'resource' if self.resource_ids.map(&:to_s).include? statement.object.to_s rescue nil
-
-              next if model.nil?
-              statement.object = RDF::URI.new("#{uri.scheme}://#{uri.host}/#{model}/#{statement.object.to_s}")
-            end
-
-          end
-=end
+      RDF::RDFXML::Writer.buffer do |writer|
+        # get the RDF graph for each vocab
+        new_obj.vocabs.each do |key, object|
+          writer << object.to_rdf(RDF::URI.new(url))
+        end
+      end
 
     end
 

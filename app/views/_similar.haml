@@ -6,8 +6,7 @@
                                   :jarowinkler_similar => true,
                                   :levenshtein_similar => true,
                                   :longest_subsequence_similar => true,
-                                  :pair_distance_similar => true,
-                                  :ids => :omit})
+                                  :pair_distance_similar => true})
   - doc.attributes[:diff] = match.values.sum / match.size
 - docs.delete_if {|doc| doc.diff < 0.5}
 
@@ -16,7 +15,7 @@
   %ul
   - docs.sort {|a, b| b.diff <=> a.diff}.each do |similar|
 
-    - if similar.diff > 0.9
+    - if similar.diff > 0.85
       %li.active{:style => 'margin-bottom: 9px;'}
         %a.active{:href => url_for(model, :index, :id => similar.id)}
           - if document.is_a? Resource # FIXME: just for now

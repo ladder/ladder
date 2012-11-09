@@ -22,8 +22,8 @@
       .creators #{creators.join'; '}
 
     - desc = []
-    - desc.push ISO_639.find(item[:dcterms][:language].first).english_name rescue nil
-    - desc.push item[:dcterms][:format].first rescue nil
+    - desc.push item[:dcterms][:format].first.capitalize rescue nil
     - desc.push item[:dcterms][:issued].first rescue nil
+    - desc.push ISO_639.find(item[:dcterms][:language].first).english_name.capitalize rescue nil
 
-    .description #{desc.join(' ').capitalize}
+    .description #{desc.join('; ')}
