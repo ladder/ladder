@@ -1,6 +1,6 @@
 - show = :join if show.nil?
 
-- docs = document.similar.to_a
+- docs = Kaminari.paginate_array(document.similar.to_a).page(1)
 - docs.each do |doc|
   - match = document.amatch(doc, {:jaro_similar => true,
                                   :jarowinkler_similar => true,

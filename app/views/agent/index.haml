@@ -14,7 +14,7 @@
           -# RELATED RESOURCES
           - unless @agent.resources.empty?
             %li.nav-header Resources
-            =list_of(@agent.resources) do |resource|
+            =list_of(@agent.resources.page(1)) do |resource|
               .null{:style => 'margin-bottom: 9px;'}
               %a{:href => url_for(:resource, :index, :id => resource.id)}
                 %img.pull-left{:src => url_for(:image, :index, :id => resource.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}

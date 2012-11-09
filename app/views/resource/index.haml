@@ -17,13 +17,13 @@
           -# RELATED AGENTS
           - unless @resource.agents.empty?
             %li.nav-header Agents
-            =list_of(@resource.agents) do |agent|
+            =list_of(@resource.agents.page(1)) do |agent|
               #{link_to agent.heading.first, url_for(:agent, :index, :id => agent.id)}
 
           -# RELATED CONCEPTS
           - unless @resource.concepts.empty?
             %li.nav-header Concepts
-            =list_of(@resource.concepts) do |concept|
+            =list_of(@resource.concepts.page(1)) do |concept|
               = partial 'stem', :locals => {:stem => (Concept.find(concept.parent_ids) + [concept]).reverse!, :model => :concept, :show => :last}
 
           -# SIMILAR ITEMS

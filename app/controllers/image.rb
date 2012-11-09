@@ -6,8 +6,10 @@ Ladder.controllers :image do
 
     @resource = Resource.find(params[:id])
 
-    # do lookup on each ISBN in order
     isbns = @resource.bibo.isbn rescue nil
+
+    # do lookup on each ISBN in order
+    # TODO: background this somehow; Parallel.fork, Sidekiq, etc.
 
     while !isbns.nil? and !isbns.empty?
       # get a numeric-only ISBN to look up
