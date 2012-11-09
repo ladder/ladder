@@ -8,7 +8,7 @@
     %meta{:name => "viewport", :content => "width=device-width"}/
     /[if lt IE 9]
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    = stylesheet_link_tag 'bootstrap.min.css', 'bootstrap-responsive.min.css', 'main.css', 'github.css'
+    = stylesheet_link_tag 'bootstrap.min.css', 'main.css', 'github.css'
     :css
       body {
         padding-top: 60px;
@@ -18,6 +18,7 @@
         padding: 9px 0;
       }
     = javascript_include_tag 'jquery.js', 'bootstrap.min.js', 'highlight.pack.js'
+    = stylesheet_link_tag 'bootstrap-responsive.min.css'
     <script>hljs.initHighlightingOnLoad();</script>
   %body
     %header

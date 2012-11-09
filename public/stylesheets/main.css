@@ -1,3 +1,15 @@
+@media all and (max-width: 480px)  {
+    .half {
+        padding-right: 9px !important;
+        float: left !important;
+        width: 100px !important;
+    }
+}
+
+h4 {
+    margin-top: 0px;
+}
+
 .hero-unit {
     background-color: #efefef;
 }

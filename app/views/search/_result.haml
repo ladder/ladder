@@ -1,14 +1,15 @@
 %hr{:style => 'margin: 9px 0;'}
 
 .row-fluid
-  .span2{:style => 'width: 100px;'}
+  .span2.half{:style => 'width: 100px;'}
     %a.thumbnail{:href => url_for(:resource, :index, :id => result.id)}
       %img{:src => url_for(:image, :index, :id => result.id, :size => 'S')}
 
   .span10
-    %h4
-      #{link_to result.heading.first, url_for(:resource, :index, :id => result.id)}
-      %small (#{result._score})
+    %a{:href => url_for(:resource, :index, :id => result.id)}
+      %h4
+        = result.heading.first
+        %small (#{result._score})
 
     - item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
 
