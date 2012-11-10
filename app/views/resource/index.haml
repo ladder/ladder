@@ -38,7 +38,7 @@
           %img{:src => url_for(:image, :index, :id => @resource.id)}
 
         .span10
-          = partial 'item', :object => Resource.normalize(@resource.as_document, {:ids => :resolve}), :locals => {:heading => true}
+          = partial 'item', :object => Resource.normalize(@resource.as_document, {:ids => :resolve})
 
       .row-fluid
         .span2

@@ -27,7 +27,7 @@
 
     .span9
       %h1.page-header= @title
-      = partial 'item', :object => Agent.normalize(@agent.as_document), :locals => {:heading => true}
+      = partial 'item', :object => Agent.normalize(@agent.as_document)
 
       .row-fluid
         .span2
