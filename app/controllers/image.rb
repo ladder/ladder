@@ -32,9 +32,29 @@ Ladder.controllers :image do
       content_type thumb.content_type
       body thumb.read
     else
-      # send an empty 1x1 GIF
-      content_type 'image/gif'
-      body Base64.decode64('R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==')
+      content_type 'image/png'
+
+      type = @resource.dcterms.format.join(' ') rescue nil
+      path = File.join(PADRINO_ROOT, '/public/img/icons')
+      case type
+        when /video/i
+          body IO.read(File.join(path, 'icon-film.png'))
+        when /sound|audio/i
+          body IO.read(File.join(path, 'icon-audio.png'))
+        when /print/i
+          body IO.read(File.join(path, 'icon-book.png'))
+        when /microf/i
+          body IO.read(File.join(path, 'icon-print.png'))
+        when /remote/i
+          body IO.read(File.join(path, 'icon-link.png'))
+        when /computer/i
+          body IO.read(File.join(path, 'icon-disk.png'))
+        when /disc/i
+          body IO.read(File.join(path, 'icon-disc.png'))
+        else
+          body IO.read(File.join(path, 'icon-question.png'))
+      end
+
       halt 200
     end
 

@@ -9,22 +9,20 @@
     %a{:href => url_for(:resource, :index, :id => result.id)}
       %h4
         = result.heading.first
-        %small (#{result._score})
+        -#%small (#{result._score})
 
     - item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
 
+    - creators = []
     - unless item[:dcterms][:creator].nil?
-      - creators = []
       - item[:dcterms][:creator].each do |creator|
         - if creator.is_a? Hash
           - heading = creator.keys.first.to_s.classify.constantize.find(creator.values.first).heading
           - creators << link_to(heading.first, url_for(creator.keys.first, :index, :id => creator.values.first))
 
-      .creators #{creators.join'; '}
-
     - desc = []
-    - desc.push item[:dcterms][:format].first.capitalize rescue nil
+    -# desc.push item[:dcterms][:format].first.capitalize rescue nil
     - desc.push item[:dcterms][:issued].first rescue nil
     - desc.push ISO_639.find(item[:dcterms][:language].first).english_name.capitalize rescue nil
 
-    .description #{desc.join('; ')}
+    .description #{[creators + desc].join('; ')}
