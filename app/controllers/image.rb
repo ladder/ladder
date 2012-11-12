@@ -49,7 +49,7 @@ Ladder.controllers :image do
           body IO.read(File.join(path, 'icon-link.png'))
         when /computer/i
           body IO.read(File.join(path, 'icon-disk.png'))
-        when /disc/i
+        when /dis[ck]/i
           body IO.read(File.join(path, 'icon-disc.png'))
         else
           body IO.read(File.join(path, 'icon-question.png'))

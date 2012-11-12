@@ -1,5 +1,6 @@
 - @title = "Results for '#{@querystring}'"
 
+-# TODO: use multi-get API to query _type in ES; @see: http://www.elasticsearch.org/guide/reference/api/multi-get.html
 -# FIXME: this will break on creator values that are non-objectID
 - @creators = Agent.find(@results.facets['creator']['terms'].map{|k| k.values_at("term")}.flatten)
 -# FIXME: this will break on subject values that are non-objectID OR non-Concept
@@ -52,9 +53,10 @@
     .span9
       <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
 
-      =partial 'search/result', :collection => @results
+      = partial 'search/result', :collection => @results
 
       .pagination-centered
         = paginate @results
 
+      %br
       %p &copy; 2012 Deliberate Data

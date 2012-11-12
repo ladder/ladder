@@ -16,7 +16,7 @@
             = partial 'similar', :locals => {:document => @concept, :model => :concept, :show => :dashjoin}
 
           -# RELATED RESOURCES
-          - unless @concept.resources.empty?
+          -# unless @concept.resources.empty?
             %li.nav-header Resources
             =list_of(@concept.resources.page(1)) do |resource|
               .null{:style => 'margin-bottom: 9px;'}
@@ -36,4 +36,8 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @concept.to_rdfxml(url_for(request.path_info))
 
-      %footer &copy; 2012 Deliberate Data
+      = partial 'search/result', :collection => @concept.resources
+      -# TODO: paginate here
+
+      %br
+      %p &copy; 2012 Deliberate Data

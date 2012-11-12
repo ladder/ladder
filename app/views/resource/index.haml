@@ -48,4 +48,5 @@
             %pre.accordion-body.collapse#collapseMARC
               %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc.to_s).to_hash, :object_nl => "\n", :indent => " ")
 
-      %footer &copy; 2012 Deliberate Data
+      %br
+      %p &copy; 2012 Deliberate Data

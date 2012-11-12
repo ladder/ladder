@@ -227,6 +227,8 @@ module LadderMapping
           unless current.nil?
             (current.skos.narrower ||= []) << concept.id
             (concept.skos.broader ||= []) << current.id
+            current.skos.narrower.uniq!
+            concept.skos.broader.uniq!
 
             current.children << concept
           end

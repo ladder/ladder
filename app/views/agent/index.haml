@@ -16,7 +16,7 @@
             = partial 'similar', :locals => {:document => @agent, :model => :agent}
 
           -# RELATED RESOURCES
-          - unless @agent.resources.empty?
+          -# unless @agent.resources.empty?
             %li.nav-header Resources
             =list_of(@agent.resources.page(1)) do |resource|
               .null{:style => 'margin-bottom: 9px;'}
@@ -36,4 +36,8 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @agent.to_rdfxml(url_for(request.path_info))
 
-      %footer &copy; 2012 Deliberate Data
+      = partial 'search/result', :collection => @agent.resources
+      -# TODO: paginate here
+
+      %br
+      %p &copy; 2012 Deliberate Data

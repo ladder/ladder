@@ -9,6 +9,7 @@
                                   :pair_distance_similar => true})
   - doc.attributes[:diff] = match.values.sum / match.size
 - docs.delete_if {|doc| doc.diff < 0.5}
+- docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
 
 - unless docs.empty?
   %li.nav-header Similar
@@ -20,7 +21,7 @@
         %a.active{:href => url_for(model, :index, :id => similar.id)}
           - if document.is_a? Resource # FIXME: just for now
             %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
-          #{similar.load.heading.send(show)}
+          %strong.text-warning #{similar.load.heading.send(show)}
           %small.muted (#{(similar.diff * 100).round}%)
           .clearfix
 

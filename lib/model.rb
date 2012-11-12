@@ -283,8 +283,8 @@ module LadderModel
       p1 = self.class.normalize(self.as_document, options.slice(:ids))
       p2 = self.class.normalize(compare, options.slice(:ids))
 
-      p1 = p1.values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
-      p2 = p2.values.map(&:values).flatten.map(&:to_s).sort.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
+      p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
+      p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
 
       # calculate amatch score for each algorithm
       options.delete :ids
