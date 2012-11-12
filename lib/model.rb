@@ -16,6 +16,7 @@ module LadderModel
         end
       end
 
+      # TODO: boost results in heading fields (title, alternative, etc)
       def define_indexes(vocabs = {})
         embeddeds = self.reflect_on_all_associations(*[:embeds_one])
 
@@ -159,6 +160,7 @@ module LadderModel
       base.send :include, Tire::Model::Callbacks2 # local patched version
 
       # dynamic templates to store un-analyzed values for faceting
+      # @see line:19 ; remove dynamic templates and use explicit mapping
       base.send :mapping, :dynamic_templates => [{
           :test => {
               :match => '*',
@@ -233,7 +235,7 @@ module LadderModel
             hash.each do |vocab, vals|
               vals.each do |field, value|
 
-                query_string = value.join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
+                query_string = value.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\\/]|&&|\|\|/, '')
                 should { text "#{vocab}.#{field}", query_string }
 
               end

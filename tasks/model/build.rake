@@ -29,6 +29,9 @@ namespace :model do
         # save each document; this will only update the hierarchy
         chunk.each(&:save)
 
+        # disconnect the session so we don't leave it orphaned
+        Mongoid::Sessions.default.disconnect
+
         # Make sure to flush the GC when done a chunk
         GC.start
       end

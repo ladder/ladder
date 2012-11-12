@@ -35,6 +35,9 @@ namespace :map do
         mapping.map(resource).save
       end
 
+      # disconnect the session so we don't leave it orphaned
+      Mongoid::Sessions.default.disconnect
+
       # Make sure to flush the GC when done a chunk
       GC.start
     end

@@ -224,7 +224,13 @@ module LadderMapping
 
           concept = Concept.find_or_create_by(:skos => skos)
 
-          current.children << concept unless current.nil?
+          unless current.nil?
+            (current.skos.narrower ||= []) << concept.id
+            (concept.skos.broader ||= []) << current.id
+
+            current.children << concept
+          end
+
           current = concept
         end
 

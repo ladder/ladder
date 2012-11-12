@@ -19,13 +19,11 @@ Ladder.controllers :search do
 
     @facets = {:dcterms => %w[format language issued creator publisher subject DDC LCC]}
 
-    # TODO: filter nested fields; have to patch Tire
-    #:issued, :format, :language, :creator, :publisher, :subject
-    @fields = [:heading, :dcterms, :agent_ids, :concept_ids]
+    @fields = [:heading, :agent_ids, :concept_ids, :dcterms]
+    # TODO: filter nested fields?
+    # ['dcterms.issued', 'dcterms.format', 'dcterms.language', 'dcterms.creator']
 
-    # TODO: boost results in Model.heading fields (title, alternative, etc)
     # TODO: multi-index search?
-
     @results = Resource.tire.search(:page => @page, :per_page => @per_page) do |search|
       search.query do |query|
         query.filtered do |filtered|

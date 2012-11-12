@@ -32,8 +32,11 @@ namespace :map do
 
         # instantiate mapping object
         mapping = LadderMapping::MODS.new
-        mapping.map(resource, xml.at_xpath('/mods'))
+        mapping.map(resource, xml.at_xpath('/mods')).save
       end
+
+      # disconnect the session so we don't leave it orphaned
+      Mongoid::Sessions.default.disconnect
 
       # Make sure to flush the GC when done a chunk
       GC.start

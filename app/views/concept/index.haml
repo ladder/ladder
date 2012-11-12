@@ -2,14 +2,18 @@
 
 .container
   .row
-    .span3
+    .span3.hidden-phone
       .well.sidebar-nav
         %ul.nav.nav-list
 
           -# RELATION TREE
-          - unless @concept.parent.nil? and @concept.children.empty?
+          - unless @concept.leaf? and @concept.root?
             %li.nav-header Relations
             = partial 'tree', :collection => @concept.root.to_a, :locals => {:model => :concept, :self_id => @concept.id, :show => :last}
+
+          -# SIMILAR ITEMS
+          - unless @concept.similar.empty?
+            = partial 'similar', :locals => {:document => @concept, :model => :concept, :show => :dashjoin}
 
           -# RELATED RESOURCES
           - unless @concept.resources.empty?
@@ -21,15 +25,11 @@
                 #{resource.heading.first}
                 .clearfix
 
-          -# SIMILAR ITEMS
-          - unless @concept.similar.empty?
-            = partial 'similar', :locals => {:document => @concept, :model => :concept, :show => :dashjoin}
-
     .span9
-      %h1.page-header= @title
-      = partial 'item', :object => Concept.normalize(@concept.as_document)
+      %h2.page-header= @title
+      = partial 'item', :object => Concept.normalize(@concept.as_document, {:ids => :resolve})
 
-      .row-fluid
+      .row-fluid.hidden-phone
         .span2
           %a.pull-right{:href => '#collapseRDF', :'data-toggle' => "collapse"} RDF/XML
         .span10
