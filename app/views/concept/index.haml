@@ -36,8 +36,11 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @concept.to_rdfxml(url_for(request.path_info))
 
-      = partial 'search/result', :collection => @concept.resources
-      -# TODO: paginate here
+      - resources = Resource.where(:concept_ids => @concept.id).page(@page)
+      = partial 'search/result', :collection => resources
+
+      .pagination-centered
+        = paginate resources
 
       %br
       %p &copy; 2012 Deliberate Data

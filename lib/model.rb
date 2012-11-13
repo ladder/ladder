@@ -221,7 +221,7 @@ module LadderModel
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
     def similar(query=false)
-      return @similar unless query || @similar.nil?
+      return @similar unless query or @similar.nil?
 
       hash = self.class.normalize(self.as_document)
       id = self.id

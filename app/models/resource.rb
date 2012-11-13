@@ -2,10 +2,10 @@ class DublinCore
   include LadderModel::Embedded
   bind_to RDF::DC, :type => Array, :only => [:title, :alternative, :issued, :format,
                                              :extent, :language, :identifier, :abstract,
-                                             :tableOfContents, :creator, :publisher,
-                                             :subject, :isPartOf, :hasPart, :hasVersion,
-                                             :isVersionOf, :hasFormat, :isFormatOf,
-                                             :isReferencedBy, :references]
+                                             :tableOfContents, :creator, :contributor,
+                                             :publisher, :subject, :isPartOf, :hasPart,
+                                             :hasVersion, :isVersionOf, :hasFormat,
+                                             :isFormatOf, :isReferencedBy, :references]
 
   bind_to LadderVocab::DCVocab, :type => Array, :only => [:DDC, :LCC]
   attr_accessible :identifier
@@ -14,13 +14,13 @@ end
 
 class Bibo
   include LadderModel::Embedded
-  bind_to LadderVocab::Bibo, :type => Array, :only => [:isbn, :issn, :lccn, :oclcnum, :upc]
+  bind_to LadderVocab::Bibo, :type => Array, :only => [:isbn, :issn, :lccn, :oclcnum, :upc, :doi, :uri]
   embedded_in :resource
 end
 
 class Prism
   include LadderModel::Embedded
-  bind_to LadderVocab::Prism, :type => Array, :only => [:edition, :hasPreviousVersion]
+  bind_to LadderVocab::Prism, :type => Array, :only => [:edition, :hasPreviousVersion, :issueIdentifier]
   embedded_in :resource
 end
 

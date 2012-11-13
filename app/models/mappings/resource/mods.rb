@@ -7,7 +7,7 @@ module LadderMapping
       mapped = {}
 
       hash.each do |symbol, xpath|
-        nodes = xml_node.xpath(xpath).map(&:inner_text).map(&:strip).uniq
+        nodes = xml_node.xpath(xpath).map(&:text).map(&:strip).uniq
         mapped[symbol] = nodes unless nodes.empty?
       end
 
@@ -26,10 +26,24 @@ module LadderMapping
       end
 
       # map encoded agents to related Agent models
-      agents = map_agents(node.xpath('name'))
+      agents = map_agents(node.xpath('name[@usage="primary"]'))
       unless agents.empty?
         resource.dcterms = DublinCore.new if resource.dcterms.nil?
         resource.dcterms.creator = agents.map(&:id)
+        resource.agents << agents
+      end
+
+      agents = map_agents(node.xpath('name[not(@usage="primary")]'))
+      unless agents.empty?
+        resource.dcterms = DublinCore.new if resource.dcterms.nil?
+        resource.dcterms.contributor = agents.map(&:id)
+        resource.agents << agents
+      end
+
+      agents = map_agents(node.xpath('originInfo/publisher'), {:foaf => {:name => '.'}})
+      unless agents.empty?
+        resource.dcterms = DublinCore.new if resource.dcterms.nil?
+        resource.dcterms.publisher = agents.map(&:id)
         resource.agents << agents
       end
 
@@ -38,6 +52,20 @@ module LadderMapping
       unless concepts.empty?
         resource.dcterms = DublinCore.new if resource.dcterms.nil?
         resource.dcterms.subject = concepts.map(&:id)
+        resource.concepts << concepts
+      end
+
+      concepts = map_concepts(node.xpath('classification[@authority="ddc"]'))
+      unless concepts.empty?
+        resource.dcterms = DublinCore.new if resource.dcterms.nil?
+        resource.dcterms.DDC = concepts.map(&:id)
+        resource.concepts << concepts
+      end
+
+      concepts = map_concepts(node.xpath('classification[@authority="lcc"]'))
+      unless concepts.empty?
+        resource.dcterms = DublinCore.new if resource.dcterms.nil?
+        resource.dcterms.LCC = concepts.map(&:id)
         resource.concepts << concepts
       end
 
@@ -69,19 +97,13 @@ module LadderMapping
           :language      => 'language/languageTerm',
 
           # dereferenceable identifiers
-          :identifier    => 'identifier[not(@type)]',
+          :identifier    => 'identifier[not(@type) or @type="local"]',
 
           # indexable textual content
           :abstract        => 'abstract',
           :tableOfContents => 'tableOfContents',
 
-          # attribution; possibly map this to Agents
-          :publisher => 'originInfo/publisher',
-
-          # concept access points
-          # TODO: move these to Concepts
-          :DDC           => 'classification[@authority="ddc"]',
-          :LCC           => 'classification[@authority="lcc"]',
+          # TODO: add <note>
       }
 
       bibo = map_xpath node, {
@@ -91,10 +113,13 @@ module LadderMapping
           :lccn     => 'identifier[@type = "lccn"]',
           :oclcnum  => 'identifier[@type = "oclc"]',
           :upc      => 'identifier[@type = "upc"]',
+          :doi      => 'identifier[@type = "doi"]',
+          :uri      => 'identifier[@type = "uri"]',
       }
 
       prism = map_xpath node, {
-          :edition     => 'originInfo/edition',
+          :edition          => 'originInfo/edition',
+          :issueIdentifier  => 'identifier[@type = "issue-number" or @type = "issue number"]',
       }
 
       vocabs[:dcterms] = dcterms unless dcterms.empty?
@@ -180,18 +205,19 @@ module LadderMapping
       relations
     end
 
-    def map_agents(node_set)
+    def map_agents(node_set, opts={})
       agents = []
       agent_ids = @resource.agents.map(&:id)
 
+      mapping = opts[:foaf] || {
+          :name     => 'namePart[not(@type)] | displayForm',
+          :birthday => 'namePart[@type = "date"]',
+          :title    => 'namePart[@type = "termsOfAddress"]',
+      }
+
       node_set.each do |node|
 
-        foaf = map_xpath node, {
-            # TODO: additional parsing/mapping
-            :name     => 'namePart[not(@type)]',
-            :birthday => 'namePart[@type = "date"]',
-            :title    => 'namePart[@type = "termsOfAddress"]',
-        }
+        foaf = map_xpath node, mapping
         next if foaf.values.flatten.empty?
 
         agent = Agent.find_or_create_by(:foaf => foaf)
@@ -215,14 +241,19 @@ module LadderMapping
 
         current = nil
 
-        node.element_children.each do |subnode|
-          # TODO: if subnode.name is name or titleInfo, link to an Agent or Resource
+        node.xpath('./text() | ./*').each do |subnode|
+          next if subnode.text.strip.empty?
 
-          # NB: this xpath is slightly slower due to repetition, but simpler
-          skos = map_xpath subnode, {:prefLabel  => 'preceding-sibling::* | .'}
-          next if skos.values.flatten.empty?
+#          case subnode.name
+#            when 'name'       # Agent
+#            when 'titleInfo'  # Resource
+#            else
+              # NB: this xpath is slightly slower due to repetition, but simpler
+              skos = map_xpath subnode, {:prefLabel  => 'preceding-sibling::* | .'}
+              next if skos.values.flatten.empty?
 
-          concept = Concept.find_or_create_by(:skos => skos)
+              concept = Concept.find_or_create_by(:skos => skos)
+#          end
 
           unless current.nil?
             (current.skos.narrower ||= []) << concept.id
