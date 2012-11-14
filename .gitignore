@@ -1,6 +1,7 @@
 .DS_Store
 log/**/*
 tmp/**/*
+public/img/thumbnails/**/*
 bin/
 vendor/
 .sass-cache/
