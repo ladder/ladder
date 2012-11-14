@@ -1,7 +1,11 @@
 Ladder.controllers  do
 
   get "/" do
-     render 'search/index'
+     render 'index'
+  end
+
+  get "/about" do
+    render 'about'
   end
 
 end

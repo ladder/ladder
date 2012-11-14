@@ -16,18 +16,35 @@ h2.page-header {
 
 .hero-unit {
     background-color: #efefef;
-}
-
-.hero-unit {
     padding: 30px;
 }
 
 .hero-unit h1 {
+    color: #28529B;
     text-align: center;
+    font-size: 50px;
+    margin-top: 0px;
+}
+
+.hero-unit h1,
+a.brand {
+    font-variant:small-caps;
 }
 
 p.lead {
     font-size: 1.5em;
+}
+
+.logo, .search {
+    text-align: center;
+}
+
+.input-xxlarge {
+    width: 330px;
+}
+
+.search {
+    margin-top: 20px;
 }
 
 .nav-list > .active > a {

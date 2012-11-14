@@ -1,0 +1,11 @@
+- @title = "MyTPL"
+
+.container
+  .hero-unit.span6.offset2
+    .logo
+      %img{:src => url_for('img/mytpl-alpha.png')}
+
+    .search
+      - form_tag '/search', :method => 'get', :class => 'form-search' do
+        = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring, :autofocus => true
+        %button{:type => 'submit', :class => 'btn'} Search

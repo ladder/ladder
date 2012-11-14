@@ -3,6 +3,7 @@
   %head
     %meta{:charset => "utf-8"}/
     %title= @title
+    %link{:rel => "apple-touch-icon", :href => "/img/apple-touch-icon.png"}
     %meta{:content => "", :name => "description"}/
     %meta{:content => "", :name => "author"}/
     %meta{:name => "viewport", :content => "width=device-width"}/
@@ -17,7 +18,6 @@
       .sidebar-nav {
         padding: 9px 0;
       }
-    = javascript_include_tag 'jquery.js', 'bootstrap.min.js', 'highlight.pack.js'
     = stylesheet_link_tag 'bootstrap-responsive.min.css'
     <script>hljs.initHighlightingOnLoad();</script>
   %body
@@ -29,18 +29,19 @@
               %span.icon-bar
               %span.icon-bar
               %span.icon-bar
-            %a.brand{:href => "/"} Ladder
+            %a.brand{:href => "/"} MyTPL
             .nav-collapse
               %ul.nav
-                %li.active
-                  %a{:href => "#"} Home
+                %li{:class => request.path_info == '/about' ? 'active' : ''}
+                  %a{:href => "/about"} About
                 %li
                   %a{:href => "http://www.deliberatedata.com"} Contact
-              - form_tag '/search', :method => 'get', :class => 'navbar-search' do
-                = text_field_tag :q, :class => 'input-xxlarge search-query', :placeholder => 'Search', :value => @querystring
+              - unless request.path_info == '/'
+                - form_tag '/search', :method => 'get', :class => 'navbar-search' do
+                  = text_field_tag :q, :class => 'input-xxlarge search-query', :placeholder => 'Search', :value => @querystring
               -#
                 %p.navbar-text.pull-right
                   Logged in as
                   %a{:href => "#"} username
     #main.container= yield
-    %footer
+    = javascript_include_tag 'bootstrap.min.js', 'highlight.pack.js'

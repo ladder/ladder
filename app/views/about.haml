@@ -1,0 +1,21 @@
+- @title = "About MyTPL"
+
+.container
+  .hero-unit.span6.offset2
+    -#%h1.page-header Welcome to MyTPL
+    %h3 What is MyTPL?
+    %p
+      MyTPL is the live demo site for a revolutionary new kind of information management
+      system.  It lets you search, browse, and find items within the collections of the
+      %a{:href => 'http://tpl.ca'} Toronto Public Library
+
+    %h3 Is TPL involved?
+    %p
+      No, MyTPL is not officially affiliated with TPL. We're just librarians who love to
+      make libraries easier to use. To get in touch,
+      %a{:href => 'mailto:info@deliberatedata.com'} send us an email
+      !
+    %p.span1.pull-right
+      %a{:href => 'http://deliberatedata.com'}
+        %img{:src => url_for('img/dD.png'), :style => 'max-width: 50px !important; float: right !important;'}
+    %br
