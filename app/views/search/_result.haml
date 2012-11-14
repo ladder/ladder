@@ -1,7 +1,7 @@
 %hr{:style => 'margin: 9px 0;'}
 
 .row-fluid
-  .span2.half{:style => 'width: 100px;'}
+  .span2.half
     %a.thumbnail{:href => url_for(:resource, :index, :id => result.id)}
       %img{:src => url_for(:image, :index, :id => result.id, :size => 'S')}
 

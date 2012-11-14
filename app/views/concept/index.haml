@@ -9,21 +9,11 @@
           -# RELATION TREE
           - unless @concept.leaf? and @concept.root?
             %li.nav-header Relations
-            = partial 'tree', :collection => @concept.root.to_a, :locals => {:model => :concept, :self_id => @concept.id, :show => :last}
+            = partial 'tree', :collection => @concept.root.to_a, :locals => {:reference => @concept, :stem => true, :show => :last}
 
           -# SIMILAR ITEMS
           - unless @concept.similar.empty?
-            = partial 'similar', :locals => {:document => @concept, :model => :concept, :show => :dashjoin}
-
-          -# RELATED RESOURCES
-          -# unless @concept.resources.empty?
-            %li.nav-header Resources
-            =list_of(@concept.resources.page(1)) do |resource|
-              .null{:style => 'margin-bottom: 9px;'}
-              %a{:href => url_for(:resource, :index, :id => resource.id)}
-                %img.pull-left{:src => url_for(:image, :index, :id => resource.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
-                #{resource.heading.first}
-                .clearfix
+            = partial 'similar', :locals => {:document => @concept, :show => :dashjoin}
 
     .span9
       %h2.page-header= @title
@@ -37,10 +27,13 @@
             %code&= @concept.to_rdfxml(url_for(request.path_info))
 
       - resources = Resource.where(:concept_ids => @concept.id).page(@page)
-      = partial 'search/result', :collection => resources
+      - unless resources.empty?
+        %b= resources.size
+        resources
 
-      .pagination-centered
-        = paginate resources
+        = partial 'search/result', :collection => resources
+        .pagination-centered
+          = paginate resources
 
       %br
       %p &copy; 2012 Deliberate Data

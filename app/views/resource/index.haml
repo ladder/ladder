@@ -9,11 +9,11 @@
           -# RELATION TREE
           - unless @resource.leaf? and @resource.root?
             %li.nav-header Relations
-            = partial 'tree', :collection => @resource.root.to_a, :locals => {:model => :resource, :self_id => @resource.id, :show => :first}
+            = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
 
           -# SIMILAR ITEMS
           - unless @resource.similar.empty?
-            = partial 'similar', :locals => {:document => @resource, :model => :resource, :show => :first}
+            = partial 'similar', :locals => {:document => @resource, :show => :first}
 
     .span9
       %h2.page-header= @title

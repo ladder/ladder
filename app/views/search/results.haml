@@ -38,10 +38,10 @@
                     %li.active= link_to display, url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
 
     .span9
-      <b>#{@results.size}</b> of <b>#{@results.total}</b> results (#{@results.time} ms)
+      %b= @results.total
+      results (#{@results.time} ms)
 
       = partial 'search/result', :collection => @results
-
       .pagination-centered
         = paginate @results
 

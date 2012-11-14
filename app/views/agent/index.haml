@@ -9,21 +9,11 @@
           -# RELATION TREE
           - unless @agent.leaf? and @agent.root?
             %li.nav-header Relations
-            = partial 'tree', :collection => @agent.root.to_a, :locals => {:self_id => @agent.id}
+            = partial 'tree', :collection => @agent.root.to_a, :locals => {:reference => @agent}
 
           -# SIMILAR ITEMS
           - unless @agent.similar.empty?
-            = partial 'similar', :locals => {:document => @agent, :model => :agent}
-
-          -# RELATED RESOURCES
-          -# unless @agent.resources.empty?
-            %li.nav-header Resources
-            =list_of(@agent.resources.page(1)) do |resource|
-              .null{:style => 'margin-bottom: 9px;'}
-              %a{:href => url_for(:resource, :index, :id => resource.id)}
-                %img.pull-left{:src => url_for(:image, :index, :id => resource.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
-                #{resource.heading.first}
-                .clearfix
+            = partial 'similar', :locals => {:document => @agent}
 
     .span9
       %h2.page-header= @title
@@ -37,10 +27,13 @@
             %code&= @agent.to_rdfxml(url_for(request.path_info))
 
       - resources = Resource.where(:agent_ids => @agent.id).page(@page)
-      = partial 'search/result', :collection => resources
+      - unless resources.empty?
+        %b= resources.size
+        resources
 
-      .pagination-centered
-        = paginate resources
+        = partial 'search/result', :collection => resources
+        .pagination-centered
+          = paginate resources
 
       %br
       %p &copy; 2012 Deliberate Data

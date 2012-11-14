@@ -18,7 +18,7 @@
 
     - if similar.diff > 0.85
       %li.active{:style => 'margin-bottom: 9px;'}
-        %a.active{:href => url_for(model, :index, :id => similar.id)}
+        %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
           - if document.is_a? Resource # FIXME: just for now
             %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
           %strong.text-warning #{similar.load.heading.send(show)}
@@ -27,7 +27,7 @@
 
     - else
       %li{:style => 'margin-bottom: 9px;'}
-        %a{:href => url_for(model, :index, :id => similar.id)}
+        %a{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
           - if document.is_a? Resource # FIXME: just for now
             %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
           #{similar.load.heading.send(show)}
