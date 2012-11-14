@@ -60,9 +60,10 @@ Ladder.controllers :search do
     end
 
     # get a list of IDs from facets and query ES for the headings to display
+    @ids = []
     @results.facets.map(&:last).each do |hash|
       hash['terms'].each do |term|
-        (@ids ||= []) << term['term'] if term['term'].to_s.match(/^[0-9a-f]{24}$/)
+        @ids << term['term'] if term['term'].to_s.match(/^[0-9a-f]{24}$/)
       end
     end
     @ids.uniq!
