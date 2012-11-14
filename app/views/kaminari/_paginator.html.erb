@@ -7,7 +7,7 @@
     paginator:     the paginator that renders the pagination tags inside
 -%>
 <%= paginator.render do -%>
-  <div class="pagination">
+  <div class="pagination hidden-phone hidden-tablet">
     <ul>
     <%= first_page_tag unless current_page.first? %>
     <%= prev_page_tag unless current_page.first? %>
@@ -22,4 +22,8 @@
     <%= last_page_tag unless current_page.last? %>
     </ul>
   </div>
+  <ul class="pager hidden-desktop">
+    <%= prev_page_tag unless current_page.first? %>
+    <%= next_page_tag unless current_page.last? %>
+  </ul>
 <% end -%>

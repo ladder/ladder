@@ -43,7 +43,7 @@
 
       = partial 'search/result', :collection => @results
       .pagination-centered
-        = paginate @results
+        = paginate @results, :window => 3
 
       %br
       %p &copy; 2012 Deliberate Data
