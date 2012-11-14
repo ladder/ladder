@@ -19,6 +19,7 @@
         padding: 9px 0;
       }
     = stylesheet_link_tag 'bootstrap-responsive.min.css'
+    = javascript_include_tag 'jquery.js', 'highlight.pack.js'
     <script>hljs.initHighlightingOnLoad();</script>
   %body
     %header
@@ -44,4 +45,4 @@
                   Logged in as
                   %a{:href => "#"} username
     #main.container= yield
-    = javascript_include_tag 'bootstrap.min.js', 'highlight.pack.js', 'jquery.js'
+    = javascript_include_tag 'bootstrap.min.js'
