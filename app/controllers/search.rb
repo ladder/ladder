@@ -19,7 +19,7 @@ Ladder.controllers :search do
 
     @facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
 
-    @fields = [:heading, :agent_ids, :concept_ids, :dcterms]
+    @fields = [:heading, :agent_ids, :concept_ids, :dcterms, :bibo]
     # TODO: filter nested fields?
     # ['dcterms.issued', 'dcterms.format', 'dcterms.language', 'dcterms.creator']
 

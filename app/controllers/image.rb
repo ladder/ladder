@@ -6,6 +6,13 @@ Ladder.controllers :image do
 
     @resource = Resource.find(params[:id])
 
+    # get the path for thumbnails on disk
+    image_path = "/img/thumbnails/resource/#{@resource.id}-#{size}.jpg"
+    full_path = File.join(PADRINO_ROOT, "/public/", image_path)
+
+    # if we wound up here in error, redirect to the existing image
+    redirect image_path if File.exists?(full_path)
+
     isbns = @resource.bibo.isbn rescue nil
 
     # do lookup on each ISBN in order
@@ -16,7 +23,7 @@ Ladder.controllers :image do
       # get a numeric-only ISBN to look up
       isbn = isbns.pop.gsub(/[^0-9]/i, '')
 
-      services = ["http://syndetics.com/index.aspx?isbn=#{isbn}/#{size}C.gif",
+      services = ["http://syndetics.com/index.aspx?isbn=#{isbn}/#{size}C.jpg",
                   "http://covers.librarything.com/devkey/KEY/medium/isbn/#{isbn}",
                   "http://images.amazon.com/images/P/#{isbn}.01.MZZZZZZZ.jpg",
                   "http://covers.openlibrary.org/b/isbn/#{isbn}-#{size}.jpg"]
@@ -30,7 +37,8 @@ Ladder.controllers :image do
 
     unless thumb.nil?
       content_type thumb.content_type
-      body thumb.read
+      contents = thumb.read
+
     else
       content_type 'image/png'
 
@@ -38,26 +46,30 @@ Ladder.controllers :image do
       path = File.join(PADRINO_ROOT, '/public/img/icons')
       case type
         when /video/i
-          body IO.read(File.join(path, 'icon-film.png'))
+          contents = IO.read(File.join(path, 'icon-film.png'))
         when /sound|audio/i
-          body IO.read(File.join(path, 'icon-audio.png'))
+          contents = IO.read(File.join(path, 'icon-audio.png'))
         when /print/i
-          body IO.read(File.join(path, 'icon-book.png'))
+          contents = IO.read(File.join(path, 'icon-book.png'))
         when /microf/i
-          body IO.read(File.join(path, 'icon-print.png'))
+          contents = IO.read(File.join(path, 'icon-print.png'))
         when /remote/i
-          body IO.read(File.join(path, 'icon-link.png'))
+          contents = IO.read(File.join(path, 'icon-link.png'))
         when /computer/i
-          body IO.read(File.join(path, 'icon-disk.png'))
+          contents = IO.read(File.join(path, 'icon-disk.png'))
         when /dis[ck]/i
-          body IO.read(File.join(path, 'icon-disc.png'))
+          contents = IO.read(File.join(path, 'icon-disc.png'))
         else
-          body IO.read(File.join(path, 'icon-question.png'))
+          contents = IO.read(File.join(path, 'icon-question.png'))
       end
 
-      halt 200
     end
 
+    # save the file for subsequent requests
+    File.open(full_path, 'wb') { |file| file.write(contents)} unless File.exists?(full_path)
+
+    body contents
+    halt 200
   end
 
 end

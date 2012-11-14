@@ -1,0 +1,31 @@
+- size = size || :M
+- image_path = "/img/thumbnails/resource/#{image.id}-#{size}.jpg"
+- full_path = File.join(PADRINO_ROOT, "/public", image_path)
+
+- type = image.dcterms.format.join(' ') rescue nil
+- isbn = image.bibo.isbn rescue nil
+
+- if File.exists?(full_path)
+  %img{:src => url_for("/img/thumbnails/resource/#{image.id}-#{size}.jpg")}
+
+- elsif isbn.nil? and !type.nil?
+  - case type
+    - when /video/i
+      %img{:src => url_for('/img/icons/icon-film.png')}
+    - when /sound|audio/i
+      %img{:src => url_for('/img/icons/icon-audio.png')}
+    - when /print/i
+      %img{:src => url_for('/img/icons/icon-book.png')}
+    - when /microf/i
+      %img{:src => url_for('/img/icons/icon-print.png')}
+    - when /remote/i
+      %img{:src => url_for('/img/icons/icon-link.png')}
+    - when /computer/i
+      %img{:src => url_for('/img/icons/icon-disk.png')}
+    - when /dis[ck]/i
+      %img{:src => url_for('/img/icons/icon-disc.png')}
+    - else
+      %img{:src => url_for('/img/icons/icon-question.png')}
+
+- else
+  %img{:src => url_for(:image, :index, :id => image.id, :size => size)}

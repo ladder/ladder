@@ -1,5 +1,5 @@
-- show = :join if show.nil?
-- stem = nil if stem.nil?
+- show = show || :join
+- stem = stem || nil
 
 - if reference.id == tree.id
   %li.active

@@ -20,7 +20,7 @@
 
       .row-fluid
         .span2.thumbnail
-          %img{:src => url_for(:image, :index, :id => @resource.id)}
+          = partial 'image', :object => @resource
 
         .span10
           = partial 'item', :object => Resource.normalize(@resource.as_document, {:ids => :resolve})

@@ -1,4 +1,4 @@
-- show = :join if show.nil?
+- show = show || :join
 
 - docs = Kaminari.paginate_array(document.similar.to_a).page(1)
 - docs.each do |doc|
@@ -19,8 +19,10 @@
     - if similar.diff > 0.85
       %li.active{:style => 'margin-bottom: 9px;'}
         %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
-          - if document.is_a? Resource # FIXME: just for now
-            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
+          - if document.is_a? Resource
+            .pull-left{:style => 'margin-right: 9px; max-width: 60px;'}
+              = partial 'image', :object => similar, :locals => {:size => 'S'}
+
           %strong.text-warning #{similar.load.heading.send(show)}
           %small.muted (#{(similar.diff * 100).round}%)
           .clearfix
@@ -28,8 +30,10 @@
     - else
       %li{:style => 'margin-bottom: 9px;'}
         %a{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
-          - if document.is_a? Resource # FIXME: just for now
-            %img.pull-left{:src => url_for(:image, :index, :id => similar.id, :size => :S), :style => 'margin-right: 9px; max-width: 60px;'}
+          - if document.is_a? Resource
+            .pull-left{:style => 'margin-right: 9px; max-width: 60px;'}
+              = partial 'image', :object => similar, :locals => {:size => 'S'}
+
           #{similar.load.heading.send(show)}
           %small.muted (#{(similar.diff * 100).round}%)
           .clearfix
