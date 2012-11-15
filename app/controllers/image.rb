@@ -7,8 +7,9 @@ Ladder.controllers :image do
     @resource = Resource.find(params[:id])
 
     # get the path for thumbnails on disk
-    image_path = "/img/thumbnails/resource/#{@resource.id}-#{size}.jpg"
-    full_path = File.join(PADRINO_ROOT, "/public/", image_path)
+    thumbnail_path = "/system/thumbnails/resource/"
+    image_path = "#{@resource.id}-#{size}.jpg"
+    full_path = File.join(PADRINO_ROOT, "/public", thumbnail_path, image_path)
 
     # if we wound up here in error, redirect to the existing image
     redirect image_path if File.exists?(full_path)
@@ -66,6 +67,8 @@ Ladder.controllers :image do
     end
 
     # save the file for subsequent requests
+    Dir.mkdir(File.join(PADRINO_ROOT, "/public", thumbnail_path)) unless File.exists?(File.join(PADRINO_ROOT, "/public", thumbnail_path))
+
     File.open(full_path, 'wb') { |file| file.write(contents)} unless File.exists?(full_path)
 
     body contents

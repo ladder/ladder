@@ -3,13 +3,13 @@
 .row-fluid
   .span2.half
     %a.thumbnail{:href => url_for(:resource, :index, :id => result.id)}
-      = partial 'image', :object => result
+      = partial 'resource/image', :object => result
 
   .span10
     %a{:href => url_for(:resource, :index, :id => result.id)}
       %h4
-        = result.heading.first
-        -#%small (#{result._score})
+        = result.heading.first.truncate(100, :separator => ' ')
+        %small (#{result._score})
 
     - item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
 
@@ -21,7 +21,7 @@
           - creators << link_to(heading.first, url_for(creator.keys.first, :index, :id => creator.values.first))
 
     - desc = []
-    -# desc.push item[:dcterms][:format].first.capitalize rescue nil
+    - desc.push item[:dcterms][:format].first.capitalize rescue nil
     - desc.push item[:dcterms][:issued].first rescue nil
     - desc.push ISO_639.find(item[:dcterms][:language].first).english_name.capitalize rescue nil
 

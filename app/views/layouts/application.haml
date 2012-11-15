@@ -8,9 +8,8 @@
     %meta{:content => "", :name => "author"}/
     %meta{:name => "viewport", :content => "width=device-width"}/
     /[if lt IE 9]
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    = stylesheet_link_tag 'bootstrap.min.css', 'bootstrap-responsive.min.css'
-    = stylesheet_link_tag 'main.css', 'github.css'
+      = javascript_include_tag 'http://html5shim.googlecode.com/svn/trunk/html5.js'
+    = stylesheet_link_tag 'bootstrap.min.css'
     :css
       body {
         padding-top: 60px;
@@ -19,9 +18,10 @@
       .sidebar-nav {
         padding: 9px 0;
       }
+    = stylesheet_link_tag 'main.css', 'github.css', 'bootstrap-responsive.min.css'
     = javascript_include_tag 'highlight.pack.js'
     = javascript_include_tag 'http://code.jquery.com/jquery-1.8.2.min.js'
-    <script>hljs.initHighlightingOnLoad();</script>
+    %script hljs.initHighlightingOnLoad();
   %body
     %header
       .navbar.navbar-fixed-top

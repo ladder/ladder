@@ -5,35 +5,39 @@ namespace :model do
 
     args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
 
-    # once for each model specified
-    args.model.to_a.each do |model|
+    Mongoid.unit_of_work(disable: :all) do
 
-      klass  = model.classify.constantize
-      next if klass.empty? # nothing to process
+      # once for each model specified
+      args.model.to_a.each do |model|
 
-      # only retrieve fields required for hierarchy
-      collection = klass.roots.only(:id, :parent_id, :parent_ids)
+        klass  = model.classify.constantize
+        next if klass.empty? # nothing to process
 
-      puts "Building #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors..."
+        # only retrieve fields required for hierarchy
+        collection = klass.roots.only(:id, :parent_id, :parent_ids)
 
-      # break collection into chunks for multi-processing
-      chunks = collection.chunkify
+        puts "Building #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors..."
 
-      # suppress indexing on save
-      klass.skip_callback(:save, :after, :update_index)
+        # break collection into chunks for multi-processing
+        chunks = collection.chunkify
 
-      Parallel.each(chunks) do |chunk|
-        # force mongoid to create a new session for each chunk
-        Mongoid::Sessions.clear
+        # suppress indexing on save
+        klass.skip_callback(:save, :after, :update_index)
 
-        # save each document; this will only update the hierarchy
-        chunk.each(&:save)
+        Parallel.each(chunks) do |chunk|
+          # force mongoid to create a new session for each chunk
+          Mongoid::Sessions.clear
 
-        # disconnect the session so we don't leave it orphaned
-        Mongoid::Sessions.default.disconnect
+          # save each document; this will only update the hierarchy
+          chunk.each(&:save)
 
-        # Make sure to flush the GC when done a chunk
-        GC.start
+          # disconnect the session so we don't leave it orphaned
+          Mongoid::Sessions.default.disconnect
+
+          # Make sure to flush the GC when done a chunk
+          GC.start
+        end
+
       end
 
     end

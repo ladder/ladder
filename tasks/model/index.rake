@@ -5,41 +5,45 @@ namespace :model do
 
     args.with_defaults(:model => ['Resource', 'Agent', 'Concept'])
 
-    # once for each model specified
-    args.model.to_a.each do |model|
+    Mongoid.unit_of_work(disable: :all) do
 
-      klass  = model.classify.constantize
-      next if klass.empty? # nothing to index
+      # once for each model specified
+      args.model.to_a.each do |model|
 
-      # only retrieve fields that are mapped in index
-      collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
+        klass  = model.classify.constantize
+        next if klass.empty? # nothing to index
 
-      puts "Indexing #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors..."
+        # only retrieve fields that are mapped in index
+        collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
 
-      # break collection into chunks for multi-processing
-      chunks = collection.chunkify
+        puts "Indexing #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors..."
 
-      # ensure the index exists
-      klass.tire.create_elasticsearch_index
+        # break collection into chunks for multi-processing
+        chunks = collection.chunkify
 
-      # temporary settings to improve indexing performance
-      klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30
+        # ensure the index exists
+        klass.tire.create_elasticsearch_index
 
-      Parallel.each(chunks) do |chunk|
-        # force mongoid to create a new session for each chunk
-        Mongoid::Sessions.clear
+        # temporary settings to improve indexing performance
+        klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30
 
-        klass.tire.index.bulk_store chunk
+        Parallel.each(chunks) do |chunk|
+          # force mongoid to create a new session for each chunk
+          Mongoid::Sessions.clear
 
-        # disconnect the session so we don't leave it orphaned
-        Mongoid::Sessions.default.disconnect
+          klass.tire.index.bulk_store chunk
 
-        # Make sure to flush the GC when done a chunk
-        GC.start
+          # disconnect the session so we don't leave it orphaned
+          Mongoid::Sessions.default.disconnect
+
+          # Make sure to flush the GC when done a chunk
+          GC.start
+        end
+
+        # restore default settings
+        klass.settings :refresh_interval => '1s', :'merge.policy.merge_factor' => 10
+
       end
-
-      # restore default settings
-      klass.settings :refresh_interval => '1s', :'merge.policy.merge_factor' => 10
 
     end
 

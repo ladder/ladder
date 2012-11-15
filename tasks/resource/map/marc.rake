@@ -5,41 +5,45 @@ namespace :map do
 
     args.with_defaults(:remap => false)
 
-    resources = Resource.marc.only(:marc)
+    Mongoid.unit_of_work(disable: :all) do
 
-    # only select resources which have not already been mapped
-    resources = resources.mods(false) unless args.remap
+      resources = Resource.marc.only(:marc)
 
-    exit if resources.empty?
+      # only select resources which have not already been mapped
+      resources = resources.mods(false) unless args.remap
 
-    puts "Mapping #{resources.size} MARC records using #{Parallel.processor_count} processors..."
+      exit if resources.empty?
 
-    # break resources into chunks for multi-processing
-    chunks = resources.chunkify
+      puts "Mapping #{resources.size} MARC records using #{Parallel.processor_count} processors..."
 
-    # suppress indexing on save
-    Resource.reset_callbacks(:save)
-    Resource.reset_callbacks(:validate)
-    Resource.reset_callbacks(:validation)
+      # break resources into chunks for multi-processing
+      chunks = resources.chunkify
 
-    # instantiate mapping object
-    mapping = LadderMapping::MARC2.new
+      # suppress indexing on save
+      Resource.reset_callbacks(:save)
+      Resource.reset_callbacks(:validate)
+      Resource.reset_callbacks(:validation)
 
-    Parallel.each(chunks) do |chunk|
-      # force mongoid to create a new session for each chunk
-      Mongoid::Sessions.clear
+      # instantiate mapping object
+      mapping = LadderMapping::MARC2.new
 
-      # TODO: we could do this in batches of 1000 (like import)
-      # or skip storing the MODS and just map through directly
-      chunk.each do |resource|
-        mapping.map(resource).save
+      Parallel.each(chunks) do |chunk|
+        # force mongoid to create a new session for each chunk
+        Mongoid::Sessions.clear
+
+        # TODO: we could do this in batches of 1000 (like import)
+        # or skip storing the MODS and just map through directly
+        chunk.each do |resource|
+          mapping.map(resource).save
+        end
+
+        # disconnect the session so we don't leave it orphaned
+        Mongoid::Sessions.default.disconnect
+
+        # Make sure to flush the GC when done a chunk
+        GC.start
       end
 
-      # disconnect the session so we don't leave it orphaned
-      Mongoid::Sessions.default.disconnect
-
-      # Make sure to flush the GC when done a chunk
-      GC.start
     end
 
   end

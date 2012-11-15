@@ -11,7 +11,7 @@
         - heading = @headings.results.find {|i| i.id == f['term']}.heading
         - if 'subject' == facet
           - display = heading.dashjoin
-        - else display = heading.first
+        - else display = heading.first.truncate(100, :separator => ' ')
 
       - elsif 'format' == facet
         - display = f['term'].capitalize
@@ -27,7 +27,7 @@
         - else
           - @new_fi = @filters.deep_merge({ns.to_s => {facet => @filters[ns][facet].to_a | f['term'].to_a}})
 
-        %li= link_to display + " (#{f['count']})", url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
+        %li= link_to display + " (#{f['count']})", current_path('q' => @querystring, 'page' => @page, 'fi' => @new_fi)
 
       - else
-        %li.active= link_to display, url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns.to_s => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
+        %li.active= link_to display, current_path('q' => @querystring, 'page' => @page, 'fi' => @filters.deep_merge({ns.to_s => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))

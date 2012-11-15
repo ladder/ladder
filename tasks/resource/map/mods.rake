@@ -5,41 +5,45 @@ namespace :map do
 
     args.with_defaults(:remap => false)
 
-    resources = Resource.mods.only(:mods)
+    Mongoid.unit_of_work(disable: :all) do
 
-    # only select resources which have not already been mapped
-    resources = resources.dcterms(false).bibo(false) unless args.remap
+      resources = Resource.mods.only(:mods)
 
-    exit if resources.empty?
+      # only select resources which have not already been mapped
+      resources = resources.dcterms(false).bibo(false) unless args.remap
 
-    puts "Mapping #{resources.size} MODS records using #{Parallel.processor_count} processors..."
+      exit if resources.empty?
 
-    # break resources into chunks for multi-processing
-    chunks = resources.chunkify
+      puts "Mapping #{resources.size} MODS records using #{Parallel.processor_count} processors..."
 
-    # suppress indexing on save
-    Resource.skip_callback(:save, :after, :update_index)
-    Agent.skip_callback(:save, :after, :update_index)
-    Concept.skip_callback(:save, :after, :update_index)
+      # break resources into chunks for multi-processing
+      chunks = resources.chunkify
 
-    Parallel.each(chunks) do |chunk|
-      # force mongoid to create a new session for each chunk
-      Mongoid::Sessions.clear
+      # suppress indexing on save
+      Resource.skip_callback(:save, :after, :update_index)
+      Agent.skip_callback(:save, :after, :update_index)
+      Concept.skip_callback(:save, :after, :update_index)
 
-      chunk.each do |resource|
-        # load MODS XML document
-        xml = Nokogiri::XML(resource.mods)
+      Parallel.each(chunks) do |chunk|
+        # force mongoid to create a new session for each chunk
+        Mongoid::Sessions.clear
 
-        # instantiate mapping object
-        mapping = LadderMapping::MODS.new
-        mapping.map(resource, xml.at_xpath('/mods')).save
+        chunk.each do |resource|
+          # load MODS XML document
+          xml = Nokogiri::XML(resource.mods)
+
+          # instantiate mapping object
+          mapping = LadderMapping::MODS.new
+          mapping.map(resource, xml.at_xpath('/mods')).save
+        end
+
+        # disconnect the session so we don't leave it orphaned
+        Mongoid::Sessions.default.disconnect
+
+        # Make sure to flush the GC when done a chunk
+        GC.start
       end
 
-      # disconnect the session so we don't leave it orphaned
-      Mongoid::Sessions.default.disconnect
-
-      # Make sure to flush the GC when done a chunk
-      GC.start
     end
 
   end

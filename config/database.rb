@@ -12,7 +12,7 @@ end
 Mongoid::Config.sessions = {default: {hosts: ["#{host}:#{port}"], database: database_name}}
 
 # @see: http://mongoid.org/en/mongoid/docs/installation.html#configuration
-#Mongoid::Config.options  = {identity_map_enabled: true}
+Mongoid::Config.options  = {identity_map_enabled: true}
 
 #Mongoid.logger = Padrino.logger
 #Moped.logger = Padrino.logger

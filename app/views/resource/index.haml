@@ -1,26 +1,26 @@
-- @title = @resource.heading.first
+- @title = @resource.heading.first.truncate(100, :separator => ' ')
 
 .container
   .row
     .span3.hidden-phone
-      .well.sidebar-nav
-        %ul.nav.nav-list
+      - unless @resource.leaf? and @resource.root? and @resource.similar.empty?
+        .well.sidebar-nav
+          %ul.nav.nav-list
+            -# RELATION TREE
+            - unless @resource.leaf? and @resource.root?
+              %li.nav-header Related
+              = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
 
-          -# RELATION TREE
-          - unless @resource.leaf? and @resource.root?
-            %li.nav-header Relations
-            = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
-
-          -# SIMILAR ITEMS
-          - unless @resource.similar.empty?
-            = partial 'similar', :locals => {:document => @resource, :show => :first}
+            -# SIMILAR ITEMS
+            - unless @resource.similar.empty?
+              = partial 'similar', :locals => {:document => @resource, :show => :first}
 
     .span9
       %h2.page-header= @title
 
       .row-fluid
         .span2.thumbnail
-          = partial 'image', :object => @resource
+          = partial 'resource/image', :object => @resource
 
         .span10
           = partial 'item', :object => Resource.normalize(@resource.as_document, {:ids => :resolve})

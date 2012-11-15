@@ -21,13 +21,18 @@ namespace :import do
 
     puts "Importing #{files.size} MODS file(s) using #{[files.size, Parallel.processor_count].min} processors..."
 
-    Parallel.each(files) do |file|
+    Mongoid.unit_of_work(disable: :all) do
 
-      # create a new resource for this MODS file
-      # NB: we don't do this in batch because files may be large (multiple MB)
-      Resource.new({:mods => IO.read(file)})
+      Parallel.each(files) do |file|
 
-      puts "Finished importing: #{file}"
+        # create a new resource for this MODS file
+        # NB: we don't do this in batch because files may be large (multiple MB)
+        Resource.new({:mods => IO.read(file)})
+
+        puts "Finished importing: #{file}"
+      end
+
     end
+
   end
 end

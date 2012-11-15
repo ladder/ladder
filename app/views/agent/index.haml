@@ -1,19 +1,25 @@
-- @title = @agent.heading.first
+- @title = @agent.heading.first.truncate(100, :separator => ' ')
 
 .container
   .row
     .span3.hidden-phone
-      .well.sidebar-nav
-        %ul.nav.nav-list
+      - unless @agent.leaf? and @agent.root? and @agent.similar.empty?
+        .well.sidebar-nav
+          %ul.nav.nav-list
+            -# RELATION TREE
+            - unless @agent.leaf? and @agent.root?
+              %li.nav-header Related
+              = partial 'tree', :collection => @agent.root.to_a, :locals => {:reference => @agent}
 
-          -# RELATION TREE
-          - unless @agent.leaf? and @agent.root?
-            %li.nav-header Relations
-            = partial 'tree', :collection => @agent.root.to_a, :locals => {:reference => @agent}
+            -# SIMILAR ITEMS
+            - unless @agent.similar.empty?
+              = partial 'similar', :locals => {:document => @agent}
 
-          -# SIMILAR ITEMS
-          - unless @agent.similar.empty?
-            = partial 'similar', :locals => {:document => @agent}
+      -# FACETS
+      - unless @facets.empty?
+        .well.sidebar-nav
+          %ul.nav.nav-list
+            = partial 'search/facet', :collection => @facets
 
     .span9
       %h2.page-header= @title
@@ -26,14 +32,13 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @agent.to_rdfxml(url_for(request.path_info))
 
-      - resources = Resource.where(:agent_ids => @agent.id).page(@page)
-      - unless resources.empty?
-        %b= resources.size
-        resources
+      .row-fluid
+        %b= @results.total
+        results (#{@results.time} ms)
 
-        = partial 'search/result', :collection => resources
+        = partial 'search/result', :collection => @results
         .pagination-centered
-          = paginate resources, :window => 3
+          = paginate @results, :window => 3
 
       %br
       %p &copy; 2012 Deliberate Data

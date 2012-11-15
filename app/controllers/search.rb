@@ -17,64 +17,23 @@ Ladder.controllers :search do
 
     session[:querystring] = @querystring
 
-    @facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
+    search = LadderSearch::Search.new(:filters => @filters)
 
-    @fields = [:heading, :agent_ids, :concept_ids, :dcterms, :bibo]
-    # TODO: filter nested fields?
-    # ['dcterms.issued', 'dcterms.format', 'dcterms.language', 'dcterms.creator']
+    search.facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
+    search.fields = [:heading, :agent_ids, :concept_ids, :dcterms, :bibo]
+    search.query = :string, @querystring, {:default_operator => 'AND'}
 
     # TODO: multi-index search?
-    @results = Resource.tire.search(:page => @page, :per_page => @per_page) do |search|
-      search.query do |query|
-        query.filtered do |filtered|
+    search.search(:page => @page, :per_page => @per_page)
 
-          filtered.query do |q|
-            q.string @querystring, :default_operator => 'AND'
-          end
-
-          @filters.each do |ns, filter|
-            filter.each do |f, arr|
-              arr.each do |v|
-                filtered.filter :term, "#{ns}.#{f}.raw" => v
-              end
-            end
-          end
-
-        end
-      end
-
-      search.fields @fields
-
-      # descriptive facets
-      @facets.each do |ns, facet|
-        facet.each do |f|
-          # TODO: prepend namespace to facet somehow to avoid collisions
-          search.facet(f) { terms ("#{ns}.#{f}.raw")}
-        end
-      end
+    if search.results.empty? and search.results.total > 0 and @page.to_i > 1
+      params[:page] = 1
+      redirect current_path(params)
     end
 
-    # if we are on a page past the end, go back to the first page
-    if @results.empty? and @results.total > 0 and @page.to_i > 1
-      redirect url(:search, :index, :q => params[:q], :fi => params[:fi], :page => 1)
-    end
-
-    # get a list of IDs from facets and query ES for the headings to display
-    @ids = []
-    @results.facets.map(&:last).each do |hash|
-      hash['terms'].each do |term|
-        @ids << term['term'] if term['term'].to_s.match(/^[0-9a-f]{24}$/)
-      end
-    end
-    @ids.uniq!
-
-    @headings = Tire.search do |search|
-      search.query do |query|
-        query.ids @ids
-      end
-      search.size @ids.size
-      search.fields ['heading']
-    end
+    @results = search.results
+    @facets = search.facets
+    @headings = search.headings
 
     render 'search/results'
   end

@@ -21,41 +21,46 @@ namespace :import do
 
     puts "Importing #{files.size} MARC file(s) using #{[files.size, Parallel.processor_count].min} processors..."
 
-    Parallel.each(files) do |file|
+    Mongoid.unit_of_work(disable: :all) do
 
-      # load records from file
-      reader = MARC::Reader.new(file)
+      Parallel.each(files) do |file|
 
-      resources = []
+        # load records from file
+        reader = MARC::Reader.new(file)
 
-      reader.each do |record|
+        resources = []
 
-        # ensure we are importing valid UTF-8 MARC
-        marc = record.to_marc
+        reader.each do |record|
 
-        if !marc.valid_encoding?# or !marc.force_encoding('UTF-8').valid_encoding?
-          puts 'Detected bad encoding, fixing...'
-          marc = marc.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
-          marc = marc.encode!('UTF-8', 'UTF-16')
+          # ensure we are importing valid UTF-8 MARC
+          marc = record.to_marc
+
+          if !marc.valid_encoding?# or !marc.force_encoding('UTF-8').valid_encoding?
+            puts 'Detected bad encoding, fixing...'
+            marc = marc.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
+            marc = marc.encode!('UTF-8', 'UTF-16')
+          end
+
+          # create a new resource for this MARC record
+          resource = Resource.new(:marc => marc)
+          resource.set_created_at
+
+          # add resource to mongoid bulk stack
+          resources << resource.as_document
+
+          if resources.size > 1000
+            Resource.collection.insert(resources)
+            resources = []
+          end
         end
 
-        # create a new resource for this MARC record
-        resource = Resource.new(:marc => marc)
-        resource.set_created_at
+        # make sure we insert anything left over from the last chunk
+        Resource.collection.insert(resources)
 
-        # add resource to mongoid bulk stack
-        resources << resource.as_document
-
-        if resources.size > 1000
-          Resource.collection.insert(resources)
-          resources = []
-        end
+        puts "Finished importing: #{file}"
       end
 
-      # make sure we insert anything left over from the last chunk
-      Resource.collection.insert(resources)
-
-      puts "Finished importing: #{file}"
     end
+
   end
 end

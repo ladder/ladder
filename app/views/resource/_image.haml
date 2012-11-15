@@ -1,12 +1,13 @@
 - size = size || :M
-- image_path = "/img/thumbnails/resource/#{image.id}-#{size}.jpg"
-- full_path = File.join(PADRINO_ROOT, "/public", image_path)
+- thumbnail_path = "/system/thumbnails/resource/"
+- image_path = "#{image.id}-#{size}.jpg"
+- full_path = File.join(PADRINO_ROOT, "/public", thumbnail_path, image_path)
 
 - type = image.dcterms.format.join(' ') rescue nil
 - isbn = image.bibo.isbn rescue nil
 
 - if File.exists?(full_path)
-  %img{:src => url_for("/img/thumbnails/resource/#{image.id}-#{size}.jpg")}
+  %img{:src => url_for(thumbnail_path + image_path)}
 
 - elsif isbn.nil? and !type.nil?
   - case type

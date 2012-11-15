@@ -222,7 +222,7 @@ module LadderMapping
 
         agent = Agent.find_or_create_by(:foaf => foaf)
 
-        next if agents.include? agent or agent_ids.include? agent.id
+        next if agent.nil? or agents.include? agent or agent_ids.include? agent.id
 
         agents << agent
       end
@@ -256,18 +256,20 @@ module LadderMapping
 #          end
 
           unless current.nil?
+            # NB: semantically this is a bit redundant, but we do it for consistency
             (current.skos.narrower ||= []) << concept.id
             (concept.skos.broader ||= []) << current.id
             current.skos.narrower.uniq!
             concept.skos.broader.uniq!
 
             current.children << concept
+            current.save
           end
 
           current = concept
         end
 
-        next if concepts.include? current or concept_ids.include? current.id
+        next if current.nil? or concepts.include? current or concept_ids.include? current.id
 
         concepts << current
       end
