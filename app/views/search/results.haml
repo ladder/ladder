@@ -5,37 +5,7 @@
     .span3
       .well.sidebar-nav.hidden-phone
         %ul.nav.nav-list
-          - @facets.each do |ns, fields|
-            - fields.each do |facet|
-              - if !@results.facets[facet]['terms'].empty?
-                %li.nav-header= facet
-
-                - @results.facets[facet]['terms'].each do |f|
-
-                  - if f['term'].match(/^[0-9a-f]{24}$/)
-                    - heading = @headings.results.find {|i| i.id == f['term']}.heading
-                    - if 'subject' == facet
-                      - display = heading.dashjoin
-                    - else display = heading.first
-
-                  - elsif 'format' == facet
-                    - display = f['term'].capitalize
-
-                  - elsif 'language' == facet
-                    - display = ISO_639.find(f['term']).english_name rescue f['term']
-
-                  - else display = f['term']
-
-                  - if @filters[ns].nil? or @filters[ns][facet].nil? or !@filters[ns][facet].to_a.include?(f['term'])
-                    - if @filters[ns].nil?
-                      - @new_fi = @filters.deep_merge({ns => {facet => f['term'].to_a}})
-                    - else
-                      - @new_fi = @filters.deep_merge({ns => {facet => @filters[ns][facet].to_a | f['term'].to_a}})
-
-                    %li= link_to display + " (#{f['count']})", url_for(:search_index, @querystring, :page => @page, :fi => @new_fi)
-
-                  - else
-                    %li.active= link_to display, url_for(:search_index, @querystring, :page => @page, :fi => @filters.deep_merge({ns => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
+          = partial 'search/facet', :collection => @facets
 
     .span9
       %b= @results.total

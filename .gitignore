@@ -3,6 +3,7 @@ log/**/*
 tmp/**/*
 bin/
 vendor/
+public/img/thumbnails/**/*
 .sass-cache/
 .idea/
 .bundle/

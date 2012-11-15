@@ -35,7 +35,7 @@ Ladder.controllers :search do
           @filters.each do |ns, filter|
             filter.each do |f, arr|
               arr.each do |v|
-                filtered.filter :term, ns.to_s + '.' + f.to_s + '.raw' => v
+                filtered.filter :term, "#{ns}.#{f}.raw" => v
               end
             end
           end
@@ -49,7 +49,7 @@ Ladder.controllers :search do
       @facets.each do |ns, facet|
         facet.each do |f|
           # TODO: prepend namespace to facet somehow to avoid collisions
-          search.facet(f) { terms (ns.to_s + '.' + f + '.raw')}
+          search.facet(f) { terms ("#{ns}.#{f}.raw")}
         end
       end
     end
