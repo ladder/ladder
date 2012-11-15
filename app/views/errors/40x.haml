@@ -1,0 +1,17 @@
+- @title = "Page Not Found"
+
+.container
+  .span2.hidden-phone
+    %img{:src => url_for('img/ladder.png')}
+
+  .span7
+    .hero-unit.well
+      %h1.page-header
+        404
+        %small{:style => 'display: block;'} Page Not Found
+      %br
+      %p.lead
+        Sorry, the page you're trying to view doesn't exist.
+      %p.lead
+        Maybe this was the result of a mistyped address
+        or an out-of-date link?

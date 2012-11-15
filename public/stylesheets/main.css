@@ -22,7 +22,7 @@ h2.page-header {
 .hero-unit h1 {
     color: #28529B;
     text-align: center;
-    font-size: 50px;
+    font-size: 80px;
     margin-top: 0px;
 }
 
@@ -32,7 +32,7 @@ a.brand {
 }
 
 p.lead {
-    font-size: 1.5em;
+    font-size: 1.4em;
 }
 
 .logo, .search {

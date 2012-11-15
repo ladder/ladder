@@ -3,7 +3,7 @@ Ladder.controllers :concept do
   get :index, :with => :id do
     @concept = Concept.find(params[:id])
 
-    @querystring = params[:q] || session[:querystring]
+    @querystring = session[:querystring]
     @filters = params[:fi] || {}
     @page = params[:page] || 1
     @per_page = params[:pp] || 25

@@ -13,7 +13,6 @@ Ladder.controllers :agent do
     search.facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
     search.fields = [:heading, :agent_ids, :concept_ids, :dcterms, :bibo]
     search.query = :term, :agent_ids, @agent.id
-    search.sort = :heading, 'desc'
 
     search.search(:page => @page, :per_page => @per_page)
 
