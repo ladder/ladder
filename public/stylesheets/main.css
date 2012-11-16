@@ -1,7 +1,6 @@
 @media all and (max-width: 480px)  {
     .half {
         float: left !important;
-        width: 100px !important;
     }
     .row-fluid .half {
         padding-right: 9px !important;
@@ -10,6 +9,10 @@
 
 a .half {
     max-width: 60px;
+}
+
+.row-fluid .half {
+    max-width: 80px;
 }
 
 h4 {
