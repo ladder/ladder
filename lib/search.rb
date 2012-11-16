@@ -1,14 +1,15 @@
 module LadderSearch
   class Search
 
-    attr_accessor :query, :facets, :fields, :filters
+    attr_accessor :query, :facets, :facet_size, :fields, :filters
     attr_reader   :results, :headings
 
     def initialize(opts={})
-      @query   = opts[:facets] || {}
-      @facets  = opts[:facets] || {}
-      @fields  = opts[:fields] || []
-      @filters = opts[:filters] || []
+      @query      = opts[:facets] || {}
+      @facets     = opts[:facets] || {}
+      @facet_size = opts[:facet_size] || 10
+      @fields     = opts[:fields] || []
+      @filters    = opts[:filters] || []
     end
 
     def search(opts={})
@@ -40,7 +41,9 @@ module LadderSearch
         @facets.each do |ns, facet|
           facet.each do |f|
             # TODO: prepend namespace to facet somehow to avoid collisions
-            search.facet(f) { terms ("#{ns}.#{f}.raw")}
+            search.facet(f) do |term|
+              term.terms "#{ns}.#{f}.raw", :size => @facet_size
+            end
           end
         end
       end

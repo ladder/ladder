@@ -6,11 +6,12 @@ Ladder.controllers :concept do
     @querystring = session[:querystring]
     @filters = params[:fi] || {}
     @page = params[:page] || 1
-    @per_page = params[:pp] || 25
+    @per_page = params[:pp] || 10
 
     search = LadderSearch::Search.new(:filters => @filters)
 
-    search.facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
+    search.facets = {:dcterms => %w[format language issued creator contributor publisher subject]}
+    search.facet_size = 5
     search.fields = [:heading, :agent_ids, :concept_ids, :dcterms, :bibo]
     search.query = :term, :concept_ids, @concept.id
 

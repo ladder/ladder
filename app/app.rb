@@ -14,11 +14,11 @@ class Ladder < Padrino::Application
   end
 
   error 404 do
-    render('errors/40x')
+    render('errors/40x', :layout => :application)
   end
 
   error 500 do
-    render('errors/50x')
+    render('errors/50x', :layout => :application)
   end
 
 end

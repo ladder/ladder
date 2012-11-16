@@ -16,9 +16,11 @@
               = partial 'similar', :locals => {:document => @agent}
 
       -# FACETS
-      - unless @facets.empty?
-        .well.sidebar-nav
+      - unless @results.empty? or 1 == @results.size
+        .well.sidebar-nav.accordion-body.collapse#collapseFilters
           %ul.nav.nav-list
+            %li.nav-header
+              %a{:href => '#collapseFilters', :'data-toggle' => "collapse"} Filters
             = partial 'search/facet', :collection => @facets
 
     .span9
