@@ -34,7 +34,7 @@ namespace :map do
 
           # instantiate mapping object
           mapping = LadderMapping::MODS.new
-          mapping.map(resource, xml.at_xpath('/mods')).save
+          mapping.map(resource, xml.at_xpath('/mods'))
         end
 
         # disconnect the session so we don't leave it orphaned

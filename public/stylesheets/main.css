@@ -1,9 +1,11 @@
 @media all and (max-width: 480px)  {
     .half {
-        padding-right: 9px !important;
         float: left !important;
-        width: 100px !important;
     }
+}
+
+.half {
+    max-width: 60px;
 }
 
 h4 {
@@ -47,6 +49,10 @@ p.lead {
     margin-top: 20px;
 }
 
+.nav li.nav-header a {
+    margin-top: -6px;
+}
+
 .nav-list > .active > a {
     opacity: 0.75;
 }
@@ -56,16 +62,12 @@ p.lead {
 }
 
 .nav-list li a {
-    // FIXME: this is like a nav-pill?
+    /* FIXME: this is like a nav-pill? */
     margin: auto;
     padding-left: 9px;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
-}
-
-.nav-list li a.thumbnail img.pull-left {
-    margin-right: 9px;
 }
 
 .nav-list li:nth-last-child(odd):not(.active) a {
@@ -74,6 +76,10 @@ p.lead {
 
 .nav-list li:nth-last-child(odd):not(.active) a:hover {
     background-color: #e5e5e5;
+}
+
+.media {
+    margin-top: 5px;
 }
 
 pre.accordion-body.collapse code {

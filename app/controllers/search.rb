@@ -31,6 +31,10 @@ Ladder.controllers :search do
       redirect current_path(params)
     end
 
+    if search.results.size == 1
+      redirect url_for(:resource, :index, :id => search.results.first.id)
+    end
+
     @results = search.results
     @facets = search.facets
     @headings = search.headings

@@ -2,18 +2,17 @@
 
 .container
   .row
-    .span3
-      .well.sidebar-nav.hidden-phone
-        %ul.nav.nav-list
-          = partial 'search/facet', :collection => @facets
-
     .span9
       %b= @results.total
-      results (#{@results.time} ms)
+      results
+      %span.muted (#{@results.time} ms)
 
       = partial 'search/result', :collection => @results
       .pagination-centered
         = paginate @results, :window => 3
 
-      %br
-      %p &copy; 2012 Deliberate Data
+    .span3
+      - unless @results.empty? or 1 == @results.size
+        .well.sidebar-nav
+          %ul.nav.nav-list
+            = partial 'search/facet', :collection => @facets

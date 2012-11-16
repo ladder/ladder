@@ -12,28 +12,27 @@
 - docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
 
 - unless docs.empty?
-  %li.nav-header Similar
-  %ul
-  - docs.sort {|a, b| b.diff <=> a.diff}.each do |similar|
+  %li.nav-header
+    Similar
+    %ul.media-list
+    - docs.sort {|a, b| b.diff <=> a.diff}.each do |similar|
 
-    - if similar.diff > 0.85
-      %li.active
-        %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
-          - if document.is_a? Resource
-            .pull-left{:style => 'margin-right: 9px; max-width: 60px;'}
-              = partial 'resource/image', :object => similar, :locals => {:size => 'S'}
+      - if similar.diff > 0.85
+        %li.media.active
+          %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
+            - if document.is_a? Resource
+              .half.pull-left= partial 'resource/image', :object => similar, :locals => {:size => 'S'}
 
-          %strong.text-warning #{similar.load.heading.send(show)}
-          %small.muted (#{(similar.diff * 100).round}%)
-          .clearfix
+            %strong.text-warning #{similar.load.heading.send(show)}
+            %small.muted (#{(similar.diff * 100).round}%)
+            .clearfix
 
-    - else
-      %li
-        %a{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
-          - if document.is_a? Resource
-            .pull-left{:style => 'margin-right: 9px; max-width: 60px;'}
-              = partial 'resource/image', :object => similar, :locals => {:size => 'S'}
+      - else
+        %li.media
+          %a{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
+            - if document.is_a? Resource
+              .half.pull-left= partial 'resource/image', :object => similar, :locals => {:size => 'S'}
 
-          #{similar.load.heading.send(show)}
-          %small.muted (#{(similar.diff * 100).round}%)
-          .clearfix
+            #{similar.load.heading.send(show)}
+            %small.muted (#{(similar.diff * 100).round}%)
+            .clearfix

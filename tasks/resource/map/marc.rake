@@ -34,7 +34,7 @@ namespace :map do
         # TODO: we could do this in batches of 1000 (like import)
         # or skip storing the MODS and just map through directly
         chunk.each do |resource|
-          mapping.map(resource).save
+          mapping.map(resource)
         end
 
         # disconnect the session so we don't leave it orphaned

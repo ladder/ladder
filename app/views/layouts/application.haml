@@ -45,5 +45,12 @@
                 %p.navbar-text.pull-right
                   Logged in as
                   %a{:href => "#"} username
+
     #main.container= yield
+
     = javascript_include_tag 'bootstrap.min.js'
+    %footer
+      .container
+        .row
+          .span3.offset6
+            .pull-right &copy; 2012 Deliberate Data

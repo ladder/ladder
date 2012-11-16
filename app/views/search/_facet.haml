@@ -3,6 +3,8 @@
 
 - fields.each do |facet|
   - if !@results.facets[facet]['terms'].empty?
+    - next if 1 == @results.facets[facet]['terms'].size and @results.total == @results.facets[facet]['terms'].first['count']
+
     %li.nav-header= facet
 
     - @results.facets[facet]['terms'].each do |f|

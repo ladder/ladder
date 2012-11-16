@@ -12,6 +12,7 @@ module LadderMapping
       marc = MARC::Record.new_from_marc(resource.marc, :forgiving => true)
 
       resource.mods = @xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash))).remove_namespaces!.to_xml#(:save_with => Nokogiri::XML::Node::SaveOptions::AS_XML | Nokogiri::XML::Node::SaveOptions::NO_DECLARATION).strip
+      resource.save
 
       resource
     end

@@ -2,7 +2,27 @@
 
 .container
   .row
-    .span3.hidden-phone
+    .span9
+      %h2.page-header= @title
+      = partial 'item', :object => Agent.normalize(@agent.as_document, {:ids => :resolve})
+
+      .row-fluid.hidden-phone
+        .span2
+          %a.pull-right{:href => '#collapseRDF', :'data-toggle' => "collapse"} RDF/XML
+        .span10
+          %pre.accordion-body.collapse#collapseRDF
+            %code&= @agent.to_rdfxml(url_for(request.path_info))
+
+      .row-fluid
+        %b= @results.total
+        results
+        %span.muted (#{@results.time} ms)
+
+        = partial 'search/result', :collection => @results
+        .pagination-centered
+          = paginate @results, :window => 3
+
+    .span3
       - unless @agent.leaf? and @agent.root? and @agent.similar.empty?
         .well.sidebar-nav
           %ul.nav.nav-list
@@ -22,25 +42,3 @@
             %li.nav-header
               %a{:href => '#collapseFilters', :'data-toggle' => "collapse"} Filters
             = partial 'search/facet', :collection => @facets
-
-    .span9
-      %h2.page-header= @title
-      = partial 'item', :object => Agent.normalize(@agent.as_document, {:ids => :resolve})
-
-      .row-fluid.hidden-phone
-        .span2
-          %a.pull-right{:href => '#collapseRDF', :'data-toggle' => "collapse"} RDF/XML
-        .span10
-          %pre.accordion-body.collapse#collapseRDF
-            %code&= @agent.to_rdfxml(url_for(request.path_info))
-
-      .row-fluid
-        %b= @results.total
-        results (#{@results.time} ms)
-
-        = partial 'search/result', :collection => @results
-        .pagination-centered
-          = paginate @results, :window => 3
-
-      %br
-      %p &copy; 2012 Deliberate Data

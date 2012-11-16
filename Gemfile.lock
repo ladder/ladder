@@ -118,6 +118,7 @@ GEM
     nokogiri (1.5.5)
     open-uri-cached (0.0.5)
     origin (1.0.10)
+    padrino-contrib (0.1.13)
     parallel (0.5.19)
     polyglot (0.3.3)
     rack (1.4.1)
@@ -193,6 +194,7 @@ DEPENDENCIES
   nokogiri
   open-uri-cached
   padrino!
+  padrino-contrib
   padrino-helpers
   parallel
   rake

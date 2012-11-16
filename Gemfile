@@ -44,3 +44,4 @@ gem 'wirble'
 # Padrino master branch
 gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
 gem 'padrino-helpers'
+gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
