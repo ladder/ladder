@@ -1,6 +1,6 @@
 - show = show || :join
 
-- docs = Kaminari.paginate_array(document.similar.to_a).page(1)
+- docs = document.similar.to_a
 - docs.each do |doc|
   - match = document.amatch(doc, {:jaro_similar => true,
                                   :jarowinkler_similar => true,
@@ -15,7 +15,9 @@
   %li.nav-header
     Similar
     %ul.media-list
-    - docs.sort {|a, b| b.diff <=> a.diff}.each do |similar|
+    - docs.sort! {|a, b| b.diff <=> a.diff}
+    - docs = Kaminari.paginate_array(docs).page(1).per(10)
+    - docs.each do |similar|
 
       - if similar.diff > 0.85
         %li.media.active
