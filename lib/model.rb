@@ -18,13 +18,15 @@ module LadderModel
 
       # TODO: boost results in heading fields (title, alternative, etc)
       def define_indexes(vocabs = {})
+        index 'md5' => 1
+
         embeddeds = self.reflect_on_all_associations(*[:embeds_one])
 
         embeddeds.each do |embed|
 
           # mongodb index definitions
           embed.class_name.constantize.fields.each do |field|
-
+=begin
             if field.is_a? Array
               if vocabs.empty?
                 # default to indexing all fields
@@ -34,8 +36,8 @@ module LadderModel
                 # only index defined fields
                 index "#{embed.key}.#{field.first}" => 1
               end
-
             end
+=end
           end
 
           # elasticsearch index definitions
@@ -48,21 +50,12 @@ module LadderModel
       # @see: http://rdoc.info/github/mongoid/mongoid/Mongoid/Finders
       def find_or_create_by(attrs = {}, &block)
 
-        # build a query based on nested fields
-        query = self
+        # use md5 fingerprint to query if a document already exists
+        hash = self.normalize(attrs, {:ids => :omit})
+        query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s)))
 
-        attrs.each do |vocab, vals|
-          vals.each do |field, value|
-            query = query.and("#{vocab}.#{field}" => value) unless value.empty?
-          end
-        end
-
-        unless query.instance_of? Class
-          # if a document exists, return that
-          result = query.first
-
-          return result unless result.nil?
-        end
+        result = query.first
+        return result unless result.nil?
 
         # otherwise create and return a new object
         obj = self.new(attrs)
@@ -159,6 +152,10 @@ module LadderModel
       base.send :include, Tire::Model::Search
       base.send :include, Tire::Model::Callbacks2 # local patched version
 
+      # Generate MD5 fingerprint for this document
+      base.send :field, :md5
+      base.send :set_callback, :save, :before, :generate_md5
+
       # dynamic templates to store un-analyzed values for faceting
       # @see line:19 ; remove dynamic templates and use explicit mapping
       base.send :mapping, :dynamic_templates => [{
@@ -179,27 +176,33 @@ module LadderModel
                   }
               }
           }
-        }], :_source => { :compress => true } do
+        }], :_source => { :compress => true },
+            :_timestamp => { :enabled => true } do
 
-      # Timestamp information
-      base.send :indexes, :created_at,    :type => 'date'
-      base.send :indexes, :deleted_at,    :type => 'date'
-      base.send :indexes, :updated_at,    :type => 'date'
+        # Timestamp information
+        base.send :indexes, :created_at,    :type => 'date'
+        base.send :indexes, :deleted_at,    :type => 'date'
+        base.send :indexes, :updated_at,    :type => 'date'
 
-      # Hierarchy information
-      base.send :indexes, :parent_id,     :type => 'string'
-      base.send :indexes, :parent_ids,    :type => 'string'
+        # Hierarchy information
+        base.send :indexes, :parent_id,     :type => 'string'
+        base.send :indexes, :parent_ids,    :type => 'string'
 
-      # Relation information
-      base.send :indexes, :agent_ids,     :type => 'string'
-      base.send :indexes, :concept_ids,   :type => 'string'
-      base.send :indexes, :resource_ids,  :type => 'string'
-
-      # add useful class methods
-      base.extend ClassMethods
+        # Relation information
+        base.send :indexes, :agent_ids,     :type => 'string'
+        base.send :indexes, :concept_ids,   :type => 'string'
+        base.send :indexes, :resource_ids,  :type => 'string'
     end
 
+    # add useful class methods
+    base.extend ClassMethods
+
   end
+
+    def generate_md5
+      hash = self.class.normalize(self.as_document, {:ids => :omit})
+      self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s))
+    end
 
     # Retrieve a hash of field names and embedded vocab objects
     def vocabs

@@ -15,7 +15,7 @@ Bundler.require(:default, PADRINO_ENV)
 #
 # ## Configure your I18n
 #
-# I18n.default_locale = :en
+I18n.default_locale = :en
 #
 # ## Configure your HTML5 data helpers
 #
@@ -34,7 +34,6 @@ Bundler.require(:default, PADRINO_ENV)
 # Add your before (RE)load hooks here
 #
 Padrino.before_load do
-  I18n.locale = :en  # default to English
   OpenURI::Cache.cache_path = File.join(PADRINO_ROOT, '/tmp/open-uri')
 end
 

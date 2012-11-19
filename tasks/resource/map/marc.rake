@@ -27,7 +27,7 @@ namespace :map do
       # instantiate mapping object
       mapping = LadderMapping::MARC2.new
 
-      Parallel.each(chunks) do |chunk|
+      Parallel.each_with_index(chunks) do |chunk, index|
         # force mongoid to create a new session for each chunk
         Mongoid::Sessions.clear
 
@@ -36,6 +36,8 @@ namespace :map do
         chunk.each do |resource|
           mapping.map(resource)
         end
+
+        puts "Finished chunk: #{(index+1)}/#{chunks.size}"
 
         # disconnect the session so we don't leave it orphaned
         Mongoid::Sessions.default.disconnect

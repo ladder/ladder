@@ -24,7 +24,7 @@ namespace :map do
       Agent.skip_callback(:save, :after, :update_index)
       Concept.skip_callback(:save, :after, :update_index)
 
-      Parallel.each(chunks) do |chunk|
+      Parallel.each_with_index(chunks) do |chunk, index|
         # force mongoid to create a new session for each chunk
         Mongoid::Sessions.clear
 
@@ -36,6 +36,8 @@ namespace :map do
           mapping = LadderMapping::MODS.new
           mapping.map(resource, xml.at_xpath('/mods'))
         end
+
+        puts "Finished chunk: #{(index+1)}/#{chunks.size}"
 
         # disconnect the session so we don't leave it orphaned
         Mongoid::Sessions.default.disconnect

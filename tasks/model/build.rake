@@ -24,12 +24,14 @@ namespace :model do
         # suppress indexing on save
         klass.skip_callback(:save, :after, :update_index)
 
-        Parallel.each(chunks) do |chunk|
+        Parallel.each_with_index(chunks) do |chunk, index|
           # force mongoid to create a new session for each chunk
           Mongoid::Sessions.clear
 
           # save each document; this will only update the hierarchy
           chunk.each(&:save)
+
+          puts "Finished chunk: #{(index+1)}/#{chunks.size}"
 
           # disconnect the session so we don't leave it orphaned
           Mongoid::Sessions.default.disconnect

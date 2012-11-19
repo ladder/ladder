@@ -31,7 +31,7 @@ Ladder.controllers :search do
       redirect current_path(params)
     end
 
-    if search.results.size == 1
+    if 1 == search.results.size and 1 == @page
       redirect url_for(:resource, :index, :id => search.results.first.id)
     end
 

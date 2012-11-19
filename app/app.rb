@@ -3,9 +3,6 @@ class Ladder < Padrino::Application
   register Padrino::Rendering
   register Padrino::Mailer
   register Padrino::Helpers
-#  register Padrino::Responders
-
-  register Padrino::Contrib::ExceptionNotifier
   register Kaminari::Helpers::SinatraHelpers
 
   configure :development do
@@ -13,6 +10,8 @@ class Ladder < Padrino::Application
   end
 
   configure :production do
+    register Padrino::Contrib::ExceptionNotifier
+
     disable :raise_errors
     disable :show_exceptions
 

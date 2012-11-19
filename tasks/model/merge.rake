@@ -24,7 +24,7 @@ namespace :model do
       klass.reset_callbacks(:validate)
       klass.reset_callbacks(:validation)
 
-      Parallel.each(chunks) do |chunk|
+      Parallel.each_with_index(chunks) do |chunk, index|
         # force mongoid to create a new session for each chunk
         Mongoid::Sessions.clear
 
@@ -66,6 +66,8 @@ namespace :model do
           end
 
         end
+
+        puts "Finished chunk: #{(index+1)}/#{chunks.size}"
 
         # disconnect the session so we don't leave it orphaned
         Mongoid::Sessions.default.disconnect

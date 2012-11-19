@@ -256,7 +256,7 @@ module LadderMapping
 #          end
 
           unless current.nil?
-            # NB: semantically this is a bit redundant, but we do it for consistency
+            # NB: semantically this seems redundant, but we do it for consistency
             (current.skos.narrower ||= []) << concept.id
             (concept.skos.broader ||= []) << current.id
             current.skos.narrower.uniq!
@@ -266,12 +266,11 @@ module LadderMapping
             current.save
           end
 
+          next if concepts.include? concept or concept_ids.include? concept.id
+
+          concepts << concept
           current = concept
         end
-
-        next if current.nil? or concepts.include? current or concept_ids.include? current.id
-
-        concepts << current
       end
 
       concepts
