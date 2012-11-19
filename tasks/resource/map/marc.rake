@@ -10,7 +10,7 @@ namespace :map do
       resources = Resource.marc.only(:marc)
 
       # only select resources which have not already been mapped
-      resources = resources.mods(false) unless args.remap
+      resources = resources.mods(false) unless !!args.remap
 
       exit if resources.empty?
 

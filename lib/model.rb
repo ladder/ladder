@@ -14,6 +14,25 @@ module LadderModel
         embeddeds.each do |embed|
           scope embed.name, ->(exists=true) { where(embed.name.exists => exists) }
         end
+
+        # add scope to check for documents not in ES index
+        scope :unindexed, -> do
+
+          # get the most recent timestamp
+          s = self.search {
+            query { all }
+            sort { by :_timestamp, 'desc' }
+            size 1
+          }
+
+          # if there's a timestamp in the index, use that as the offset
+          unless s.results.empty?
+            timestamp = s.results.first.sort.first / 1000
+            self.queryable.or(:updated_at.gte => timestamp, :created_at.gte => timestamp)
+          else
+            self.queryable
+          end
+        end
       end
 
       # TODO: boost results in heading fields (title, alternative, etc)
