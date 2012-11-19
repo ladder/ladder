@@ -27,28 +27,26 @@ end
 class Resource
   include LadderModel::Core
 
-  # imported data objects
-  field :marc, type: CompressedBinary
-  field :mods, type: CompressedBinary
-
   # embedded RDF vocabularies
   embeds_one :dcterms, class_name: "DublinCore"
   embeds_one :bibo,    class_name: "Bibo"
   embeds_one :prism,   class_name: "Prism"
 
+  @headings = [{:dcterms => :title},
+               {:dcterms => :alternative}]
+
+  # imported data objects
+  field :marc, type: CompressedBinary
+  field :mods, type: CompressedBinary
+
   # scopes
-  define_scopes
   scope :marc, ->(exists=true) { where(:marc.exists => exists) }
   scope :mods, ->(exists=true) { where(:mods.exists => exists) }
-
-  # mongoid indexing
-  define_indexes
 
   # model relations
   has_and_belongs_to_many :agents, index: true
   has_and_belongs_to_many :concepts, index: true
 
-  def heading
-    get_first_field(['dcterms.title', 'dcterms.alternative']) || ['untitled']
-  end
+  define_scopes
+  define_indexes
 end

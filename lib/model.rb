@@ -6,7 +6,54 @@ module LadderModel
 
   module Core
 
+    def self.included(base)
+      base.send :include, Mongoid::Document
+
+      # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
+      base.send :include, Mongoid::Paranoia # soft deletes
+      base.send :include, Mongoid::Timestamps
+      base.send :include, Mongoid::Tree
+      #base.send :include, Mongoid::Tree::Ordering
+
+      # Pagination
+      base.send :include, Kaminari::MongoidExtension::Criteria
+      base.send :include, Kaminari::MongoidExtension::Document
+
+      # ElasticSearch integration
+      base.send :include, Tire::Model::Search
+      base.send :include, Tire::Model::Callbacks2 # local patched version
+
+      # Generate MD5 fingerprint for this document
+      base.send :field, :md5
+      base.send :index, 'md5' => 1
+      base.send :set_callback, :save, :before, :generate_md5
+
+      # Make :headings a readable class variable
+      base.send :class_eval, %(class << self; attr_reader :headings end)
+
+      # add useful class methods
+      # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
+      base.extend ClassMethods
+    end
+
     module ClassMethods
+
+      # Override Mongoid #find_or_create_by
+      # @see: http://rdoc.info/github/mongoid/mongoid/Mongoid/Finders
+      def find_or_create_by(attrs = {}, &block)
+
+        # use md5 fingerprint to query if a document already exists
+        hash = self.normalize(attrs, {:ids => :omit})
+        query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s)))
+
+        result = query.first
+        return result unless result.nil?
+
+        # otherwise create and return a new object
+        obj = self.new(attrs)
+        obj.save
+        obj
+      end
 
       def define_scopes
         embeddeds = self.reflect_on_all_associations(*[:embeds_one])
@@ -35,51 +82,70 @@ module LadderModel
         end
       end
 
-      # TODO: boost results in heading fields (title, alternative, etc)
-      def define_indexes(vocabs = {})
-        index 'md5' => 1
+      def define_indexes
+        # dynamic templates to store un-analyzed values for faceting
+        # TODO: remove dynamic templates and use explicit mapping
+        mapping :dynamic_templates => [{
+          :test => {
+              :match => '*',
+              :match_mapping_type => 'string',
+              :mapping => {
+                  :type => 'multi_field',
+                  :fields => {
+                      '{name}' => {
+                          :type => '{dynamic_type}',
+                          :index => 'analyzed'
+                      },
+                      :raw => {
+                          :type => '{dynamic_type}',
+                          :index => 'not_analyzed'
+                      }
+                  }
+              }
+          }
+         }], :_source => { :compress => true },
+             :_timestamp => { :enabled => true } do
 
-        embeddeds = self.reflect_on_all_associations(*[:embeds_one])
+          embeddeds = self.reflect_on_all_associations(*[:embeds_one])
 
-        embeddeds.each do |embed|
-
-          # mongodb index definitions
-          embed.class_name.constantize.fields.each do |field|
-=begin
-            if field.is_a? Array
-              if vocabs.empty?
-                # default to indexing all fields
-                index "#{embed.key}.#{field.first}" => 1
-
-              elsif !vocabs[embed.name].nil? and vocabs[embed.name].include? field.first.to_sym
-                # only index defined fields
-                index "#{embed.key}.#{field.first}" => 1
-              end
-            end
-=end
+          # combine headings so we can operate on the them per-vocab
+          combined = headings.inject do |a, b|
+            a.merge(b) { |k, v1, v2| v1 == v2 ? v1 : [v1, v2].flatten }
           end
 
-          # elasticsearch index definitions
-          mapping indexes embed.name, :type => 'object'
+          # map each embedded object
+          embeddeds.each do |embed|
+
+            # if this vocab contained headings, map them
+            if combined[embed.name.to_sym]
+              properties = {}
+
+              # each vocab may have multiple heading fields
+              fields = combined[embed.name.to_sym].to_a rescue [combined[embed.name.to_sym]]
+              fields.each do |field|
+                properties[field] = {:type => :string, :boost => 2}
+              end
+
+              indexes embed.name, :type => 'object', :properties => properties
+            else
+              indexes embed.name, :type => 'object'
+            end
+          end
+
+          # Timestamp information
+          indexes :created_at,    :type => 'date'
+          indexes :deleted_at,    :type => 'date'
+          indexes :updated_at,    :type => 'date'
+
+          # Hierarchy information
+          indexes :parent_id,     :type => 'string'
+          indexes :parent_ids,    :type => 'string'
+
+          # Relation information
+          indexes :agent_ids,     :type => 'string'
+          indexes :concept_ids,   :type => 'string'
+          indexes :resource_ids,  :type => 'string'
         end
-
-      end
-
-      # Override Mongoid #find_or_create_by
-      # @see: http://rdoc.info/github/mongoid/mongoid/Mongoid/Finders
-      def find_or_create_by(attrs = {}, &block)
-
-        # use md5 fingerprint to query if a document already exists
-        hash = self.normalize(attrs, {:ids => :omit})
-        query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s)))
-
-        result = query.first
-        return result unless result.nil?
-
-        # otherwise create and return a new object
-        obj = self.new(attrs)
-        obj.save
-        obj
       end
 
       def normalize(hash, opts={})
@@ -153,70 +219,6 @@ module LadderModel
       end
 
     end
-
-    def self.included(base)
-      base.send :include, Mongoid::Document
-
-      # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
-      base.send :include, Mongoid::Paranoia # soft deletes
-      base.send :include, Mongoid::Timestamps
-      base.send :include, Mongoid::Tree
-#      base.send :include, Mongoid::Tree::Ordering
-
-      # Pagination
-      base.send :include, Kaminari::MongoidExtension::Criteria
-      base.send :include, Kaminari::MongoidExtension::Document
-
-      # ElasticSearch integration
-      base.send :include, Tire::Model::Search
-      base.send :include, Tire::Model::Callbacks2 # local patched version
-
-      # Generate MD5 fingerprint for this document
-      base.send :field, :md5
-      base.send :set_callback, :save, :before, :generate_md5
-
-      # dynamic templates to store un-analyzed values for faceting
-      # @see line:19 ; remove dynamic templates and use explicit mapping
-      base.send :mapping, :dynamic_templates => [{
-          :test => {
-              :match => '*',
-              :match_mapping_type => 'string',
-              :mapping => {
-                  :type => 'multi_field',
-                  :fields => {
-                      '{name}' => {
-                          :type => '{dynamic_type}',
-                          :index => 'analyzed'
-                      },
-                      :raw => {
-                          :type => '{dynamic_type}',
-                          :index => 'not_analyzed'
-                      }
-                  }
-              }
-          }
-        }], :_source => { :compress => true },
-            :_timestamp => { :enabled => true } do
-
-        # Timestamp information
-        base.send :indexes, :created_at,    :type => 'date'
-        base.send :indexes, :deleted_at,    :type => 'date'
-        base.send :indexes, :updated_at,    :type => 'date'
-
-        # Hierarchy information
-        base.send :indexes, :parent_id,     :type => 'string'
-        base.send :indexes, :parent_ids,    :type => 'string'
-
-        # Relation information
-        base.send :indexes, :agent_ids,     :type => 'string'
-        base.send :indexes, :concept_ids,   :type => 'string'
-        base.send :indexes, :resource_ids,  :type => 'string'
-    end
-
-    # add useful class methods
-    base.extend ClassMethods
-
-  end
 
     def generate_md5
       hash = self.class.normalize(self.as_document, {:ids => :omit})
@@ -317,20 +319,18 @@ module LadderModel
       options
     end
 
-    # Search an array of model fields in order and return the first non-empty value
-    def get_first_field(fields_array)
-      target = nil
-
-      fields_array.each do |target_field|
-        vocab = target_field.split('.').first
-        field = target_field.split('.').last
+    def heading
+      self.class.headings.each do |mapping|
+        vocab = mapping.keys.first
+        field = mapping.values.first
 
         target = self.send(vocab).send(field) unless self.send(vocab).nil?
 
-        break if target
+        return target if target
       end
 
-      target
+      # TODO: localize me!
+      ['untitled']
     end
 
     # more precise serialization for Tire
