@@ -10,6 +10,7 @@
       %h4
         = result.heading.first.truncate(100, :separator => ' ')
         -#%small (#{result._score})
+    -#= result._explanation.to_json
 
     - item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
 

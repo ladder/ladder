@@ -24,14 +24,14 @@ Ladder.controllers :search do
     search.query = :string, @querystring, {:default_operator => 'AND'}
 
     # TODO: multi-index search?
-    search.search(:page => @page, :per_page => @per_page)
+    search.search('Resource', :page => @page, :per_page => @per_page)
 
     if search.results.empty? and search.results.total > 0 and @page.to_i > 1
       params[:page] = 1
       redirect current_path(params)
     end
 
-    if 1 == search.results.size and 1 == @page
+    if 1 == search.results.size.to_i and 1 == @page.to_i
       redirect url_for(:resource, :index, :id => search.results.first.id)
     end
 

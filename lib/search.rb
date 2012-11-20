@@ -12,11 +12,13 @@ module LadderSearch
       @filters    = opts[:filters] || []
     end
 
-    def search(opts={})
+    def search(model, opts={})
       page = opts[:page]
       per_page = opts[:per_page]
 
-      @results = Resource.tire.search(:page => page, :per_page => per_page) do |search|
+      @results = model.classify.constantize.tire.search(:page => page, :per_page => per_page) do |search|
+#        search.explain true
+
         search.query do |query|
           query.filtered do |filtered|
 

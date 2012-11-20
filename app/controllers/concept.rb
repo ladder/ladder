@@ -15,7 +15,7 @@ Ladder.controllers :concept do
     search.fields = [:heading, :agent_ids, :concept_ids, :dcterms, :bibo]
     search.query = :term, :concept_ids, @concept.id
 
-    search.search(:page => @page, :per_page => @per_page)
+    search.search('Resource', :page => @page, :per_page => @per_page)
 
     if search.results.empty? and search.results.total > 0 and @page.to_i > 1
       params[:page] = 1
