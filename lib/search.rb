@@ -1,11 +1,12 @@
 module LadderSearch
   class Search
 
-    attr_accessor :query, :facets, :facet_size, :fields, :filters
+    attr_accessor :query, :size, :facets, :facet_size, :fields, :filters
     attr_reader   :results, :headings
 
     def initialize(opts={})
       @query      = opts[:facets] || {}
+      @size       = opts[:size] || nil
       @facets     = opts[:facets] || {}
       @facet_size = opts[:facet_size] || 10
       @fields     = opts[:fields] || []
@@ -37,6 +38,7 @@ module LadderSearch
           end
         end
 
+        search.size @size unless @size.nil?
         search.fields @fields unless @fields.empty?
 
         # descriptive facets
@@ -51,20 +53,24 @@ module LadderSearch
       end
 
       # get a list of IDs from facets and query ES for the headings to display
-      ids = []
-      @results.facets.map(&:last).each do |hash|
-        hash['terms'].each do |term|
-          ids << term['term'] if term['term'].to_s.match(/^[0-9a-f]{24}$/)
-        end
-      end
-      ids.uniq!
+      unless @facets.empty?
+        ids = []
 
-      @headings = Tire.search do |search|
-        search.query do |query|
-          query.ids ids
+        @results.facets.map(&:last).each do |hash|
+          hash['terms'].each do |term|
+            ids << term['term'] if term['term'].to_s.match(/^[0-9a-f]{24}$/)
+          end
         end
-        search.size ids.size
-        search.fields ['heading']
+
+        ids.uniq!
+
+        @headings = Tire.search do |search|
+          search.query do |query|
+            query.ids ids
+          end
+          search.size ids.size
+          search.fields ['heading']
+        end
       end
 
     end
