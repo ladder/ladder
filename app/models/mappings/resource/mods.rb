@@ -48,6 +48,7 @@ module LadderMapping
       end
 
       # map encoded concepts to related Concept models
+      # TODO: this should be dcterms.LCSH and separate for not(@authority)
       concepts = map_concepts(node.xpath('subject[@authority]'))
       unless concepts.empty?
         resource.dcterms = DublinCore.new if resource.dcterms.nil?

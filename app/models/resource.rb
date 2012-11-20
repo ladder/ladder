@@ -36,8 +36,8 @@ class Resource
                {:dcterms => :alternative}]
 
   # imported data objects
-  field :marc, type: CompressedBinary
-  field :mods, type: CompressedBinary
+  field :marc, type: LadderModel::CompressedBinary
+  field :mods, type: LadderModel::CompressedBinary
 
   # scopes
   scope :marc, ->(exists=true) { where(:marc.exists => exists) }

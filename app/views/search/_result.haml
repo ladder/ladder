@@ -14,22 +14,16 @@
 
     - item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
 
-    - agents = []
-    - if !item[:dcterms][:creator].nil?
-      - item[:dcterms][:creator].take(3).each do |creator|
-        - if creator.is_a? Hash
-          - heading = creator.keys.first.to_s.classify.constantize.find(creator.values.first).heading
-          - agents << link_to(heading.first, url_for(creator.keys.first, :index, :id => creator.values.first))
-    - elsif !item[:dcterms][:contributor].nil?
-      - item[:dcterms][:contributor].take(3).each do |creator|
-        - if creator.is_a? Hash
-          - heading = creator.keys.first.to_s.classify.constantize.find(creator.values.first).heading
-          - agents << link_to(heading.first, url_for(creator.keys.first, :index, :id => creator.values.first))
-    - elsif !item[:dcterms][:publisher].nil?
-      - item[:dcterms][:publisher].take(3).each do |creator|
-        - if creator.is_a? Hash
-          - heading = creator.keys.first.to_s.classify.constantize.find(creator.values.first).heading
-          - agents << link_to(heading.first, url_for(creator.keys.first, :index, :id => creator.values.first))
+    - if item[:dcterms][:creator] then agents = item[:dcterms][:creator]
+    - elsif item[:dcterms][:contributor] then agents = item[:dcterms][:contributor]
+    - elsif item[:dcterms][:publisher] then agents = item[:dcterms][:publisher]
+
+    - if agents
+      - agents = agents.take(3).map do |value|
+        - if value.is_a? Hash
+          - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
+          - link_to(heading.first, url_for(value.keys.first, :index, :id => value.values.first))
+    - else agents = []
 
     - desc = []
     - desc.push item[:dcterms][:format].first.capitalize rescue nil

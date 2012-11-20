@@ -329,8 +329,7 @@ module LadderModel
         return target if target
       end
 
-      # TODO: localize me!
-      ['untitled']
+      [I18n.t('untitled')]
     end
 
     # more precise serialization for Tire
@@ -376,15 +375,6 @@ module LadderModel
         end
       end
 
-    end
-
-  end
-
-  module Embedded
-
-    def self.included(base)
-      base.send :include, Mongoid::Document
-      base.send :include, Easel::Bindable
     end
 
   end
