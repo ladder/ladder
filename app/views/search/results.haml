@@ -4,7 +4,7 @@
   .row
     .span9
       %b= @results.total
-      results
+      =I18n.t("search.results")
       %span.muted (#{@results.time} ms)
 
       = partial 'search/result', :collection => @results

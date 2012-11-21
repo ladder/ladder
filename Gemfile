@@ -34,8 +34,8 @@ gem 'marc'
 gem 'gyoku' # NB: this can cause bundle update problems
 
 # gems for service endpoints
-#gem 'zoom'
 gem 'open-uri-cached', :require => 'open-uri/cached'
+gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
 
 # Test/debug requirements
 #gem 'pry'

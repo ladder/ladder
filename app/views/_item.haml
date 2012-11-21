@@ -1,15 +1,15 @@
 %table.table.table-bordered.table-striped.table-condensed
-  - item.each do |vocab, fields|
+  - doc = item.class.normalize(item.as_document, {:ids => :resolve})
+  - doc.each do |vocab, fields|
     - next if fields.empty?
 
     -#%tr
-      %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}
-        = vocab
+      %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= vocab
 
     - fields.each do |name, values|
       %tr
         %td.span2
-          %strong= name.to_s.underscore.humanize
+          %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{name}")
         %td.span10
           - values.each do |value|
 

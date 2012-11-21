@@ -13,7 +13,7 @@
 
 - unless docs.empty?
   %li.nav-header
-    Similar
+    = I18n.t('model.similar')
     %ul.media-list
     - docs.sort! {|a, b| b.diff <=> a.diff}
     - docs = Kaminari.paginate_array(docs).page(1).per(10)

@@ -10,7 +10,7 @@
           = partial 'resource/image', :object => @resource
 
         .span10
-          = partial 'item', :object => Resource.normalize(@resource.as_document, {:ids => :resolve})
+          = partial 'item', :object => @resource
 
       .row-fluid.hidden-phone
         .span2
@@ -41,7 +41,7 @@
           %ul.nav.nav-list
             -# RELATION TREE
             - unless @resource.leaf? and @resource.root?
-              %li.nav-header Related
+              %li.nav-header= I18n.t('model.related')
               = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
 
             -# SIMILAR ITEMS

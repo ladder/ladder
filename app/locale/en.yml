@@ -1,2 +1,66 @@
 en:
-  untitled: "untitled"
+  en: "English"
+  fr: "French"
+
+  language: "Language"
+  about:    "About"
+  contact:  "Contact"
+
+  search:
+    results: "results"
+    filters: "filters"
+
+  resource:
+    abstract:         "abstract"
+    alternative:      "alternative"
+    contributor:      "contributor"
+    creator:          "creator"
+    extent:           "extent"
+    format:           "format"
+    hasFormat:        "has format"
+    hasPart:          "has part"
+    hasVersion:       "has version"
+    identifier:       "identifier"
+    isFormatOf:       "is format of"
+    isPartOf:         "is part of"
+    isReferencedBy:   "is referenced by"
+    issued:           "issued"
+    isVersionOf:      "is version of"
+    language:         "language"
+    publisher:        "publisher"
+    references:       "references"
+    subject:          "subject"
+    tableOfContents:  "table of contents"
+    title:            "title"
+
+    DDC: "DDC"
+    LCC: "LCC"
+
+    doi:     "DOI"
+    isbn:    "ISBN"
+    issn:    "ISSN"
+    lccn:    "LCCN"
+    oclcnum: "OCLCnum"
+    upc:     "UPC"
+    uri:     "URI"
+
+    edition:            "edition"
+    hasPreviousVersion: "has previous version"
+    issueIdentifier:    "issue identifier"
+
+  agent:
+    name:     "name"
+    birthday: "birthday"
+    title:    "title"
+
+  concept:
+    prefLabel:   "preferred label"
+    altLabel:    "alternative label"
+    hiddenLabel: "hidden label"
+    broader:     "broader"
+    narrower:    "narrower"
+
+  model:
+    untitled: "untitled"
+    similar:  "similar"
+    related:  "related"

@@ -2,7 +2,7 @@ Ladder.controllers :search do
 
   get :index do
     if params[:q].nil?
-      render 'search/index'
+      render 'index'
     else
       redirect url(:search_index, :q => params[:q], :fi => params[:fi], :page => params[:page])
     end
@@ -10,15 +10,20 @@ Ladder.controllers :search do
 
   get :index, :with => :q do
 
-    @querystring = params[:q] || session[:querystring]
+    @querystring = params[:q]
     @filters = params[:fi] || {}
     @page = params[:page] || 1
     @per_page = params[:pp] || 25
 
     session[:querystring] = @querystring
 
+    # TODO: DRY this out somehow
+    I18n.locale = params[:locale] || session[:locale]
+    session[:locale] = I18n.locale if params[:locale]
+
     # TODO: these can be combined into a multi_search
     # @see: http://www.elasticsearch.org/guide/reference/api/multi-search.html
+    # NB: this won't catch a combination of agent/concept terms and resource terms
     a_search = LadderSearch::Search.new({:size => 5, :fields => [:id]})
     a_search.query = :string, @querystring, {:default_operator => 'AND'}
     a_search.search('Agent')

@@ -4,7 +4,7 @@
 - fields.each do |facet|
   - if !@results.facets[facet]['terms'].empty?
 
-    %li.nav-header= facet
+    %li.nav-header= I18n.t("resource.#{facet}")
 
     - @results.facets[facet]['terms'].each do |f|
 
@@ -17,7 +17,8 @@
         - display = f['term'].capitalize
 
       - elsif 'language' == facet
-        - display = ISO_639.find(f['term']).english_name rescue f['term']
+        - if 'fr' == I18n.locale.to_s then display = ISO_639.find(f['term']).french_name.titleize rescue f['term']
+        - else display = ISO_639.find(f['term']).english_name rescue f['term']
 
       - else display = f['term']
 

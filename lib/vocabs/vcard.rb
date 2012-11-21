@@ -1,7 +1,8 @@
 ##
 # VCard vocabulary
 #
-# @see http://semanticweb.org/wiki/HCard or http://microformats.org/wiki/hcard
+# @see http://semanticweb.org/wiki/HCard
+# @see http://microformats.org/wiki/hcard
 
 module LadderVocab
 

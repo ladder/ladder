@@ -35,16 +35,25 @@
             .nav-collapse
               %ul.nav
                 %li{:class => request.path_info == '/about' ? 'active' : ''}
-                  %a{:href => "/about"} About
+                  %a{:href => "/about"}= I18n.t('about')
                 %li
-                  %a{:href => "http://www.deliberatedata.com"} Contact
+                  %a{:href => "http://www.deliberatedata.com"}= I18n.t('contact')
               - unless request.path_info == '/'
                 - form_tag '/search', :method => 'get', :class => 'navbar-search' do
                   = text_field_tag :q, :class => 'input-xxlarge search-query', :placeholder => 'Search', :value => @querystring
-              -#
-                %p.navbar-text.pull-right
-                  Logged in as
-                  %a{:href => "#"} username
+              -#%p.navbar-text.pull-right
+                Logged in as
+                %a{:href => "#"} username
+              %ul.nav.pull-right
+                %li.dropdown
+                  %a.dropdown-toggle{:href => "#", :'data-toggle' => 'dropdown'}
+                    = I18n.t('language')
+                    %b.caret
+                  %ul.dropdown-menu
+                    %li{:class => 'en' == I18n.locale.to_s ? 'active' : ''}
+                      = link_to I18n.t('en'), current_path('locale' => 'en')
+                    %li{:class => 'fr' == I18n.locale.to_s ? 'active' : ''}
+                      = link_to I18n.t('fr'), current_path('locale' => 'fr')
 
     #main.container= yield
 

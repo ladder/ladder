@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/bricestacey/ruby-zoom.git
+  revision: 9a3787008e0385f8d9085bbfb2b27096e1bcb528
+  specs:
+    zoom (0.4.1)
+
+GIT
   remote: git://github.com/mtrudel/easel.git
   revision: 7853696fa62d61a5aa1b18c110ce68f4c6f0be32
   specs:
@@ -204,3 +210,4 @@ DEPENDENCIES
   unicorn
   wirble
   yajl-ruby
+  zoom!

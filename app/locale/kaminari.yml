@@ -6,3 +6,12 @@ en:
       previous: "&lsaquo; Prev"
       next: "Next &rsaquo;"
       truncate: "&hellip;"
+
+fr:
+  views:
+    pagination:
+      first: "&laquo; Premier"
+      last: "Dernier &raquo;"
+      previous: "&lsaquo; Précédent"
+      next: "Suivant &rsaquo;"
+      truncate: "&hellip;"

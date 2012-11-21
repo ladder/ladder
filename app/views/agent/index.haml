@@ -4,7 +4,7 @@
   .row
     .span9
       %h2.page-header= @title
-      = partial 'item', :object => Agent.normalize(@agent.as_document, {:ids => :resolve})
+      = partial 'item', :object => @agent
 
       .row-fluid.hidden-phone
         .span2
@@ -15,7 +15,7 @@
 
       .row-fluid
         %b= @results.total
-        results
+        =I18n.t("search.results")
         %span.muted (#{@results.time} ms)
 
         = partial 'search/result', :collection => @results
@@ -28,7 +28,7 @@
           %ul.nav.nav-list
             -# RELATION TREE
             - unless @agent.leaf? and @agent.root?
-              %li.nav-header Related
+              %li.nav-header= I18n.t('model.related')
               = partial 'tree', :collection => @agent.root.to_a, :locals => {:reference => @agent}
 
             -# SIMILAR ITEMS
@@ -40,5 +40,5 @@
         .well.sidebar-nav.accordion-body.collapse#collapseFilters
           %ul.nav.nav-list
             %li.nav-header
-              %a{:href => '#collapseFilters', :'data-toggle' => "collapse"} Filters
+              %a{:href => '#collapseFilters', :'data-toggle' => "collapse"}= I18n.t('search.filters')
             = partial 'search/facet', :collection => @facets

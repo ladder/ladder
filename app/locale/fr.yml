@@ -1,2 +1,66 @@
 fr:
-  untitled: "sans titre"
+  en: "Anglais"
+  fr: "Français"
+
+  language: "Langue"
+  about: "À propos"
+  contact: "Contacter"
+
+  search:
+    results: "résultats"
+    filters: "filtres"
+
+  resource:
+    abstract:         "abstrait"
+    alternative:      "alternative"
+    contributor:      "collaborateur"
+    creator:          "créateur"
+    extent:           "ampleur"
+    format:           "format"
+    hasFormat:        "a format"
+    hasPart:          "a pièce"
+    hasVersion:       "a version"
+    identifier:       "identifiant"
+    isFormatOf:       "est le format des"
+    isPartOf:         "fait partie de"
+    isReferencedBy:   "est référencé par"
+    issued:           "émis"
+    isVersionOf:      "est la version de"
+    language:         "langue"
+    publisher:        "éditeur"
+    references:       "références"
+    subject:          "sujet"
+    tableOfContents:  "table des matières"
+    title:            "titre"
+
+    DDC: "DDC"
+    LCC: "LCC"
+
+    doi:     "DOI"
+    isbn:    "ISBN"
+    issn:    "ISSN"
+    lccn:    "LCCN"
+    oclcnum: "OCLCnum"
+    upc:     "UPC"
+    uri:     "URI"
+
+    edition:            "édition"
+    hasPreviousVersion: "a version précédente"
+    issueIdentifier:    "identifiant de l'émission"
+
+  agent:
+    name:     "nom"
+    birthday: "anniversaire"
+    title:    "titre"
+
+  concept:
+    prefLabel:   "marque préférée"
+    altLabel:    "marque alternative"
+    hiddenLabel: "marque cachée"
+    broader:     "plus large"
+    narrower:    "plus étroit"
+
+  model:
+    untitled: "sans titre"
+    similar:  "similaire"
+    related:  "liée"

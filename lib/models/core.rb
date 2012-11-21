@@ -329,7 +329,7 @@ module LadderModel
         return target if target
       end
 
-      [I18n.t('untitled')]
+      [I18n.t('model.untitled')]
     end
 
     # more precise serialization for Tire

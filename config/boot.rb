@@ -35,6 +35,7 @@ I18n.default_locale = :en
 #
 Padrino.before_load do
   OpenURI::Cache.cache_path = File.join(PADRINO_ROOT, '/tmp/open-uri')
+  Encoding.default_internal = nil
 end
 
 ##
