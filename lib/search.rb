@@ -14,10 +14,11 @@ module LadderSearch
     end
 
     def search(model, opts={})
-      page = opts[:page]
-      per_page = opts[:per_page]
+      # NB: we have to calculate our own pages because this isn't a model search
+      from = (opts[:page].to_i - 1) * opts[:per_page].to_i
+      size = opts[:per_page].to_i
 
-      @results = model.classify.constantize.tire.search(:page => page, :per_page => per_page) do |search|
+      @search = Tire.search(model, :from => from, :size => size) do |search|
 #        search.explain true
 
         search.query do |query|
@@ -35,6 +36,13 @@ module LadderSearch
               end
             end
 
+            # TODO: add filter to remove Concepts (Agents?) with no resource_ids
+#            filtered.filter :bool, {
+#                :must => [{ :type => { :value => 'concept' } },
+#                              { :exists => { :field => 'resource_ids' } }
+#                ]
+#            }
+
           end
         end
 
@@ -51,6 +59,7 @@ module LadderSearch
           end
         end
       end
+      @results = @search.results
 
       # get a list of IDs from facets and query ES for the headings to display
       unless @facets.empty?

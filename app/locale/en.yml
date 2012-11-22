@@ -7,8 +7,10 @@ en:
   contact:  "Contact"
 
   search:
-    results: "results"
-    filters: "filters"
+    empty:     "Your search did not match any documents. Perhaps try different keywords?"
+    results:   "results"
+    resources: "resources"
+    filters:   "filters"
 
   resource:
     abstract:         "abstract"

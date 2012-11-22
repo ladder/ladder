@@ -37,8 +37,9 @@
 
       -# FACETS
       - unless @results.empty? or 1 == @results.size
-        .well.sidebar-nav.accordion-body.collapse#collapseFilters
+        .well.sidebar-nav.accordion-body#collapseFilters{:class => (@concept.leaf? and @concept.root? and @concept.similar.empty?) ? '' : 'collapse'}
           %ul.nav.nav-list
-            %li.nav-header
-              %a{:href => '#collapseFilters', :'data-toggle' => "collapse"}= I18n.t('search.filters')
+            - unless @concept.leaf? and @concept.root? and @concept.similar.empty?
+              %li.nav-header
+                %a{:href => '#collapseFilters', :'data-toggle' => "collapse"}= I18n.t('search.filters')
             = partial 'search/facet', :collection => @facets
