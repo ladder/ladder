@@ -11,12 +11,12 @@
     }
 }
 
-a .half, {
+a .half {
     max-width: 60px;
 }
 
 a .half-small {
-    width: 60px
+    width: 50px
 }
 
 .row-fluid .half {

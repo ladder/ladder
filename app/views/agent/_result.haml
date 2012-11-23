@@ -1,21 +1,22 @@
-%a{:href => url_for(:agent, :index, :id => result.id)}
-  %h4
-    = result.heading.first.truncate(100, :separator => ' ')
--#    %small (#{result._score})
+.span8
+  %a{:href => url_for(:agent, :index, :id => result.id)}
+    %h4
+      = result.heading.first.truncate(100, :separator => ' ')
 
-- item = Agent.normalize(result.to_hash, {:ids => :resolve})
+  - item = Agent.normalize(result.to_hash, {:ids => :resolve})
 
-- desc = []
-- desc.push item[:foaf][:name].pop rescue nil unless 1 == item[:foaf][:name].size
-- desc.push item[:foaf][:birthday].first rescue nil
+  - desc = []
+  - desc.push item[:foaf][:name].pop rescue nil unless 1 == item[:foaf][:name].size
+  - desc.push item[:foaf][:birthday].first rescue nil
 
-- if result.resource_ids.size > 3
-  - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
+  - if result.resource_ids.size > 3
+    - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
 
-.description.pull-left #{desc.join('; ')}
+  .description #{desc.join('; ')}
 
-.row-fluid
-- Resource.find(result.resource_ids.take(3)).each do |resource|
-  %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
-    .half.half-small
-      = partial 'resource/image', :object => resource, :locals => {:size => 'S'}
+.span4
+  .together
+    - Resource.find(result.resource_ids.take(3)).each do |resource|
+      %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
+        .half-small
+          = partial 'resource/image', :object => resource, :locals => {:size => 'S'}
