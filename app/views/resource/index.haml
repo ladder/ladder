@@ -35,6 +35,7 @@
             %pre.accordion-body.collapse#collapseMARC
               %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc.to_s).to_hash, :object_nl => "\n", :indent => " ")
 
+      %br
     .span3
       - unless @resource.leaf? and @resource.root? and @resource.similar.empty?
         .well.sidebar-nav

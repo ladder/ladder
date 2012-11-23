@@ -15,6 +15,7 @@
       - else
         = I18n.t("search.empty")
 
+      %br
     .span3
       - unless @results.facets.nil? or @results.empty? or 1 == @results.size
         .well.sidebar-nav

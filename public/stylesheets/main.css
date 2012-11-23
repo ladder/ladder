@@ -2,13 +2,21 @@
     .half {
         float: left !important;
     }
+    .half-small {
+        float: right !important;
+        width: 40px !important;
+    }
     .row-fluid .half {
         padding-right: 9px !important;
     }
 }
 
-a .half {
+a .half, {
     max-width: 60px;
+}
+
+a .half-small {
+    width: 60px
 }
 
 .row-fluid .half {

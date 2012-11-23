@@ -22,6 +22,7 @@
         .pagination-centered
           = paginate @results, :window => 3
 
+      %br
     .span3
       - unless @agent.leaf? and @agent.root? and @agent.similar.empty?
         .well.sidebar-nav
