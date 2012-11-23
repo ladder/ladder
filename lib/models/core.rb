@@ -107,15 +107,15 @@ module LadderModel
              :_timestamp => { :enabled => true } do
 
           embeddeds = self.reflect_on_all_associations(*[:embeds_one])
-
+=begin
           # combine headings so we can operate on the them per-vocab
           combined = headings.inject do |a, b|
             a.merge(b) { |k, v1, v2| v1 == v2 ? v1 : [v1, v2].flatten }
           end
-
+=end
           # map each embedded object
           embeddeds.each do |embed|
-
+=begin
             # if this vocab contained headings, map them
             if combined[embed.name.to_sym]
               properties = {}
@@ -128,9 +128,13 @@ module LadderModel
 
               indexes embed.name, :type => 'object', :properties => properties
             else
+=end
               indexes embed.name, :type => 'object'
-            end
+#            end
           end
+
+          # Heading is what users will correlate with most
+          indexes :heading,       :type => 'string', :boost => 2
 
           # Timestamp information
           indexes :created_at,    :type => 'date'
@@ -254,7 +258,7 @@ module LadderModel
         query do
           boolean do
             # do not include self
-            must_not { term :_id, id }
+            must_not { term :_id, id.to_s }
 
             hash.each do |vocab, vals|
               vals.each do |field, value|

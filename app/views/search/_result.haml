@@ -3,8 +3,11 @@
 .row-fluid
   .span2.half
     %a.thumbnail{:href => url_for(result.class.to_s.underscore.to_sym, :index, :id => result.id)}
-      - if result.class == Resource
-        = partial "#{result.class.to_s.underscore}/image", :object => result
+      = partial "#{result.class.to_s.underscore}/image", :object => result
 
   .span10
     = partial "#{result.class.to_s.underscore}/result", :object => result
+
+- if result._explanation
+  %pre
+    %code= JSON.pretty_generate(result._explanation.to_hash)

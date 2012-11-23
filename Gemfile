@@ -23,7 +23,7 @@ gem 'mongo', :require => 'mongo'
 gem 'mongoid', '~> 3.0.0'
 gem 'mongoid-tree', :require => 'mongoid/tree'
 gem 'kaminari', :require => 'kaminari/sinatra'
-gem 'tire'
+gem 'tire', '~> 0.5.0'
 
 # linked data gems
 gem 'easel', :git => 'git://github.com/mtrudel/easel.git'

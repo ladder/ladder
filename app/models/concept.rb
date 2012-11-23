@@ -11,8 +11,7 @@ class Concept
   embeds_one :skos, class_name: "SKOS"
 
   @headings = [{:skos => :prefLabel},
-               {:skos => :altLabel},
-               {:skos => :hiddenLabel}]
+               {:skos => :altLabel}]
 
   # model relations
   has_and_belongs_to_many :resources, index: true

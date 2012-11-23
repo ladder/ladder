@@ -21,24 +21,121 @@ Ladder.controllers :search do
     I18n.locale = params[:locale] || session[:locale]
     session[:locale] = I18n.locale if params[:locale]
 
-    search = LadderSearch::Search.new(:filters => @filters)
-    search.facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
-    search.query = :text, :_all, @querystring, {:operator => 'AND' }
-    search.search('*', :page => @page, :per_page => @per_page)
+    # create Tire search object
+    @search = Tire::Search::Search.new
+    @search.from (@page.to_i - 1) * @per_page
+    @search.size @per_page
 
-    if search.results.empty? and search.results.total > 0 and @page.to_i > 1
+    # for debugging
+#    @search.explain true
+
+    # special treatment for 'model type' facet
+    @search.facet('type') {terms '_type', :size => 10}
+
+    # set fields
+    @fields = '_all'
+=begin
+    @fields = [Concept, Agent, Resource].map do |model|
+      model.reflect_on_all_associations(*[:embeds_one]).map do |embed|
+        fields = embed.class_name.constantize.fields.map do |field|
+          field.first if field.last.type == Array
+        end
+
+        fields.compact.map { |field| "#{embed.name}.#{field}" }
+      end
+    end
+    @fields.flatten!
+=end
+
+    # set facets
+    @facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
+    @facets.each do |ns, fields|
+      fields.each do |field|
+        @search.facet("#{ns}.#{field}") {terms "#{ns}.#{field}.raw", :size => 10}
+      end
+    end
+@test = []
+    # set query
+    @search.query do |query|
+
+      query.filtered do |filtered|
+
+        filtered.query do |q|
+          q.boosting(:negative_boost => 0.1) do |b|
+
+            # query for the provided query string
+            b.positive do |p|
+              p.match @fields, @querystring, :operator => 'and'
+            end
+
+            # suppress results that are not document roots
+            # eg. sub-concepts, items within a hierarchy, etc.
+            b.negative do |n|
+              n.string '_exists_:parent_id'
+            end
+
+          end
+        end
+
+        # special treatment for 'model type' filter
+        if @filters['type']
+          filtered.filter :type, :value => @filters['type']['type'].first
+        end
+
+        # add filters for selected facets
+        @filters.each do |ns, filter|
+          next if 'type' == ns
+
+          filter.each do |f, arr|
+            arr.each do |v|
+              filtered.filter :term, "#{ns}.#{f}.raw" => v
+            end
+          end
+        end
+
+        # add filter to remove Concepts/Agents with no resource_ids
+        filtered.filter :not, { :bool => {
+            :must => { :missing => {:field => 'resource_ids'} },
+            :should => [
+                {:type => {:value => 'concept'}},
+                {:type => {:value => 'agent'}},
+            ] }
+        }
+
+      end
+
+    end
+
+    @results = @search.results
+
+    if @results.empty? and @results.total > 0 and @page.to_i > 1
       params[:page] = 1
       redirect current_path(params)
     end
 
-    if 1 == search.results.size.to_i and 1 == @page.to_i
-      result = search.results.first
+    if 1 == @results.size.to_i and 1 == @page.to_i
+      result = @results.first
       redirect url_for(result.class.to_s.underscore.to_sym, :index, :id => result.id)
     end
 
-    @results = search.results
-    @facets = search.facets
-    @headings = search.headings
+    # get a list of IDs from facets and query ES for the headings to display
+    # TODO: DRY this out somehow
+    unless @facets.empty?
+      ids = @results.facets.map(&:last).map do |hash|
+        hash['terms'].map do |term|
+          term['term'] if term['term'].to_s.match(/^[0-9a-f]{24}$/)
+        end
+      end
+
+      ids = ids.flatten.uniq.compact
+      unless ids.empty?
+        @headings = Tire.search do |search|
+          search.query { |q| q.ids ids }
+          search.size ids.size
+          search.fields ['heading']
+        end
+      end
+    end
 
     render 'search/results'
   end

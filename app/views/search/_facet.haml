@@ -1,38 +1,39 @@
-- ns = facet.first
-- fields = facet.last
+- unless facet.last['terms'].empty?
+  - ns = facet.first.split('.').first
+  - name = facet.first.split('.').last
 
-- fields.each do |facet|
-  - if !@results.facets[facet]['terms'].empty?
+  %li.nav-header= I18n.t("resource.#{name}")
 
-    %li.nav-header= I18n.t("resource.#{facet}")
+  - facet.last['terms'].each do |f|
 
-    - @results.facets[facet]['terms'].each do |f|
+    - if f['term'].match(/^[0-9a-f]{24}$/)
+      - heading = @headings.results.find {|i| i.id == f['term']}.heading
+      - if 'dcterms.subject' == facet.first then display = heading.dashjoin
+      - else display = heading.first.truncate(100, :separator => ' ')
 
-      - if f['term'].match(/^[0-9a-f]{24}$/)
-        - heading = @headings.results.find {|i| i.id == f['term']}.heading
-        - if 'subject' == facet then display = heading.dashjoin
-        - else display = heading.first.truncate(100, :separator => ' ')
+    - elsif 'dcterms.language' == facet.first
+      - if 'fr' == I18n.locale.to_s then display = ISO_639.find(f['term']).french_name.titleize rescue f['term']
+      - else display = ISO_639.find(f['term']).english_name rescue f['term']
 
-      - elsif 'format' == facet
-        - display = f['term'].capitalize
+    - elsif 'dcterms.format' == facet.first
+      - display = f['term'].capitalize
 
-      - elsif 'language' == facet
-        - if 'fr' == I18n.locale.to_s then display = ISO_639.find(f['term']).french_name.titleize rescue f['term']
-        - else display = ISO_639.find(f['term']).english_name rescue f['term']
+    - elsif 'type' == facet.first
+      - display = f['term'].capitalize
 
-      - else display = f['term']
+    - else display = f['term']
 
-      - if @filters[ns].nil? or @filters[ns][facet].nil? or !@filters[ns][facet].to_a.include?(f['term'])
-        - if @filters[ns].nil?
-          - @new_fi = @filters.deep_merge({ns.to_s => {facet => f['term'].to_a}})
-        - else
-          - @new_fi = @filters.deep_merge({ns.to_s => {facet => @filters[ns][facet].to_a | f['term'].to_a}})
-
-        - if @results.total == f['count']
-          %li.active
-            %a= display + " (#{f['count']})"
-        - else
-          %li= link_to display + " (#{f['count']})", current_path('page' => @page, 'fi' => @new_fi)
-
+    - if @filters[ns].nil? or @filters[ns][name].nil? or !@filters[ns][name].to_a.include?(f['term'])
+      - if @filters[ns].nil?
+        - @new_fi = @filters.deep_merge({ns.to_s => {name => f['term'].to_a}})
       - else
-        %li.active= link_to display, current_path('page' => @page, 'fi' => @filters.deep_merge({ns.to_s => {facet => @filters[ns][facet].reject { |x| f['term'] == x}}}))
+        - @new_fi = @filters.deep_merge({ns.to_s => {name => @filters[ns][name].to_a | f['term'].to_a}})
+
+      - if @results.total == f['count']
+        %li.active
+          %a= display + " (#{f['count']})"
+      - else
+        %li= link_to display + " (#{f['count']})", current_path('page' => @page, 'fi' => @new_fi)
+
+    - else
+      %li.active= link_to display, current_path('page' => @page, 'fi' => @filters.deep_merge({ns.to_s => {name => @filters[ns][name].reject { |x| f['term'] == x}}}))

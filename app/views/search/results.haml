@@ -16,7 +16,7 @@
         = I18n.t("search.empty")
 
     .span3
-      - unless @results.empty? or 1 == @results.size or @facets.nil?
+      - unless @results.facets.nil? or @results.empty? or 1 == @results.size
         .well.sidebar-nav
           %ul.nav.nav-list
-            = partial 'search/facet', :collection => @facets
+            = partial 'search/facet', :collection => @results.facets

@@ -1,4 +1,22 @@
 module Tire
+  class Index
+
+    def get_id_from_document(document)
+      old_verbose, $VERBOSE = $VERBOSE, nil # Silence Object#id deprecation warnings
+      id = case
+             when document.is_a?(Hash)
+               document[:_id] || document['_id'] || document[:id] || document['id']
+             when document.respond_to?(:id) && document.id != document.object_id
+               document.id
+           end
+      $VERBOSE = old_verbose
+      id.to_s
+    end
+
+  end
+end
+
+module Tire
   module Results
 
     class Item
@@ -15,9 +33,6 @@ module Tire
   end
 end
 
-#
-# NB: THESE SHOULD APPEAR IN THE NEXT RUBYGEMS RELEASE OF TIRE
-#
 module Tire
   module Search
 
@@ -31,35 +46,6 @@ module Tire
       end
     end
 
-    class Search
-
-      def min_score(value)
-        @min_score = value
-        self
-      end
-
-      def to_hash
-        @options.delete(:payload) || begin
-          request = {}
-          request.update( { :indices_boost => @indices_boost } ) if @indices_boost
-          request.update( { :query  => @query.to_hash } )    if @query
-          request.update( { :sort   => @sort.to_ary   } )    if @sort
-          request.update( { :facets => @facets.to_hash } )   if @facets
-          request.update( { :filter => @filters.first.to_hash } ) if @filters && @filters.size == 1
-          request.update( { :filter => { :and => @filters.map {|filter| filter.to_hash} } } ) if  @filters && @filters.size > 1
-          request.update( { :highlight => @highlight.to_hash } ) if @highlight
-          request.update( { :size => @size } )               if @size
-          request.update( { :from => @from } )               if @from
-          request.update( { :fields => @fields } )           if @fields
-          request.update( { :script_fields => @script_fields } ) if @script_fields
-          request.update( { :version => @version } )         if @version
-          request.update( { :explain => @explain } )         if @explain
-          request.update( { :min_score => @min_score } )     if @min_score
-          request
-        end
-      end
-
-    end
   end
 end
 

@@ -13,6 +13,7 @@ fr:
     filters:   "filtres"
 
   resource:
+    type:             "type" # NB: move this to model?
     abstract:         "abstrait"
     alternative:      "alternative"
     contributor:      "collaborateur"
