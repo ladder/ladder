@@ -2,7 +2,7 @@
 # Common methods for all model classes within the application
 #
 
-module LadderModel
+module Model
 
   module Core
 
@@ -30,6 +30,10 @@ module LadderModel
 
       # Make :headings a readable class variable
       base.send :class_eval, %(class << self; attr_reader :headings end)
+
+      # Create rdf_types field and accessor
+      base.send :class_eval, %(class << self; attr_reader :rdf_types end)
+      base.send :field, :rdf_types, :type => Array, :default => []
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
@@ -136,6 +140,9 @@ module LadderModel
           # Heading is what users will correlate with most
           indexes :heading,       :type => 'string', :boost => 2
 
+          # RDF class information
+          indexes :rdf_types,     :type => 'string'
+
           # Timestamp information
           indexes :created_at,    :type => 'date'
           indexes :deleted_at,    :type => 'date'
@@ -153,8 +160,8 @@ module LadderModel
       end
 
       def normalize(hash, opts={})
-        # use a deep clone of the hash
-        hash = Marshal.load(Marshal.dump(hash))
+        # Use a sorted deep clone of the hash
+        hash = Marshal.load(Marshal.dump(hash)).sort_by_key(true)
 
         # store relation ids if we need to resolve them
         if :resolve == opts[:ids]
@@ -211,7 +218,9 @@ module LadderModel
           # Reject empty values
           hash.reject! { |key, value| value.kind_of? Enumerable and value.empty? }
 
+          # Recurse into Hash values
           hash.values.select { |value| value.is_a? Hash }.each{ |h| normal.call(h, opts) }
+
           hash
         end
 
@@ -349,6 +358,9 @@ module LadderModel
       # add heading
       hash[:heading] = self.heading
 
+      # store RDF type for faceting
+      hash[:rdf_types] = self.rdf_types.map { |value| URI(value).fragment ? URI(value).fragment : URI(value).path.split('/').last }.uniq!
+
       hash.to_json
     end
 
@@ -373,6 +385,17 @@ module LadderModel
       new_obj = self.class.new(normal)
 
       RDF::RDFXML::Writer.buffer do |writer|
+        # FIXME: this is necessary to write a rdf:Description element
+        writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(''))
+
+        self.class.rdf_types.each do |type|
+          writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(type))
+        end
+
+        self.rdf_types.each do |type|
+          writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(type))
+        end
+
         # get the RDF graph for each vocab
         new_obj.vocabs.each do |key, object|
           writer << object.to_rdf(RDF::URI.new(url))

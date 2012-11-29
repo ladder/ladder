@@ -32,12 +32,15 @@ fr:
     language:         "langue"
     publisher:        "éditeur"
     references:       "références"
+    spatial:          "spatial"
     subject:          "sujet"
     tableOfContents:  "table des matières"
     title:            "titre"
 
-    DDC: "DDC"
-    LCC: "LCC"
+    DDC:  "DDC"
+    LCC:  "LCC"
+    LCSH: "LCSH"
+    RVM:  "RVM"
 
     doi:     "DOI"
     isbn:    "ISBN"

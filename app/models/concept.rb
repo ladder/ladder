@@ -1,14 +1,17 @@
 class SKOS
-  include LadderModel::Embedded
+  include Model::Embedded
   bind_to RDF::SKOS, :type => Array, :only => [:prefLabel, :altLabel, :hiddenLabel, :broader, :narrower]
   embedded_in :concept
 end
 
 class Concept
-  include LadderModel::Core
+  include Model::Core
 
   # embedded RDF vocabularies
   embeds_one :skos, class_name: "SKOS"
+
+  @rdf_types = ['http://dbpedia.org/ontology/TopicalConcept',
+                (RDF::SKOS.to_uri / 'Concept').to_s]
 
   @headings = [{:skos => :prefLabel},
                {:skos => :altLabel}]

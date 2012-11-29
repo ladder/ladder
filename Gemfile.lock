@@ -78,6 +78,9 @@ GEM
       net-sftp (>= 2.0.0)
       net-ssh (>= 2.0.14)
       net-ssh-gateway (>= 1.1.0)
+    enhanced_marc (0.2.3)
+      locale
+      marc
     erubis (2.7.0)
     gyoku (0.4.6)
       builder (>= 2.1.2)
@@ -96,6 +99,7 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     kgio (2.7.4)
+    locale (2.0.8)
     lz4-ruby (0.1.7)
     mail (2.3.3)
       i18n (>= 0.4.0)
@@ -187,6 +191,7 @@ DEPENDENCIES
   amatch
   bson_ext
   easel!
+  enhanced_marc
   gyoku
   haml
   hashdiff

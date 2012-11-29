@@ -33,7 +33,7 @@
             %a.pull-right{:href => '#collapseMARC', :'data-toggle' => "collapse"} MARC
           .span10
             %pre.accordion-body.collapse#collapseMARC
-              %code= JSON.fast_generate(MARC::Record.new_from_marc(@resource.marc.to_s).to_hash, :object_nl => "\n", :indent => " ")
+              %code= JSON.pretty_generate(MARC::Reader.decode(@resource.marc.to_s).to_hash)
 
       %br
     .span3

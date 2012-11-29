@@ -44,7 +44,7 @@ namespace :model do
 
             item = check.first
 
-            # == TODO: refactor this into a LadderModel method
+            # == TODO: refactor this into a Model method
 
             # move_children_to_parent with self context
             item.children.each do |c|

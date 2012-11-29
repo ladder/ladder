@@ -3,7 +3,7 @@
 #
 # @see http://www.prismstandard.org/specifications/2.1/PRISM_prism_namespace_2.1.pdf
 
-module LadderVocab
+module Vocab
 
   class Prism < RDF::Vocabulary("http://prismstandard.org/namespaces/1.2/basic/")
     property :aggregationType

@@ -9,7 +9,7 @@
 # @see: https://github.com/komiya-atsushi/lz4-ruby
 #
 
-module LadderModel
+module Model
 
   class CompressedBinary
 

@@ -33,7 +33,7 @@ namespace :map do
           xml = Nokogiri::XML(resource.mods)
 
           # instantiate mapping object
-          mapping = LadderMapping::MODS.new
+          mapping = Mapping::MODS.new
           mapping.map(resource, xml.at_xpath('/mods'))
         end
 

@@ -27,10 +27,11 @@ Ladder.controllers :search do
     @search.size @per_page
 
     # for debugging
-#    @search.explain true
+    @search.explain true if params[:explain]
 
-    # special treatment for 'model type' facet
+    # special treatment for 'model type' and rdf type facets
     @search.facet('type') {terms '_type', :size => 10}
+    @search.facet('rdf_types') {terms 'rdf_types', :size => 10}
 
     # set fields
     @fields = '_all'
@@ -48,13 +49,13 @@ Ladder.controllers :search do
 =end
 
     # set facets
-    @facets = {:dcterms => %w[format language issued creator contributor publisher subject DDC LCC]}
+    @facets = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
     @facets.each do |ns, fields|
       fields.each do |field|
         @search.facet("#{ns}.#{field}") {terms "#{ns}.#{field}.raw", :size => 10}
       end
     end
-@test = []
+
     # set query
     @search.query do |query|
 
@@ -66,6 +67,7 @@ Ladder.controllers :search do
             # query for the provided query string
             b.positive do |p|
               p.match @fields, @querystring, :operator => 'and'
+#              p.string @querystring
             end
 
             # suppress results that are not document roots
@@ -82,9 +84,17 @@ Ladder.controllers :search do
           filtered.filter :type, :value => @filters['type']['type'].first
         end
 
+        # special treatment for rdf types filter
+        if @filters['rdf_types']
+          @filters['rdf_types']['rdf_types'].each do |v|
+            filtered.filter :term, "rdf_types" => v
+          end
+        end
+
         # add filters for selected facets
         @filters.each do |ns, filter|
           next if 'type' == ns
+          next if 'rdf_types' == ns
 
           filter.each do |f, arr|
             arr.each do |v|

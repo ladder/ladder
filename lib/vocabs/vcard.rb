@@ -4,7 +4,7 @@
 # @see http://semanticweb.org/wiki/HCard
 # @see http://microformats.org/wiki/hcard
 
-module LadderVocab
+module Vocab
 
   class VCard < RDF::Vocabulary("http://www.w3.org/2006/vcard/ns")
     property :fn

@@ -14,12 +14,12 @@
           - values.each do |value|
 
             - if value.is_a? Hash
-              - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
+              - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
               - if value[:concept]
-                #{link_to heading.dashjoin, url_for(value.keys.first, :index, :id => value.values.first)}
+                #{link_to [reference.ancestors.map(&:heading) + reference.heading].dashjoin, url_for(value.keys.first, :index, :id => value.values.first)}
               - else
-                #{link_to heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+                #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
 
             - elsif :language == name
               = ISO_639.find(value).english_name

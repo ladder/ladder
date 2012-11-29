@@ -1,14 +1,14 @@
+- item = Concept.normalize(result.to_hash, {:ids => :resolve})
+
 .span8
   %a{:href => url_for(:concept, :index, :id => result.id)}
     %h4
+      - if item[:skos][:hiddenLabel]
+        %small= item[:skos][:hiddenLabel].dashjoin
+        \--
       = result.heading.last.truncate(100, :separator => ' ')
-  -#    %small (#{result._score})
-
-  - item = Concept.normalize(result.to_hash, {:ids => :resolve})
 
   - desc = []
-  - desc.push item[:skos][:prefLabel].dashjoin rescue nil unless 1 == item[:skos][:prefLabel].size
-
   - if result.resource_ids.size > 3
     - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
 

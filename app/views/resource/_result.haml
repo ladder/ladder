@@ -1,9 +1,8 @@
+- item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
+
 %a{:href => url_for(:resource, :index, :id => result.id)}
   %h4
     = result.heading.first.truncate(100, :separator => ' ')
--#    %small (#{result._score})
-
-- item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
 
 - if item[:dcterms][:creator] then agents = item[:dcterms][:creator]
 - elsif item[:dcterms][:contributor] then agents = item[:dcterms][:contributor]

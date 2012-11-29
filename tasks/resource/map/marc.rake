@@ -25,7 +25,7 @@ namespace :map do
       Resource.reset_callbacks(:validation)
 
       # instantiate mapping object
-      mapping = LadderMapping::MARC2.new
+      mapping = Mapping::MARC2.new
 
       Parallel.each_with_index(chunks) do |chunk, index|
         # force mongoid to create a new session for each chunk

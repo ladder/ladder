@@ -3,7 +3,7 @@
 #
 # @see http://dublincore.org/documents/2012/06/14/dcmi-terms/?v=terms#H4
 
-module LadderVocab
+module Vocab
 
   class DCVocab < RDF::Vocabulary("http://purl.org/dc/terms/")
     property :DCMIType

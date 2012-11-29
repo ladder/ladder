@@ -1,43 +1,47 @@
 class DublinCore
-  include LadderModel::Embedded
+  include Model::Embedded
   bind_to RDF::DC, :type => Array, :only => [:title, :alternative, :issued, :format,
                                              :extent, :language, :identifier, :abstract,
                                              :tableOfContents, :creator, :contributor,
-                                             :publisher, :subject, :isPartOf, :hasPart,
-                                             :hasVersion, :isVersionOf, :hasFormat,
+                                             :publisher, :spatial, :subject, :isPartOf,
+                                             :hasPart, :hasVersion, :isVersionOf, :hasFormat,
                                              :isFormatOf, :isReferencedBy, :references]
 
-  bind_to LadderVocab::DCVocab, :type => Array, :only => [:DDC, :LCC]
+  bind_to Vocab::DCVocab, :type => Array, :only => [:DDC, :LCSH, :LCC, :RVM]
   attr_accessible :identifier
   embedded_in :resource
 end
 
 class Bibo
-  include LadderModel::Embedded
-  bind_to LadderVocab::Bibo, :type => Array, :only => [:isbn, :issn, :lccn, :oclcnum, :upc, :doi, :uri]
+  include Model::Embedded
+  bind_to Vocab::Bibo, :type => Array, :only => [:isbn, :issn, :lccn, :oclcnum, :upc, :doi, :uri]
   embedded_in :resource
 end
 
 class Prism
-  include LadderModel::Embedded
-  bind_to LadderVocab::Prism, :type => Array, :only => [:edition, :hasPreviousVersion, :issueIdentifier]
+  include Model::Embedded
+  bind_to Vocab::Prism, :type => Array, :only => [:edition, :hasPreviousVersion, :issueIdentifier]
   embedded_in :resource
 end
 
 class Resource
-  include LadderModel::Core
+  include Model::Core
 
   # embedded RDF vocabularies
   embeds_one :dcterms, class_name: "DublinCore"
   embeds_one :bibo,    class_name: "Bibo"
   embeds_one :prism,   class_name: "Prism"
 
-  @headings = [{:dcterms => :title},
-               {:dcterms => :alternative}]
+  @rdf_types = ['http://dbpedia.org/ontology/Work',
+                'http://schema.org/CreativeWork',
+                (RDF::DC.to_uri / 'BibliographicResource').to_s,
+                (Vocab::Bibo.to_uri / 'Document').to_s]
+
+  @headings = [{:dcterms => :title}, {:dcterms => :alternative}]
 
   # imported data objects
-  field :marc, type: LadderModel::CompressedBinary
-  field :mods, type: LadderModel::CompressedBinary
+  field :marc, type: Model::CompressedBinary
+  field :mods, type: Model::CompressedBinary
 
   # scopes
   scope :marc, ->(exists=true) { where(:marc.exists => exists) }

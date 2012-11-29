@@ -3,7 +3,7 @@
 #
 # @see http://bibotools.googlecode.com/svn/bibo-ontology/trunk/doc/index.html
 
-module LadderVocab
+module Vocab
 
   class Bibo < RDF::Vocabulary("http://purl.org/ontology/bibo/")
     property :abstract

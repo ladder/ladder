@@ -1,28 +1,30 @@
 class FOAF
-  include LadderModel::Embedded
+  include Model::Embedded
   bind_to RDF::FOAF, :type => Array, :only => [:name, :birthday, :title]
   embedded_in :agent
 end
 
 class VCard
-  include LadderModel::Embedded
-  bind_to LadderVocab::VCard, :type => Array, :only => []
+  include Model::Embedded
+  bind_to Vocab::VCard, :type => Array, :only => []
 
-  fields.map(&:first).map(&:to_sym).each do |field|
-    if field_alias = LadderVocab::VCard.aliases[field]
-      alias_method field_alias, field
-    end
+  # enable camelCase field aliases
+  Vocab::VCard.aliases.each do |name, new|
+    alias_method new, name if fields.map(&:first).include? name.to_s
   end
 
   embedded_in :agent
 end
 
 class Agent
-  include LadderModel::Core
+  include Model::Core
 
   # embedded RDF vocabularies
   embeds_one :foaf, class_name: "FOAF"
   embeds_one :vcard, class_name: "VCard"
+
+  @rdf_types = ['http://dbpedia.org/ontology/Agent',
+                (RDF::FOAF.to_uri / 'Agent').to_s]
 
   @headings = [{:foaf => :name}]
 

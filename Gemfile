@@ -31,7 +31,8 @@ gem 'rdf-rdfxml'
 
 # gems for importing existing data
 gem 'marc'
-gem 'gyoku' # NB: this can cause bundle update problems
+gem 'enhanced_marc'
+gem 'gyoku'
 
 # gems for service endpoints
 gem 'open-uri-cached', :require => 'open-uri/cached'

@@ -1,4 +1,4 @@
-- @title = @concept.heading.dashjoin
+- @title = [@concept.ancestors.map(&:heading) + @concept.heading].dashjoin
 
 .container
   .row
@@ -13,14 +13,15 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @concept.to_rdfxml(url_for(request.path_info))
 
-      .row-fluid
-        %b= @results.total
-        =I18n.t("search.results")
-        %span.muted (#{@results.time} ms)
+      - unless @results.empty?
+        .row-fluid
+          %b= @results.total
+          =I18n.t("search.results")
+          %span.muted (#{@results.time} ms)
 
-        = partial 'search/result', :collection => @results
-        .pagination-centered
-          = paginate @results, :window => 3
+          = partial 'search/result', :collection => @results
+          .pagination-centered
+            = paginate @results, :window => 3
 
       %br
     .span3

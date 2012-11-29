@@ -1,9 +1,9 @@
+- item = Agent.normalize(result.to_hash, {:ids => :resolve})
+
 .span8
   %a{:href => url_for(:agent, :index, :id => result.id)}
     %h4
       = result.heading.first.truncate(100, :separator => ' ')
-
-  - item = Agent.normalize(result.to_hash, {:ids => :resolve})
 
   - desc = []
   - desc.push item[:foaf][:name].pop rescue nil unless 1 == item[:foaf][:name].size
