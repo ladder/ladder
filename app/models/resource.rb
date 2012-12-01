@@ -32,10 +32,10 @@ class Resource
   embeds_one :bibo,    class_name: "Bibo"
   embeds_one :prism,   class_name: "Prism"
 
-  @rdf_types = ['http://dbpedia.org/ontology/Work',
-                'http://schema.org/CreativeWork',
-                (RDF::DC.to_uri / 'BibliographicResource').to_s,
-                (Vocab::Bibo.to_uri / 'Document').to_s]
+  @rdf_types = {'Vocab::DBpedia' => ['Work'],
+                'Vocab::Schema' => ['CreativeWork'],
+                'RDF::DC' => ['BibliographicResource'],
+                'Vocab::Bibo' => ['Document']}
 
   @headings = [{:dcterms => :title}, {:dcterms => :alternative}]
 

@@ -23,8 +23,8 @@ class Agent
   embeds_one :foaf, class_name: "FOAF"
   embeds_one :vcard, class_name: "VCard"
 
-  @rdf_types = ['http://dbpedia.org/ontology/Agent',
-                (RDF::FOAF.to_uri / 'Agent').to_s]
+  @rdf_types = {'Vocab::DBpedia' => ['Agent'],
+                'RDF::FOAF' => ['Agent']}
 
   @headings = [{:foaf => :name}]
 

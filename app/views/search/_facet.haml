@@ -2,7 +2,7 @@
   - ns = facet.first.split('.').first
   - name = facet.first.split('.').last
 
-  %li.nav-header= I18n.t("resource.#{name}")
+  %li.nav-header= I18n.t("resource.#{name}") unless 'rdf_types' == name
 
   - facet.last['terms'].each do |f|
 
@@ -18,7 +18,7 @@
     - elsif 'dcterms.format' == facet.first
       - display = f['term'].capitalize
 
-    - elsif 'type' == facet.first
+    - elsif 'type' == facet.first or 'rdf_types' == facet.first
       - display = f['term'].capitalize
 
     - else display = f['term']

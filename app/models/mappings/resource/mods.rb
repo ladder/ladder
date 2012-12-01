@@ -17,6 +17,7 @@ module Mapping
     def map(resource, node)
       # make resource accessible to other methods
       @resource = resource
+      @node = node
 
       # map MODS elements to embedded vocabs
       if resource.vocabs.empty?
@@ -26,194 +27,56 @@ module Mapping
       end
 
       # map encoded agents to related Agent models
-      agents = map_agents(node.xpath('name[@usage="primary"]'))
-      unless agents.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.creator = agents.map(&:id)
-        resource.agents << agents
-      end
-
-      agents = map_agents(node.xpath('name[not(@usage="primary")]'))
-      unless agents.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.contributor = agents.map(&:id)
-        resource.agents << agents
-      end
-
-      agents = map_agents(node.xpath('originInfo/publisher'), {:foaf => {:name => '.'}})
-      unless agents.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.publisher = agents.map(&:id)
-        resource.agents << agents
-      end
+      map_agents('name[@usage="primary"]',      {:relation => {:dcterms => :creator}})
+      map_agents('name[not(@usage="primary")]', {:relation => {:dcterms => :contributor}})
+      map_agents('originInfo/publisher',        {:relation => {:dcterms => :publisher},
+                                                 :mapping  => {:foaf => {:name => '.'}}})
 
       # map encoded concepts to related Concept models
-      concepts = map_concepts(node.xpath('subject/geographicCode'))
-      unless concepts.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.spatial = concepts.map(&:id)
-        resource.concepts << concepts
-      end
-
-      concepts = map_concepts(node.xpath('subject[not(@authority="lcsh") and not(geographicCode)]'))
-      unless concepts.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.subject = concepts.map(&:id)
-        resource.concepts << concepts
-      end
-
-      concepts = map_concepts(node.xpath('subject[@authority="lcsh"]'))
-      unless concepts.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.LCSH = concepts.map(&:id)
-        resource.concepts << concepts
-      end
-
-      concepts = map_concepts(node.xpath('subject[@authority="rvm"]'))
-      unless concepts.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.RVM = concepts.map(&:id)
-        resource.concepts << concepts
-      end
-
-      concepts = map_concepts(node.xpath('classification[@authority="ddc"]'))
-      unless concepts.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.DDC = concepts.map(&:id)
-        resource.concepts << concepts
-      end
-
-      concepts = map_concepts(node.xpath('classification[@authority="lcc"]'))
-      unless concepts.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.LCC = concepts.map(&:id)
-        resource.concepts << concepts
-      end
+      map_concepts('subject/geographicCode',               {:relation => {:dcterms => :spatial}})
+      map_concepts('subject[not(@authority="lcsh")
+                    and not(geographicCode)]',             {:relation => {:dcterms => :subject}})
+      map_concepts('subject[@authority="lcsh"]',           {:relation => {:dcterms => :LCSH}})
+      map_concepts('subject[@authority="rvm"]',            {:relation => {:dcterms => :RVM}})
+      map_concepts('classification[@authority="ddc"]',     {:relation => {:dcterms => :DDC}})
+      map_concepts('classification[@authority="lcc"]',     {:relation => {:dcterms => :LCC}})
 
       # map related Resources as tree hierarchy
+      # @see: http://www.loc.gov/standards/mods/userguide/relateditem.html
 
+      # limit to one relation to avoid a multi-parent situation
+      map_relations('relatedItem[@type="host"
+                     or @type="series"][1]',               {:parent   => true,
+                                                            :relation => {:dcterms => :isPartOf},
+                                                            :inverse  => {:dcterms => :hasPart}})
+      map_relations('relatedItem[@type="constituent"]',    {:relation => {:dcterms => :hasPart},
+                                                            :inverse  => {:dcterms => :isPartOf}})
+      map_relations('relatedItem[@type="otherVersion"]',   {:siblings => true,
+                                                            :relation => {:dcterms => :hasVersion},
+                                                            :inverse  => {:dcterms => :isVersionOf}})
+      map_relations('relatedItem[@type="otherFormat"]',    {:siblings => true,
+                                                            :relation => {:dcterms => :hasFormat},
+                                                            :inverse  => {:dcterms => :isFormatOf}})
+      map_relations('relatedItem[@type="isReferencedBy"]', {:siblings => true,
+                                                            :relation => {:dcterms => :isReferencedBy},
+                                                            :inverse  => {:dcterms => :references}})
+      map_relations('relatedItem[@type="references"]',     {:siblings => true,
+                                                            :relation => {:dcterms => :references},
+                                                            :inverse  => {:dcterms => :isReferencedBy}})
       # NB: these relationships are poorly defined
-      relations = map_relations(node.xpath('relatedItem[not(@type) or @type="preceding" or @type="succeeding" or @type="reviewOf"]'))
-      unless relations.empty?
-        relations.each do |relation|
-          resource.children << relation
-        end
-      end
+      map_relations('relatedItem[not(@type)]')
 
-      relations = map_relations(node.xpath('relatedItem[@type="host"]'))
-      unless relations.empty?
-        relations.each do |relation|
-          relation.children << resource
-        end
-      end
+      # TODO: find an appropriate relation type for these
+      map_relations('relatedItem[@type="original"
+                     or @type="preceding"
+                     or @type="succeeding"
+                     or @type="reviewOf"]',                {:siblings => true})
 
-      relations = map_relations(node.xpath('relatedItem[@type="series"]'))
-      unless relations.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.isPartOf = relations.map(&:id)
+      # save mapped resources
+      @resource.parent.save if @resource.parent_id
+      @resource.save
 
-        relations.each do |relation|
-          relation.dcterms = DublinCore.new if relation.dcterms.nil?
-          relation.dcterms.hasPart = [resource.id]
-          relation.children << resource
-        end
-      end
-
-      relations = map_relations(node.xpath('relatedItem[@type="constituent"]'))
-      unless relations.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.hasPart = relations.map(&:id)
-
-        relations.each do |relation|
-          relation.dcterms = DublinCore.new if relation.dcterms.nil?
-          relation.dcterms.isPartOf = [resource.id]
-          resource.children << relation
-        end
-      end
-
-      relations = map_relations(node.xpath('relatedItem[@type="original"]'))
-      unless relations.empty?
-        relations.each do |relation|
-          if resource.root?
-            resource.children << relation
-          else
-            resource.parent.children << relation
-          end
-        end
-      end
-
-      relations = map_relations(node.xpath('relatedItem[@type="isReferencedBy"]'))
-      unless relations.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.isReferencedBy = relations.map(&:id)
-
-        relations.each do |relation|
-          relation.dcterms = DublinCore.new if relation.dcterms.nil?
-          relation.dcterms.references = [resource.id]
-
-          if resource.root?
-            resource.children << relation
-          else
-            resource.parent.children << relation
-          end
-        end
-      end
-
-      relations = map_relations(node.xpath('relatedItem[@type="references"]'))
-      unless relations.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.references = relations.map(&:id)
-
-        relations.each do |relation|
-          relation.dcterms = DublinCore.new if relation.dcterms.nil?
-          relation.dcterms.isReferencedBy = [resource.id]
-
-          if resource.root?
-            resource.children << relation
-          else
-            resource.parent.children << relation
-          end
-        end
-      end
-
-      relations = map_relations(node.xpath('relatedItem[@type="otherVersion"]'))
-      unless relations.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.hasVersion = relations.map(&:id)
-
-        relations.each do |relation|
-          relation.dcterms = DublinCore.new if relation.dcterms.nil?
-          relation.dcterms.isVersionOf = [resource.id]
-
-          if resource.root?
-            resource.children << relation
-          else
-            resource.parent.children << relation
-          end
-        end
-      end
-
-      relations = map_relations(node.xpath('relatedItem[@type="otherFormat"]'))
-      unless relations.empty?
-        resource.dcterms = DublinCore.new if resource.dcterms.nil?
-        resource.dcterms.hasFormat = relations.map(&:id)
-
-        relations.each do |relation|
-          relation.dcterms = DublinCore.new if relation.dcterms.nil?
-          relation.dcterms.isFormatOf = [resource.id]
-
-          if resource.root?
-            resource.children << relation
-          else
-            resource.parent.children << relation
-          end
-        end
-      end
-
-      # save modifications to hierarchy
-      resource.root.save
-
-      resource
+      @resource
     end
 
     def map_vocabs(node)
@@ -235,7 +98,7 @@ module Mapping
           :abstract        => 'abstract',
           :tableOfContents => 'tableOfContents',
 
-          # TODO: add <note>
+          # TODO: add <note> etc.
       }
 
       bibo = map_xpath node, {
@@ -261,11 +124,10 @@ module Mapping
       vocabs
     end
 
-    def map_relations(node_set)
-      # @see: http://www.loc.gov/standards/mods/userguide/relateditem.html
+    def map_relations(xpath, opts={})
       relations = []
 
-      node_set.each do |node|
+      @node.xpath(xpath).each do |node|
         # create/map related resource
         vocabs = map_vocabs(node)
 
@@ -274,62 +136,110 @@ module Mapping
         # recursively map related resources
         resource = Resource.find_or_create_by(vocabs)
 
-        mapping = Mapping::MODS.new
-        resource = mapping.map(resource, node)
+        resource = Mapping::MODS.new.map(resource, node)
 
         next if resource.nil? or relations.include? resource
 
         relations << resource
       end
 
-      relations
+      unless relations.empty?
+        if opts[:relation]
+          vocab = opts[:relation].keys.first
+          field = opts[:relation].values.first
+
+          # set the target field value if it's provided
+          @resource.send("#{vocab}=", @resource.class.vocabs[vocab].new) if @resource.send(vocab).nil?
+          @resource.send(vocab).send("#{field}=", relations.map(&:id))
+        end
+
+        if opts[:inverse]
+          vocab = opts[:inverse].keys.first
+          field = opts[:inverse].values.first
+
+          relations.each do |relation|
+            # set the inverse field value if it's provided
+            relation.send("#{vocab}=", relation.class.vocabs[vocab].new) if relation.send(vocab).nil?
+            relation.send(vocab).send("#{field}=", [@resource.id])
+          end
+        end
+
+        if opts[:parent]
+          # if we are parenting, assign the relation as the resource's parent
+          @resource.parent = relations.first
+
+        elsif opts[:siblings]
+          # try to assign relations as siblings if possible
+          if @resource.root? then @resource.children << relations
+          else @resource.parent.children << relations
+          end
+
+        else
+          # otherwise assign relations as the resource's children (default)
+          @resource.children << relations
+        end
+
+      end
     end
 
-    def map_agents(node_set, opts={})
+    def map_agents(xpath, opts={})
       agents = []
       agent_ids = @resource.agents.map(&:id)
 
-      mapping = opts[:foaf] || {
+      mapping = opts[:mapping] || { :foaf => {
           :name     => 'namePart[not(@type)] | displayForm',
           :birthday => 'namePart[@type = "date"]',
           :title    => 'namePart[@type = "termsOfAddress"]',
+        }
       }
 
-      node_set.each do |node|
+      @node.xpath(xpath).each do |node|
+        mapped = {}
 
-        foaf = map_xpath node, mapping
-        next if foaf.values.flatten.empty?
-
-        agent = Agent.find_or_create_by(:foaf => foaf)
+        mapped[:foaf] = map_xpath node, mapping[:foaf]
+        next if mapped[:foaf].values.flatten.empty?
 
         case node['type']
           when 'personal'
-            agent.rdf_types << (RDF::FOAF.to_uri / 'Person').to_s
-            agent.rdf_types << 'http://dbpedia.org/ontology/Person'
-            agent.rdf_types << 'http://schema.org/Person'
+            mapped[:rdf_types] = {'RDF::FOAF' => ['Person'],
+                                  'Vocab::DBpedia' => ['Person'],
+                                  'Vocab::Schema' => ['Person']}
           when 'corporate'
-            agent.rdf_types << (RDF::FOAF.to_uri / 'Organization').to_s
-            agent.rdf_types << 'http://dbpedia.org/ontology/Organisation'
-            agent.rdf_types << 'http://schema.org/Organization'
+            mapped[:rdf_types] = {'RDF::FOAF' => ['Organization'],
+                                  'Vocab::DBpedia' => ['Organisation'],
+                                  'Vocab::Schema' => ['Organization']}
         end
 
-        next if agent.nil? or agents.include? agent or agent_ids.include? agent.id
+        agent = Agent.find_or_create_by(mapped)
+
+        next if agent.nil? or agent_ids.include? agent.id or agents.include? agent
 
         agents << agent
       end
 
-      agents
+      unless agents.empty?
+        if opts[:relation]
+          vocab = opts[:relation].keys.first
+          field = opts[:relation].values.first
+
+          # set the target field value if it's provided
+          @resource.send("#{vocab}=", @resource.class.vocabs[vocab].new) if @resource.send(vocab).nil?
+          @resource.send(vocab).send("#{field}=", agents.map(&:id))
+        end
+
+        @resource.agents << agents
+      end
     end
 
-    def map_concepts(node_set, opts={})
+    def map_concepts(xpath, opts={})
       concepts = []
       concept_ids = @resource.concepts.map(&:id)
 
-      node_set.each do |node|
+      @node.xpath(xpath).each do |node|
         # in MODS, each subject access point is usually composed of multiple
         # ordered sub-elements; so that's what we process for hierarchy
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
-
+        mapped = {}
         current = nil
 
         node.children.each do |subnode| # xpath('./text() | ./*')
@@ -341,22 +251,23 @@ module Mapping
 #            when 'titleInfo'  # Resource
             else
               # NB: the :hiddenLabel xpath is overkill, but required for uniqueness
-              mapping = opts[:skos] || {
+              mapping = opts[:mapping] || { :skos => {
                   :prefLabel  => '.',
                   :hiddenLabel => 'preceding-sibling::*'
+                }
               }
 
-              skos = map_xpath subnode, mapping
-              next if skos.values.flatten.empty?
+              mapped[:skos] = map_xpath subnode, mapping[:skos]
+              next if mapped[:skos].values.flatten.empty?
 
-              skos[:broader] = [current.id] unless current.nil?
-
-              concept = Concept.find_or_create_by(:skos => skos)
+              mapped[:skos][:broader] = [current.id] unless current.nil?
 
               if 'geographic' == subnode.name
-                concept.rdf_types << 'http://dbpedia.org/ontology/Place'
-                concept.rdf_types << 'http://schema.org/Place'
+                mapped[:rdf_types] = {'Vocab::DBpedia' => ['Place'],
+                                       'Vocab::Schema' => ['Place']}
               end
+
+              concept = Concept.find_or_create_by(mapped)
           end
 
           unless current.nil?
@@ -370,12 +281,23 @@ module Mapping
           current = concept
         end
 
-        next if current.nil? or concepts.include? current or concept_ids.include? current.id
+        next if current.nil? or concept_ids.include? current.id or concepts.include? current
 
         concepts << current
       end
 
-      concepts
+      unless concepts.empty?
+        if opts[:relation]
+          vocab = opts[:relation].keys.first
+          field = opts[:relation].values.first
+
+          # set the target field value if it's provided
+          @resource.send("#{vocab}=", @resource.class.vocabs[vocab].new) if @resource.send(vocab).nil?
+          @resource.send(vocab).send("#{field}=", concepts.map(&:id))
+        end
+
+        @resource.concepts << concepts
+      end
     end
 
   end

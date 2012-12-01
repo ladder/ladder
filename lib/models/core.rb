@@ -33,7 +33,7 @@ module Model
 
       # Create rdf_types field and accessor
       base.send :class_eval, %(class << self; attr_reader :rdf_types end)
-      base.send :field, :rdf_types, :type => Array, :default => []
+      base.send :field, :rdf_types, :type => Hash
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
@@ -60,6 +60,7 @@ module Model
       end
 
       def define_scopes
+        # TODO: refactor to use self.vocabs
         embeddeds = self.reflect_on_all_associations(*[:embeds_one])
 
         embeddeds.each do |embed|
@@ -183,6 +184,7 @@ module Model
 
           # Strip id field
           hash.except! :_id
+          hash.except! :rdf_types
 
           # Modify Object ID references if specified
           if hash.class == Hash and opts[:ids]
@@ -231,6 +233,17 @@ module Model
         Mongoid::Criteria.new(self).chunkify(opts)
       end
 
+      def vocabs
+        embeddeds = reflect_on_all_associations(*[:embeds_one])
+
+        vocabs = {}
+        embeddeds.each do |embedded|
+          vocabs[embedded.key.to_sym] = embedded.class_name.constantize
+        end
+
+        vocabs
+      end
+
     end
 
     def generate_md5
@@ -240,12 +253,11 @@ module Model
 
     # Retrieve a hash of field names and embedded vocab objects
     def vocabs
-      embeddeds = self.reflect_on_all_associations(*[:embeds_one])
-
       vocabs = {}
-      embeddeds.each do |embedded|
-        vocab = self.method(embedded.key).call
-        vocabs[embedded.key.to_sym] = vocab unless vocab.nil?
+
+      self.class.vocabs.keys.each do |vocab|
+        value = self.method(vocab).call
+        vocabs[vocab] = value unless value.nil?
       end
 
       vocabs
@@ -359,7 +371,7 @@ module Model
       hash[:heading] = self.heading
 
       # store RDF type for faceting
-      hash[:rdf_types] = self.rdf_types.map { |value| URI(value).fragment ? URI(value).fragment : URI(value).path.split('/').last }.uniq!
+      hash[:rdf_types] = self.rdf_types.values.uniq unless self.rdf_types.nil?
 
       hash.to_json
     end
@@ -388,12 +400,18 @@ module Model
         # FIXME: this is necessary to write a rdf:Description element
         writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(''))
 
-        self.class.rdf_types.each do |type|
-          writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(type))
+        self.class.rdf_types.each do |vocab, values|
+          values.each do |value|
+            writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(vocab.constantize.to_uri / value))
+          end
         end
 
-        self.rdf_types.each do |type|
-          writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(type))
+        unless self.rdf_types.nil?
+          self.rdf_types.each do |vocab, values|
+            values.each do |value|
+              writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(vocab.constantize.to_uri / value))
+            end
+          end
         end
 
         # get the RDF graph for each vocab
