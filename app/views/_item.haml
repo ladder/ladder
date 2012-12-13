@@ -7,9 +7,12 @@
       %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= vocab
 
     - fields.each do |name, values|
+      - next if :thumbnail == name
+
       %tr
         %td.span2
           %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{name}", :default => name.to_s.underscore.humanize)
+
         %td.span10
           - values.each do |value|
 
@@ -18,6 +21,17 @@
 
               - if value[:concept]
                 #{link_to [reference.ancestors.map(&:heading) + reference.heading].dashjoin, url_for(value.keys.first, :index, :id => value.values.first)}
+
+              - elsif value[:agent]
+                - agent = Agent.find(value.values.first)
+                .together{:style => 'clear: both;'}
+                  .span2
+                    %a.thumbnail.pull-left{:href => url_for(:agent, :index, :id => agent.id), :style => 'margin-left: 9px;'}
+                      .half-small
+                        = partial 'agent/image', :object => agent, :locals => {:size => 'S'}
+                  .span8
+                    #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+
               - else
                 #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
 

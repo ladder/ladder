@@ -1,1 +1,6 @@
-%img{:src => url_for('/img/icons/icon-person.png')}
+- url = image.dbpedia.thumbnail.first rescue nil
+
+- if url
+  %img{:src => url}
+- else
+  %img{:src => url_for('/img/icons/icon-person.png')}

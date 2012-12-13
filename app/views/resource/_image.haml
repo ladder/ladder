@@ -10,23 +10,26 @@
   %img{:src => url_for(thumbnail_path + image_path)}
 
 - elsif isbn.nil? and !type.nil?
-  - case type
-    - when /video/i
-      %img{:src => url_for('/img/icons/icon-film.png')}
-    - when /sound|audio/i
-      %img{:src => url_for('/img/icons/icon-audio.png')}
-    - when /print/i
-      %img{:src => url_for('/img/icons/icon-book.png')}
-    - when /microf/i
-      %img{:src => url_for('/img/icons/icon-print.png')}
-    - when /remote/i
-      %img{:src => url_for('/img/icons/icon-link.png')}
-    - when /computer/i
-      %img{:src => url_for('/img/icons/icon-disk.png')}
-    - when /dis[ck]/i
-      %img{:src => url_for('/img/icons/icon-disc.png')}
-    - else
-      %img{:src => url_for('/img/icons/icon-question.png')}
+  - if url = image.dbpedia.thumbnail.first rescue nil
+    %img{:src => url}
+  - else
+    - case type
+      - when /video/i
+        %img{:src => url_for('/img/icons/icon-film.png')}
+      - when /sound|audio/i
+        %img{:src => url_for('/img/icons/icon-audio.png')}
+      - when /print/i
+        %img{:src => url_for('/img/icons/icon-book.png')}
+      - when /microf/i
+        %img{:src => url_for('/img/icons/icon-print.png')}
+      - when /remote/i
+        %img{:src => url_for('/img/icons/icon-link.png')}
+      - when /computer/i
+        %img{:src => url_for('/img/icons/icon-disk.png')}
+      - when /dis[ck]/i
+        %img{:src => url_for('/img/icons/icon-disc.png')}
+      - else
+        %img{:src => url_for('/img/icons/icon-question.png')}
 
 - else
   %img{:src => url_for(:image, :index, :id => image.id, :size => size)}
