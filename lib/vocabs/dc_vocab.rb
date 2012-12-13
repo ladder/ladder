@@ -5,7 +5,7 @@
 
 module Vocab
 
-  class DCVocab < RDF::Vocabulary("http://purl.org/dc/terms/")
+  class DC < RDF::Vocabulary("http://purl.org/dc/terms/")
     property :DCMIType
     property :DDC
     property :IMT

@@ -16,15 +16,22 @@ class VCard
   embedded_in :agent
 end
 
+class DBpedia
+  include Model::Embedded
+  bind_to Vocab::DBpedia, :type => Array
+  embedded_in :resource
+end
+
 class Agent
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :foaf, class_name: "FOAF"
-  embeds_one :vcard, class_name: "VCard"
+  embeds_one :foaf,     class_name: "FOAF"
+  embeds_one :vcard,    class_name: "VCard"
+  embeds_one :dbpedia,  class_name: "DBpedia"
 
-  @rdf_types = {'Vocab::DBpedia' => ['Agent'],
-                'RDF::FOAF' => ['Agent']}
+  @rdf_types = {'Vocab::DBpedia'  => ['Agent'],
+                'RDF::FOAF'       => ['Agent']}
 
   @headings = [{:foaf => :name}]
 

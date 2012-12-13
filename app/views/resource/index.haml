@@ -25,7 +25,7 @@
             %a.pull-right{:href => '#collapseMODS', :'data-toggle' => "collapse"} MODS
           .span10
             %pre.accordion-body.collapse#collapseMODS
-              %code&= @resource.mods.to_s
+              %code&= @resource.mods
 
       - if @resource.marc
         .row-fluid.hidden-phone
@@ -33,7 +33,7 @@
             %a.pull-right{:href => '#collapseMARC', :'data-toggle' => "collapse"} MARC
           .span10
             %pre.accordion-body.collapse#collapseMARC
-              %code= JSON.pretty_generate(MARC::Reader.decode(@resource.marc.to_s).to_hash)
+              %code= MultiJson.dump(MARC::Reader.decode(@resource.marc).to_hash, :pretty => true)
 
       %br
     .span3

@@ -10,4 +10,4 @@
 
 - if result._explanation
   %pre
-    %code= JSON.pretty_generate(result._explanation.to_hash)
+    %code= MultiJson.dump(result._explanation.to_hash, :pretty => true)

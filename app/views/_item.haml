@@ -9,7 +9,7 @@
     - fields.each do |name, values|
       %tr
         %td.span2
-          %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{name}")
+          %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{name}", :default => name.to_s.underscore.humanize)
         %td.span10
           - values.each do |value|
 
@@ -22,7 +22,7 @@
                 #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
 
             - elsif :language == name
-              = ISO_639.find(value).english_name
+              = ISO_639.find(value).english_name rescue nil
 
             - else
               = value

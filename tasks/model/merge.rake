@@ -1,3 +1,6 @@
+#
+# TODO: put this together
+#
 desc "Merge duplicate documents, optionally only for [model]"
 
 namespace :model do

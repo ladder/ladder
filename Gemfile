@@ -15,7 +15,7 @@ gem 'parallel' # multi-core processing
 gem 'iso-639'  # english/french lists
 gem 'hashdiff' # hash comparison
 gem 'amatch'   # string comparison
-gem 'yajl-ruby', :require => 'yajl/json_gem'
+gem 'oj'       # JSON parser/serializer
 
 # model gems
 gem 'bson_ext', :require => 'mongo'

@@ -10,8 +10,8 @@ class Concept
   # embedded RDF vocabularies
   embeds_one :skos, class_name: "SKOS"
 
-  @rdf_types = {'Vocab::DBpedia' => ['TopicalConcept'],
-                'RDF::SKOS' => ['Concept']}
+  @rdf_types = {'Vocab::DBpedia'  => ['TopicalConcept'],
+                'RDF::SKOS'       => ['Concept']}
 
   @headings = [{:skos => :prefLabel},
                {:skos => :altLabel}]

@@ -6,7 +6,7 @@
 
 module Vocab
 
-  class VCard < RDF::Vocabulary("http://www.w3.org/2006/vcard/ns")
+  class VCard < RDF::Vocabulary("http://www.w3.org/2006/vcard/ns#")
     property :fn
     property :'family-name'
     property :'given-name'

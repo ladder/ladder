@@ -4,7 +4,12 @@
   .row
     .span9
       %h2.page-header= @title
-      = partial 'item', :object => @agent
+      .row-fluid
+        .span2.thumbnail
+          = partial 'agent/image', :object => @agent
+
+        .span10
+          = partial 'item', :object => @agent
 
       .row-fluid.hidden-phone
         .span2

@@ -1,4 +1,4 @@
-class DublinCore
+class DC
   include Model::Embedded
   bind_to RDF::DC, :type => Array, :only => [:title, :alternative, :issued, :format,
                                              :extent, :language, :identifier, :abstract,
@@ -7,7 +7,7 @@ class DublinCore
                                              :hasPart, :hasVersion, :isVersionOf, :hasFormat,
                                              :isFormatOf, :isReferencedBy, :references]
 
-  bind_to Vocab::DCVocab, :type => Array, :only => [:DDC, :LCSH, :LCC, :RVM]
+  bind_to Vocab::DC, :type => Array, :only => [:DDC, :LCSH, :LCC, :RVM]
   attr_accessible :identifier
   embedded_in :resource
 end
@@ -24,18 +24,25 @@ class Prism
   embedded_in :resource
 end
 
+class DBpedia
+  include Model::Embedded
+  bind_to Vocab::DBpedia, :type => Array
+  embedded_in :resource
+end
+
 class Resource
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :dcterms, class_name: "DublinCore"
-  embeds_one :bibo,    class_name: "Bibo"
-  embeds_one :prism,   class_name: "Prism"
+  embeds_one :dcterms,  class_name: "DC"
+  embeds_one :bibo,     class_name: "Bibo"
+  embeds_one :prism,    class_name: "Prism"
+  embeds_one :dbpedia,  class_name: "DBpedia"
 
-  @rdf_types = {'Vocab::DBpedia' => ['Work'],
-                'Vocab::Schema' => ['CreativeWork'],
-                'RDF::DC' => ['BibliographicResource'],
-                'Vocab::Bibo' => ['Document']}
+  @rdf_types = {'Vocab::DBpedia'  => ['Work'],
+                'Vocab::Schema'   => ['CreativeWork'],
+                'RDF::DC'         => ['BibliographicResource'],
+                'Vocab::Bibo'     => ['Document']}
 
   @headings = [{:dcterms => :title}, {:dcterms => :alternative}]
 
