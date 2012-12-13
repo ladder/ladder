@@ -22,13 +22,22 @@ class DBpedia
   embedded_in :resource
 end
 
+class RDFS
+  include Model::Embedded
+  bind_to RDF::RDFS, :type => Array
+  embedded_in :resource
+end
+
 class Agent
   include Model::Core
 
   # embedded RDF vocabularies
   embeds_one :foaf,     class_name: "FOAF"
   embeds_one :vcard,    class_name: "VCard"
+
+  # TODO: embed on all models
   embeds_one :dbpedia,  class_name: "DBpedia"
+  embeds_one :rdfs,     class_name: "RDFS"
 
   @rdf_types = {'Vocab::DBpedia'  => ['Agent'],
                 'RDF::FOAF'       => ['Agent']}

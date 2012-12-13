@@ -30,6 +30,12 @@ class DBpedia
   embedded_in :resource
 end
 
+class RDFS
+  include Model::Embedded
+  bind_to RDF::RDFS, :type => Array
+  embedded_in :resource
+end
+
 class Resource
   include Model::Core
 
@@ -37,7 +43,10 @@ class Resource
   embeds_one :dcterms,  class_name: "DC"
   embeds_one :bibo,     class_name: "Bibo"
   embeds_one :prism,    class_name: "Prism"
+
+  # TODO: embed on all models
   embeds_one :dbpedia,  class_name: "DBpedia"
+  embeds_one :rdfs,     class_name: "RDFS"
 
   @rdf_types = {'Vocab::DBpedia'  => ['Work'],
                 'Vocab::Schema'   => ['CreativeWork'],

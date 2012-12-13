@@ -3,7 +3,7 @@ desc "Retrieve Linked Data from DBpedia"
 namespace :link do
   task :dbpedia, [:model] => :environment do |t, args|
 
-#    args.with_defaults(:model => ['Resource', 'Agent', 'Concept'], :relink => false)
+    # TODO: implement Concepts once we have better matching
     args.with_defaults(:model => ['Resource', 'Agent'], :relink => false)
 
     Mongoid.unit_of_work(disable: :all) do
@@ -14,7 +14,11 @@ namespace :link do
         klass  = model.classify.constantize
         next if klass.empty? # nothing to index
 
-        collection = klass.all # TODO: selector/scoping here?
+        collection = klass.where(:'rdf_types.Vocab::DBpedia'.exists => true)
+        # TODO:
+        # .only(:rdf_types, :heading, :id)
+
+        # only select documents which have not already been linked
         collection = collection.dbpedia(false) unless !!args.relink
         next if collection.empty?
 
@@ -23,19 +27,15 @@ namespace :link do
         # break collection into chunks for multi-processing
         chunks = collection.chunkify
 
-        Parallel.each_with_index(chunks, {:in_threads => Parallel.processor_count}) do |chunk, index|
+        Parallel.each_with_index(chunks) do |chunk, index|
           # force mongoid to create a new session for each chunk
           Mongoid::Sessions.clear
 
           chunk.each do |item|
-            # only lookup if we have a type set for this RDF vocab
-            next if item.rdf_types.nil?
-            next if ! item.rdf_types['Vocab::DBpedia']
-#p item.id
             # build a URI to search for a matching RDF resource
             search_uri = URI('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?')
 
-            # FIXME: try with each type?
+            # FIXME: try with each type?  each heading?
             type = item.rdf_types['Vocab::DBpedia'].first rescue next
             querystring = item.heading.first
             search_uri.query = {'QueryClass' => type, 'QueryString' => querystring}.to_query
@@ -58,22 +58,19 @@ namespace :link do
               resource_uri = result.at_xpath('URI').text
               live_uri = resource_uri.sub('/dbpedia.org/', '/live.dbpedia.org/')
               rdf_uri = live_uri.sub('/resource/', '/data/')
-#p rdf_uri
+
               # query the URI, but suppress errors
               content = open(rdf_uri).read rescue next
-
               rdf_xml = Nokogiri::XML(content)
 
               # only select properties about this resource
               rdf_props = rdf_xml.at_xpath("//*[@rdf:about='#{live_uri}']")
-
               next if rdf_props.nil?
-#puts "------ #{item.id} #{item.heading}"
+
               rdf_props.element_children.each do |node|
 
                 # skip properties with no namespace, since we don't know what vocab
                 vocab = RDF::URI(node.namespace.href).qname.first rescue nil
-#puts "#{node.namespace.href} : #{vocab}"
                 next if vocab.nil?
 
                 # skip properties that use an unknown vocabulary
@@ -118,10 +115,10 @@ namespace :link do
                 embed = item.send(vocab).nil? ? item.send("#{vocab}=", klass.vocabs[vocab].new) : item.send(vocab)
                 (embed[node.name] ||= []) << value
 #                item.send(vocab).send("#{node.name}=", value)
-#puts "#{vocab}.#{node.name} = #{value}"
+
                 item.save
               end
-#puts "-----------"
+
             end
 
           end
