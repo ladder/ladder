@@ -67,7 +67,7 @@ Ladder.controllers :search do
             # query for the provided query string
             b.positive do |p|
               p.match @fields, @querystring, :operator => 'and'
-#              p.string @querystring
+#              p.string @querystring, :default_operator => 'and'
             end
 
             # suppress results that are not document roots

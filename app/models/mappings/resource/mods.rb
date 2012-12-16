@@ -87,7 +87,8 @@ module Mapping
           :title         => 'titleInfo[not(@type = "alternative")]',
           :alternative   => 'titleInfo[@type = "alternative"]',
           :issued        => 'originInfo/dateIssued',
-          :format        => 'physicalDescription/form',
+          :format        => 'physicalDescription/form[not(@authority = "marcsmd")]',
+          :medium        => 'physicalDescription/form[@authority = "marcsmd"]',
           :extent        => 'physicalDescription/extent',
           :language      => 'language/languageTerm',
 

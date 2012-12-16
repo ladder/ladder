@@ -14,7 +14,8 @@ class Concept
                 'RDF::SKOS'       => ['Concept']}
 
   @headings = [{:skos => :prefLabel},
-               {:skos => :altLabel}]
+               {:skos => :altLabel},
+               {:skos => :hiddenLabel}]
 
   # model relations
   has_and_belongs_to_many :resources, index: true

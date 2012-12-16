@@ -42,7 +42,10 @@ class Agent
   @rdf_types = {'Vocab::DBpedia'  => ['Agent'],
                 'RDF::FOAF'       => ['Agent']}
 
-  @headings = [{:foaf => :name}]
+  @headings = [{:rdfs => :label},
+               {:foaf => :name},
+               {:foaf => :givenName},
+               {:foaf => :surname}]
 
   # model relations
   has_and_belongs_to_many :resources, index: true
