@@ -2,11 +2,7 @@
 
 - docs = document.similar.to_a
 - docs.each do |doc|
-  - match = document.amatch(doc, {:jaro_similar => true,
-                                  :jarowinkler_similar => true,
-                                  :levenshtein_similar => true,
-                                  :longest_subsequence_similar => true,
-                                  :pair_distance_similar => true})
+  - match = document.amatch(doc)
   - doc.attributes[:diff] = match.values.sum / match.size
 - docs.delete_if {|doc| doc.diff < 0.5}
 - docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}

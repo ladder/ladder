@@ -284,7 +284,7 @@ module Model
             hash.each do |vocab, vals|
               vals.each do |field, value|
 
-                query_string = value.join(' ').gsub(/[-+!\(\)\{\}\[\]\n^"~*?:;,.\\\/]|&&|\|\|/, '')
+                query_string = value.join(' ').normalize
                 should { text "#{vocab}.#{field}", query_string }
 
               end
@@ -332,8 +332,8 @@ module Model
       p1 = self.class.normalize(self.as_document, options.slice(:ids))
       p2 = self.class.normalize(compare, options.slice(:ids))
 
-      p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
-      p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').gsub(/[-+!\(\)\{\}\[\]\n\s^"~*?:;,.\\\/]|&&|\|\|/, '')
+      p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
+      p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
 
       # calculate amatch score for each algorithm
       options.delete :ids

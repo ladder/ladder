@@ -1,4 +1,8 @@
 - item = Concept.normalize(result.to_hash, {:ids => :resolve})
+- desc = []
+
+- if result.resource_ids.size > 3
+  - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
 
 .span8
   %a{:href => url_for(:concept, :index, :id => result.id)}
@@ -7,11 +11,6 @@
         %small= item[:skos][:hiddenLabel].dashjoin
         \--
       = result.heading.last.truncate(100, :separator => ' ')
-
-  - desc = []
-  - if result.resource_ids.size > 3
-    - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
-
   .description #{desc.join('; ')}
 
 .span4

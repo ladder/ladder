@@ -1,17 +1,19 @@
 - item = Agent.normalize(result.to_hash, {:ids => :resolve})
+- desc = []
+- desc.push item[:dbpedia][:birthName].first rescue nil
+- desc.push item[:foaf][:name].first unless item[:dbpedia][:birthName] rescue nil
+
+- desc.push Date.parse(item[:dbpedia][:birthYear].first).year.to_s + '-' rescue nil
+- desc.push Date.parse(item[:dbpedia][:birthDate].first).year.to_s + '-' unless item[:dbpedia][:birthYear] rescue nil
+- desc.push item[:foaf][:birthday].first unless item[:dbpedia][:birthYear] or item[:dbpedia][:birthDate] rescue nil
+
+- if result.resource_ids.size > 3
+  - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
 
 .span8
   %a{:href => url_for(:agent, :index, :id => result.id)}
     %h4
       = result.heading.first.truncate(100, :separator => ' ')
-
-  - desc = []
-  - desc.push item[:foaf][:name].pop rescue nil unless 1 == item[:foaf][:name].size
-  - desc.push item[:foaf][:birthday].first rescue nil
-
-  - if result.resource_ids.size > 3
-    - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
-
   .description #{desc.join('; ')}
 
 .span4

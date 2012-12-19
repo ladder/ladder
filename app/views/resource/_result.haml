@@ -1,4 +1,8 @@
 - item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
+- desc = []
+- desc.push item[:dcterms][:format].first.capitalize rescue nil
+- desc.push item[:dcterms][:issued].first rescue nil
+- desc.push ISO_639.find(item[:dcterms][:language].first).english_name.capitalize rescue nil
 
 %a{:href => url_for(:resource, :index, :id => result.id)}
   %h4
@@ -14,10 +18,5 @@
       - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
       - link_to(heading.first, url_for(value.keys.first, :index, :id => value.values.first))
 - else agents = []
-
-- desc = []
-- desc.push item[:dcterms][:format].first.capitalize rescue nil
-- desc.push item[:dcterms][:issued].first rescue nil
-- desc.push ISO_639.find(item[:dcterms][:language].first).english_name.capitalize rescue nil
 
 .description #{[agents + desc].join('; ')}

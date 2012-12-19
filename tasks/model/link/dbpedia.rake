@@ -4,7 +4,7 @@ namespace :link do
   task :dbpedia, [:model] => :environment do |t, args|
 
     # TODO: implement Concepts once we have better matching
-    args.with_defaults(:model => ['Resource', 'Agent'], :relink => false)
+    args.with_defaults(:model => ['Agent', 'Resource'], :relink => false)
 
     Mongoid.unit_of_work(disable: :all) do
 
@@ -35,27 +35,64 @@ namespace :link do
             # build a URI to search for a matching RDF resource
             search_uri = URI('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?')
 
-            # FIXME: try with each type?  each heading?
-            type = item.rdf_types['Vocab::DBpedia'].first rescue next
-            querystring = item.heading.first
-            search_uri.query = {'QueryClass' => type, 'QueryString' => querystring}.to_query
+            # TODO: loop with each heading instead of join?
+            querystring = item.heading.join()
 
-            # query the URI, but suppress errors
-            content = open(search_uri).read rescue next
+            # FIXME: this is a hack for dbpedia's order-sensitive keyword lookup
+            # reverse "surname, name" for searching Agents
+            querystring.gsub!(/([^,]+), ([^,^\.]+)\.?/, '\2 \1')
 
-            xml = Nokogiri::XML(content).remove_namespaces!
-            results = xml.xpath('/ArrayOfResult/Result')
+            # attempt to lookup based on types if defined
+            types = [''] + item.rdf_types['Vocab::DBpedia'] rescue []
 
-            unless results.empty?
-              # use the first result for now
-              # FIXME: if more than one, we can't be sure it's a match; manual intervention?
-              # NB: possibly similarity match on rdfs:label
-              result = results.first
+            begin
+              search_uri.query = {'QueryClass' => types.pop, 'QueryString' => querystring}.to_query
+
+              # query the URI, but suppress errors
+              content = open(search_uri).read rescue next
+
+              xml = Nokogiri::XML(content).remove_namespaces!
+              results = xml.xpath('/ArrayOfResult/Result')
+
+            end while (results.nil? or results.empty?) and !types.empty?
+
+            unless results.nil? or results.empty?
+              # TODO: refactor into #amatch method somewhere
+              options = {:jaro_similar => true,
+                         :jarowinkler_similar => true,
+                         #:levenshtein_similar => true,
+                         :longest_subsequence_similar => true,
+                         :longest_substring_similar => true,
+                         :pair_distance_similar => true}
+
+              querystring.downcase!
+              querystring.normalize!
+
+              # if more than one result, use the closest match
+              matched = nil
+              results.each do |result|
+                label = result.at_xpath('Label').text.downcase.normalize
+
+                # TODO: refactor into #amatch method as above
+                match = options.map {|sim, bool| querystring.send(sim, label) if bool}
+                score = match.sum / match.length.to_f
+
+                # TODO: use, eg. birth/death dates in Result/Description to improve match
+
+                # match at 90% similarity (empirical threshold)
+                if score > 0.9 then
+                  matched = result
+                  break
+                elsif score > 0.8 then puts "#{score}: #{querystring} == #{label}" # temporary
+                end
+              end
+
+              next if matched.nil?
 
               # TODO: add classes to document
-              #  classes = result.xpath('Classes/Class')
+              #  classes = matched.xpath('Classes/Class')
 
-              resource_uri = result.at_xpath('URI').text
+              resource_uri = matched.at_xpath('URI').text
               live_uri = resource_uri.sub('/dbpedia.org/', '/live.dbpedia.org/')
               rdf_uri = live_uri.sub('/resource/', '/data/')
 
@@ -81,10 +118,9 @@ namespace :link do
                 lang = node.attribute('lang')
                 next if lang and lang.to_s != 'en'
 
+                # use resource URI if specified
                 if node.text.empty?
-                  # use resource URI if specified
-
-                  # FIXME: handle resource URIs "properly"
+                  # FIXME: handle resource URIs "properly"; eg. store as URI
                   case node.name
                     when 'thumbnail'
                       value = node.attribute('resource').to_s
@@ -110,6 +146,9 @@ namespace :link do
 
                 # skip if value is empty
                 next if value.strip.empty?
+
+                # @agent[:rdfs]['comment'].first - @agent[:dbpedia]['abstract'].first
+                # @agent[:dbpedia]['abstract'].first - @agent[:rdfs]['comment'].first
 
                 # TODO: build a hash here and use update() or save()
                 embed = item.send(vocab).nil? ? item.send("#{vocab}=", klass.vocabs[vocab].new) : item.send(vocab)
