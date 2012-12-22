@@ -4,7 +4,6 @@
 - docs.each do |doc|
   - match = document.amatch(doc)
   - doc.attributes[:diff] = match.values.sum / match.size
-- docs.delete_if {|doc| doc.diff < 0.5}
 - docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
 
 - unless docs.empty?
@@ -12,14 +11,12 @@
     = I18n.t('model.similar')
     %ul.media-list
     - docs.sort! {|a, b| b.diff <=> a.diff}
-    - docs = Kaminari.paginate_array(docs).page(1).per(10)
-    - docs.each do |similar|
+    - docs.take(5).each do |similar|
 
       - if similar.diff > 0.85
         %li.media.active
           %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
-            - if document.is_a? Resource
-              .half.pull-left= partial 'resource/image', :object => similar, :locals => {:size => 'S'}
+            .half.pull-left= partial 'image', :object => similar, :locals => {:style => 'font-size: 1.5em;'}
 
             %strong.text-warning #{similar.load.heading.send(show)}
             %small.muted (#{(similar.diff * 100).round}%)
@@ -28,9 +25,11 @@
       - else
         %li.media
           %a{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => similar.id)}
-            - if document.is_a? Resource
-              .half.pull-left= partial 'resource/image', :object => similar, :locals => {:size => 'S'}
+            .half.pull-left= partial 'image', :object => similar, :locals => {:style => 'font-size: 1.5em;'}
 
-            #{similar.load.heading.send(show)}
+            - if document.is_a? Concept
+              #{[similar.load.ancestors.map(&:heading) + similar.load.heading].dashjoin}
+            - else
+              #{similar.load.heading.send(show)}
             %small.muted (#{(similar.diff * 100).round}%)
             .clearfix

@@ -3,9 +3,11 @@
 - desc.push item[:dbpedia][:birthName].first rescue nil
 - desc.push item[:foaf][:name].first unless item[:dbpedia][:birthName] rescue nil
 
-- desc.push Date.parse(item[:dbpedia][:birthYear].first).year.to_s + '-' rescue nil
-- desc.push Date.parse(item[:dbpedia][:birthDate].first).year.to_s + '-' unless item[:dbpedia][:birthYear] rescue nil
-- desc.push item[:foaf][:birthday].first unless item[:dbpedia][:birthYear] or item[:dbpedia][:birthDate] rescue nil
+- birth = item[:dbpedia][:birthYear] || item[:dbpedia][:birthDate] || item[:foaf][:birthday] rescue []
+- birth = Date.parse(birth.first).year.to_s rescue ''
+- death = item[:dbpedia][:deathYear] || item[:dbpedia][:deathDate] rescue []
+- death = Date.parse(death.first).year.to_s rescue ''
+- desc.push "#{birth}-#{death}" unless birth.empty?
 
 - if result.resource_ids.size > 3
   - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
@@ -21,4 +23,4 @@
     - Resource.find(result.resource_ids.take(3)).each do |resource|
       %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
         .half-small
-          = partial 'resource/image', :object => resource, :locals => {:size => 'S'}
+          = partial 'image', :object => resource

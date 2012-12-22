@@ -8,6 +8,7 @@
 
     - if f['term'].match(/^[0-9a-f]{24}$/)
       - heading = @headings.results.find {|i| i.id == f['term']}.heading
+      -# FIXME: heading in LCSH heirarchy has changed
       - if 'dcterms.subject' == facet.first then display = heading.dashjoin
       - else display = heading.first.truncate(100, :separator => ' ')
 
@@ -19,7 +20,8 @@
       - display = f['term'].capitalize
 
     - elsif 'type' == facet.first or 'rdf_types' == facet.first
-      - display = f['term'].capitalize
+      - display = partial 'image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
+      - display = display + f['term'].underscore.humanize
 
     - else display = f['term']
 
@@ -31,7 +33,7 @@
 
       - if @results.total == f['count']
         %li.active
-          %a= display + " (#{f['count']})"
+          %a= display
       - else
         %li= link_to display + " (#{f['count']})", current_path('page' => @page, 'fi' => @new_fi)
 

@@ -202,13 +202,13 @@ module Mapping
 
         case node['type']
           when 'personal'
-            mapped[:rdf_types] = {'RDF::FOAF' => ['Person'],
-                                  'Vocab::DBpedia' => ['Person'],
-                                  'Vocab::Schema' => ['Person']}
+            mapped[:rdf_types] = [[:foaf, :Person],
+                                  [:dbpedia, :Person],
+                                  [:schema, :Person]]
           when 'corporate'
-            mapped[:rdf_types] = {'RDF::FOAF' => ['Organization'],
-                                  'Vocab::DBpedia' => ['Organisation'],
-                                  'Vocab::Schema' => ['Organization']}
+            mapped[:rdf_types] = [[:foaf, :Organization],
+                                  [:dbpedia, :Organisation],
+                                  [:schema, :Organization]]
         end
 
         agent = Agent.find_or_create_by(mapped)
@@ -240,7 +240,6 @@ module Mapping
         # in MODS, each subject access point is usually composed of multiple
         # ordered sub-elements; so that's what we process for hierarchy
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
-        mapped = {}
         current = nil
 
         node.children.each do |subnode| # xpath('./text() | ./*')
@@ -251,6 +250,8 @@ module Mapping
 #            when 'name'       # Agent
 #            when 'titleInfo'  # Resource
             else
+              mapped = {}
+
               # NB: the :hiddenLabel xpath is overkill, but required for uniqueness
               mapping = opts[:mapping] || { :skos => {
                   :prefLabel  => '.',
@@ -264,8 +265,8 @@ module Mapping
               mapped[:skos][:broader] = [current.id] unless current.nil?
 
               if 'geographic' == subnode.name
-                mapped[:rdf_types] = {'Vocab::DBpedia' => ['Place'],
-                                       'Vocab::Schema' => ['Place']}
+                mapped[:rdf_types] = [[:dbpedia, :Place],
+                                      [:schema, :Place]]
               end
 
               concept = Concept.find_or_create_by(mapped)

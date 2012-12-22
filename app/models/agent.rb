@@ -39,8 +39,8 @@ class Agent
   embeds_one :dbpedia,  class_name: "DBpedia"
   embeds_one :rdfs,     class_name: "RDFS"
 
-  @rdf_types = {'Vocab::DBpedia'  => ['Agent'],
-                'RDF::FOAF'       => ['Agent']}
+  @rdf_types = [[:dbpedia, :Agent],
+                [:foaf, :Agent]]
 
   @headings = [{:rdfs => :label},
                {:foaf => :name},

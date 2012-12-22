@@ -31,7 +31,7 @@ Ladder.controllers :search do
 
     # special treatment for 'model type' and rdf type facets
     @search.facet('type') {terms '_type', :size => 10}
-    @search.facet('rdf_types') {terms 'rdf_types', :size => 10}
+    @search.facet('rdf_types') {terms 'rdf_types.raw', :size => 10}
 
     # set fields
     @fields = '_all'
@@ -66,8 +66,8 @@ Ladder.controllers :search do
 
             # query for the provided query string
             b.positive do |p|
-              p.match @fields, @querystring, :operator => 'and'
-#              p.string @querystring, :default_operator => 'and'
+#              p.match @fields, @querystring, :operator => 'and'
+              p.string @querystring, :default_operator => 'and'
             end
 
             # suppress results that are not document roots
@@ -75,6 +75,17 @@ Ladder.controllers :search do
             b.negative do |n|
               n.string '_exists_:parent_id'
             end
+
+            # suppress Concepts/Agents with no resource_ids
+=begin
+        filtered.filter :not, { :bool => {
+            :must => { :missing => {:field => 'resource_ids'} },
+            :should => [
+                {:type => {:value => 'concept'}},
+                {:type => {:value => 'agent'}},
+            ] }
+        }
+=end
 
           end
         end
@@ -87,7 +98,7 @@ Ladder.controllers :search do
         # special treatment for rdf types filter
         if @filters['rdf_types']
           @filters['rdf_types']['rdf_types'].each do |v|
-            filtered.filter :term, "rdf_types" => v
+            filtered.filter :term, "rdf_types.raw" => v
           end
         end
 
@@ -102,15 +113,6 @@ Ladder.controllers :search do
             end
           end
         end
-
-        # add filter to remove Concepts/Agents with no resource_ids
-        filtered.filter :not, { :bool => {
-            :must => { :missing => {:field => 'resource_ids'} },
-            :should => [
-                {:type => {:value => 'concept'}},
-                {:type => {:value => 'agent'}},
-            ] }
-        }
 
       end
 

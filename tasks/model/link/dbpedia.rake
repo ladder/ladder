@@ -1,10 +1,10 @@
 desc "Retrieve Linked Data from DBpedia"
 
 namespace :link do
-  task :dbpedia, [:model] => :environment do |t, args|
+  task :dbpedia, [:model, :relink] => :environment do |t, args|
 
     # TODO: implement Concepts once we have better matching
-    args.with_defaults(:model => ['Agent', 'Resource'], :relink => false)
+    args.with_defaults(:model => ['Concept', 'Resource', 'Agent'], :relink => false)
 
     Mongoid.unit_of_work(disable: :all) do
 
@@ -14,9 +14,7 @@ namespace :link do
         klass  = model.classify.constantize
         next if klass.empty? # nothing to index
 
-        collection = klass.where(:'rdf_types.Vocab::DBpedia'.exists => true)
-        # TODO:
-        # .only(:rdf_types, :heading, :id)
+        collection = klass.without(:marc, :mods) # TODO: make this dynamic
 
         # only select documents which have not already been linked
         collection = collection.dbpedia(false) unless !!args.relink
@@ -27,26 +25,47 @@ namespace :link do
         # break collection into chunks for multi-processing
         chunks = collection.chunkify
 
+        #######
+        # build a URI to search for a matching RDF resource
+        search_uri = URI('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?')
+
+        # TODO: refactor into #amatch method somewhere
+        options = {:jaro_similar => true,
+                   :jarowinkler_similar => true,
+                   #:levenshtein_similar => true,
+                   :longest_subsequence_similar => true,
+                   :longest_substring_similar => true,
+                   :pair_distance_similar => true}
+        #######
+
+        # TODO: spin up a lot of threads; we're heavily request-bound
         Parallel.each_with_index(chunks) do |chunk, index|
           # force mongoid to create a new session for each chunk
           Mongoid::Sessions.clear
 
           chunk.each do |item|
-            # build a URI to search for a matching RDF resource
-            search_uri = URI('http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?')
-
             # TODO: loop with each heading instead of join?
-            querystring = item.heading.join()
+            # TODO: handle concept LCSH hierarchy
+            # TODO: handle 'untitled' better in Model#heading
+            if item.is_a? Concept
+              querystring = [item.ancestors.map(&:heading) + item.heading].join(' ')
+            else
+              querystring = item.heading.join()
+            end
 
             # FIXME: this is a hack for dbpedia's order-sensitive keyword lookup
             # reverse "surname, name" for searching Agents
             querystring.gsub!(/([^,]+), ([^,^\.]+)\.?/, '\2 \1')
 
-            # attempt to lookup based on types if defined
-            types = [''] + item.rdf_types['Vocab::DBpedia'] rescue []
+            next if 'untitled' == querystring
+
+            # attempt to lookup based on types in decreasing order of specificity
+            rdf_types = klass.rdf_types + (item.rdf_types || [])
+            types = [''] + rdf_types.reject {|type| :dbpedia != type.first}.map(&:last).uniq.dup
 
             begin
               search_uri.query = {'QueryClass' => types.pop, 'QueryString' => querystring}.to_query
+#puts "--> #{item.id} : #{search_uri.to_s}"
 
               # query the URI, but suppress errors
               content = open(search_uri).read rescue next
@@ -54,111 +73,123 @@ namespace :link do
               xml = Nokogiri::XML(content).remove_namespaces!
               results = xml.xpath('/ArrayOfResult/Result')
 
-            end while (results.nil? or results.empty?) and !types.empty?
+              # if we have results, see if any match
+              unless results.nil? or results.empty?
 
-            unless results.nil? or results.empty?
-              # TODO: refactor into #amatch method somewhere
-              options = {:jaro_similar => true,
-                         :jarowinkler_similar => true,
-                         #:levenshtein_similar => true,
-                         :longest_subsequence_similar => true,
-                         :longest_substring_similar => true,
-                         :pair_distance_similar => true}
+                results.each do |result|
+                  # normalize label and heading (querystring) for similarity matching
+                  label = result.at_xpath('Label').text.downcase.normalize
 
-              querystring.downcase!
-              querystring.normalize!
+                  querystring.downcase!
+                  querystring.normalize!
 
-              # if more than one result, use the closest match
-              matched = nil
-              results.each do |result|
-                label = result.at_xpath('Label').text.downcase.normalize
+                  # TODO: refactor into #amatch method as above?
+                  # TODO: use, eg. birth/death dates in Result/Description to improve match
+                  match = options.map {|sim, bool| querystring.send(sim, label) if bool}
+                  score = match.sum / match.length.to_f
 
-                # TODO: refactor into #amatch method as above
-                match = options.map {|sim, bool| querystring.send(sim, label) if bool}
-                score = match.sum / match.length.to_f
+                  # TODO: pass through ability to set a threshold here
+                  if score >= 0.9 then
+                    # we have a heading match, check class intersection
+                    classes = result.xpath('Classes/Class/URI').map {|rdf_class| RDF::URI.intern(rdf_class.text).qname}
 
-                # TODO: use, eg. birth/death dates in Result/Description to improve match
+                    # if classes intersect, consider it a match
+                    if ! (classes & rdf_types).empty?
 
-                # match at 90% similarity (empirical threshold)
-                if score > 0.9 then
-                  matched = result
-                  break
-                elsif score > 0.8 then puts "#{score}: #{querystring} == #{label}" # temporary
+                      # TODO: MOAR REFACTOR
+                      resource_uri = result.at_xpath('URI').text
+                      live_uri = resource_uri#.sub('/dbpedia.org/', '/live.dbpedia.org/')
+                      rdf_uri = live_uri.sub('/resource/', '/data/')
+
+                      # query the URI, but suppress errors
+                      content = open(rdf_uri).read rescue next
+                      rdf_xml = Nokogiri::XML(content)
+
+                      # only select properties about this resource
+                      rdf_props = rdf_xml.at_xpath("//*[@rdf:about='#{live_uri}']")
+                      next if rdf_props.nil?
+
+                      update_hash = {}
+                      rdf_props.element_children.each do |node|
+
+                        # skip properties with no namespace, since we don't know what vocab to use
+                        vocab = RDF::URI.intern(node.namespace.href).qname.first rescue nil
+                        next if vocab.nil?
+
+                        # skip properties that use an unknown vocabulary
+                        next unless klass.vocabs.keys.include? vocab or :rdf == vocab
+
+                        # skip l10n-ized properties that are not English (for now)
+                        # TODO: store multilingual properties
+                        lang = node.attribute('lang')
+                        next unless 'en' == lang.to_s or lang.nil?
+
+                        # use resource URI if specified
+                        if node.text.empty?
+
+                          # FIXME: handle resource URIs "properly"; eg. store as URI type
+                          case node.name
+                            when 'type'
+                              # special case to add RDF types directly
+                                resource_uri = RDF::URI.intern(node.attribute('resource')).qname
+
+                                if resource_uri and klass.vocabs.keys.include? resource_uri.first
+                                    (item.rdf_types ||= []) << resource_uri unless rdf_types.include? resource_uri
+                                end
+                              value = ''
+
+                            when 'thumbnail'
+                              value = node.attribute('resource').to_s
+
+                            else
+                              value = ''
+                          end
+                        else
+                          value = node.text
+                        end
+
+                        # skip if value is empty
+                        next if value.strip.empty?
+
+                        # build a hash here and use atomic update()
+                        update_hash[vocab] ||= {}
+                        (update_hash[vocab][node.name.to_sym] ||= []) << value
+
+                        update_hash[vocab][node.name.to_sym].uniq!
+                      end
+
+                      # TODO: move this to mapping tools somewhere
+                      rdfs_comment = update_hash[:rdfs][:comment].first rescue ''
+                      dbpedia_abstract = update_hash[:dbpedia][:abstract].first rescue ''
+                      abstract = (dbpedia_abstract - rdfs_comment)
+
+                      case abstract
+                        when nil
+                          # abstract does not contain comment; do nothing
+                        when ''
+                          # abstract and comment are equal
+                          update_hash[:dbpedia][:abstract].shift rescue nil
+                        else
+                          # abstract has more information
+                          update_hash[:dbpedia][:abstract] = [abstract.strip]
+                      end
+
+                      # limit dbpedia.abstract and rdfs.comment to one value
+                      update_hash[:dbpedia][:abstract] = update_hash[:dbpedia][:abstract].take(1) rescue [] if update_hash[:dbpedia]
+                      update_hash[:rdfs][:comment] = update_hash[:rdfs][:comment].take(1) rescue [] if update_hash[:rdfs]
+                      # END TODO
+#p update_hash
+                      # NB: this will overwrite existing values in set fields
+                      item.update_attributes(update_hash)
+
+                      # we're done here
+                      types = []
+                      break
+                    end
+                  end
                 end
               end
-
-              next if matched.nil?
-
-              # TODO: add classes to document
-              #  classes = matched.xpath('Classes/Class')
-
-              resource_uri = matched.at_xpath('URI').text
-              live_uri = resource_uri.sub('/dbpedia.org/', '/live.dbpedia.org/')
-              rdf_uri = live_uri.sub('/resource/', '/data/')
-
-              # query the URI, but suppress errors
-              content = open(rdf_uri).read rescue next
-              rdf_xml = Nokogiri::XML(content)
-
-              # only select properties about this resource
-              rdf_props = rdf_xml.at_xpath("//*[@rdf:about='#{live_uri}']")
-              next if rdf_props.nil?
-
-              rdf_props.element_children.each do |node|
-
-                # skip properties with no namespace, since we don't know what vocab
-                vocab = RDF::URI(node.namespace.href).qname.first rescue nil
-                next if vocab.nil?
-
-                # skip properties that use an unknown vocabulary
-                next unless klass.vocabs.keys.include? vocab
-
-                # skip l10n-ized properties that are not English
-                # TODO: store multilingual properties
-                lang = node.attribute('lang')
-                next if lang and lang.to_s != 'en'
-
-                # use resource URI if specified
-                if node.text.empty?
-                  # FIXME: handle resource URIs "properly"; eg. store as URI
-                  case node.name
-                    when 'thumbnail'
-                      value = node.attribute('resource').to_s
-                    else
-                      value = String.new
-                  end
-
-                # FIXME: would prefer not to have to do this
-                elsif node.attribute('datatype') and qname = RDF::URI(node.attribute('datatype').to_s).qname
-                  # use typed data if specified, eg. XSD
-                  case qname.last
-                    when :date
-                      value = Date.parse(node.text).to_s rescue String.new
-                    when :gYear
-                      value = Date.parse(node.text).to_s rescue String.new
-                    else
-                      value = node.text
-                  end
-
-                else
-                  value = node.text
-                end
-
-                # skip if value is empty
-                next if value.strip.empty?
-
-                # @agent[:rdfs]['comment'].first - @agent[:dbpedia]['abstract'].first
-                # @agent[:dbpedia]['abstract'].first - @agent[:rdfs]['comment'].first
-
-                # TODO: build a hash here and use update() or save()
-                embed = item.send(vocab).nil? ? item.send("#{vocab}=", klass.vocabs[vocab].new) : item.send(vocab)
-                (embed[node.name] ||= []) << value
-#                item.send(vocab).send("#{node.name}=", value)
-
-                item.save
-              end
-
-            end
+            end while !types.empty?
 
           end
 

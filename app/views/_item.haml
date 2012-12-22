@@ -28,7 +28,7 @@
                   .span2
                     %a.thumbnail.pull-left{:href => url_for(:agent, :index, :id => agent.id), :style => 'margin-left: 9px;'}
                       .half-small
-                        = partial 'agent/image', :object => agent, :locals => {:size => 'S'}
+                        = partial 'image', :object => agent
                   .span8
                     #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
 

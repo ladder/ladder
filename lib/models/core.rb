@@ -33,7 +33,7 @@ module Model
 
       # Create rdf_types field and accessor
       base.send :class_eval, %(class << self; attr_reader :rdf_types end)
-      base.send :field, :rdf_types, :type => Hash
+      base.send :field, :rdf_types
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
@@ -90,26 +90,27 @@ module Model
       def define_indexes
         # dynamic templates to store un-analyzed values for faceting
         # TODO: remove dynamic templates and use explicit mapping
-        mapping :dynamic_templates => [{
-          :test => {
-              :match => '*',
-              :match_mapping_type => 'string',
-              :mapping => {
-                  :type => 'multi_field',
-                  :fields => {
-                      '{name}' => {
-                          :type => '{dynamic_type}',
-                          :index => 'analyzed'
-                      },
-                      :raw => {
-                          :type => '{dynamic_type}',
-                          :index => 'not_analyzed'
-                      }
-                  }
-              }
-          }
-         }], :_source => { :compress => true },
-             :_timestamp => { :enabled => true } do
+        mapping :_source => { :compress => true },
+                :_timestamp => { :enabled => true },
+                :dynamic_templates => [{
+                    :test => {
+                        :match => '*',
+                        :match_mapping_type => '*',
+                        :mapping => {
+                            :type => 'multi_field',
+                            :fields => {
+                                '{name}' => {
+                                    :type => 'string',
+                                    :index => 'analyzed'
+                                },
+                                :raw => {
+                                    :type => 'string',
+                                    :index => 'not_analyzed'
+                                }
+                            }
+                        }
+                    }
+                 }] do
 
           embeddeds = self.reflect_on_all_associations(*[:embeds_one])
 =begin
@@ -142,7 +143,10 @@ module Model
           indexes :heading,       :type => 'string', :boost => 2
 
           # RDF class information
-          indexes :rdf_types,     :type => 'string'
+          indexes :rdf_types,     :type => 'multi_field', :fields => {
+                                  'rdf_types' => { :type => 'string', :index => 'analyzed' },
+                                  :raw        => { :type => 'string', :index => 'not_analyzed' }
+          }
 
           # Timestamp information
           indexes :created_at,    :type => 'date'
@@ -284,7 +288,9 @@ module Model
             hash.each do |vocab, vals|
               vals.each do |field, value|
 
-                query_string = value.join(' ').normalize
+                # NB: this requires increasing index.query.bool.max_clause_count
+                # TODO: perhaps search against _all?
+                query_string = value.join(' ')#.normalize
                 should { text "#{vocab}.#{field}", query_string }
 
               end
@@ -370,8 +376,8 @@ module Model
       # add heading
       hash[:heading] = self.heading
 
-      # store RDF type for faceting
-      hash[:rdf_types] = self.rdf_types.values.uniq unless self.rdf_types.nil?
+      # store RDF type for faceting; property only, not qname
+      hash[:rdf_types] = self.rdf_types.map(&:last).uniq unless self.rdf_types.nil?
 
       hash.to_json
     end
@@ -387,7 +393,7 @@ module Model
           values.each do |value|
             if value.is_a? Hash
               # replace ID references with URI references
-              normal[name][field][values.index(value)] = RDF::URI.new("#{uri.scheme}://#{uri.host}/#{value.keys.first}/#{value.values.first}")
+              normal[name][field][values.index(value)] = RDF::URI.intern("#{uri.scheme}://#{uri.host}/#{value.keys.first}/#{value.values.first}")
             end
           end
         end
@@ -398,25 +404,18 @@ module Model
 
       RDF::RDFXML::Writer.buffer do |writer|
         # FIXME: this is necessary to write a rdf:Description element
-        writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(''))
+        writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.intern(''))
 
-        self.class.rdf_types.each do |vocab, values|
-          values.each do |value|
-            writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(vocab.constantize.to_uri / value))
-          end
-        end
+        types = self.class.rdf_types + (self.rdf_types || [])
 
-        unless self.rdf_types.nil?
-          self.rdf_types.each do |vocab, values|
-            values.each do |value|
-              writer << RDF::Statement.new(RDF::URI.new(url), RDF.type, RDF::URI.new(vocab.constantize.to_uri / value))
-            end
-          end
+        types.each do |qname, property|
+          # FIXME: resolve qname to vocab URI
+          writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.intern(qname) / property)
         end
 
         # get the RDF graph for each vocab
         new_obj.vocabs.each do |key, object|
-          writer << object.to_rdf(RDF::URI.new(url))
+          writer << object.to_rdf(RDF::URI.intern(url))
         end
       end
 

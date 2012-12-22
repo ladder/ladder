@@ -1,0 +1,32 @@
+-# NB: rdf_types will be an array of strings from search results (['dbpedia', 'book', 'foaf' ... ])
+- type = type || image.class.rdf_types + (image.rdf_types || []) rescue nil
+- type = type.join(' ').strip rescue type
+
+- style = style || nil
+
+- icon_class = case type
+  - when /writer/i then 'icon-pencil'
+  - when /person/i then 'icon-user'
+  - when /organi[sz]ation/i then 'icon-group'
+  - when /agent/i then 'icon-user-md'
+
+  - when /film/i then 'icon-film'
+  - when /book/i then 'icon-book'
+  - when /software/i then 'icon-save'
+  - when /map/i then 'icon-globe'
+  - when /periodical/i then 'icon-copy'
+  - when /musical/i then 'icon-music'
+  - when /(audio)?visual/i then 'icon-facetime-video'
+  - when /audio/i then 'icon-volume-down'
+  - when /resource/i then 'icon-file'
+
+  - when /place/i then 'icon-map-marker'
+  - when /concept/i then 'icon-cloud'
+
+  - else 'icon-question-sign'
+
+- if url = image.dbpedia.thumbnail.first rescue nil
+  %img{:src => url, :onError => "imgFallback(this, '#{icon_class}', '#{style}');"}
+
+- else
+  %i{:class => icon_class, :style => style}

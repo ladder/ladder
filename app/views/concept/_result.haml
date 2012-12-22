@@ -1,8 +1,6 @@
 - item = Concept.normalize(result.to_hash, {:ids => :resolve})
 - desc = []
-
-- if result.resource_ids.size > 3
-  - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
+- desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" if result.resource_ids.size > 3 rescue nil
 
 .span8
   %a{:href => url_for(:concept, :index, :id => result.id)}
@@ -14,8 +12,9 @@
   .description #{desc.join('; ')}
 
 .span4
-  .together
-    - Resource.find(result.resource_ids.take(3)).each do |resource|
-      %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
-        .half-small
-          = partial 'resource/image', :object => resource, :locals => {:size => 'S'}
+  - if result.resource_ids
+    .together
+      - Resource.find(result.resource_ids.take(3)).each do |resource|
+        %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
+          .half-small
+            = partial 'image', :object => resource

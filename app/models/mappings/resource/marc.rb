@@ -14,20 +14,20 @@ module Mapping
       # assign RDF class based on MARC class
       case marc
         when MARC::BookRecord
-          rdf_types = {'Vocab::DBpedia' => ['Book'], 'Vocab::Bibo' => ['Book']}
+          rdf_types = [[:dbpedia, :Book], [:bibo, :Book]]
         when MARC::SerialRecord
-          rdf_types = {'Vocab::DBpedia' => ['PeriodicalLiterature'], 'Vocab::Bibo' => ['Periodical']}
+          rdf_types = [[:dbpedia, :PeriodicalLiterature], [:bibo, :Periodical]]
         when MARC::MapRecord
-          rdf_types = {'Vocab::Bibo' => ['Map']}
+          rdf_types = [[:bibo, :Map]]
         when MARC::ScoreRecord
-          rdf_types = {'Vocab::DBpedia' => ['MusicalWork']}
+          rdf_types = [[:dbpedia, :MusicalWork]]
         when MARC::SoundRecord
-          rdf_types = {'Vocab::Bibo' => ['AudioDocument']}
+          rdf_types = [[:dbpedia, :AudioDocument]]
         when MARC::VisualRecord
-          rdf_types = {'Vocab::Bibo' => ['AudioVisualDocument']}
+          rdf_types = [[:dbpedia, :AudioVisualDocument]]
         when MARC::ComputerRecord
           # NB: not 100% sure about this one
-          rdf_types = {'Vocab::Schema' => ['SoftwareApplication']}
+          rdf_types = [[:dbpedia, :SoftwareApplication]]
 #        when MARC::MixedRecord
       end
 

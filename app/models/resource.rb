@@ -49,10 +49,10 @@ class Resource
   embeds_one :dbpedia,  class_name: "DBpedia"
   embeds_one :rdfs,     class_name: "RDFS"
 
-  @rdf_types = {'Vocab::DBpedia'  => ['Work'],
-                'Vocab::Schema'   => ['CreativeWork'],
-                'RDF::DC'         => ['BibliographicResource'],
-                'Vocab::Bibo'     => ['Document']}
+  @rdf_types = [[:dbpedia, :Work],
+                [:schema, :CreativeWork],
+                [:dc, :BibliographicResource],
+                [:bibo, :Document]]
 
   @headings = [{:rdfs => :label},
                {:dcterms => :title},
