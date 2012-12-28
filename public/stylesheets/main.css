@@ -4,6 +4,9 @@
     width: auto;
 }
 
+a.thumbnail:hover {
+    text-decoration: none;
+}
 .thumbnail {
     text-align: center;
 }
@@ -25,6 +28,9 @@
     }
     .row-fluid .half {
         padding-right: 9px !important;
+    }
+    .half-small  i {
+        font-size: 3em;
     }
 }
 

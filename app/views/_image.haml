@@ -5,7 +5,13 @@
 - style = style || nil
 
 - icon_class = case type
+  - when /musical/i then 'icon-music'
+  - when /athlete/i then 'icon-trophy'
+  - when /office/i then 'icon-briefcase'
   - when /writer/i then 'icon-pencil'
+  - when /scientist/i then 'icon-beaker'
+  - when /politician/i then 'icon-bullhorn'
+  - when /artist/i then 'icon-picture'
   - when /person/i then 'icon-user'
   - when /organi[sz]ation/i then 'icon-group'
   - when /agent/i then 'icon-user-md'
@@ -20,6 +26,10 @@
   - when /audio/i then 'icon-volume-down'
   - when /resource/i then 'icon-file'
 
+  - when /country/i then 'icon-flag'
+  - when /populated/i then 'icon-road'
+  - when /settlement/i then 'icon-home'
+  - when /protected/i then 'icon-leaf'
   - when /place/i then 'icon-map-marker'
   - when /concept/i then 'icon-cloud'
 

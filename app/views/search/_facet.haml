@@ -7,10 +7,10 @@
   - facet.last['terms'].each do |f|
 
     - if f['term'].match(/^[0-9a-f]{24}$/)
-      - heading = @headings.results.find {|i| i.id == f['term']}.heading
+      - heading = @headings.results.find {|i| i.id == f['term']}.heading rescue []
       -# FIXME: heading in LCSH heirarchy has changed
       - if 'dcterms.subject' == facet.first then display = heading.dashjoin
-      - else display = heading.first.truncate(100, :separator => ' ')
+      - else display = heading.first.truncate(100, :separator => ' ') rescue ''
 
     - elsif 'dcterms.language' == facet.first
       - if 'fr' == I18n.locale.to_s then display = ISO_639.find(f['term']).french_name.titleize rescue f['term']

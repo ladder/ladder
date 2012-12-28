@@ -68,6 +68,7 @@ namespace :link do
 #puts "--> #{item.id} : #{search_uri.to_s}"
 
               # query the URI, but suppress errors
+              # TODO:replace open-uri with httpclient
               content = open(search_uri).read rescue next
 
               xml = Nokogiri::XML(content).remove_namespaces!
@@ -102,6 +103,7 @@ namespace :link do
                       rdf_uri = live_uri.sub('/resource/', '/data/')
 
                       # query the URI, but suppress errors
+                      # TODO:replace open-uri with httpclient
                       content = open(rdf_uri).read rescue next
                       rdf_xml = Nokogiri::XML(content)
 
