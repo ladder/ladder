@@ -1,10 +1,4 @@
 GIT
-  remote: git://github.com/bricestacey/ruby-zoom.git
-  revision: 9a3787008e0385f8d9085bbfb2b27096e1bcb528
-  specs:
-    zoom (0.4.1)
-
-GIT
   remote: git://github.com/mtrudel/easel.git
   revision: 6d22bf83323a51aea4f60dc83b1ff956fd6575f4
   specs:
@@ -79,6 +73,7 @@ GEM
       net-sftp (>= 2.0.0)
       net-ssh (>= 2.0.14)
       net-ssh-gateway (>= 1.1.0)
+    coderay (1.0.8)
     enhanced_marc (0.2.3)
       locale
       marc
@@ -93,6 +88,7 @@ GEM
     http_router (0.10.2)
       rack (>= 1.0.0)
       url_mount (~> 0.2.1)
+    httpclient (2.3.0.1)
     i18n (0.6.1)
     iso-639 (0.1.0)
     journey (1.0.4)
@@ -107,6 +103,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     marc (0.5.0)
+    method_source (0.8.1)
     mime-types (1.19)
     mongo (1.8.0)
       bson (~> 1.8.0)
@@ -128,11 +125,14 @@ GEM
       net-ssh (>= 1.99.1)
     nokogiri (1.5.6)
     oj (2.0.0)
-    open-uri-cached (0.0.5)
     origin (1.0.11)
     padrino-contrib (0.1.13)
     parallel (0.6.1)
     polyglot (0.3.3)
+    pry (0.9.10)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.3.1)
     rack (1.4.1)
     rack-cache (1.2)
       rack (>= 0.4)
@@ -160,6 +160,7 @@ GEM
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
       tilt (~> 1.3, >= 1.3.3)
+    slop (3.3.3)
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -197,6 +198,7 @@ DEPENDENCIES
   gyoku
   haml
   hashdiff
+  httpclient
   iso-639
   kaminari
   lz4-ruby
@@ -206,15 +208,14 @@ DEPENDENCIES
   mongoid-tree
   nokogiri
   oj
-  open-uri-cached
   padrino!
   padrino-contrib
   padrino-helpers
   parallel
+  pry
   rake
   rdf-rdfxml
   rvm-capistrano
   tire (~> 0.5.0)
   unicorn
   wirble
-  zoom!

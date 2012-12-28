@@ -35,11 +35,11 @@ gem 'enhanced_marc'
 gem 'gyoku'
 
 # gems for service endpoints
-gem 'open-uri-cached', :require => 'open-uri/cached'
-gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
+#gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
+gem 'httpclient'
 
 # Test/debug requirements
-#gem 'pry'
+gem 'pry'
 gem 'wirble'
 
 # Padrino master branch
