@@ -23,8 +23,8 @@ Ladder.controllers :search do
 
     # create Tire search object
     @search = Tire::Search::Search.new
-    @search.from (@page.to_i - 1) * @per_page
-    @search.size @per_page
+    @search.from (@page.to_i - 1) * @per_page.to_i
+    @search.size @per_page.to_i
 
     # for debugging
     @search.explain true if params[:explain]

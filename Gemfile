@@ -39,8 +39,9 @@ gem 'gyoku'
 gem 'httpclient'
 
 # Test/debug requirements
-gem 'pry'
-gem 'wirble'
+#gem 'pry'
+#gem 'wirble'
+#gem 'ruby-prof'
 
 # Padrino master branch
 gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
