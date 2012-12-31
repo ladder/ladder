@@ -40,7 +40,7 @@
 
             -# SIMILAR ITEMS
             - unless @agent.similar.empty?
-              = partial 'similar', :locals => {:document => @agent}
+              = partial 'similar', :locals => {:document => @agent, :show => :dashjoin}
 
       -# FACETS
       - unless @results.empty? or 1 == @results.size

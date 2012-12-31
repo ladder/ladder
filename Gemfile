@@ -39,8 +39,8 @@ gem 'gyoku'
 gem 'httpclient'
 
 # Test/debug requirements
-#gem 'pry'
-#gem 'wirble'
+gem 'pry-padrino'
+gem 'wirble'
 #gem 'ruby-prof'
 
 # Padrino master branch

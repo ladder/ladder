@@ -33,20 +33,8 @@ Ladder.controllers :search do
     @search.facet('type') {terms '_type', :size => 10}
     @search.facet('rdf_types') {terms 'rdf_types.raw', :size => 10}
 
-    # set fields
-    @fields = '_all'
-=begin
-    @fields = [Concept, Agent, Resource].map do |model|
-      model.reflect_on_all_associations(*[:embeds_one]).map do |embed|
-        fields = embed.class_name.constantize.fields.map do |field|
-          field.first if field.last.type == Array
-        end
-
-        fields.compact.map { |field| "#{embed.name}.#{field}" }
-      end
-    end
-    @fields.flatten!
-=end
+    # set fields; prefer matches in heading, but search everywhere
+    @fields = ['heading', '_all']
 
     # set facets
     @facets = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
@@ -67,25 +55,24 @@ Ladder.controllers :search do
             # query for the provided query string
             b.positive do |p|
 #              p.match @fields, @querystring, :operator => 'and'
-              p.string @querystring, :default_operator => 'and'
+              p.string @querystring, {:fields => @fields, :default_operator => 'and'}
             end
 
-            # suppress results that are not document roots
-            # eg. sub-concepts, items within a hierarchy, etc.
-            b.negative do |n|
-              n.string '_exists_:parent_id'
-            end
+            b.negative do
+              boolean do
+                # suppress results that are not document roots
+                # eg. sub-concepts, items within a hierarchy, etc.
+                should { string '_exists_:parent_id' }
 
-            # suppress Concepts/Agents with no resource_ids
-=begin
-        filtered.filter :not, { :bool => {
-            :must => { :missing => {:field => 'resource_ids'} },
-            :should => [
-                {:type => {:value => 'concept'}},
-                {:type => {:value => 'agent'}},
-            ] }
-        }
-=end
+                # suppress Concepts/Agents with no resource_ids
+                should { string '-_exists_:resource_ids AND _type:concept'}
+                should { string '-_exists_:resource_ids AND _type:agent'}
+
+                # suppress Resources with no agent_ids or concept_ids
+                should { string '-_exists_:concept_ids AND _type:resource'}
+                should { string '-_exists_:agent_ids AND _type:resource'}
+              end
+            end
 
           end
         end

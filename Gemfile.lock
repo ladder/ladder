@@ -73,6 +73,7 @@ GEM
       net-sftp (>= 2.0.0)
       net-ssh (>= 2.0.14)
       net-ssh-gateway (>= 1.1.0)
+    coderay (1.0.8)
     enhanced_marc (0.2.3)
       locale
       marc
@@ -102,6 +103,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     marc (0.5.0)
+    method_source (0.8.1)
     mime-types (1.19)
     mongo (1.8.0)
       bson (~> 1.8.0)
@@ -127,6 +129,12 @@ GEM
     padrino-contrib (0.1.13)
     parallel (0.6.1)
     polyglot (0.3.3)
+    pry (0.9.10)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.3.1)
+    pry-padrino (0.1.2)
+      pry (>= 0.8)
     rack (1.4.1)
     rack-cache (1.2)
       rack (>= 0.4)
@@ -154,6 +162,7 @@ GEM
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
       tilt (~> 1.3, >= 1.3.3)
+    slop (3.3.3)
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -178,6 +187,7 @@ GEM
       raindrops (~> 0.7)
     url_mount (0.2.1)
       rack
+    wirble (0.1.3)
 
 PLATFORMS
   ruby
@@ -204,8 +214,10 @@ DEPENDENCIES
   padrino-contrib
   padrino-helpers
   parallel
+  pry-padrino
   rake
   rdf-rdfxml
   rvm-capistrano
   tire (~> 0.5.0)
   unicorn
+  wirble

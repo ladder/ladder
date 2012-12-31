@@ -9,6 +9,9 @@
 - death = Date.parse(death.first).year.to_s rescue ''
 - desc.push "#{birth}-#{death}" unless birth.empty?
 
+- if item[:foaf][:name] and !item[:foaf][:name].drop(1).empty?
+  - desc.push item[:foaf][:name].drop(1).dashjoin
+
 - if result.resource_ids.size > 3
   - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" rescue nil
 

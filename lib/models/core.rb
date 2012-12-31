@@ -93,7 +93,7 @@ module Model
         mapping :_source => { :compress => true },
                 :_timestamp => { :enabled => true },
                 :dynamic_templates => [{
-                    :test => {
+                    :auto_facet => {
                         :match => '*',
                         :match_mapping_type => '*',
                         :mapping => {
