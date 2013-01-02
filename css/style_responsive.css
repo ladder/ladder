@@ -1,0 +1,84 @@
+/* Landscape phones and down */
+@media (max-width: 480px) {
+    .let_get_closer,.launch_day, .open_me{ display: none;}
+    .timer_box{ margin:  24px; }
+    h1{ line-height: 48px; }
+    #timer .button_bg:nth-child(2){display: block !important;}
+    .a_social_icon{  margin-bottom: 12px; }
+    #GoogleMaps{ display: none;}
+    .form-horizontal .control-group > label{ text-align: center !important;}
+    .controls{
+        width: 100% !important;
+        display: block;
+        margin: 0 auto !important;
+    }
+    .submit_button_bg{
+        text-align: center;
+        display: block !important;
+        margin-left: 24px !important;
+    }
+}
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+    h1{ line-height: 96px;}
+    .open_me{right: 160px;}
+    .let_get_closer,.launch_day{ display: none;}
+    .timer_box{ margin:  24px;}
+    .timer_box:last-child{margin-top: 12px;}
+    #timer .button_bg:nth-child(2){display: block !important;}
+    #progress_area{margin-left: 0;}
+    #button_open_progress{ margin-top: 24px;}
+    #container p{text-align: center;}
+    .subscribe_input{
+        width: 50% !important;
+        display: block;
+        margin: 0 auto 24px auto!important;
+    }
+    .subscribe_button{
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        -o-border-radius: 4px;
+        border-radius: 4px;
+        margin-bottom: 36px;
+    }
+    #additional .span6:first-child div.button_bg{
+        padding: 0;
+        display: inline;
+        background: rgba(0, 0, 0, 0);
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        -moz-box-shadow: none;
+        -o-box-shadow: none;
+        -ms-box-shadow: none;
+        -webkit-border-radius: 0;
+        -moz-border-radius:  0;
+        -o-border-radius:  0;
+        border-radius:  0;
+    }
+    .form-horizontal{ float: none !important;}
+    #contact_area.span12 div.row div.span6:last-child{
+        float: none;
+        display: block;
+        margin-bottom: 12px;
+    }
+}
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+    h1{ line-height: 96px;}
+    .open_me{right: 160px;}
+    .let_get_closer{ display: none;}
+    #contact_area.span12 div.row div.span6:last-child{
+        float: none;
+        margin-bottom: 12px;
+    }
+    #contact_area.span12 div.row div.span6:first-child{
+        display: block;
+        width: auto;
+        float: none;
+    }
+    #GoogleMaps{
+        width: 710px;
+        display: block;
+        margin: 0 auto;
+    }
+}
