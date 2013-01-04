@@ -19,21 +19,21 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @resource.to_rdfxml(url_for(request.path_info))
 
-      - if @resource.mods
+      - @resource.files.select {|i| i.type == Model::File::MODS}.each do |mods|
         .row-fluid.hidden-phone
           .span2
             %a.pull-right{:href => '#collapseMODS', :'data-toggle' => "collapse"} MODS
           .span10
             %pre.accordion-body.collapse#collapseMODS
-              %code&= @resource.mods
+              %code&= mods.data
 
-      - if @resource.marc
+      - @resource.files.select {|i| i.type == Model::File::MARC}.each do |marc|
         .row-fluid.hidden-phone
           .span2
             %a.pull-right{:href => '#collapseMARC', :'data-toggle' => "collapse"} MARC
           .span10
             %pre.accordion-body.collapse#collapseMARC
-              %code= MultiJson.dump(MARC::Reader.decode(@resource.marc).to_hash, :pretty => true)
+              %code= MultiJson.dump(MARC::Reader.decode(marc.data).to_hash, :pretty => true)
 
       %br
     .span3

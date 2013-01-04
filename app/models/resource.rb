@@ -25,29 +25,13 @@ class Prism
   embedded_in :resource
 end
 
-class DBpedia
-  include Model::Embedded
-  bind_to Vocab::DBpedia, :type => Array
-  embedded_in :resource
-end
-
-class RDFS
-  include Model::Embedded
-  bind_to RDF::RDFS, :type => Array
-  embedded_in :resource
-end
-
 class Resource
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :dcterms,  class_name: "DC"
-  embeds_one :bibo,     class_name: "Bibo"
-  embeds_one :prism,    class_name: "Prism"
-
-  # TODO: embed on all models
-  embeds_one :dbpedia,  class_name: "DBpedia"
-  embeds_one :rdfs,     class_name: "RDFS"
+  embeds_one :dcterms,  class_name: 'DC'
+  embeds_one :bibo,     class_name: 'Bibo'
+  embeds_one :prism,    class_name: 'Prism'
 
   @rdf_types = [[:dbpedia, :Work],
                 [:schema, :CreativeWork],
@@ -59,12 +43,7 @@ class Resource
                {:dcterms => :alternative}]
 
   # imported data objects
-  field :marc, type: Model::CompressedBinary
-  field :mods, type: Model::CompressedBinary
-
-  # scopes
-  scope :marc, ->(exists=true) { where(:marc.exists => exists) }
-  scope :mods, ->(exists=true) { where(:mods.exists => exists) }
+  has_many :files, class_name: 'Model::File'
 
   # model relations
   has_and_belongs_to_many :agents, index: true

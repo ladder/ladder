@@ -2,6 +2,18 @@
 # Common methods for all model classes within the application
 #
 
+class DBpedia
+  include Model::Embedded
+  bind_to Vocab::DBpedia, :type => Array
+  embedded_in :resource
+end
+
+class RDFS
+  include Model::Embedded
+  bind_to RDF::RDFS, :type => Array
+  embedded_in :resource
+end
+
 module Model
 
   module Core
@@ -34,6 +46,10 @@ module Model
       # Create rdf_types field and accessor
       base.send :class_eval, %(class << self; attr_reader :rdf_types end)
       base.send :field, :rdf_types
+
+      # Include default embedded vocabularies
+      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia'
+      base.send :embeds_one, :rdfs,     class_name: 'RDFS'
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.

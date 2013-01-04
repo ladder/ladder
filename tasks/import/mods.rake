@@ -19,15 +19,16 @@ namespace :import do
       files = [path]
     end
 
-    puts "Importing #{files.size} MODS file(s) using #{[files.size, Parallel.processor_count].min} processors..."
+    puts "Importing #{files.size} MODS files using #{[files.size, Parallel.processor_count].min} processors..."
 
     Mongoid.unit_of_work(disable: :all) do
 
       Parallel.each(files) do |file|
 
-        # create a new resource for this MODS file
-        # NB: we don't do this in batch because files may be large (multiple MB)
-        Resource.new({:mods => IO.read(file)})
+        # create a new db_file for this MODS file
+        # NB: we don't do this using batch insert because files may be large (multiple MB)
+        db_file = Model::File.new(:data => IO.read(file), :type => Model::File::MODS)
+        db_file.save
 
         puts "Finished importing: #{file}"
       end

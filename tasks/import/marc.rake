@@ -19,7 +19,7 @@ namespace :import do
       files = [path]
     end
 
-    puts "Importing #{files.size} MARC file(s) using #{[files.size, Parallel.processor_count].min} processors..."
+    puts "Importing #{files.size} MARC files using #{[files.size, Parallel.processor_count].min} processors..."
 
     Mongoid.unit_of_work(disable: :all) do
 
@@ -28,7 +28,7 @@ namespace :import do
         # load records from file
         reader = MARC::Reader.new(file)
 
-        resources = []
+        db_files = []
 
         reader.each do |record|
 
@@ -41,21 +41,21 @@ namespace :import do
             marc = marc.encode!('UTF-8', 'UTF-16')
           end
 
-          # create a new resource for this MARC record
-          resource = Resource.new(:marc => marc)
-          resource.set_created_at
+          # create a new db_file for this MARC record
+          db_file = Model::File.new(:data => marc, :type => Model::File::MARC)
+          db_file.set_created_at
 
           # add resource to mongoid bulk stack
-          resources << resource.as_document
+          db_files << db_file.as_document
 
-          if resources.size > 1000
-            Resource.collection.insert(resources)
-            resources = []
+          if db_files.size > 1000
+            Model::File.collection.insert(db_files)
+            db_files = []
           end
         end
 
         # make sure we insert anything left over from the last chunk
-        Resource.collection.insert(resources)
+        Model::File.collection.insert(db_files)
 
         puts "Finished importing: #{file}"
       end
