@@ -13,9 +13,6 @@
 body{
     color: #DEDEDE;
     background: url('../images/pattern.png') repeat;
-/*
-    text-shadow: 0 -2px 0 #222;
-*/
 }
 #page{
 	z-index: 2;
@@ -44,6 +41,7 @@ h2{
 }
 a, a:hover{
     color: #CCCCCC;
+    text-decoration: none;
 }
 .separation{
     width: 100%;
@@ -76,13 +74,13 @@ a, a:hover{
 	background: url('../images/light_bg.png') no-repeat 50% 0%;
 }
 header{
-    margin: 96px 0 24px 0;
+    margin: 46px 0 24px 0;
 /*
     font-variant: small-caps;
 */
 }
 .logo{
-    margin-bottom: 56px;
+    margin-bottom: 26px;
 }
 /********************************/
 /*Timer
@@ -304,7 +302,7 @@ a img.a_social_icon:hover {
 h1.dd{
     font-style: italic;
     color: #2F4362;
-    margin-top: 42px;
+    margin-top: 24px;
 }
 .button_bg{
     padding: 6px;
