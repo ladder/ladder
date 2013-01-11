@@ -1,9 +1,11 @@
-- @title = "MyTPL"
+- @title = "Ladder"
 
 .container
   .hero-unit.well.span6.offset2
-    .logo
-      %img{:src => url_for('img/mytpl-alpha.png')}
+    .logo{:style => 'width: 30%; margin: auto;'}
+      %img{:src => url_for('img/logo.png')}
+
+    %h2{:style => 'text-align: center;'}= @title
 
     .search
       - form_tag '/search', :method => 'get', :class => 'form-search' do
