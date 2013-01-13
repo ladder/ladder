@@ -18,6 +18,14 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @agent.to_rdfxml(url_for(request.path_info))
 
+      - if dbpedia = @agent.files.detect {|i| i.type == Model::File::DBPEDIA}
+        .row-fluid.hidden-phone
+          .span2
+            %a.pull-right{:href => '#collapseDBpedia', :'data-toggle' => "collapse"} DBpedia
+          .span10
+            %pre.accordion-body.collapse#collapseDBpedia
+              %code&= dbpedia.data
+
       - unless @results.empty?
         .row-fluid
           %b= @results.total

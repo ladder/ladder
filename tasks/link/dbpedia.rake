@@ -7,7 +7,7 @@ namespace :link do
 
     Mongoid.unit_of_work(disable: :all) do
       # re-use http_client connection
-      http_client = HTTPClient.new('http://localhost:8123')
+      http_client = HTTPClient.new
       http_client.connect_timeout = 10
       http_client.receive_timeout = 10
 
@@ -17,7 +17,7 @@ namespace :link do
         klass  = model.classify.constantize
         next if klass.empty? # nothing to link
 
-        collection = klass.without(:marc, :mods) # TODO: make this dynamic
+        collection = klass # NB: this seems ... naked
 
         # only select documents which have not already been linked
         collection = collection.dbpedia(false) unless !!args.relink
@@ -145,7 +145,20 @@ namespace :link do
                               value = ''
 
                             when 'thumbnail'
-                              value = node.attribute('resource').to_s
+                              # TODO: make more sexy
+                              thumb_uri = node.attribute('resource').to_s
+                              thumb_message = http_client.head(thumb_uri, :follow_redirect => true)
+
+                              if 200 != thumb_message.status
+                                thumb_uri.sub!('/commons/', '/en/')
+                                thumb_message = http_client.head(thumb_uri, :follow_redirect => true)
+                              end
+
+                              if 200 == thumb_message.status
+                                value = thumb_uri
+                              else
+                                value = ''
+                              end
 
                             else
                               value = ''
@@ -187,6 +200,7 @@ namespace :link do
 
                       # NB: this will overwrite existing values in set fields
                       item.update_attributes(update_hash)
+                      item.files << Model::File.new(:data => message.content, :type => Model::File::DBPEDIA)
 
                       # we're done here
                       types = []

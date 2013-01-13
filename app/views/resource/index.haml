@@ -19,7 +19,15 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @resource.to_rdfxml(url_for(request.path_info))
 
-      - @resource.files.select {|i| i.type == Model::File::MODS}.each do |mods|
+      - if dbpedia = @resource.files.detect {|i| i.type == Model::File::DBPEDIA}
+        .row-fluid.hidden-phone
+          .span2
+            %a.pull-right{:href => '#collapseDBpedia', :'data-toggle' => "collapse"} DBpedia
+          .span10
+            %pre.accordion-body.collapse#collapseDBpedia
+              %code&= dbpedia.data
+
+      - if mods = @resource.files.detect {|i| i.type == Model::File::MODS}
         .row-fluid.hidden-phone
           .span2
             %a.pull-right{:href => '#collapseMODS', :'data-toggle' => "collapse"} MODS
@@ -27,7 +35,7 @@
             %pre.accordion-body.collapse#collapseMODS
               %code&= mods.data
 
-      - @resource.files.select {|i| i.type == Model::File::MARC}.each do |marc|
+      - if marc = @resource.files.detect {|i| i.type == Model::File::MARC}
         .row-fluid.hidden-phone
           .span2
             %a.pull-right{:href => '#collapseMARC', :'data-toggle' => "collapse"} MARC

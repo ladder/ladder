@@ -22,7 +22,14 @@ module Model
     def mongoize
       return unless self
       compressed_string = LZ4::compress(Marshal.dump(object))
-      serialized_object = Moped::BSON::Binary.new(:generic, compressed_string)
+
+      # if the object is larger than a single GridFS chunk, use GridFS
+      if compressed_string.size > Mongoid::GridFs::file_model.new.chunkSize
+        file = Mongoid::GridFs.put(StringIO.new(compressed_string))
+        file.id
+      else
+        serialized_object = Moped::BSON::Binary.new(:generic, compressed_string)
+      end
     end
 
     def self.mongoize(object)
@@ -35,7 +42,16 @@ module Model
 
     def self.demongoize(serialized_object)
       return unless serialized_object
-      decompressed_string = LZ4::uncompress(serialized_object.to_s)
+
+      # if we have an ObjectId, retrieve the file from GridFS
+      if serialized_object.is_a? Moped::BSON::ObjectId
+        file = Mongoid::GridFs.get(serialized_object)
+        decompressed_string = LZ4::uncompress(file.data.to_s)
+      else
+        # otherwise it's a Moped::BSON::Binary
+        decompressed_string = LZ4::uncompress(serialized_object.to_s)
+      end
+
       Marshal.load(decompressed_string)
     end
 

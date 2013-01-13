@@ -112,6 +112,9 @@ GEM
       moped (~> 1.1)
       origin (~> 1.0)
       tzinfo (~> 0.3.22)
+    mongoid-grid_fs (1.7.0)
+      mime-types (~> 1.19)
+      mongoid (~> 3.0)
     mongoid-tree (1.0.1)
       mongoid (>= 3.0, <= 4.0)
     moped (1.3.1)
@@ -207,6 +210,7 @@ DEPENDENCIES
   marc
   mongo
   mongoid (~> 3.0.0)
+  mongoid-grid_fs
   mongoid-tree
   nokogiri
   oj

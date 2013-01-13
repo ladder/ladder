@@ -14,6 +14,8 @@ module Model
     field :type, type: Integer # constant as above
 
     belongs_to :resource
+    belongs_to :concept
+    belongs_to :agent
   end
 
 end
