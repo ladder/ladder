@@ -32,8 +32,11 @@ module Model
       base.send :include, Kaminari::MongoidExtension::Document
 
       # ElasticSearch integration
-      base.send :include, Tire::Model::Search
-      base.send :include, Tire::Model::Callbacks2 # local patched version
+      # don't index group since they are only a structural construct
+      unless 'Group' == base.name
+        base.send :include, Tire::Model::Search
+        base.send :include, Tire::Model::Callbacks2 # local patched version
+      end
 
       # Generate MD5 fingerprint for this document
       base.send :field, :md5
@@ -48,8 +51,8 @@ module Model
       base.send :field, :rdf_types
 
       # Include default embedded vocabularies
-      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia'
-      base.send :embeds_one, :rdfs,     class_name: 'RDFS'
+      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia'#,  autobuild: true
+      base.send :embeds_one, :rdfs,     class_name: 'RDFS'#,     autobuild: true
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
@@ -174,6 +177,7 @@ module Model
           indexes :parent_ids,    :type => 'string'
 
           # Relation information
+          indexes :group_ids,     :type => 'string'
           indexes :agent_ids,     :type => 'string'
           indexes :concept_ids,   :type => 'string'
           indexes :resource_ids,  :type => 'string'
@@ -195,7 +199,7 @@ module Model
         end
 
         # Reject keys not declared in mapping
-        hash.reject! { |key, value| ! self.tire.mapping.keys.include? key.to_sym }
+        hash.reject! { |key, value| ! self.tire.mapping.keys.include? key.to_sym } unless 'Group' == self.name
 
         # Self-contained recursive lambda
         normal = lambda do |hash, opts|

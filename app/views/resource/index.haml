@@ -1,4 +1,4 @@
-- @title = @resource.heading.first.truncate(100, :separator => ' ')
+- @title = @resource.heading.first.truncate(100, :separator => ' ').humanize
 
 .container
   .row
@@ -19,29 +19,21 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @resource.to_rdfxml(url_for(request.path_info))
 
-      - if dbpedia = @resource.files.detect {|i| i.type == Model::File::DBPEDIA}
+      - @resource.files.each do |file|
+        - mime = MIME::Type.new(file.content_type).sub_type.upcase
         .row-fluid.hidden-phone
           .span2
-            %a.pull-right{:href => '#collapseDBpedia', :'data-toggle' => "collapse"} DBpedia
+            %a.pull-right{:href => "##{file.id}", :'data-toggle' => "collapse"}= mime
           .span10
-            %pre.accordion-body.collapse#collapseDBpedia
-              %code&= dbpedia.data
-
-      - if mods = @resource.files.detect {|i| i.type == Model::File::MODS}
-        .row-fluid.hidden-phone
-          .span2
-            %a.pull-right{:href => '#collapseMODS', :'data-toggle' => "collapse"} MODS
-          .span10
-            %pre.accordion-body.collapse#collapseMODS
-              %code&= mods.data
-
-      - if marc = @resource.files.detect {|i| i.type == Model::File::MARC}
-        .row-fluid.hidden-phone
-          .span2
-            %a.pull-right{:href => '#collapseMARC', :'data-toggle' => "collapse"} MARC
-          .span10
-            %pre.accordion-body.collapse#collapseMARC
-              %code= MultiJson.dump(MARC::Reader.decode(marc.data).to_hash, :pretty => true)
+            %pre.accordion-body.collapse{:id => file.id}
+              - if 'MARC' == mime
+                - mapping = Mapping::MARC2.new
+                - mapping.map(MARC::Record.new_from_marc(file.data, :forgiving => true))
+                %code&= mapping.mods
+                -#
+                  %code= MultiJson.dump(MARC::Record.new_from_marc(file.data, :forgiving => true).to_hash, :pretty => true)
+              - else
+                %code&= file.data
 
       %br
     .span3

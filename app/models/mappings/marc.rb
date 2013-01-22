@@ -1,15 +1,16 @@
 module Mapping
 
   class MARC2
+    attr_reader :mods
 
     def initialize
       # load MARC2MODS XSL
       @xslt = Nokogiri::XSLT(File.read(Padrino.root('lib/xslt', 'MARC21slim2MODS3-4.xsl')))
     end
 
-    def map(marc_file)
-      # load MARC from db_file
-      marc = MARC::Record.new_from_marc(marc_file.data, :forgiving => true)
+    def map(marc)
+      # create MODS XML from MARC record
+      @mods = @xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash))).remove_namespaces!
 
       # assign RDF class based on MARC class
       case marc
@@ -31,16 +32,10 @@ module Mapping
 #        when MARC::MixedRecord
       end
 
-      # create MODS XML from MARC record
-      mods = @xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash))).remove_namespaces!.to_xml#(:save_with => Nokogiri::XML::Node::SaveOptions::AS_XML | Nokogiri::XML::Node::SaveOptions::NO_DECLARATION).strip
-      mods_file = Model::File.new(:data => mods, :type => Model::File::MODS)
+      # create a new Resource for this record
+      @resource = Resource.create({:rdf_types => rdf_types})
 
-      # create a new Resource for these files
-      resource = Resource.create({:rdf_types => rdf_types})
-      resource.files << marc_file
-      resource.files << mods_file
-
-      resource
+      @resource
     end
 
   end

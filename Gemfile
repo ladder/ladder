@@ -22,7 +22,7 @@ gem 'bson_ext', :require => 'mongo'
 gem 'mongo', :require => 'mongo'
 gem 'mongoid', '~> 3.0.0'
 gem 'mongoid-tree', :require => 'mongoid/tree'
-gem 'mongoid-grid_fs'
+#gem 'mongoid-grid_fs'
 gem 'kaminari', :require => 'kaminari/sinatra'
 gem 'tire', '~> 0.5.0'
 

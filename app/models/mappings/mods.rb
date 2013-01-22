@@ -84,8 +84,8 @@ module Mapping
 
       dcterms = map_xpath node, {
           # descriptive elements
-          :title         => 'titleInfo[not(@type = "alternative")]',
-          :alternative   => 'titleInfo[@type = "alternative"]',
+          :title         => 'titleInfo[not(@type = "alternative")]/*[not(name() = "nonSort")]',
+          :alternative   => 'titleInfo[@type = "alternative"]/*[not(name() = "nonSort")]',
           :issued        => 'originInfo/dateIssued',
           :format        => 'physicalDescription/form[not(@authority = "marcsmd")]',
           :medium        => 'physicalDescription/form[@authority = "marcsmd"]',

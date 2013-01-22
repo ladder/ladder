@@ -200,7 +200,7 @@ namespace :link do
 
                       # NB: this will overwrite existing values in set fields
                       item.update_attributes(update_hash)
-                      item.files << Model::File.new(:data => message.content, :type => Model::File::DBPEDIA)
+                      item.files << Model::File.new(:data => message.content, :content_type => 'application/rdf+xml')
 
                       # we're done here
                       types = []

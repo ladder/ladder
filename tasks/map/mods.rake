@@ -7,23 +7,25 @@ namespace :map do
 
     Mongoid.unit_of_work(disable: :all) do
 
-      db_files = Model::File.where(:type => Model::File::MODS)
+      db_files = Model::File.where(:content_type => 'application/mods+xml')
 
       # only select files which have not already been mapped
-      # TODO: think about this
-#      db_files = db_files.where(:resource_id.exists => false) unless !!args.remap
+      db_files = db_files.where(:resource_id.exists => false) unless !!args.remap
 
       exit if db_files.empty?
 
       puts "Mapping #{db_files.size} MODS files using #{Parallel.processor_count} processors..."
 
-      # break resources into chunks for multi-processing
+      # break files into chunks for multi-processing
       chunks = db_files.chunkify
 
+      # instantiate MODS mapping object
+      mods_mapping = Mapping::MODS.new
+
       # suppress indexing on save
-      Resource.skip_callback(:save, :after, :update_index)
       Agent.skip_callback(:save, :after, :update_index)
       Concept.skip_callback(:save, :after, :update_index)
+      Resource.skip_callback(:save, :after, :update_index)
 
       Parallel.each_with_index(chunks) do |chunk, index|
         # force mongoid to create a new session for each chunk
@@ -31,11 +33,10 @@ namespace :map do
 
         chunk.each do |file|
           # load MODS XML document
-          xml = Nokogiri::XML(file.data)
+          mods = Nokogiri::XML(file.data)
 
-          # instantiate mapping object
-          mapping = Mapping::MODS.new
-          mapping.map(file.resource, xml.at_xpath('/mods'))
+          resource = mods_mapping.map(file.resource, mods.at_xpath('/mods'))
+          resource.files << file
         end
 
         puts "Finished chunk: #{(index+1)}/#{chunks.size}"

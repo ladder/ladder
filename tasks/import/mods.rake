@@ -27,7 +27,7 @@ namespace :import do
 
         # create a new db_file for this MODS file
         # NB: we don't do this using batch insert because files may be large (multiple MB)
-        db_file = Model::File.new(:data => IO.read(file), :type => Model::File::MODS)
+        db_file = Model::File.new(:data => IO.read(file), :content_type => 'application/mods+xml')
         db_file.save
 
         puts "Finished importing: #{file}"

@@ -42,7 +42,7 @@ namespace :import do
           end
 
           # create a new db_file for this MARC record
-          db_file = Model::File.new(:data => marc, :type => Model::File::MARC)
+          db_file = Model::File.new(:data => marc, :content_type => 'application/marc')
           db_file.set_created_at
 
           # add resource to mongoid bulk stack

@@ -18,6 +18,15 @@
           %pre.accordion-body.collapse#collapseRDF
             %code&= @concept.to_rdfxml(url_for(request.path_info))
 
+      - @concept.files.each do |file|
+        - mime = MIME::Type.new(file.content_type).sub_type.upcase
+        .row-fluid.hidden-phone
+          .span2
+            %a.pull-right{:href => "##{file.id}", :'data-toggle' => "collapse"}= mime
+          .span10
+            %pre.accordion-body.collapse{:id => file.id}
+              %code&= file.data
+
       - unless @results.empty?
         .row-fluid
           %b= @results.total

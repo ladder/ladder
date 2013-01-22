@@ -7,7 +7,7 @@ namespace :map do
 
     Mongoid.unit_of_work(disable: :all) do
 
-      db_files = Model::File.where(:type => Model::File::MARC)
+      db_files = Model::File.where(:content_type => 'application/marc')
 
       # only select files which have not already been mapped
       db_files = db_files.where(:resource_id.exists => false) unless !!args.remap
@@ -19,10 +19,13 @@ namespace :map do
       # break files into chunks for multi-processing
       chunks = db_files.chunkify
 
-      # instantiate mapping object
-      mapping = Mapping::MARC2.new
+      # instantiate MARC and MODS mapping objects
+      marc_mapping = Mapping::MARC2.new
+      mods_mapping = Mapping::MODS.new
 
       # suppress indexing on save
+      Agent.skip_callback(:save, :after, :update_index)
+      Concept.skip_callback(:save, :after, :update_index)
       Resource.skip_callback(:save, :after, :update_index)
 
       Parallel.each_with_index(chunks) do |chunk, index|
@@ -30,7 +33,13 @@ namespace :map do
         Mongoid::Sessions.clear
 
         chunk.each do |file|
-          mapping.map(file)
+          # load MARC record
+          marc = MARC::Record.new_from_marc(file.data, :forgiving => true)
+
+          resource = marc_mapping.map(marc)
+          resource.files << file
+
+          mods_mapping.map(resource, marc_mapping.mods.at_xpath('/mods'))
         end
 
         puts "Finished chunk: #{(index+1)}/#{chunks.size}"

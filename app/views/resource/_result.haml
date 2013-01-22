@@ -5,8 +5,7 @@
 - desc.push ISO_639.find(item[:dcterms][:language].first).english_name.capitalize rescue nil
 
 %a{:href => url_for(:resource, :index, :id => result.id)}
-  %h4
-    = result.heading.first.truncate(100, :separator => ' ')
+  %h4= result.heading.first.truncate(100, :separator => ' ').humanize
 
 - if item[:dcterms][:creator] then agents = item[:dcterms][:creator]
 - elsif item[:dcterms][:contributor] then agents = item[:dcterms][:contributor]

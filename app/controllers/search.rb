@@ -29,6 +29,9 @@ Ladder.controllers :search do
     # for debugging
     @search.explain true if params[:explain]
 
+    # special treatment for group facet
+    @search.facet('group') {terms 'group_ids', :size => 10}
+
     # special treatment for 'model type' and rdf type facets
     @search.facet('type') {terms '_type', :size => 10}
     @search.facet('rdf_types') {terms 'rdf_types.raw', :size => 10}
@@ -77,6 +80,13 @@ Ladder.controllers :search do
           end
         end
 
+        # special treatment for groups filter
+        if @filters['group']
+          @filters['group']['group'].each do |v|
+            filtered.filter :term, "group_ids" => v
+          end
+        end
+
         # special treatment for 'model type' filter
         if @filters['type']
           filtered.filter :type, :value => @filters['type']['type'].first
@@ -91,6 +101,7 @@ Ladder.controllers :search do
 
         # add filters for selected facets
         @filters.each do |ns, filter|
+          next if 'group' == ns
           next if 'type' == ns
           next if 'rdf_types' == ns
 
