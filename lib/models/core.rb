@@ -425,8 +425,7 @@ module Model
         types = self.class.rdf_types + (self.rdf_types || [])
 
         types.each do |qname, property|
-          # FIXME: resolve qname to vocab URI
-          writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.intern(qname) / property)
+          writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
         end
 
         # get the RDF graph for each vocab

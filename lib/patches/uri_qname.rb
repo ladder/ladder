@@ -1,6 +1,13 @@
 module RDF
   class URI
 
+    def self.from_qname(qname)
+      # store defined vocab URIs as a run-time constant
+      @@vocab_uris ||= Vocabulary.map {|vocab| {vocab.equal?(RDF) ? :rdf : vocab.__prefix__ => vocab.to_uri.to_s}}.reduce Hash.new, :merge
+
+      return self.intern(@@vocab_uris.fetch(qname.to_sym, nil))
+    end
+
     def qname
       # store defined vocab URIs as a run-time constant
       @@vocab_uris ||= Vocabulary.map {|vocab| {vocab.equal?(RDF) ? :rdf : vocab.__prefix__ => vocab.to_uri.to_s}}.reduce Hash.new, :merge

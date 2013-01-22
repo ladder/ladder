@@ -36,8 +36,9 @@ gem 'enhanced_marc'
 gem 'gyoku'
 
 # gems for service endpoints
-#gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
 gem 'httpclient'
+#gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
+#gem 'oai'
 
 # Test/debug requirements
 gem 'pry-padrino'
