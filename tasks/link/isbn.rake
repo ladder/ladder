@@ -7,7 +7,7 @@ namespace :link do
 
     Mongoid.unit_of_work(disable: :all) do
       # re-use http_client connection
-      http_client = HTTPClient.new('http://localhost:8123')
+      http_client = HTTPClient.new
       http_client.connect_timeout = 10
       http_client.receive_timeout = 10
 
