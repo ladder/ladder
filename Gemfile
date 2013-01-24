@@ -10,6 +10,11 @@ end
 # Project requirements
 gem 'rake'
 gem 'haml'
+gem 'fabrication'
+
+# Auth/ACL requirements
+gem 'padrino-cancan'
+#gem 'omniauth-identity'
 
 # Component requirements
 gem 'lz4-ruby' # binary compression

@@ -27,6 +27,9 @@ namespace :map do
       Concept.skip_callback(:save, :after, :update_index)
       Resource.skip_callback(:save, :after, :update_index)
 
+      # create a group for this import
+      group = Group.new({:type => 'Resource', :rdfs => {:label => ["Import #{Time.now}"]}})
+
       Parallel.each_with_index(chunks) do |chunk, index|
         # force mongoid to create a new session for each chunk
         Mongoid::Sessions.clear
@@ -37,6 +40,7 @@ namespace :map do
 
           resource = mods_mapping.map(file.resource, mods.at_xpath('/mods'))
           resource.files << file
+          resource.groups << group
         end
 
         puts "Finished chunk: #{(index+1)}/#{chunks.size}"

@@ -4,7 +4,6 @@ class SKOS
   embedded_in :concept
 end
 
-
 class Concept
   include Model::Core
 

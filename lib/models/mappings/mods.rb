@@ -138,6 +138,7 @@ module Mapping
         resource = Resource.find_or_create_by(vocabs)
 
         resource = Mapping::MODS.new.map(resource, node)
+        resource.groups = @resource.groups
 
         next if resource.nil? or relations.include? resource
 

@@ -8,11 +8,15 @@ class DBpedia
   embedded_in :resource
 end
 
+Fabricator(:DBpedia)
+
 class RDFS
   include Model::Embedded
   bind_to RDF::RDFS, :type => Array
   embedded_in :resource
 end
+
+Fabricator(:RDFS)
 
 module Model
 

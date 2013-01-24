@@ -4,6 +4,7 @@ class Ladder < Padrino::Application
   register Padrino::Mailer
   register Padrino::Helpers
   register Kaminari::Helpers::SinatraHelpers
+  register Padrino::CanCan
 
   configure :development do
     disable :asset_stamp
@@ -15,15 +16,13 @@ class Ladder < Padrino::Application
     disable :raise_errors
     disable :show_exceptions
 
-    set :exceptions_from,    "errors@mytpl.ca"
+    set :exceptions_from,    "errors@deliberatedata.com"
     set :exceptions_to,      "errors@deliberatedata.com"
     set :exceptions_page,    'errors/50x'
     set :exceptions_layout,  :application
   end
 
   use Rack::Mongoid::Middleware::IdentityMap
-
-  enable :sessions
 
   error Mongoid::Errors::DocumentNotFound do
     halt 404
