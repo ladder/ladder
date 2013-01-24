@@ -1,19 +1,10 @@
-# Connection.new takes host, port
-host = ENV['MONGOLAB_URI'] || 'localhost'
-port = Mongo::Connection::DEFAULT_PORT
+#
+# Configuring tire is easy -- just copy the URL from the bonsai service into the
+# env var that tire expects
+#
+ENV['ELASTICSEARCH_URL'] = ENV['BONSAI_URL'] if ENV['BONSAI_URL']
 
-database_name = case Padrino.env
-  when :development then 'ladder_development'
-  when :production  then 'ladder_production'
-  when :staging     then 'ladder_staging'
-  when :test        then 'ladder_test'
-end
-
-Mongoid::Config.sessions = {default: {hosts: ["#{host}:#{port}"], database: database_name}}
-
-# @see: http://mongoid.org/en/mongoid/docs/installation.html#configuration
-Mongoid::Config.options  = {identity_map_enabled: true}
-
-#Mongoid.logger = Padrino.logger
-#Moped.logger = Padrino.logger
-#Tire.configure { logger STDERR, level: Padrino.logger.level }
+#
+# Mongoid config is contained in mongoid.yml. We just load it here
+#
+Mongoid.load!(File.join(File.dirname(__FILE__), "mongoid.yml"))
