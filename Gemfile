@@ -1,8 +1,11 @@
 source :rubygems
+ruby "1.9.3"
 
-# Server requirements
-gem 'unicorn'
-gem 'rvm-capistrano'
+group :development do
+  gem 'wirble'
+  gem 'heroku'
+  gem 'pry-padrino'
+end
 
 # Project requirements
 gem 'rake'
@@ -44,13 +47,6 @@ gem 'gyoku'
 gem 'httpclient'
 #gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
 #gem 'oai'
-
-# Test/debug requirements
-group :development do
-  gem 'pry-padrino'
-  gem 'wirble'
-  gem 'ruby-prof'
-end
 
 # Padrino master branch
 gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
