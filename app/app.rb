@@ -4,7 +4,6 @@ class Ladder < Padrino::Application
   register Padrino::Mailer
   register Padrino::Helpers
   register Kaminari::Helpers::SinatraHelpers
-  register Padrino::CanCan
 
   configure :development do
     disable :asset_stamp

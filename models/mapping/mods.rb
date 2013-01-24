@@ -19,7 +19,7 @@ module Mapping
       @resource = resource
       @node = node
 
-      # map MODS elements to embedded vocabs
+      # map MODS elements to embedded vocab
       if resource.vocabs.empty?
         vocabs = map_vocabs(node)
         return if vocabs.values.map(&:values).flatten.empty?

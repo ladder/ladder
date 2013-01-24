@@ -40,6 +40,7 @@ module Model
       unless 'Group' == base.name
         base.send :include, Tire::Model::Search
         base.send :include, Tire::Model::Callbacks2 # local patched version
+        base.send :index_name, base.database_name
       end
 
       # Generate MD5 fingerprint for this document
@@ -83,7 +84,7 @@ module Model
       end
 
       def define_scopes
-        # TODO: refactor to use self.vocabs
+        # TODO: refactor to use self.vocab
         embeddeds = self.reflect_on_all_associations(*[:embeds_one])
 
         embeddeds.each do |embed|
