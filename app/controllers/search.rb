@@ -21,8 +21,11 @@ Ladder.controllers :search do
     I18n.locale = params[:locale] || session[:locale]
     session[:locale] = I18n.locale if params[:locale]
 
+    # set search indexes explicitly, based on/including type filter
+    indices = @filters['type'] ? @filters['type']['type'].map(&:pluralize) : %w[resources concepts agents]
+
     # create Tire search object
-    @search = Tire::Search::Search.new
+    @search = Tire::Search::Search.new(indices)
     @search.from (@page.to_i - 1) * @per_page.to_i
     @search.size @per_page.to_i
 
@@ -87,11 +90,6 @@ Ladder.controllers :search do
           end
         end
 
-        # special treatment for 'model type' filter
-        if @filters['type']
-          filtered.filter :type, :value => @filters['type']['type'].first
-        end
-
         # special treatment for rdf types filter
         if @filters['rdf_types']
           @filters['rdf_types']['rdf_types'].each do |v|
@@ -139,7 +137,7 @@ Ladder.controllers :search do
 
       ids = ids.flatten.uniq.compact
       unless ids.empty?
-        @headings = Tire.search do |search|
+        @headings = Tire.search %w[resources concepts agents] do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
           search.fields ['heading']
