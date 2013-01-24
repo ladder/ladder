@@ -20,7 +20,7 @@ set :user, "ladder"
 set :group, user
 set :runner, user
 
-set :host, "#{user}@mytpl.ca"
+set :host, "#{user}@ladder.deliberatedata.com"
 role :web, host
 role :app, host
 

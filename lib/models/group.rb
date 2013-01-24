@@ -1,6 +1,8 @@
 class Group
   include Model::Core
 
+  field :type
+
   @rdf_types = [[:rdfs, :Container]]
 
   @headings = [{:rdfs => :label}]
@@ -12,3 +14,5 @@ class Group
 
   define_scopes
 end
+
+Fabricator(:Group)

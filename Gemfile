@@ -7,6 +7,11 @@ gem 'rvm-capistrano'
 # Project requirements
 gem 'rake'
 gem 'haml'
+gem 'fabrication'
+
+# Auth/ACL requirements
+gem 'padrino-cancan'
+#gem 'omniauth-identity'
 
 # Component requirements
 gem 'lz4-ruby' # binary compression
@@ -41,9 +46,11 @@ gem 'httpclient'
 #gem 'oai'
 
 # Test/debug requirements
-gem 'pry-padrino'
-gem 'wirble'
-#gem 'ruby-prof'
+group :development do
+  gem 'pry-padrino'
+  gem 'wirble'
+  gem 'ruby-prof'
+end
 
 # Padrino master branch
 gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
