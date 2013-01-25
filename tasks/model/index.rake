@@ -10,7 +10,11 @@ namespace :model do
       # once for each model specified
       args.model.to_a.each do |model|
 
-        klass  = model.classify.constantize
+        klass = model.classify.constantize
+
+        # make sure the mapping is defined
+        klass.define_mapping
+
         next if klass.empty? # nothing to index
 
         # only retrieve fields that are mapped in index
@@ -24,9 +28,6 @@ namespace :model do
 
         # break collection into chunks for multi-processing
         chunks = collection.chunkify
-
-        # ensure the index exists
-        klass.tire.create_elasticsearch_index
 
         # temporary settings to improve indexing performance
         klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30

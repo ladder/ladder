@@ -12,11 +12,18 @@ Bundler.require(:default, PADRINO_ENV)
 #
 # Padrino::Logger::Config[:development][:log_level]  = :devel
 # Padrino::Logger::Config[:development][:log_static] = true
+
+if false#'development' == PADRINO_ENV
+  Mongoid.logger = Padrino.logger
+  Moped.logger = Padrino.logger
+  Tire.configure { logger STDERR, level: Padrino.logger.level }
+end
+
 #
 # ## Configure your I18n
 #
 I18n.default_locale = :en
-#
+
 # ## Configure your HTML5 data helpers
 #
 # Padrino::Helpers::TagHelpers::DATA_ATTRIBUTES.push(:dialog)

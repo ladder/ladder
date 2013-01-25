@@ -1,4 +1,16 @@
 GIT
+  remote: git://github.com/cjbottaro/tire.git
+  revision: e72b409009461181727f471438ce6045f67ae9f3
+  branch: put_mapping
+  specs:
+    tire (0.5.1)
+      activemodel (>= 3.0)
+      hashr (~> 0.0.19)
+      multi_json (~> 1.0)
+      rake
+      rest-client (~> 1.6)
+
+GIT
   remote: git://github.com/mtrudel/easel.git
   revision: 6d22bf83323a51aea4f60dc83b1ff956fd6575f4
   specs:
@@ -67,7 +79,6 @@ GEM
     bson_ext (1.8.0)
       bson (~> 1.8.0)
     builder (3.0.4)
-    cancan (1.6.8)
     coderay (1.0.8)
     enhanced_marc (0.2.3)
       locale
@@ -125,8 +136,6 @@ GEM
     nokogiri (1.5.6)
     oj (2.0.0)
     origin (1.0.11)
-    padrino-cancan (0.1.0)
-      cancan
     padrino-contrib (0.1.13)
     parallel (0.6.1)
     polyglot (0.3.3)
@@ -170,12 +179,6 @@ GEM
     thor (0.16.0)
     tilt (1.3.3)
     tins (0.6.0)
-    tire (0.5.2)
-      activemodel (>= 3.0)
-      hashr (~> 0.0.19)
-      multi_json (~> 1.0)
-      rake
-      rest-client (~> 1.6)
     treetop (1.4.12)
       polyglot
       polyglot (>= 0.3.1)
@@ -203,17 +206,15 @@ DEPENDENCIES
   lz4-ruby
   marc
   mongo
-  mongoid (~> 3.0.0)
+  mongoid
   mongoid-tree
   nokogiri
   oj
   padrino!
-  padrino-cancan
   padrino-contrib
-  padrino-helpers
   parallel
   pry-padrino
   rake
   rdf-rdfxml
-  tire (~> 0.5.0)
+  tire!
   wirble

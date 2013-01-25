@@ -2,7 +2,6 @@ class Ladder < Padrino::Application
 
   register Padrino::Rendering
   register Padrino::Mailer
-  register Padrino::Helpers
   register Kaminari::Helpers::SinatraHelpers
 
   configure :development do
@@ -30,7 +29,8 @@ class Ladder < Padrino::Application
     }
   end
 
-  use Rack::Mongoid::Middleware::IdentityMap
+  # FIXME: was getting bundler errors previously
+#  use Rack::Mongoid::Middleware::IdentityMap
 
   error Mongoid::Errors::DocumentNotFound do
     halt 404

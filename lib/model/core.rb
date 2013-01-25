@@ -84,11 +84,8 @@ module Model
       end
 
       def define_scopes
-        # TODO: refactor to use self.vocab
-        embeddeds = self.reflect_on_all_associations(*[:embeds_one])
-
-        embeddeds.each do |embed|
-          scope embed.name, ->(exists=true) { where(embed.name.exists => exists) }
+        self.vocabs.keys.each do |vocab|
+          scope vocab, ->(exists=true) { where(vocab.exists => exists) }
         end
 
         # add scope to check for documents not in ES index
@@ -111,82 +108,64 @@ module Model
         end
       end
 
-      def define_indexes
-        # dynamic templates to store un-analyzed values for faceting
-        # TODO: remove dynamic templates and use explicit mapping
-        mapping :_source => { :compress => true },
-                :_timestamp => { :enabled => true },
-                :dynamic_templates => [{
-                    :auto_facet => {
-                        :match => '*',
-                        :match_mapping_type => '*',
-                        :mapping => {
-                            :type => 'multi_field',
-                            :fields => {
-                                '{name}' => {
-                                    :type => 'string',
-                                    :index => 'analyzed'
-                                },
-                                :raw => {
-                                    :type => 'string',
-                                    :index => 'not_analyzed'
-                                }
-                            }
-                        }
-                    }
-                 }] do
+      def define_mapping
+        # ensure the index exists
+        create_elasticsearch_index
 
-          embeddeds = self.reflect_on_all_associations(*[:embeds_one])
-=begin
-          # combine headings so we can operate on the them per-vocab
-          combined = headings.inject do |a, b|
-            a.merge(b) { |k, v1, v2| v1 == v2 ? v1 : [v1, v2].flatten }
-          end
-=end
-          # map each embedded object
-          embeddeds.each do |embed|
-=begin
-            # if this vocab contained headings, map them
-            if combined[embed.name.to_sym]
-              properties = {}
-
-              # each vocab may have multiple heading fields
-              fields = combined[embed.name.to_sym].to_a rescue [combined[embed.name.to_sym]]
-              fields.each do |field|
-                properties[field] = {:type => :string, :boost => 2}
-              end
-
-              indexes embed.name, :type => 'object', :properties => properties
-            else
-=end
-              indexes embed.name, :type => 'object'
-#            end
-          end
-
-          # Heading is what users will correlate with most
-          indexes :heading,       :type => 'string', :boost => 2
-
-          # RDF class information
-          indexes :rdf_types,     :type => 'multi_field', :fields => {
-                                  'rdf_types' => { :type => 'string', :index => 'analyzed' },
-                                  :raw        => { :type => 'string', :index => 'not_analyzed' }
-          }
-
-          # Timestamp information
-          indexes :created_at,    :type => 'date'
-          indexes :deleted_at,    :type => 'date'
-          indexes :updated_at,    :type => 'date'
-
-          # Hierarchy information
-          indexes :parent_id,     :type => 'string'
-          indexes :parent_ids,    :type => 'string'
-
-          # Relation information
-          indexes :group_ids,     :type => 'string'
-          indexes :agent_ids,     :type => 'string'
-          indexes :concept_ids,   :type => 'string'
-          indexes :resource_ids,  :type => 'string'
+        # basic object mapping for vocabs
+        # TODO: put explicit mapping here when removing dynamic templates
+        vocabs = self.vocabs.each_with_object({}) do |(key,val), h|
+          h[key] = {:type => 'object'}
         end
+
+        # Timestamp information
+        dates = [:created_at, :deleted_at, :updated_at].each_with_object({}) {|(key,val), h| h[key] = {:type => 'date'}}
+
+        # Hierarchy/Group information
+        ids = [:parent_id, :parent_ids, :group_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string'}}
+
+        # Relation information
+        relations = [:agent_ids, :concept_ids, :resource_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string'}}
+
+        properties = {
+            # Heading is what users will correlate with most
+            :heading => {:type => 'string', :boost => 2},
+
+            # RDF class information
+            :rdf_types => {:type => 'multi_field', :fields => {
+                'rdf_types' => { :type => 'string', :index => 'analyzed' },
+                :raw        => { :type => 'string', :index => 'not_analyzed' }
+                }
+            },
+        }.merge(vocabs).merge(dates).merge(ids).merge(relations)
+
+#binding.pry
+        tire.index.mapping self.name.downcase, :_source => { :compress => true },
+                           :_timestamp => { :enabled => true },
+                           :properties => properties,
+
+                           # dynamic templates to store un-analyzed values for faceting
+                           # TODO: remove dynamic templates and use explicit facet mapping
+
+                           :dynamic_templates => [{
+                                :auto_facet => {
+                                    :match => '*',
+                                    :match_mapping_type => '*',
+                                    :mapping => {
+                                        :type => 'multi_field',
+                                        :fields => {
+                                            '{name}' => {
+                                                :type => 'string',
+                                                :index => 'analyzed'
+                                            },
+                                            :raw => {
+                                                :type => 'string',
+                                                :index => 'not_analyzed'
+                                            }
+                                        }
+                                    }
+                                }
+                            }]
       end
 
       def normalize(hash, opts={})
@@ -204,7 +183,10 @@ module Model
         end
 
         # Reject keys not declared in mapping
-        hash.reject! { |key, value| ! self.tire.mapping.keys.include? key.to_sym } unless 'Group' == self.name
+        unless 'Group' == self.name
+          hash.reject! { |key, value| ! tire.index.mapping[self.name.downcase]['properties'].keys.include? key }
+#binding.pry
+        end
 
         # Self-contained recursive lambda
         normal = lambda do |hash, opts|
@@ -390,10 +372,11 @@ module Model
 
     # more precise serialization for Tire
     def to_indexed_json
-      mapping = self.class.tire.mapping
-
+      # TODO: can retrieve this from define_mapping logic above, and save sending a query to ES
+      mapping = tire.index.mapping[self.class.name.downcase]['properties']
+#binding.pry
       # Reject keys not declared in mapping
-      hash = self.as_document.reject { |key, value| ! mapping.keys.include? key.to_sym }
+      hash = self.as_document.reject { |key, value| ! mapping.keys.include? key }
 
       # Reject empty values
       hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }

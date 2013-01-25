@@ -26,5 +26,4 @@ class Concept
   has_and_belongs_to_many :agents, index: true
 
   define_scopes
-  define_indexes
 end

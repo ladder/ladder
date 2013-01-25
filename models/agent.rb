@@ -40,5 +40,4 @@ class Agent
   has_and_belongs_to_many :concepts, index: true
 
   define_scopes
-  define_indexes
 end
