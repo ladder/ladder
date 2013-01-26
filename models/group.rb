@@ -14,5 +14,3 @@ class Group
 
   define_scopes
 end
-
-Fabricator(:Group)

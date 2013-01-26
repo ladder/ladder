@@ -1,30 +1,3 @@
-class DC
-  include Model::Embedded
-  bind_to RDF::DC, :type => Array, :only => [:title, :alternative, :issued, :format,
-                                             :extent, :medium, :language, :identifier,
-                                             :abstract, :tableOfContents, :creator,
-                                             :contributor, :publisher, :spatial, :subject,
-                                             :isPartOf, :hasPart, :hasVersion, :isVersionOf,
-                                             :hasFormat, :isFormatOf, :isReferencedBy,
-                                             :references]
-
-  bind_to Vocab::DC, :type => Array, :only => [:DDC, :LCSH, :LCC, :RVM]
-  attr_accessible :identifier
-  embedded_in :resource
-end
-
-class Bibo
-  include Model::Embedded
-  bind_to Vocab::Bibo, :type => Array, :only => [:isbn, :issn, :lccn, :oclcnum, :upc, :doi, :uri]
-  embedded_in :resource
-end
-
-class Prism
-  include Model::Embedded
-  bind_to Vocab::Prism, :type => Array, :only => [:edition, :hasPreviousVersion, :issueIdentifier]
-  embedded_in :resource
-end
-
 class Resource
   include Model::Core
 
