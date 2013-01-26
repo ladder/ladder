@@ -1,4 +1,5 @@
 class Hash
+
   def sort_by_key(recursive=false, &block)
     self.keys.sort(&block).reduce({}) do |seed, key|
       seed[key] = self[key]
@@ -8,4 +9,5 @@ class Hash
       seed
     end
   end
+
 end

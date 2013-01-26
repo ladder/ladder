@@ -1,4 +1,5 @@
 module RDF
+
   class URI
 
     def self.from_qname(qname)
@@ -34,4 +35,5 @@ module RDF
     end
 
   end
+
 end

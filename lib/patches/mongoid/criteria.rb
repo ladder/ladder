@@ -3,6 +3,7 @@
 #
 
 module Mongoid
+
   class Criteria
 
     def chunkify(opts = {})
@@ -22,4 +23,5 @@ module Mongoid
     end
 
   end
+
 end
