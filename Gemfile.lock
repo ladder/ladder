@@ -74,6 +74,10 @@ GEM
     addressable (2.3.2)
     amatch (0.2.10)
       tins (~> 0.3)
+    better_errors (0.3.2)
+      coderay (>= 1.0.0)
+      erubis (>= 2.7.0)
+    binding_of_caller (0.6.8)
     bson (1.8.0)
       activesupport
     bson_ext (1.8.0)
@@ -192,6 +196,8 @@ PLATFORMS
 
 DEPENDENCIES
   amatch
+  better_errors
+  binding_of_caller
   bson_ext
   easel!
   enhanced_marc

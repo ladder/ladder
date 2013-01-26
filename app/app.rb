@@ -6,6 +6,8 @@ class Ladder < Padrino::Application
 
   configure :development do
     disable :asset_stamp
+    use BetterErrors::Middleware
+    BetterErrors.application_root = PADRINO_ROOT
   end
 
   configure :production do
@@ -29,8 +31,7 @@ class Ladder < Padrino::Application
     }
   end
 
-  # FIXME: was getting bundler errors previously
-#  use Rack::Mongoid::Middleware::IdentityMap
+  use Rack::Mongoid::Middleware::IdentityMap
 
   error Mongoid::Errors::DocumentNotFound do
     halt 404

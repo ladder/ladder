@@ -5,6 +5,9 @@ group :development do
   gem 'wirble'
   gem 'heroku'
   gem 'pry-padrino'
+  gem 'better_errors'
+  gem 'binding_of_caller'
+  #gem 'ruby-prof'
 end
 
 # Project requirements
