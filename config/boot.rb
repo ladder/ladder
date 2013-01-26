@@ -13,7 +13,7 @@ Bundler.require(:default, PADRINO_ENV)
 # Padrino::Logger::Config[:development][:log_level]  = :devel
 # Padrino::Logger::Config[:development][:log_static] = true
 
-if false#'development' == PADRINO_ENV
+if 'development' == PADRINO_ENV
   Mongoid.logger = Padrino.logger
   Moped.logger = Padrino.logger
   Tire.configure { logger STDERR, level: Padrino.logger.level }
