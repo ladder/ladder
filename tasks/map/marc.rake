@@ -1,9 +1,9 @@
 desc "Map/Re-map Resources from MARC data"
 
 namespace :map do
-  task :marc, [:remap] => :environment do |t, args|
+  task :marc, [:remap, :index] => :environment do |t, args|
 
-    args.with_defaults(:remap => false)
+    args.with_defaults(:remap => false, :index => false)
 
     Mongoid.unit_of_work(disable: :all) do
 
@@ -23,10 +23,12 @@ namespace :map do
       marc_mapping = Mapping::MARC2.new
       mods_mapping = Mapping::MODS.new
 
-      # suppress indexing on save
-      Agent.skip_callback(:save, :after, :update_index)
-      Concept.skip_callback(:save, :after, :update_index)
-      Resource.skip_callback(:save, :after, :update_index)
+      unless !!args.index
+        # suppress indexing on save
+        Agent.skip_callback(:save, :after, :update_index)
+        Concept.skip_callback(:save, :after, :update_index)
+        Resource.skip_callback(:save, :after, :update_index)
+      end
 
       # create a group for this import
       group = Group.create({:type => 'Resource', :rdfs => {:label => ["Import #{Time.now}"]}})
