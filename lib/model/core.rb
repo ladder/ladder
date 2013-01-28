@@ -138,7 +138,7 @@ module Model
                 # NB: this requires increasing index.query.bool.max_clause_count
                 # TODO: perhaps search against _all?
                 query_string = value.join(' ')#.normalize
-                should { text "#{vocab}.#{field}", query_string }
+                should { match "#{vocab}.#{field}", query_string }
 
               end
             end

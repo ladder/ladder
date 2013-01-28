@@ -14,6 +14,10 @@ module Tire
       id.to_s
     end
 
+    def self.default
+      Mongoid::Sessions.default.options[:database]
+    end
+
   end
 
 end

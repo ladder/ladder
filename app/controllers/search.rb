@@ -22,7 +22,7 @@ Ladder.controllers :search do
     session[:locale] = I18n.locale if params[:locale]
 
     # create Tire search object
-    @search = Tire::Search::Search.new
+    @search = Tire::Search::Search.new(Tire::Index.default)
     @search.from (@page.to_i - 1) * @per_page.to_i
     @search.size @per_page.to_i
 
@@ -139,7 +139,7 @@ Ladder.controllers :search do
 
       ids = ids.flatten.uniq.compact
       unless ids.empty?
-        @headings = Tire.search do |search|
+        @headings = Tire.search Tire::Index.default do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
           search.fields ['heading']

@@ -61,7 +61,7 @@ Ladder.controllers :concept do
 
       ids = ids.flatten.uniq.compact
       unless ids.empty?
-        @headings = Tire.search do |search|
+        @headings = Tire.search Tire::Index.default do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
           search.fields ['heading']
