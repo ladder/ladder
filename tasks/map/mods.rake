@@ -40,7 +40,8 @@ namespace :map do
           # load MODS XML document
           mods = Nokogiri::XML(file.data)
 
-          resource = mods_mapping.map(file.resource, mods.at_xpath('/mods'))
+          # create a resource if one doesn't exist
+          resource = mods_mapping.map(Resource.new, mods.at_xpath('/mods'))
           resource.files << file
           resource.groups << group
         end

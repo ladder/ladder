@@ -45,7 +45,7 @@ namespace :import do
           db_file = Model::File.new(:data => marc, :content_type => 'application/marc')
           db_file.set_created_at
 
-          # add resource to mongoid bulk stack
+          # add file to mongoid bulk stack
           db_files << db_file.as_document
 
           if db_files.size > 1000
