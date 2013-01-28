@@ -9,14 +9,14 @@ Bundler.require(:default, PADRINO_ENV)
 
 ##
 # ## Enable devel logging
-#
-# Padrino::Logger::Config[:development][:log_level]  = :devel
-# Padrino::Logger::Config[:development][:log_static] = true
+
+Padrino::Logger::Config[:development][:log_level]  = :info#:devel
+Padrino::Logger::Config[:development][:log_static] = true
 
 if 'development' == PADRINO_ENV
   Mongoid.logger = Padrino.logger
   Moped.logger = Padrino.logger
-  Tire.configure { logger STDERR, level: Padrino.logger.level }
+  Tire.configure { logger Padrino.logger, level: Padrino.logger.level }
 end
 
 #
