@@ -12,6 +12,10 @@ module Tire
         super
       end
 
+      def normalize(opts={})
+        self.class.normalize(self.to_hash, opts)
+      end
+
     end
   end
 

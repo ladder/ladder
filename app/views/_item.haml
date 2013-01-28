@@ -1,5 +1,5 @@
 %table.table.table-bordered.table-striped.table-condensed
-  - doc = item.class.normalize(item.as_document, {:ids => :resolve})
+  - doc = item.normalize({:ids => :resolve})
   - doc.each do |vocab, fields|
     - next if fields.empty?
 

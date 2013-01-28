@@ -12,13 +12,10 @@ namespace :model do
 
         klass = model.classify.constantize
 
-        # make sure the mapping is defined
-        klass.define_mapping
-
         next if klass.empty? # nothing to index
 
         # only retrieve fields that are mapped in index
-        collection = klass.only(klass.mapping_to_hash[model.underscore.singularize.to_sym][:properties].keys)
+        collection = klass.only(klass.get_mapping[:properties].keys)
 
         # only select documents which have not already been indexed
         collection = collection.unindexed unless !!args.reindex
@@ -28,6 +25,9 @@ namespace :model do
 
         # break collection into chunks for multi-processing
         chunks = collection.chunkify
+
+        # make sure the mapping is defined
+        klass.put_mapping
 
         # temporary settings to improve indexing performance
         klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30

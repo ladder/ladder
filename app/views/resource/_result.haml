@@ -1,4 +1,4 @@
-- item = Resource.normalize(result.to_hash.except(:bibo), {:ids => :resolve})
+- item = result.normalize({:ids => :resolve})
 - desc = []
 - desc.push item[:dcterms][:format].first.capitalize rescue nil
 - desc.push item[:dcterms][:issued].first rescue nil

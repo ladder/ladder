@@ -1,4 +1,4 @@
-- item = Agent.normalize(result.to_hash, {:ids => :resolve})
+- item = result.normalize({:ids => :resolve})
 - desc = []
 - desc.push item[:dbpedia][:birthName].first rescue nil
 - desc.push item[:foaf][:name].first unless item[:dbpedia][:birthName] rescue nil

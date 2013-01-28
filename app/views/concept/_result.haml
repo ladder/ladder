@@ -1,4 +1,4 @@
-- item = Concept.normalize(result.to_hash, {:ids => :resolve})
+- item = result.normalize({:ids => :resolve})
 - desc = []
 - desc.push "#{result.resource_ids.size} #{I18n.t('search.resources')}" if result.resource_ids.size > 3 rescue nil
 

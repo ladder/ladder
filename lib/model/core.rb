@@ -49,7 +49,7 @@ module Model
     end
 
     def generate_md5
-      hash = self.class.normalize(self.as_document, {:ids => :omit})
+      hash = self.normalize({:ids => :omit})
       self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s))
     end
 
@@ -67,15 +67,15 @@ module Model
 
     # Assign model vocab objects by a hash of field names
     def vocabs=(hash)
-      self.update_attributes(hash)
+      update_attributes(hash)
     end
 
     def heading
-      self.class.headings.each do |mapping|
-        vocab = mapping.keys.first
-        field = mapping.values.first
+      self.class.headings.each do |heading|
+        vocab = heading.keys.first
+        field = heading.values.first
 
-        target = self.send(vocab).send(field) unless self.send(vocab).nil?
+        target = send(vocab).send(field) unless send(vocab).nil?
 
         return target if target
       end
@@ -83,17 +83,13 @@ module Model
       [I18n.t('model.untitled')]
     end
 
+    def normalize(opts={})
+      self.class.normalize(self.as_document, opts)
+    end
+
     # Return a HashDiff array computed between the two model instances
     def diff(model)
-      # use the right type for masqueraded search results
-      if model.is_a? Tire::Results::Item
-        compare = model.to_hash
-      else
-        compare = model.as_document
-      end
-
-      # return the diff comparison
-      HashDiff.diff(self.class.normalize(self.as_document), self.class.normalize(compare))
+      HashDiff.diff(self.normalize, model.normalize)
     end
 
     def amatch(model, opts={})
@@ -108,15 +104,8 @@ module Model
       # if we have selected specific comparisons, use those
       options = opts unless opts.empty?
 
-      # use the right type for masqueraded search results
-      if model.is_a? Tire::Results::Item
-        compare = model.to_hash
-      else
-        compare = model.as_document
-      end
-
-      p1 = self.class.normalize(self.as_document, options.slice(:ids))
-      p2 = self.class.normalize(compare, options.slice(:ids))
+      p1 = self.normalize(options.slice(:ids))
+      p2 = model.normalize(options.slice(:ids))
 
       p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
       p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
@@ -134,7 +123,7 @@ module Model
     def similar(query=false)
       return @similar unless query or @similar.nil?
 
-      hash = self.class.normalize(self.as_document)
+      hash = self.normalize
       id = self.id
 
       results = self.class.tire.search do
@@ -163,20 +152,17 @@ module Model
 
     # more precise serialization for Tire
     def to_indexed_json
-      # TODO: can retrieve this from define_mapping logic above, and save sending a query to ES
-      mapping = tire.index.mapping[self.class.name.downcase]['properties']
-
       # Reject keys not declared in mapping
-      hash = self.as_document.reject { |key, value| ! mapping.keys.include? key }
+      hash = self.as_document.reject { |key, value| ! self.class.get_mapping[:properties].keys.include? key.to_sym }
 
       # Reject empty values
       hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }
 
       # add heading
-      hash[:heading] = self.heading
+      hash[:heading] = heading
 
       # store RDF type for faceting; property only, not qname
-      hash[:rdf_types] = self.rdf_types.map(&:last).uniq unless self.rdf_types.nil?
+      hash[:rdf_types] = rdf_types.map(&:last).uniq unless rdf_types.nil?
 
       hash.to_json
     end
@@ -185,7 +171,7 @@ module Model
       uri = URI.parse(url)
 
       # normalize into a hash to resolve ID references
-      normal = self.class.normalize(self.as_document, {:ids => :resolve})
+      normal = self.normalize({:ids => :resolve})
 
       normal.each do |name, vocab|
         vocab.each do |field, values|
@@ -205,7 +191,7 @@ module Model
         # FIXME: this is necessary to write a rdf:Description element
         writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.intern(''))
 
-        types = self.class.rdf_types + (self.rdf_types || [])
+        types = self.class.rdf_types + (rdf_types || [])
 
         types.each do |qname, property|
           writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)

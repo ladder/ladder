@@ -1,5 +1,5 @@
 #
-# TODO: put this together
+# TODO: REFACTOR THIS WHOLE THING
 #
 desc "Merge duplicate documents, optionally only for [model]"
 

@@ -66,9 +66,6 @@ module Model
       end
 
       def define_mapping
-        # ensure the index exists
-        create_elasticsearch_index
-
         # basic object mapping for vocabs
         # TODO: put explicit mapping here when removing dynamic templates
         vocabs = self.vocabs.each_with_object({}) do |(key,val), h|
@@ -90,38 +87,50 @@ module Model
 
             # RDF class information
             :rdf_types => {:type => 'multi_field', :fields => {
-                'rdf_types' => { :type => 'string', :index => 'analyzed' },
-                :raw        => { :type => 'string', :index => 'not_analyzed' }
-            }
+              'rdf_types' => { :type => 'string', :index => 'analyzed' },
+              :raw        => { :type => 'string', :index => 'not_analyzed' }
+              }
             },
         }.merge(vocabs).merge(dates).merge(ids).merge(relations)
 
-        tire.index.mapping self.name.downcase, :_source => { :compress => true },
-                           :_timestamp => { :enabled => true },
-                           :properties => properties,
+        # store mapping as a class variable for future lookups
+        @mapping = {:_source => { :compress => true },
+                     :_timestamp => { :enabled => true },
+                     :properties => properties,
 
-                           # dynamic templates to store un-analyzed values for faceting
-                           # TODO: remove dynamic templates and use explicit facet mapping
+                     # dynamic templates to store un-analyzed values for faceting
+                     # TODO: remove dynamic templates and use explicit facet mapping
+                     :dynamic_templates => [{
+                         :auto_facet => {
+                              :match => '*',
+                              :match_mapping_type => '*',
+                              :mapping => {
+                                  :type => 'multi_field',
+                                  :fields => {
+                                      '{name}' => {
+                                          :type => 'string',
+                                          :index => 'analyzed'
+                                      },
+                                      :raw => {
+                                          :type => 'string',
+                                          :index => 'not_analyzed'
+                                      }
+                                  }
+                              }
+                          }
+                     }]}
+      end
 
-                           :dynamic_templates => [{
-                                                      :auto_facet => {
-                                                          :match => '*',
-                                                          :match_mapping_type => '*',
-                                                          :mapping => {
-                                                              :type => 'multi_field',
-                                                              :fields => {
-                                                                  '{name}' => {
-                                                                      :type => 'string',
-                                                                      :index => 'analyzed'
-                                                                  },
-                                                                  :raw => {
-                                                                      :type => 'string',
-                                                                      :index => 'not_analyzed'
-                                                                  }
-                                                              }
-                                                          }
-                                                      }
-                                                  }]
+      def put_mapping
+        # ensure the index exists
+        create_elasticsearch_index
+
+        # do a PUT mapping for this index
+        tire.index.mapping self.name.downcase, @mapping ||= self.define_mapping
+      end
+
+      def get_mapping
+        @mapping ||= self.define_mapping
       end
 
       def normalize(hash, opts={})
@@ -140,7 +149,7 @@ module Model
 
         # Reject keys not declared in mapping
         unless 'Group' == self.name
-          hash.reject! { |key, value| ! tire.index.mapping[self.name.downcase]['properties'].keys.include? key }
+          hash.reject! { |key, value| ! self.get_mapping[:properties].keys.include? key.to_sym }
         end
 
         # Self-contained recursive lambda
