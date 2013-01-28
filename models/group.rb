@@ -1,3 +1,5 @@
+require 'embedded'
+
 class Group
   include Model::Core
 

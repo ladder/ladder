@@ -1,0 +1,8 @@
+require 'embedded/bibo'
+require 'embedded/dbpedia'
+require 'embedded/dc'
+require 'embedded/foaf'
+require 'embedded/prism'
+require 'embedded/rdfs'
+require 'embedded/skos'
+require 'embedded/vcard'
