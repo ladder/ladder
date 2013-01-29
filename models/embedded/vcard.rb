@@ -1,6 +1,6 @@
 class VCard
   include Model::Embedded
-  bind_to Vocab::VCard, :type => Array, :only => []
+  bind_to Vocab::VCard, :type => Array, :localize => true
 
   # enable camelCase field aliases
   Vocab::VCard.aliases.each do |name, new|

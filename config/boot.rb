@@ -22,7 +22,10 @@ end
 #
 # ## Configure your I18n
 #
+require "i18n/backend/fallbacks"
+I18n::Backend::Simple.send(:include, I18n::Backend::Fallbacks)
 I18n.default_locale = :en
+I18n.fallbacks[:fr] = [ :fr, :en ]
 
 # ## Configure your HTML5 data helpers
 #

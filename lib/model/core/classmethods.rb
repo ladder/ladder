@@ -158,8 +158,7 @@ module Model
           hash.symbolize_keys!
 
           # Strip id field
-          hash.except! :_id
-          hash.except! :rdf_types
+          hash.except! :_id, :rdf_types
 
           # Modify Object ID references if specified
           if hash.class == Hash and opts[:ids]
