@@ -1,12 +1,12 @@
 - item = result.normalize({:ids => :resolve})
 - desc = []
-- desc.push item[:dbpedia][:birthName].first rescue nil
-- desc.push item[:foaf][:name].first unless item[:dbpedia][:birthName] rescue nil
+- desc.push ignore_nil {item.dbpedia.birthName.first}
+- desc.push ignore_nil {item.foaf.name.first} unless ignore_nil {item.dbpedia.birthName}
 
-- birth = item[:dbpedia][:birthYear] || item[:dbpedia][:birthDate] || item[:foaf][:birthday] rescue []
-- birth = Date.parse(birth.first).year.to_s rescue ''
-- death = item[:dbpedia][:deathYear] || item[:dbpedia][:deathDate] rescue []
-- death = Date.parse(death.first).year.to_s rescue ''
+- birth = ignore_nil {item.dbpedia.birthYear.first || item.dbpedia.birthDate.first || item.foaf.birthday.first}
+- birth = Date.parse(birth).year.to_s
+- death = ignore_nil {item.dbpedia.deathYear.first || item.dbpedia.deathDate.first}
+- death = Date.parse(death).year.to_s
 - desc.push "#{birth}-#{death}" unless birth.empty?
 
 - if item[:foaf][:name] and !item[:foaf][:name].drop(1).empty?

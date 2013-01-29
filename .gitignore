@@ -2,6 +2,7 @@
 log/**/*
 tmp/**/*
 bin/
+tmp/
 vendor/
 public/system/**/*
 .sass-cache/

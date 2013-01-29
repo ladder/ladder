@@ -1,16 +1,13 @@
 - item = result.normalize({:ids => :resolve})
 - desc = []
-- desc.push item[:dcterms][:format].first.capitalize rescue nil
-- desc.push item[:dcterms][:issued].first rescue nil
-- desc.push ISO_639.find(item[:dcterms][:language].first).english_name.capitalize rescue nil
+- desc.push ignore_nil {item.dcterms.format.first.capitalize}
+- desc.push ignore_nil {item.dcterms.issued.first}
+- desc.push ISO_639.find(item.dcterms.language.first).english_name.capitalize rescue nil
 
 %a{:href => url_for(:resource, :index, :id => result.id)}
   %h4= result.heading.first.truncate(100, :separator => ' ').humanize
 
-- if item[:dcterms][:creator] then agents = item[:dcterms][:creator]
-- elsif item[:dcterms][:contributor] then agents = item[:dcterms][:contributor]
-- elsif item[:dcterms][:publisher] then agents = item[:dcterms][:publisher]
-
+- agents = ignore_nil {item.dcterms.creator || item.dcterms.contributor ||item.dcterms.publisher}
 - if agents
   - agents = agents.take(3).map do |value|
     - if value.is_a? Hash

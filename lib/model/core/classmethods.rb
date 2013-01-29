@@ -134,8 +134,8 @@ module Model
       end
 
       def normalize(hash, opts={})
-        # Use a sorted deep clone of the hash
-        hash = Marshal.load(Marshal.dump(hash)).sort_by_key(true)
+        # Use a sorted deep duplicate of the hash
+        hash = hash.deep_dup.sort_by_key(true)
 
         # store relation ids if we need to resolve them
         if :resolve == opts[:ids]
@@ -158,7 +158,8 @@ module Model
           hash.symbolize_keys!
 
           # Strip id field
-          hash.except! :_id, :rdf_types
+          hash.except! :_id
+          hash.except! :rdf_types
 
           # Modify Object ID references if specified
           if hash.class == Hash and opts[:ids]

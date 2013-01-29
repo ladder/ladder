@@ -119,7 +119,7 @@ namespace :link do
                       rdf_props.element_children.each do |node|
 
                         # skip properties with no namespace, since we don't know what vocab to use
-                        vocab = RDF::URI.intern(node.namespace.href).qname.first rescue nil
+                        vocab = ignore_nil {RDF::URI.intern(node.namespace.href).qname.first}
                         next if vocab.nil?
 
                         # skip properties that use an unknown vocabulary
