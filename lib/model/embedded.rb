@@ -11,6 +11,14 @@ module Model
       vocabularies.first.to_uri
     end
 
+    def dynamic_attributes
+      attributes.keys - fields.keys - _protected_attributes[:default].to_a
+    end
+
+    def static_attributes
+      fields.keys - dynamic_attributes - _protected_attributes[:default].to_a
+    end
+
   end
 
 end

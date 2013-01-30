@@ -49,7 +49,7 @@ module Model
     end
 
     def generate_md5
-      hash = self.normalize({:ids => :omit})
+      hash = self.to_normalized_hash({:ids => :omit})
       self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s))
     end
 
@@ -83,13 +83,13 @@ module Model
       [I18n.t('model.untitled')]
     end
 
-    def normalize(opts={})
-      self.class.normalize(self.as_document, opts)
+    def to_normalized_hash(opts={})
+      self.class.normalize(self.attributes, opts)
     end
 
     # Return a HashDiff array computed between the two model instances
     def diff(model)
-      HashDiff.diff(self.normalize, model.normalize)
+      HashDiff.diff(self.to_normalized_hash, model.to_normalized_hash)
     end
 
     def amatch(model, opts={})
@@ -104,8 +104,8 @@ module Model
       # if we have selected specific comparisons, use those
       options = opts unless opts.empty?
 
-      p1 = self.normalize(options.slice(:ids))
-      p2 = model.normalize(options.slice(:ids))
+      p1 = self.to_normalized_hash(options.slice(:ids))
+      p2 = model.to_normalized_hash(options.slice(:ids))
 
       p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
       p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
@@ -123,7 +123,7 @@ module Model
     def similar(query=false)
       return @similar unless query or @similar.nil?
 
-      hash = self.normalize
+      hash = self.to_normalized_hash
       id = self.id
 
       results = self.class.tire.search do
@@ -137,7 +137,7 @@ module Model
 
                 # NB: this requires increasing index.query.bool.max_clause_count
                 # TODO: perhaps search against _all?
-                query_string = value.join(' ')#.normalize
+                query_string = value.flatten.join(' ')#.normalize
                 should { match "#{vocab}.#{field}", query_string }
 
               end
@@ -153,7 +153,7 @@ module Model
     # more precise serialization for Tire
     def to_indexed_json
       # Reject keys not declared in mapping
-      hash = self.as_document.reject { |key, value| ! self.class.get_mapping[:properties].keys.include? key.to_sym }
+      hash = self.attributes.reject { |key, value| ! self.class.get_mapping[:properties].keys.include? key.to_sym }
 
       # Reject empty values
       hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }
@@ -171,7 +171,7 @@ module Model
       uri = URI.parse(url)
 
       # normalize into a hash to resolve ID references
-      normal = self.normalize({:ids => :resolve})
+      normal = self.to_normalized_hash({:ids => :resolve})
 
       normal.each do |name, vocab|
         vocab.each do |field, values|

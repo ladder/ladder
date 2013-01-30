@@ -30,11 +30,9 @@ module Model
       end
 
       def vocabs
-        embeddeds = reflect_on_all_associations(*[:embeds_one])
-
         vocabs = {}
-        embeddeds.each do |embedded|
-          vocabs[embedded.key.to_sym] = embedded.class_name.constantize
+        embedded_relations.each do |vocab, meta|
+          vocabs[vocab.to_sym] = meta.class_name.constantize
         end
 
         vocabs
@@ -154,12 +152,10 @@ module Model
 
         # Self-contained recursive lambda
         normal = lambda do |hash, opts|
-
           hash.symbolize_keys!
 
           # Strip id field
-          hash.except! :_id
-          hash.except! :rdf_types
+          hash.except! :_id, :rdf_types
 
           # Modify Object ID references if specified
           if hash.class == Hash and opts[:ids]
