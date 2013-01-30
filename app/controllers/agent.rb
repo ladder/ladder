@@ -68,6 +68,6 @@ Ladder.controllers :agent do
       end
     end
 
-    render 'agent/index'
+    render 'agent'
   end
 end

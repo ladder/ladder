@@ -1,0 +1,27 @@
+- desc = []
+- desc.push ignore_nil {agent.dbpedia.birthName.first || agent.foaf.name.first}
+
+- birth = ignore_nil {agent.dbpedia.birthYear.first || agent.dbpedia.birthDate.first || agent.foaf.birthday.first}
+- if birth
+  - birth = Date.parse(birth).year.to_s
+  - death = ignore_nil {agent.dbpedia.deathYear.first || agent.dbpedia.deathDate.first}
+  - death = Date.parse(death).year.to_s
+  - desc.push "#{birth}-#{death}"
+
+- if ignore_nil {agent.foaf.name}
+  - desc.push ignore_nil {agent.foaf.name.dashjoin}
+
+- if ignore_nil {agent.resource_ids.size > 3}
+  - desc.push "#{agent.resource_ids.size} #{I18n.t('search.resources')}"
+
+.span8
+  %a{:href => url_for(:agent, :index, :id => agent.id)}
+    %h4= agent.heading.first.truncate(100, :separator => ' ').humanize
+  .description #{desc.join('; ')}
+
+.span4
+  .together
+    - Resource.find(agent.resource_ids.take(3)).each do |resource|
+      %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
+        .half-small
+          = partial 'image', :object => resource

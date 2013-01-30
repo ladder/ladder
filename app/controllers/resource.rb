@@ -9,6 +9,6 @@ Ladder.controllers :resource do
 
     @querystring = session[:querystring]
 
-    render 'resource/index'
+    render 'resource'
   end
 end

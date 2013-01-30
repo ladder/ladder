@@ -6,7 +6,7 @@
       = partial 'image', :object => result
 
   .span10
-    = partial "#{result.class.to_s.underscore}/result", :object => result
+    = partial "search/results/#{result.class.to_s.underscore}", :object => result
 
 - if result._explanation
   %pre

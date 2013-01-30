@@ -69,6 +69,6 @@ Ladder.controllers :concept do
       end
     end
 
-    render 'concept/index'
+    render 'concept'
   end
 end

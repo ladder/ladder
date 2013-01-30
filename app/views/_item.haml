@@ -1,17 +1,16 @@
 %table.table.table-bordered.table-striped.table-condensed
-  - doc = item.normalize({:ids => :resolve})
-  - doc.each do |vocab, fields|
-    - next if fields.empty?
-
+  - item.vocabs.each do |name, vocab|
     -#%tr
       %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= vocab
 
-    - fields.each do |name, values|
-      - next if :thumbnail == name
+    - vocab.static_attributes.each do |field|
+      - values = vocab.public_send(field.to_sym)
+      - next if values.nil?
+      -# next if 'thumbnail' == name
 
       %tr
         %td.span2
-          %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{name}", :default => name.to_s.underscore.humanize)
+          %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
 
         %td.span10
           - values.each do |value|
@@ -35,7 +34,7 @@
               - else
                 #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
 
-            - elsif :language == name
+            - elsif :language == field
               = ISO_639.find(value).english_name rescue nil
 
             - else
