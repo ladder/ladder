@@ -84,7 +84,7 @@ module Model
     end
 
     def to_normalized_hash(opts={})
-      self.class.normalize(self.attributes, opts)
+      self.to_hash.normalize(opts)
     end
 
     # Return a HashDiff array computed between the two model instances

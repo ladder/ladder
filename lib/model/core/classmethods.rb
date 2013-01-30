@@ -150,54 +150,7 @@ module Model
           hash.reject! { |key, value| ! self.get_mapping[:properties].keys.include? key.to_sym }
         end
 
-        # Self-contained recursive lambda
-        normal = lambda do |hash, opts|
-          hash.symbolize_keys!
-
-          # Strip id field
-          hash.except! :_id, :rdf_types
-
-          # Modify Object ID references if specified
-          if hash.class == Hash and opts[:ids]
-
-            hash.each do |key, values|
-              values.to_a.each do |value|
-
-                # NB: have to use regexp matching for Tire Items
-                if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
-
-                  case opts[:ids]
-                    when :omit then
-                      #hash[key].delete value     # doesn't work as expected?
-                      hash[key][values.index(value)] = nil
-
-                    when :resolve then
-                      model = :resource if opts[:resource_ids].include? value rescue nil
-                      model = :agent if opts[:agent_ids].include? value rescue nil
-                      model = :concept if opts[:concept_ids].include? value rescue nil
-                      model = opts[:type].to_sym if model.nil?
-
-                      hash[key][values.index(value)] = {model => value.to_s}
-                  end
-                end
-              end
-
-              # remove keys that are now empty
-              hash[key].to_a.compact!
-            end
-
-          end
-
-          # Reject empty values
-          hash.reject! { |key, value| value.kind_of? Enumerable and value.empty? }
-
-          # Recurse into Hash values
-          hash.values.select { |value| value.is_a? Hash }.each{ |h| normal.call(h, opts) }
-
-          hash
-        end
-
-        normal.call(hash.reject { |key, value| !value.is_a? Hash }, opts)
+        hash.reject { |key, value| !value.is_a? Hash }.normalize(opts)
       end
 
     end
