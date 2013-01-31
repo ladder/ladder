@@ -48,8 +48,16 @@ module Model
       base.extend ClassMethods
     end
 
+    def normalize(opts={})
+      # get a hash that we can modify
+      opts[:localize] ? hash = self.to_hash : hash = self.as_document
+
+      self.class.normalize(Marshal.load(Marshal.dump(hash)), opts)
+    end
+
     def generate_md5
-      hash = self.to_hash.normalize({:ids => :omit})
+      hash = self.normalize({:ids => :omit})
+
       self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s))
     end
 
@@ -85,7 +93,7 @@ module Model
 
     # Return a HashDiff array computed between the two model instances
     def diff(model)
-      HashDiff.diff(self.to_hash.normalize, model.to_hash.normalize)
+      HashDiff.diff(self.normalize({:ids => :omit}), model.normalize({:ids => :omit}))
     end
 
     def amatch(model, opts={})
@@ -100,8 +108,8 @@ module Model
       # if we have selected specific comparisons, use those
       options = opts unless opts.empty?
 
-      p1 = self.to_hash.normalize(options.slice(:ids))
-      p2 = model.to_hash.normalize(options.slice(:ids))
+      p1 = self.normalize(options.slice(:ids))
+      p2 = model.normalize(options.slice(:ids))
 
       p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
       p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
@@ -119,8 +127,7 @@ module Model
     def similar(query=false)
       return @similar unless query or @similar.nil?
 
-      # TODO: maybe this should be as_document.deep_dup.normalize
-      hash = self.to_hash.normalize
+      hash = self.normalize({:ids => :omit})
       id = self.id
 
       results = self.class.tire.search do
@@ -149,11 +156,8 @@ module Model
 
     # more precise serialization for Tire
     def to_indexed_json
-      # Reject keys not declared in mapping
-      hash = self.attributes.reject { |key, value| ! self.class.get_mapping[:properties].keys.include? key.to_sym }
-
-      # Reject empty values
-      hash = hash.reject { |key, value| value.kind_of? Enumerable and value.empty? }
+      # Use normalized copy of document
+      hash = self.normalize(:all_keys => true)
 
       # add heading
       hash[:heading] = heading
@@ -168,7 +172,7 @@ module Model
       uri = URI.parse(url)
 
       # normalize into a hash to resolve ID references
-      normal = self.to_hash.normalize({:ids => :resolve})
+      normal = self.normalize({:ids => :resolve})
 
       normal.each do |name, vocab|
         vocab.each do |field, values|

@@ -13,6 +13,7 @@ module Tire
       end
 
       def normalize(opts={})
+        # TODO: implement :localize option
         self.class.normalize(self.to_hash, opts)
       end
 

@@ -1,34 +1,32 @@
 class Hash
 
-  def sort_by_key(recursive=false, &block)
-    self.keys.sort(&block).reduce({}) do |seed, key|
-      seed[key] = self[key]
-      if recursive && seed[key].is_a?(Hash)
-        seed[key] = seed[key].sort_by_key(true, &block)
-      end
-      seed
-    end
+  def deep_sort
+    self.values.select { |value| value.is_a? Hash }.each{ |h| h.deep_sort }
+
+    self.class[self.sort]
   end
 
-  # NB THIS IS DESTRUCTIVE
-  # TODO: refactor to be non-modifying
-  def normalize(opts={})
+  # NB: this is destructive
+  def normalize!(opts={})
+    # set default keys to strip
+    except = opts[:except] || [:_id]
+
     self.symbolize_keys!
 
-    # Strip specified fields
-    # TODO: parameterize
-    self.except! :_id, :rdf_types
+    # Strip specified keys
+    self.except! *except
 
     # Reject nil values
-    self.reject! { |key, value| value.nil? }
-
-    # Reject empty values
-    self.reject! { |key, value| value.kind_of? Enumerable and value.empty? }
+    self.delete_if { |key, value| value.nil? }
 
     # Recurse into Hash values
-    self.values.select { |value| value.is_a? Hash }.each{ |h| h.normalize(opts) }
+    self.values.select { |value| value.is_a? Hash }.each{ |h| h.normalize!(opts) }
 
-    self
+    # Reject empty values
+    self.delete_if { |key, value| value.kind_of? Enumerable and value.empty? }
+
+    # Sort keys recursively
+    self.deep_sort
   end
 
 end

@@ -10,7 +10,7 @@ module Model
 
       # Override Mongoid #find_or_create_by
       # @see: http://rdoc.info/github/mongoid/mongoid/Mongoid/Finders
-      def find_or_create_by(attrs = {}, &block)
+      def find_or_create_by(attrs = {})
 
         # use md5 fingerprint to query if a document already exists
         hash = self.normalize(attrs, {:ids => :omit})
@@ -132,71 +132,65 @@ module Model
       end
 
       def normalize(hash, opts={})
-        # Use a sorted deep duplicate of the hash
-        hash = hash.deep_dup
+        # Normalize the hash first
+        hash.normalize!(opts)
 
-        hash = hash.sort_by_key(true)
-=begin
-  def sort_by_key(recursive=false, &block)
-    self.keys.sort(&block).reduce({}) do |seed, key|
-      seed[key] = self[key]
-      if recursive && seed[key].is_a?(Hash)
-        seed[key] = seed[key].sort_by_key(true, &block)
-      end
-      seed
-    end
-  end
-=end
+        # Remove keys not declared in mapping
+        hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key } unless 'Group' == self.name
 
-        # store relation ids if we need to resolve them
-        if :resolve == opts[:ids]
-          hash.symbolize_keys!
+        # Modify Object ID references if specified
+        if opts[:ids]
 
-          opts[:type] = hash[:type] || self.name.underscore
-          opts[:resource_ids] = hash[:resource_ids]
-          opts[:agent_ids] = hash[:agent_ids]
-          opts[:concept_ids] = hash[:concept_ids]
-        end
+          hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
+            vocab.each do |field, locales|
+              locales.each do |locale, values|
 
-=begin
-    # Modify Object ID references if specified
-    if opts[:ids]
+                values = hash[name][field] if !! opts[:localize] # values = nil
 
-      self.each do |key, values|
-        values.to_a.each do |value|
+                # traverse through ID-like values
+                values.select {|value| value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)}.each do |value|
+                  case opts[:ids]
+                    when :omit
+                      # modify the value in-place
+                      if !! opts[:localize]
+                        hash[name][field].delete value
+                      else
+                        hash[name][field][locale].delete value
+                      end
 
-          # NB: have to use regexp matching for Tire Items
-          if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+                    when :resolve
+                      if hash[:resource_ids] and hash[:resource_ids].include? value
+                        model = :resource
+                      elsif hash[:agent_ids] and hash[:agent_ids].include? value
+                        model = :agent
+                      elsif hash[:concept_ids] and hash[:concept_ids].include? value
+                        model = :concept
+                      else
+                        model = hash[:type] || self.name.underscore
+                      end
 
-            case opts[:ids]
-              when :omit then
-                #hash[key].delete value     # doesn't work as expected?
-                self[key][values.index(value)] = nil
+                      # modify the value in-place
+                      if !! opts[:localize]
+                        hash[name][field][values.index(value)] = {model.to_sym => value.to_s}
+                      else
+                        hash[name][field][locale][values.index(value)] = {model.to_sym => value.to_s}
+                      end
+                  end
 
-              when :resolve then
-                model = :resource if opts[:resource_ids].include? value rescue nil
-                model = :agent if opts[:agent_ids].include? value rescue nil
-                model = :concept if opts[:concept_ids].include? value rescue nil
-                model = opts[:type].to_sym if model.nil?
+                end
 
-                self[key][values.index(value)] = {model => value.to_s}
+              end
             end
           end
+
+          # Re-normalize to remove empty keys
+          hash.normalize!(opts)
         end
 
-        # remove keys that are now empty
-        self[key].to_a.compact!
-      end
+        # Remove non-hash keys
+        hash.delete_if { |key, value| !value.is_a? Hash } unless opts[:all_keys]
 
-    end
-=end
-
-        # Reject keys not declared in mapping
-        unless 'Group' == self.name
-          hash.reject! { |key, value| ! self.get_mapping[:properties].keys.include? key.to_sym }
-        end
-
-        hash.reject { |key, value| !value.is_a? Hash }.normalize(opts)
+        hash
       end
 
     end
