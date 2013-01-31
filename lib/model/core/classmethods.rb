@@ -13,14 +13,14 @@ module Model
       def find_or_create_by(attrs = {})
 
         # use md5 fingerprint to query if a document already exists
-        hash = self.normalize(attrs, {:ids => :omit})
+        obj = self.new(attrs)
+        hash = obj.normalize({:ids => :omit})
         query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s)))
 
         result = query.first
         return result unless result.nil?
 
         # otherwise create and return a new object
-        obj = self.new(attrs)
         obj.save
         obj
       end
