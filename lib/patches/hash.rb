@@ -10,43 +10,15 @@ class Hash
     end
   end
 
+  # NB THIS IS DESTRUCTIVE
+  # TODO: refactor to be non-modifying
   def normalize(opts={})
     self.symbolize_keys!
 
-    # Strip id field
+    # Strip specified fields
+    # TODO: parameterize
     self.except! :_id, :rdf_types
-=begin
-    # Modify Object ID references if specified
-    if opts[:ids]
 
-      self.each do |key, values|
-        values.to_a.each do |value|
-
-          # NB: have to use regexp matching for Tire Items
-          if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
-
-            case opts[:ids]
-              when :omit then
-                #hash[key].delete value     # doesn't work as expected?
-                self[key][values.index(value)] = nil
-
-              when :resolve then
-                model = :resource if opts[:resource_ids].include? value rescue nil
-                model = :agent if opts[:agent_ids].include? value rescue nil
-                model = :concept if opts[:concept_ids].include? value rescue nil
-                model = opts[:type].to_sym if model.nil?
-
-                self[key][values.index(value)] = {model => value.to_s}
-            end
-          end
-        end
-
-        # remove keys that are now empty
-        self[key].to_a.compact!
-      end
-
-    end
-=end
     # Reject nil values
     self.reject! { |key, value| value.nil? }
 

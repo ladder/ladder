@@ -32,7 +32,7 @@ gem 'mongo', :require => 'mongo'
 gem 'mongoid'
 gem 'mongoid-tree', :require => 'mongoid/tree'
 #gem 'mongoid-grid_fs'
-gem 'recursive-open-struct' # access normalized hashes using object notation
+#gem 'recursive-open-struct' # access hashes using object notation
 gem 'ignore_nil'            # cleanly access chained property methods
 
 # linked data gems

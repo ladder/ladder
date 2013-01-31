@@ -49,7 +49,7 @@ module Model
     end
 
     def generate_md5
-      hash = self.to_normalized_hash({:ids => :omit})
+      hash = self.to_hash.normalize({:ids => :omit})
       self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s))
     end
 
@@ -83,13 +83,9 @@ module Model
       [I18n.t('model.untitled')]
     end
 
-    def to_normalized_hash(opts={})
-      self.to_hash.normalize(opts)
-    end
-
     # Return a HashDiff array computed between the two model instances
     def diff(model)
-      HashDiff.diff(self.to_normalized_hash, model.to_normalized_hash)
+      HashDiff.diff(self.to_hash.normalize, model.to_hash.normalize)
     end
 
     def amatch(model, opts={})
@@ -104,8 +100,8 @@ module Model
       # if we have selected specific comparisons, use those
       options = opts unless opts.empty?
 
-      p1 = self.to_normalized_hash(options.slice(:ids))
-      p2 = model.to_normalized_hash(options.slice(:ids))
+      p1 = self.to_hash.normalize(options.slice(:ids))
+      p2 = model.to_hash.normalize(options.slice(:ids))
 
       p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
       p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
@@ -123,7 +119,8 @@ module Model
     def similar(query=false)
       return @similar unless query or @similar.nil?
 
-      hash = self.to_normalized_hash
+      # TODO: maybe this should be as_document.deep_dup.normalize
+      hash = self.to_hash.normalize
       id = self.id
 
       results = self.class.tire.search do
@@ -171,7 +168,7 @@ module Model
       uri = URI.parse(url)
 
       # normalize into a hash to resolve ID references
-      normal = self.to_normalized_hash({:ids => :resolve})
+      normal = self.to_hash.normalize({:ids => :resolve})
 
       normal.each do |name, vocab|
         vocab.each do |field, values|
