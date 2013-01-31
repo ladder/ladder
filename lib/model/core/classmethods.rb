@@ -145,7 +145,10 @@ module Model
             vocab.each do |field, locales|
               locales.each do |locale, values|
 
-                values = hash[name][field] if !! opts[:localize] # values = nil
+                if values.nil?
+                  values = hash[name][field]
+                  opts[:localize] = true
+                end
 
                 # traverse through ID-like values
                 values.select {|value| value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)}.each do |value|
