@@ -1,6 +1,6 @@
 Ladder.controllers :resource do
 
-  get :index, :with => :id do
+  get :index, :with => :id, :cache => true do
     @resource = Resource.find(params[:id])
 
     # TODO: DRY this out somehow

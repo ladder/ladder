@@ -1,6 +1,6 @@
 Ladder.controllers :concept do
 
-  get :index, :with => :id do
+  get :index, :with => :id, :cache => true do
     @concept = Concept.find(params[:id])
 
     # TODO: DRY this out somehow

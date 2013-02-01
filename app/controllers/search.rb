@@ -1,6 +1,6 @@
 Ladder.controllers :search do
 
-  get :index do
+  get :index, :cache => true do
     if params[:q].nil?
       render 'index'
     else
@@ -8,7 +8,7 @@ Ladder.controllers :search do
     end
   end
 
-  get :index, :with => :q do
+  get :index, :with => :q, :cache => true do
 
     @querystring = params[:q]
     @filters = params[:fi] || {}
