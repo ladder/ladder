@@ -1,13 +1,15 @@
-- item = resource.normalize({:ids => :resolve})
+%a{:href => url_for(:resource, :index, :id => resource.id)}
+  %h4= resource.heading.first.truncate(100, :separator => ' ').humanize
+
+- resource = RecursiveOpenStruct.new(resource.normalize({:ids => :resolve, :localize => true}))
+-#= resource.normalize({:ids => :resolve, :localize => true, :all_keys => true})
+
 - desc = []
 - desc.push ignore_nil {resource.dcterms.format.first.capitalize}
 - desc.push ignore_nil {resource.dcterms.issued.first}
 - desc.push ISO_639.find(resource.dcterms.language.first).english_name.capitalize rescue nil
 
-%a{:href => url_for(:resource, :index, :id => resource.id)}
-  %h4= resource.heading.first.truncate(100, :separator => ' ').humanize
-
-- agents = nil#ignore_nil {item.dcterms.creator || item.dcterms.contributor ||item.dcterms.publisher}
+- agents = ignore_nil {resource.dcterms.creator || resource.dcterms.contributor ||resource.dcterms.publisher}
 - if agents
   - agents = agents.take(3).map do |value|
     - if value.is_a? Hash

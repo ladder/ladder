@@ -1,7 +1,3 @@
-- desc = []
-- if ignore_nil {concept.resource_ids.size > 3}
-  - desc.push "#{concept.resource_ids.size} #{I18n.t('search.resources')}"
-
 .span8
   %a{:href => url_for(:concept, :index, :id => concept.id)}
     %h4
@@ -9,6 +5,11 @@
         %small= ignore_nil {concept.skos.hiddenLabel.dashjoin}
         \--
       = concept.heading.last.truncate(100, :separator => ' ')
+
+  - desc = []
+  - if ignore_nil {concept.resource_ids.size > 3}
+    - desc.push "#{concept.resource_ids.size} #{I18n.t('search.resources')}"
+
   .description #{desc.join('; ')}
 
 .span4

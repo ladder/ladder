@@ -1,10 +1,10 @@
 %table.table.table-bordered.table-striped.table-condensed
-  - item.vocabs.each do |name, vocab|
+  - hash = item.normalize({:localize => true, :ids => :resolve})
+  - hash.each do |name, vocab|
     -#%tr
-      %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= vocab
+      %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= name
 
-    - vocab.static_attributes.each do |field|
-      - values = vocab.public_send(field.to_sym)
+    - vocab.each do |field, values|
       - next if values.nil?
       -# next if 'thumbnail' == name
 
