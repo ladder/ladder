@@ -4,7 +4,7 @@ namespace :model do
   task :init => :environment do
 
     # ensure indexes are mapped
-    ['Resource', 'Agent', 'Concept'].each do |model|
+    ['Agent', 'Concept', 'Resource'].each do |model|
       klass = model.classify.constantize
 
       # make sure the mapping is defined

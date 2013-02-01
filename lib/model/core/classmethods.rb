@@ -50,12 +50,13 @@ module Model
           s = self.search {
             query { all }
             sort { by :_timestamp, 'desc' }
+            fields ['_timestamp']
             size 1
           }
 
           # if there's a timestamp in the index, use that as the offset
           unless s.results.empty?
-            timestamp = s.results.first.sort.first / 1000
+            timestamp = s.results.first._timestamp / 1000
             self.queryable.or(:updated_at.gte => timestamp, :created_at.gte => timestamp)
           else
             self.queryable
@@ -84,18 +85,15 @@ module Model
             :heading => {:type => 'string', :boost => 2},
 
             # RDF class information
-            :rdf_types => {:type => 'multi_field', :fields => {
-              'rdf_types' => { :type => 'string', :index => 'analyzed' },
-              :raw        => { :type => 'string', :index => 'not_analyzed' }
-              }
-            },
+            :rdf_types => { :type => 'string', :index => 'not_analyzed' },
+
         }.merge(vocabs).merge(dates).merge(ids).merge(relations)
 
         # store mapping as a class variable for future lookups
         @mapping = {:_source => { :compress => true },
-                     :_timestamp => { :enabled => true },
+                     :_timestamp => { :enabled => true, :store => 'yes' },
                      :properties => properties,
-
+=begin
                      # dynamic templates to store un-analyzed values for faceting
                      # TODO: remove dynamic templates and use explicit facet mapping
                      :dynamic_templates => [{
@@ -116,12 +114,14 @@ module Model
                                   }
                               }
                           }
-                     }]}
+                     }]
+=end
+        }
       end
 
       def put_mapping
         # ensure the index exists
-        create_elasticsearch_index
+        tire.index.create unless tire.index.exists?
 
         # do a PUT mapping for this index
         tire.index.mapping self.name.downcase, @mapping ||= self.define_mapping
