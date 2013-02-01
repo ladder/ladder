@@ -155,7 +155,7 @@ module Model
                   case opts[:ids]
                     when :omit
                       # modify the value in-place
-                      if !! opts[:localize]
+                      if opts[:localize]
                         hash[name][field].delete value
                       else
                         hash[name][field][locale].delete value
