@@ -2,7 +2,7 @@
   - ns = facet.first.split('.').first
   - name = facet.first.split('.').last
 
-  %li.nav-header= I18n.t("resource.#{name}", :default => name.to_s.underscore.humanize) unless 'rdf_types' == name
+  %li.nav-header= I18n.t("resource.#{name}", :default => name.titleize) unless 'rdf_types' == name
 
   - facet.last['terms'].each do |f|
 
@@ -22,11 +22,11 @@
       - else display = ISO_639.find(f['term']).english_name rescue f['term']
 
     - elsif 'dcterms.format' == facet.first
-      - display = f['term'].capitalize
+      - display = f['term'].titleize
 
     - elsif 'type' == facet.first or 'rdf_types' == facet.first
       - display = partial 'image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
-      - display = display + f['term'].underscore.humanize
+      - display = display + f['term'].titleize
 
     - else display = f['term']
 

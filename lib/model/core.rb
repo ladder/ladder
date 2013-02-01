@@ -91,6 +91,10 @@ module Model
       [I18n.t('model.untitled')]
     end
 
+    def locales
+      self.normalize.values.map {|vocab| vocab.map {|field, values| values.keys} }.flatten.uniq
+    end
+
     # Return a HashDiff array computed between the two model instances
     def diff(model)
       HashDiff.diff(self.normalize({:ids => :omit}), model.normalize({:ids => :omit}))
@@ -161,6 +165,9 @@ module Model
 
       # add heading
       hash[:heading] = heading
+
+      # add locales
+      hash[:locales] = locales
 
       # store RDF type for faceting; property only, not qname
       hash[:rdf_types] = rdf_types.map(&:last).uniq unless rdf_types.nil?

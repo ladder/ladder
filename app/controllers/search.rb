@@ -34,16 +34,30 @@ Ladder.controllers :search do
 
     # special treatment for 'model type' and rdf type facets
     @search.facet('type') {terms '_type', :size => 10}
-    @search.facet('rdf_types') {terms 'rdf_types.raw', :size => 10}
+    @search.facet('rdf_types') {terms 'rdf_types', :size => 10}
 
     # set fields; prefer matches in heading, but search everywhere
     @fields = ['heading', '_all']
+
+    # do a faceted search to enumerate used locales
+    @locales = Tire.search Tire::Index.default do |search|
+      search.query { all }
+      search.size 0
+      search.facet('locales') {terms 'locales', :size => 10}
+    end
+
+    locales = @locales.results.facets['locales']['terms'].map {|locale| locale['term']}
 
     # set facets
     @facets = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
     @facets.each do |ns, fields|
       fields.each do |field|
-        @search.facet("#{ns}.#{field}") {terms "#{ns}.#{field}.raw", :size => 10}
+        facet_fields = []
+        locales.each do |locale|
+           facet_fields << "#{ns}.#{field}.#{locale}"
+        end
+
+        @search.facet("#{ns}.#{field}") {terms facet_fields, :size => 10}
       end
     end
 
@@ -95,7 +109,7 @@ Ladder.controllers :search do
         # special treatment for rdf types filter
         if @filters['rdf_types']
           @filters['rdf_types']['rdf_types'].each do |v|
-            filtered.filter :term, "rdf_types.raw" => v
+            filtered.filter :term, "rdf_types" => v
           end
         end
 
@@ -107,6 +121,7 @@ Ladder.controllers :search do
 
           filter.each do |f, arr|
             arr.each do |v|
+              # TODO: refactor me with dynamic templates
               filtered.filter :term, "#{ns}.#{f}.raw" => v
             end
           end
