@@ -1,18 +1,21 @@
 class Ladder < Padrino::Application
 
   register Padrino::Rendering
-  register Padrino::Mailer
   register Kaminari::Helpers::SinatraHelpers
 
   configure :development do
     disable :asset_stamp
+
     use BetterErrors::Middleware
     BetterErrors.application_root = PADRINO_ROOT
   end
 
   configure :production do
+    register Padrino::Cache
     register Padrino::Contrib::ExceptionNotifier
+    register Padrino::Mailer
 
+    enable :caching
     disable :raise_errors
     disable :show_exceptions
 
