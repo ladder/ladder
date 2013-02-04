@@ -4,7 +4,7 @@ module Tire
 
     class Item
 
-      attr_reader :attributes
+      attr_accessor :diff
 
       def class
         defined?(::Padrino) && @attributes[:_type] ? @attributes[:_type].camelize.constantize : super

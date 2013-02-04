@@ -96,8 +96,16 @@ module Model
     end
 
     # Return a HashDiff array computed between the two model instances
-    def diff(model)
-      HashDiff.diff(self.normalize({:ids => :omit}), model.normalize({:ids => :omit}))
+    def diff(model, opts={})
+
+      p1 = self.normalize(opts.slice(:ids))
+      p2 = model.normalize(opts.slice(:ids))
+
+      # TODO: use to calculate a similarity score somehow
+      p1_size = p1.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).size
+      p2_size = p2.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).size
+
+      HashDiff.diff(p1, p2)
     end
 
     def amatch(model, opts={})
@@ -110,13 +118,13 @@ module Model
                  :pair_distance_similar => true}
 
       # if we have selected specific comparisons, use those
-      options = opts unless opts.empty?
+      options = opts if opts.is_a? Hash and ! opts.empty?
 
       p1 = self.normalize(options.slice(:ids))
       p2 = model.normalize(options.slice(:ids))
 
-      p1 = p1.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
-      p2 = p2.values.map(&:values).flatten.map(&:to_s).join(' ').normalize
+      p1 = p1.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).join(' ').normalize
+      p2 = p2.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).join(' ').normalize
 
       # calculate amatch score for each algorithm
       options.delete :ids
@@ -128,31 +136,40 @@ module Model
     end
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
-    def similar(query=false)
-      return @similar unless query or @similar.nil?
+    def similar(opts={})
 
       hash = self.normalize({:ids => :omit})
       id = self.id
 
-      results = self.class.tire.search do
+      results = self.class.search do
         query do
           boolean do
             # do not include self
             must_not { term :_id, id.to_s }
 
-            hash.each do |vocab, vals|
-              vals.each do |field, value|
-
-                # NB: this requires increasing index.query.bool.max_clause_count
-                # TODO: perhaps search against _all?
-                query_string = value.flatten.join(' ')#.normalize
-                should { match "#{vocab}.#{field}", query_string }
-
+            hash.each do |name, vocab|
+              vocab.each do |field, locales|
+                locales.each do |locale, values|
+                  values.each do |value|
+                    should do
+                      match "#{name}.#{field}.#{locale}", \
+                            value.normalize({:space_char => ' '}).truncate(100, :separator => ' ')
+                    end
+                  end
+                end
               end
             end
           end
         end
         min_score 1
+      end
+
+      if opts[:amatch]
+        # calculate amatch score for each result
+        results.each do |result|
+          match = self.amatch(result, opts[:amatch])
+          result.diff = match.values.sum / match.size
+        end
       end
 
       @similar = results
