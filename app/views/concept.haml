@@ -11,22 +11,6 @@
         .span10
           = partial 'item', :object => @concept
 
-      .row-fluid.hidden-phone
-        .span2
-          %a.pull-right{:href => '#collapseRDF', :'data-toggle' => "collapse"} RDF/XML
-        .span10
-          %pre.accordion-body.collapse#collapseRDF
-            %code&= @concept.to_rdfxml(url_for(request.path_info))
-
-      - @concept.files.each do |file|
-        - mime = MIME::Type.new(file.content_type).sub_type.upcase
-        .row-fluid.hidden-phone
-          .span2
-            %a.pull-right{:href => "##{file.id}", :'data-toggle' => "collapse"}= mime
-          .span10
-            %pre.accordion-body.collapse{:id => file.id}
-              %code&= file.data
-
       - unless @results.empty?
         .row-fluid
           %b= @results.total
@@ -37,7 +21,6 @@
           .pagination-centered
             = paginate @results, :window => 3
 
-      %br
     .span3
       - unless @concept.leaf? and @concept.root? and @concept.similar.empty?
         .well.sidebar-nav

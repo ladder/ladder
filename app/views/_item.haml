@@ -1,44 +1,81 @@
-%table.table.table-bordered.table-striped.table-condensed
-  - hash = item.normalize({:localize => true, :ids => :resolve})
-  - hash.each do |name, vocab|
-    -#%tr
-      %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= name
+.tabbable
+  %ul.nav.nav-tabs
+    %li.active
+      %a{:href => '#item', :'data-toggle' => "tab"}= item.class.name
+    %li
+      %a{:href => '#rdf', :'data-toggle' => "tab"} RDF/XML
+    - item.files.each do |file|
+      - mime = MIME::Type.new(file.content_type).sub_type
+      - if 'marc' == mime
+        %li
+          %a{:href => '#mods', :'data-toggle' => "tab"} MODS
+      %li
+        %a{:href => "##{mime}", :'data-toggle' => "tab"}= mime.upcase
 
-    - vocab.each do |field, values|
-      - next if values.nil?
-      -# next if 'thumbnail' == name
+  .tab-content
+    .tab-pane.active#item
+      %table.table.table-bordered.table-striped.table-condensed
+        - hash = item.normalize({:localize => true, :ids => :resolve})
+        - hash.each do |name, vocab|
+          -#%tr
+            %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= name
 
-      %tr
-        %td.span2
-          %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
+          - vocab.each do |field, values|
+            - next if values.nil?
+            -# next if 'thumbnail' == name
 
-        %td.span10
-          - values.each do |value|
+            %tr
+              %td.span2
+                %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
 
-            - if value.is_a? Hash
-              - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
+              %td.span10
+                - values.each do |value|
 
-              - if value[:concept]
-                #{link_to [reference.ancestors.map(&:heading) + reference.heading].dashjoin, url_for(value.keys.first, :index, :id => value.values.first)}
+                  - if value.is_a? Hash
+                    - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
-              - elsif value[:agent]
-                - agent = Agent.find(value.values.first)
-                .together{:style => 'clear: both;'}
-                  .span2
-                    %a.thumbnail.pull-left{:href => url_for(:agent, :index, :id => agent.id), :style => 'margin-left: 9px;'}
-                      .half-small
-                        = partial 'image', :object => agent
-                  .span8
-                    #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+                    - if value[:concept]
+                      #{link_to [reference.ancestors.map(&:heading) + reference.heading].dashjoin, url_for(value.keys.first, :index, :id => value.values.first)}
 
-              - else
-                #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+                    - elsif value[:agent]
+                      - agent = Agent.find(value.values.first)
+                      .together{:style => 'clear: both;'}
+                        .span2
+                          %a.thumbnail.pull-left{:href => url_for(:agent, :index, :id => agent.id), :style => 'margin-left: 9px;'}
+                            .half-small
+                              = partial 'image', :object => agent
+                        .span8
+                          #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
 
-            - elsif :language == field
-              = ISO_639.find(value).english_name rescue nil
+                    - else
+                      #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
 
-            - else
-              = value
+                  - elsif :language == field
+                    = ISO_639.find(value).english_name rescue nil
 
-            - unless values.last == value
-              %br
+                  - else
+                    = value
+
+                  - unless values.last == value
+                    %br
+    .tab-pane#rdf
+      %pre
+        %code&= item.to_rdfxml(url_for(request.path_info))
+
+    - item.files.each do |file|
+      - mime = MIME::Type.new(file.content_type).sub_type
+      - if 'marc' == mime
+        .tab-pane#mods
+          - mapping = Mapping::MARC2.new
+          - mapping.map(MARC::Record.new_from_marc(file.data, :forgiving => true))
+          %pre
+            %code&= mapping.mods
+
+      .tab-pane{:id => mime}
+        - if 'marc' == mime
+          %pre
+            %code= MultiJson.dump(MARC::Record.new_from_marc(file.data, :forgiving => true).to_hash, :pretty => true)
+        - else
+          %pre
+            %code&= file.data
+

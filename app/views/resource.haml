@@ -12,30 +12,6 @@
         .span10
           = partial 'item', :object => @resource
 
-      .row-fluid.hidden-phone
-        .span2
-          %a.pull-right{:href => '#collapseRDF', :'data-toggle' => "collapse"} RDF/XML
-        .span10
-          %pre.accordion-body.collapse#collapseRDF
-            %code&= @resource.to_rdfxml(url_for(request.path_info))
-
-      - @resource.files.each do |file|
-        - mime = MIME::Type.new(file.content_type).sub_type.upcase
-        .row-fluid.hidden-phone
-          .span2
-            %a.pull-right{:href => "##{file.id}", :'data-toggle' => "collapse"}= mime
-          .span10
-            %pre.accordion-body.collapse{:id => file.id}
-              - if 'MARC' == mime
-                %code= MultiJson.dump(MARC::Record.new_from_marc(file.data, :forgiving => true).to_hash, :pretty => true)
-                -#
-                  - mapping = Mapping::MARC2.new
-                  - mapping.map(MARC::Record.new_from_marc(file.data, :forgiving => true))
-                  = mapping.mods
-              - else
-                %code&= file.data
-
-      %br
     .span3
       - unless @resource.leaf? and @resource.root? and @resource.similar.empty?
         .well.sidebar-nav

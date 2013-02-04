@@ -121,8 +121,9 @@ Ladder.controllers :search do
 
           filter.each do |f, arr|
             arr.each do |v|
-              # TODO: refactor me with dynamic templates
-              filtered.filter :term, "#{ns}.#{f}.raw" => v
+              # FIXME: refactor me with dynamic templates
+#              filtered.filter :term, "#{ns}.#{f}.raw" => v
+              filtered.filter :term, "#{ns}.#{f}.en" => v
             end
           end
         end
