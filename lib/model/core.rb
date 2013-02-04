@@ -195,22 +195,35 @@ module Model
     def to_rdfxml(url)
       uri = URI.parse(url)
 
-      # normalize into a hash to resolve ID references
-      normal = self.normalize({:ids => :resolve})
+      # get the RDF graph for each vocab
+      graphs = []
+      self.vocabs.each do |name, object|
+        graph = object.to_rdf(RDF::URI.intern(url))
 
-      normal.each do |name, vocab|
-        vocab.each do |field, values|
-          values.each do |value|
-            if value.is_a? Hash
-              # replace ID references with URI references
-              normal[name][field][values.index(value)] = RDF::URI.intern("#{uri.scheme}://#{uri.host}/#{value.keys.first}/#{value.values.first}")
+        graph.statements.each do |statement|
+          # resolve IDs
+          value = statement.object.object
+
+          # TODO: refactor as Model/Core/ClassMethods#normalize
+          if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+            if defined? resource_ids and resource_ids.include? value
+              model = :resource
+            elsif defined? agent_ids and agent_ids.include? value
+              model = :agent
+            elsif defined? concept_ids and concept_ids.include? value
+              model = :concept
+            else
+              model = self.class.name.underscore
             end
+
+            new_statement = [statement.subject, statement.predicate, RDF::URI.intern("#{uri.scheme}://#{uri.host}/#{model}/#{statement.object}")]
+            graph.delete(statement)
+            graph << new_statement
           end
         end
-      end
 
-      # create a new model object from the modified values
-      new_obj = self.class.new(normal)
+        graphs << graph
+      end
 
       RDF::RDFXML::Writer.buffer do |writer|
         # FIXME: this is necessary to write a rdf:Description element
@@ -222,9 +235,8 @@ module Model
           writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
         end
 
-        # get the RDF graph for each vocab
-        new_obj.vocabs.each do |key, object|
-          writer << object.to_rdf(RDF::URI.intern(url))
+        graphs.each do |graph|
+          writer << graph
         end
       end
 

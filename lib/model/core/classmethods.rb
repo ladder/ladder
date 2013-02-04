@@ -151,6 +151,7 @@ module Model
                 end
 
                 # traverse through ID-like values
+                # TODO: refactor me somewhere reusable
                 values.select {|value| value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)}.each do |value|
                   case opts[:ids]
                     when :omit

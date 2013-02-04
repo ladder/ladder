@@ -11,16 +11,6 @@ GIT
       rest-client (~> 1.6)
 
 GIT
-  remote: git://github.com/mtrudel/easel.git
-  revision: 84f258585c3bb65f7683f447e7d75cfd48b2edbd
-  specs:
-    easel (0.0.5)
-      activesupport
-      mongoid
-      rdf
-      rdf-xml
-
-GIT
   remote: git://github.com/padrino/padrino-framework.git
   revision: 5173465336716426f99b971df16e9bdee8b8c39a
   specs:
@@ -51,6 +41,15 @@ GIT
     padrino-mailer (0.10.7)
       mail (~> 2.5.3)
       padrino-core (= 0.10.7)
+
+PATH
+  remote: ~/Documents/easel
+  specs:
+    easel (0.1.0)
+      activesupport
+      mongoid
+      rdf
+      rdf-xml
 
 GEM
   remote: http://rubygems.org/
