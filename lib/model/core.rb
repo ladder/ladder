@@ -79,6 +79,7 @@ module Model
     end
 
     def heading
+      # TODO: save localized heading, or make a localized field
       self.class.headings.each do |heading|
         vocab = heading.keys.first
         field = heading.values.first

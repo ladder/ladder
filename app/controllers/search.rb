@@ -45,7 +45,6 @@ Ladder.controllers :search do
       search.size 0
       search.facet('locales') {terms 'locales', :size => 10}
     end
-
     locales = @locales.results.facets['locales']['terms'].map {|locale| locale['term']}
 
     # set facets
@@ -122,8 +121,12 @@ Ladder.controllers :search do
           filter.each do |f, arr|
             arr.each do |v|
               # FIXME: refactor me with dynamic templates
-#              filtered.filter :term, "#{ns}.#{f}.raw" => v
-              filtered.filter :term, "#{ns}.#{f}.en" => v
+              filter_fields = []
+              locales.each do |locale|
+                filter_fields << {:term => {"#{ns}.#{f}.#{locale}" => v}}
+              end
+
+              filtered.filter :or, filter_fields
             end
           end
         end
