@@ -12,7 +12,8 @@ GIT
 
 GIT
   remote: git://github.com/mtrudel/easel.git
-  revision: e11adb1031badd4d713fb7501714a915a43bdd16
+  revision: e592b5294c9d96159e86c194c06aec551c78ea8a
+  branch: i18n
   specs:
     easel (0.1.0)
       activesupport

@@ -36,7 +36,7 @@ gem 'recursive-open-struct' # access hashes using object notation
 gem 'ignore_nil'            # cleanly access chained property methods
 
 # linked data gems
-gem 'easel', :git => 'git://github.com/mtrudel/easel.git'
+gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'
 gem 'rdf-rdfxml'
 
 # gems for importing existing data
