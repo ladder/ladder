@@ -78,13 +78,19 @@ module Model
       update_attributes(hash)
     end
 
-    def heading
-      # TODO: save localized heading, or make a localized field
+    def heading(opts={})
       self.class.headings.each do |heading|
         vocab = heading.keys.first
         field = heading.values.first
 
-        target = send(vocab).send(field) unless send(vocab).nil?
+        unless send(vocab).nil?
+          # NB: default is localized
+          if opts[:delocalize]
+            target = self[vocab][field.to_s]
+          else
+            target = send(vocab).send(field)
+          end
+        end
 
         return target if target
       end
@@ -182,7 +188,7 @@ module Model
       hash = self.normalize(:all_keys => true)
 
       # add heading
-      hash[:heading] = heading
+      hash[:heading] = heading(:delocalize => true)
 
       # add locales
       hash[:locales] = locales
