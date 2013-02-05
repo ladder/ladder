@@ -10,9 +10,9 @@ class Group
   @headings = [{:rdfs => :label}]
 
   # model relations
-  has_many :agents
-  has_many :concepts
-  has_many :resources
+  has_and_belongs_to_many :agents
+  has_and_belongs_to_many :concepts
+  has_and_belongs_to_many :resources
 
   define_scopes
 end
