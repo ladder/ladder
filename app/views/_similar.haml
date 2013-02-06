@@ -27,6 +27,6 @@
             - if document.is_a? Concept
               #{[doc.load.ancestors.map(&:heading) + doc.load.heading].send(*show)}
             - else
-              #{doc.load.heading.send(show)}
+              #{doc.load.heading.send(*show)}
             %small.muted (#{(doc.diff * 100).round}%)
             .clearfix

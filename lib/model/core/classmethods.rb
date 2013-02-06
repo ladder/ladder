@@ -15,7 +15,7 @@ module Model
         # use md5 fingerprint to query if a document already exists
         obj = self.new(attrs)
         hash = obj.normalize({:ids => :omit})
-        query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s)))
+        query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize)))
 
         result = query.first
         return result unless result.nil?
@@ -132,8 +132,21 @@ module Model
       end
 
       def normalize(hash, opts={})
-        # Normalize the hash first
-        hash.normalize!(opts)
+        # set default keys to strip
+        except = opts[:except] || [:_id]
+
+        hash = hash.recurse do |h|
+          h.symbolize_keys!
+
+          # Strip specified keys
+          h.except! *except
+
+          # Reject nil and empty values
+          h.delete_if { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+
+          # Sort keys
+          Hash[h.sort]
+        end
 
         # Remove keys not declared in mapping
         hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key } unless 'Group' == self.name
@@ -187,8 +200,11 @@ module Model
             end
           end
 
-          # Re-normalize to remove empty keys
-          hash.normalize!(opts)
+          hash = hash.recurse do |h|
+            # Reject nil and empty values
+            h.delete_if { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+          end
+
         end
 
         # Remove non-hash keys
