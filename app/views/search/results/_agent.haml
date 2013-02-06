@@ -1,6 +1,6 @@
 .span8
   %a{:href => url_for(:agent, :index, :id => agent.id)}
-    %h4= agent.heading.first.truncate(100, :separator => ' ').humanize
+    %h4= agent.heading.lookup(agent.heading.to_hash).first.truncate(100, :separator => ' ').humanize
 
   - desc = []
   - desc.push ignore_nil {agent.dbpedia.birthName.first || agent.foaf.name.first}

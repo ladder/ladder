@@ -87,6 +87,7 @@ module Model
           # NB: default is localized
           if opts[:delocalize]
             target = self[vocab][field.to_s]
+            target.symbolize_keys! unless target.nil?
           else
             target = send(vocab).send(field)
           end
@@ -95,7 +96,7 @@ module Model
         return target if target
       end
 
-      [I18n.t('model.untitled')]
+      {I18n.locale => [I18n.t('model.untitled')]}
     end
 
     def locales

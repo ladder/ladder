@@ -82,7 +82,7 @@ module Model
 
         properties = {
             # Heading is what users will correlate with most
-            :heading => {:type => 'string', :boost => 2},
+            :heading => {:type => 'object', :boost => 2},
 
             # RDF class information
             :rdf_types => { :type => 'string', :index => 'not_analyzed' },
