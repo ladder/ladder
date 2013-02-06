@@ -1,8 +1,7 @@
 %a{:href => url_for(:resource, :index, :id => resource.id)}
   %h4= resource.heading.lookup(resource.heading.to_hash).first.truncate(100, :separator => ' ').humanize
 
-- resource = RecursiveOpenStruct.new(resource.normalize({:ids => :resolve, :localize => true}))
--#= resource.normalize({:ids => :resolve, :localize => true, :all_keys => true})
+- resource = resource.normalize({:ids => :resolve, :localize => true}).to_ostruct_recurse
 
 - desc = []
 - desc.push ignore_nil {resource.dcterms.format.first.capitalize}

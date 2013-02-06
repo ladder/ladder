@@ -2,7 +2,7 @@
   %a{:href => url_for(:concept, :index, :id => concept.id)}
     %h4
       - if ignore_nil {concept.skos.hiddenLabel}
-        %small= ignore_nil {concept.skos.hiddenLabel.dashjoin}
+        %small= ignore_nil {concept.skos.hiddenLabel.join(' -- ')}
         \--
       = concept.heading.lookup(concept.heading.to_hash).last.truncate(100, :separator => ' ')
 

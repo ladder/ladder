@@ -12,7 +12,7 @@
       - if 'dcterms.LCSH' == facet.first
         -# NB: this requires multiple hits to the DB
         - reference = heading.type.to_s.classify.constantize.find(heading.id)
-        - display = [reference.ancestors.map(&:heading) + reference.heading].dashjoin
+        - display = [reference.ancestors.map(&:heading) + reference.heading].join(' -- ')
       - elsif 'group' == facet.first
         - display = Group.find(f['term']).rdfs.label.first
       - else display = heading.heading.first.truncate(100, :separator => ' ') rescue ''

@@ -91,6 +91,7 @@ GEM
     erubis (2.7.0)
     excon (0.16.10)
     fabrication (2.5.4)
+    facets (2.9.3)
     gyoku (0.4.6)
       builder (>= 2.1.2)
     haml (3.1.7)
@@ -169,7 +170,6 @@ GEM
       rdf (>= 0.1.1)
     rdf-xsd (0.3.8)
       rdf (>= 0.3.4)
-    recursive-open-struct (0.3.1)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rubyzip (0.9.9)
@@ -205,6 +205,7 @@ DEPENDENCIES
   easel!
   enhanced_marc
   fabrication
+  facets
   gyoku
   haml
   hashdiff
@@ -226,6 +227,5 @@ DEPENDENCIES
   pry-padrino
   rake
   rdf-rdfxml
-  recursive-open-struct
   tire!
   wirble

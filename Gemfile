@@ -23,6 +23,12 @@ gem 'iso-639'     # english/french lists
 gem 'hashdiff'    # hash comparison
 gem 'amatch'      # string comparison
 gem 'oj'          # JSON parser/serializer
+gem 'ignore_nil'  # cleanly access chained property methods
+
+# Ruby facets methods
+gem 'facets', :require => ['facets/hash/recurse',
+                           'facets/hash/recursively',
+                           'facets/ostruct']
 
 # model gems
 gem 'tire', :git => 'git://github.com/cjbottaro/tire.git', :branch => 'put_mapping'
@@ -32,8 +38,6 @@ gem 'mongo', :require => 'mongo'
 gem 'mongoid'
 gem 'mongoid-tree', :require => 'mongoid/tree'
 #gem 'mongoid-grid_fs'
-gem 'recursive-open-struct' # access hashes using object notation
-gem 'ignore_nil'            # cleanly access chained property methods
 
 # linked data gems
 gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'

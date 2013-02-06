@@ -1,4 +1,4 @@
-- @title = [@concept.ancestors.map(&:heading) + @concept.heading].dashjoin
+- @title = [@concept.ancestors.map(&:heading) + @concept.heading].join(' -- ')
 
 .container
   .row
@@ -32,7 +32,7 @@
 
             -# SIMILAR ITEMS
             - unless @concept.similar.empty?
-              = partial 'similar', :locals => {:document => @concept, :show => :dashjoin}
+              = partial 'similar', :locals => {:document => @concept, :show => [:join, ' -- ']}
 
       -# FACETS
       - unless @results.empty? or 1 == @results.size

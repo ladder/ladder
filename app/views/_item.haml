@@ -35,7 +35,7 @@
                     - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
                     - if value[:concept]
-                      #{link_to [reference.ancestors.map(&:heading) + reference.heading].dashjoin, url_for(value.keys.first, :index, :id => value.values.first)}
+                      #{link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :index, :id => value.values.first)}
 
                     - elsif value[:agent]
                       - agent = Agent.find(value.values.first)
