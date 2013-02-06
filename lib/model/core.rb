@@ -50,7 +50,7 @@ module Model
 
     def normalize(opts={})
       # get a hash that we can modify
-      !! opts[:localize] ? hash = self.to_hash : hash = self.as_document
+      !! opts[:localize] ? hash = self.to_hash : hash = Hash[self.as_document]
 
       self.class.normalize(Marshal.load(Marshal.dump(hash)), opts)
     end
@@ -58,7 +58,7 @@ module Model
     def generate_md5
       hash = self.normalize({:ids => :omit})
 
-      self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_s))
+      self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize))
     end
 
     # Retrieve a hash of field names and embedded vocab objects
@@ -110,9 +110,6 @@ module Model
       p2 = model.normalize(opts.slice(:ids))
 
       # TODO: use to calculate a similarity score somehow
-      p1_size = p1.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).size
-      p2_size = p2.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).size
-
       HashDiff.diff(p1, p2)
     end
 
@@ -128,11 +125,8 @@ module Model
       # if we have selected specific comparisons, use those
       options = opts if opts.is_a? Hash and ! opts.empty?
 
-      p1 = self.normalize(options.slice(:ids))
-      p2 = model.normalize(options.slice(:ids))
-
-      p1 = p1.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).join(' ').normalize
-      p2 = p2.values.map(&:values).flatten.map(&:values).flatten.map(&:to_s).join(' ').normalize
+      p1 = self.normalize(options.slice(:ids)).to_string_recursive.normalize
+      p2 = model.normalize(options.slice(:ids)).to_string_recursive.normalize
 
       # calculate amatch score for each algorithm
       options.delete :ids
