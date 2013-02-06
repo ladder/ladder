@@ -27,7 +27,6 @@ gem 'ignore_nil'  # cleanly access chained property methods
 
 # Ruby facets methods
 gem 'facets', :require => ['facets/hash/recurse',
-                           'facets/hash/recursively',
                            'facets/ostruct']
 
 # model gems
