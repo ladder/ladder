@@ -52,7 +52,7 @@ module Model
       # get a hash that we can modify
       !! opts[:localize] ? hash = self.to_hash : hash = Hash[self.as_document]
 
-      self.class.normalize(Hash[hash], opts)
+      self.class.normalize(Marshal.load(Marshal.dump(hash)), opts)
     end
 
     def generate_md5

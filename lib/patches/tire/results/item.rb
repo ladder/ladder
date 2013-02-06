@@ -23,7 +23,7 @@ module Tire
           end
         end
 
-        self.class.normalize(Hash[hash], opts)
+        self.class.normalize(Marshal.load(Marshal.dump(hash)), opts)
       end
 
       def lookup(object)

@@ -9,13 +9,14 @@
     - if f['term'].match(/^[0-9a-f]{24}$/)
       - heading = @headings.results.find {|i| i.id == f['term']} rescue []
 
-      - if 'dcterms.LCSH' == facet.first
+      - if 'dcterms.LCSH' == facet.first or 'dcterms.subject' == facet.first
         -# NB: this requires multiple hits to the DB
         - reference = heading.type.to_s.classify.constantize.find(heading.id)
         - display = [reference.ancestors.map(&:heading) + reference.heading].join(' -- ')
       - elsif 'group' == facet.first
         - display = Group.find(f['term']).rdfs.label.first
-      - else display = heading.heading.first.truncate(100, :separator => ' ') rescue ''
+      - else
+        - display = heading.heading.lookup(heading.heading.to_hash).first.truncate(100, :separator => ' ') rescue ''
 
     - elsif 'dcterms.language' == facet.first
       - if 'fr' == I18n.locale.to_s then display = ISO_639.find(f['term']).french_name.titleize rescue f['term']
