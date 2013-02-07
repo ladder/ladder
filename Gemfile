@@ -7,6 +7,8 @@ group :development do
   gem 'pry-padrino'
   gem 'better_errors'
   gem 'binding_of_caller'
+  gem 'unicorn'
+  gem 'rvm-capistrano'
   #gem 'ruby-prof'
 end
 
