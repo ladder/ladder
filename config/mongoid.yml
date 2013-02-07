@@ -1,7 +1,7 @@
 production:
   sessions:
     default:
-      uri: <%= ENV['MONGOLAB_URI'] %>
+      uri: <%= ENV['MONGOLAB_URI'] || 'mongodb://localhost' %>
       options:
         skip_version_check: true
         identity_map_enabled: true
