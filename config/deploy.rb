@@ -7,6 +7,7 @@ set :rvm_ruby_string, '1.9.3-p286'
 set :rvm_type, :user
 
 set :application, "ladder"
+set :branch, "re-enable-staging"
 set :repository,  "git@github.com:Marbletank/Ladder.git"
 
 set :scm, :git
@@ -24,7 +25,7 @@ set :host, "#{user}@ladder.deliberatedata.com"
 role :web, host
 role :app, host
 
-set :rack_env, :production
+set :rack_env, :test
 
 set :deploy_to, "/srv/#{application}"
 set :unicorn_conf, "#{deploy_to}/current/config/unicorn.rb"

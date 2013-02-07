@@ -1,14 +1,15 @@
 source :rubygems
 ruby "1.9.3"
 
+gem 'unicorn'
+gem 'rvm-capistrano'
+
 group :development do
   gem 'wirble'
   gem 'heroku'
   gem 'pry-padrino'
   gem 'better_errors'
   gem 'binding_of_caller'
-  gem 'unicorn'
-  gem 'rvm-capistrano'
   #gem 'ruby-prof'
 end
 
