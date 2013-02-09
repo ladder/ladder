@@ -28,7 +28,8 @@
               %td.span2
                 %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
 
-              %td.span10
+              %td.span8
+                - wl = WhatLanguage.new(:all)
                 - values.each do |value|
 
                   - if value.is_a? Hash
@@ -56,8 +57,16 @@
                   - else
                     = value
 
+                  .pull-right
+                    - if value.is_a? String
+                      - lang = wl.language(value)
+                      - score = wl.process_text(value)[lang]
+                      - if score > 2
+                        .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
+
                   - unless values.last == value
                     %br
+
     .tab-pane#rdf
       %pre
         %code&= item.to_rdfxml(url_for(request.path_info))

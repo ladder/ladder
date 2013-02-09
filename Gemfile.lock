@@ -22,6 +22,12 @@ GIT
       rdf-xml
 
 GIT
+  remote: git://github.com/niknikjaja/whatlanguage.git
+  revision: 9ae91e769cf511a681086f3032519efbff221b69
+  specs:
+    whatlanguage (1.0.5)
+
+GIT
   remote: git://github.com/padrino/padrino-framework.git
   revision: 5173465336716426f99b971df16e9bdee8b8c39a
   specs:
@@ -117,6 +123,7 @@ GEM
     kaminari (0.14.1)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
+    language_list (0.1.0)
     launchy (2.1.2)
       addressable (~> 2.3)
     locale (2.0.8)
@@ -214,6 +221,7 @@ DEPENDENCIES
   ignore_nil
   iso-639
   kaminari
+  language_list
   lz4-ruby
   marc
   mongo
@@ -228,4 +236,5 @@ DEPENDENCIES
   rake
   rdf-rdfxml
   tire!
+  whatlanguage!
   wirble
