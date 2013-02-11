@@ -1,3 +1,5 @@
+- wl = WhatLanguage.new(:all)
+
 .tabbable
   %ul.nav.nav-tabs
     %li.active
@@ -29,7 +31,6 @@
                 %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
 
               %td.span8
-                - wl = WhatLanguage.new(:all)
                 - values.each do |value|
 
                   - if value.is_a? Hash
@@ -57,7 +58,6 @@
                   - else
                     = value
 
-                  .pull-right
                     - if value.is_a? String
                       -# TODO: refactor into a helper and improve logic
                       - lang = wl.language(value)
@@ -65,11 +65,12 @@
                       - if results[lang] > 1
                         - match = results[lang].to_f / value.split.size
                         - if 1 == results.values.count(results[lang])
-                          - if match > 0.85
-                            .label.label-info= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
-                          - else
-                            .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
-                          %small.muted (#{(100 * match).round}%)
+                          .pull-right
+                            - if match > 0.85
+                              .label.label-info= LanguageList::LanguageInfo.find(lang.capitalize.to_s).name
+                            - else
+                              .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).name
+                            %small.muted (#{(100 * match).round}%)
 
                   - unless values.last == value
                     %br

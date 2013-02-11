@@ -96,7 +96,8 @@ module Model
         return target if target
       end
 
-      {I18n.locale => [I18n.t('model.untitled')]}
+#      {I18n.locale => [I18n.t('model.untitled')]}
+      [I18n.t('model.untitled')]
     end
 
     def locales
@@ -139,7 +140,6 @@ module Model
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
     def similar(opts={})
-
       hash = self.normalize({:ids => :omit})
       id = self.id
 
@@ -174,7 +174,7 @@ module Model
         end
       end
 
-      @similar = results
+      results
     end
 
     # more precise serialization for Tire
