@@ -7,7 +7,7 @@ module Mapping
       mapped = {}
 
       hash.each do |symbol, xpath|
-        nodes = xml_node.xpath(xpath).map(&:text).map(&:strip).uniq
+        nodes = xml_node.xpath(xpath).map(&:text).uniq#.map(&:strip).uniq
         mapped[symbol] = nodes unless nodes.empty?
       end
 

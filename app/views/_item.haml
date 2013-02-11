@@ -59,11 +59,17 @@
 
                   .pull-right
                     - if value.is_a? String
+                      -# TODO: refactor into a helper and improve logic
                       - lang = wl.language(value)
-                      - score = wl.process_text(value)[lang]
-                      - if score > 2
-                        .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
-                        %small.muted (#{(100 * score / value.split.size).round}%)
+                      - results = wl.process_text(value)
+                      - if results[lang] > 1
+                        - match = results[lang].to_f / value.split.size
+                        - if 1 == results.values.count(results[lang])
+                          - if match > 0.85
+                            .label.label-info= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
+                          - else
+                            .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
+                          %small.muted (#{(100 * match).round}%)
 
                   - unless values.last == value
                     %br
