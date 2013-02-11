@@ -63,6 +63,7 @@
                       - score = wl.process_text(value)[lang]
                       - if score > 2
                         .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
+                        %small.muted (#{(100 * score / value.split.size).round}%)
 
                   - unless values.last == value
                     %br
