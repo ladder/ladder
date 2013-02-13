@@ -2,7 +2,7 @@
 
 .row-fluid
   .span2.half
-    %a.thumbnail{:href => url_for(result.class.to_s.underscore.to_sym, :index, :id => result.id)}
+    %a.thumbnail{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
       = partial 'image', :object => result
 
   .span10

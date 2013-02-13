@@ -12,7 +12,7 @@
 
       - if doc.diff > 0.85
         %li.media.active
-          %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => doc.id)}
+          %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
             .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
             %strong.text-warning #{doc.load.heading.send(*show)}
@@ -21,7 +21,7 @@
 
       - else
         %li.media
-          %a{:href => url_for(document.class.to_s.underscore.to_sym, :index, :id => doc.id)}
+          %a{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
             .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
             - if document.is_a? Concept

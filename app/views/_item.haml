@@ -37,20 +37,20 @@
                     - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
                     - if value[:concept]
-                      #{link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :index, :id => value.values.first)}
+                      #{link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :id => value.values.first)}
 
                     - elsif value[:agent]
                       - agent = Agent.find(value.values.first)
                       .together{:style => 'clear: both;'}
                         .span2
-                          %a.thumbnail.pull-left{:href => url_for(:agent, :index, :id => agent.id), :style => 'margin-left: 9px;'}
+                          %a.thumbnail.pull-left{:href => url_for(:agent, :id => agent.id), :style => 'margin-left: 9px;'}
                             .half-small
                               = partial 'image', :object => agent
                         .span8
-                          #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+                          #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :id => value.values.first)}
 
                     - else
-                      #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+                      #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :id => value.values.first)}
 
                   - elsif :language == field
                     = ISO_639.find(value).english_name rescue nil

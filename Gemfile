@@ -10,9 +10,14 @@ group :development do
   #gem 'ruby-prof'
 end
 
+# Padrino master branch
+gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
+gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
+
 # Project requirements
 gem 'rake'
 gem 'haml'
+#gem 'rabl'
 
 # Component requirements
 gem 'fabrication' # object generation
@@ -54,7 +59,3 @@ gem 'gyoku'
 gem 'httpclient'
 #gem 'oai'
 #gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
-
-# Padrino master branch
-gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
-gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'

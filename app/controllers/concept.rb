@@ -1,6 +1,6 @@
-Ladder.controllers :concept do
+Ladder.controllers do
 
-  get :index, :with => :id, :cache => true do
+  get :concept, :map => '/concept/:id', :cache => true do
     @concept = Concept.find(params[:id])
 
     # TODO: DRY this out somehow
@@ -11,7 +11,6 @@ Ladder.controllers :concept do
     @filters = params[:fi] || {}
     @page = params[:page] || 1
     @per_page = params[:pp] || 10
-
 
     # set facets
     @facets = {:dcterms => %w[format language issued creator contributor publisher subject]}

@@ -1,4 +1,4 @@
-%a{:href => url_for(:resource, :index, :id => resource.id)}
+%a{:href => url_for(:resource, :id => resource.id)}
   %h4= resource.load.heading.first.truncate(100, :separator => ' ').humanize
 
 - resource = resource.normalize({:ids => :resolve, :localize => true}).to_ostruct_recurse
@@ -13,7 +13,7 @@
   - agents = agents.take(3).map do |value|
     - if value.is_a? Hash
       - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
-      - link_to(heading.first, url_for(value.keys.first, :index, :id => value.values.first))
+      - link_to(heading.first, url_for(value.keys.first, :id => value.values.first))
 - else agents = []
 
 .description #{[agents + desc].join('; ')}
