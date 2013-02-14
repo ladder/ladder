@@ -1,5 +1,5 @@
 .span8
-  %a{:href => url_for(:concept, :index, :id => concept.id)}
+  %a{:href => url_for(:concept, :id => concept.id)}
     %h4= [concept.load.ancestors.map(&:heading) + concept.load.heading].join(' -- ').truncate(100, :separator => ' ').humanize
 
   - desc = []
@@ -12,6 +12,6 @@
   - if concept.resource_ids
     .together
       - Resource.find(concept.resource_ids.take(3)).each do |resource|
-        %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
+        %a.thumbnail.pull-right{:href => url_for(:resource, :id => resource.id), :style => 'margin-left: 9px;'}
           .half-small
             = partial 'image', :object => resource

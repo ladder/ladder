@@ -1,6 +1,6 @@
-Ladder.controllers :agent do
+Ladder.controllers do
 
-  get :index, :with => :id, :cache => true do
+  get :agent, :map => '/agent/:id', :cache => true do
     @agent = Agent.find(params[:id])
 
     # TODO: DRY this out somehow

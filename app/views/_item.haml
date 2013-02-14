@@ -1,3 +1,5 @@
+- wl = WhatLanguage.new(:all)
+
 .tabbable
   %ul.nav.nav-tabs
     %li.active
@@ -29,27 +31,26 @@
                 %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
 
               %td.span8
-                - wl = WhatLanguage.new(:all)
                 - values.each do |value|
 
                   - if value.is_a? Hash
                     - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
                     - if value[:concept]
-                      #{link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :index, :id => value.values.first)}
+                      #{link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :id => value.values.first)}
 
                     - elsif value[:agent]
                       - agent = Agent.find(value.values.first)
                       .together{:style => 'clear: both;'}
                         .span2
-                          %a.thumbnail.pull-left{:href => url_for(:agent, :index, :id => agent.id), :style => 'margin-left: 9px;'}
+                          %a.thumbnail.pull-left{:href => url_for(:agent, :id => agent.id), :style => 'margin-left: 9px;'}
                             .half-small
                               = partial 'image', :object => agent
                         .span8
-                          #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+                          #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :id => value.values.first)}
 
                     - else
-                      #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :index, :id => value.values.first)}
+                      #{link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :id => value.values.first)}
 
                   - elsif :language == field
                     = ISO_639.find(value).english_name rescue nil
@@ -57,12 +58,19 @@
                   - else
                     = value
 
-                  .pull-right
                     - if value.is_a? String
+                      -# TODO: refactor into a helper and improve logic
                       - lang = wl.language(value)
-                      - score = wl.process_text(value)[lang]
-                      - if score > 2
-                        .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).to_s
+                      - results = wl.process_text(value)
+                      - if results[lang] > 1
+                        - match = results[lang].to_f / value.split.size
+                        - if 1 == results.values.count(results[lang])
+                          .pull-right
+                            - if match > 0.85
+                              .label.label-info= LanguageList::LanguageInfo.find(lang.capitalize.to_s).name
+                            - else
+                              .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).name
+                            %small.muted (#{(100 * match).round}%)
 
                   - unless values.last == value
                     %br
