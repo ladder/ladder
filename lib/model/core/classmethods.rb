@@ -14,7 +14,7 @@ module Model
 
         # use md5 fingerprint to query if a document already exists
         obj = self.new(attrs)
-        hash = obj.normalize({:ids => :omit})
+        hash = obj.to_normalized_hash({:ids => :omit})
         query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize)))
 
         result = query.first
@@ -136,6 +136,9 @@ module Model
         # set default keys to strip
         except = opts[:except] || [:_id, :version]
 
+        # Remove keys not declared in mapping
+        hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key.to_sym } unless 'Group' == self.name
+
         hash = hash.recurse do |h|
           h.symbolize_keys!
 
@@ -143,19 +146,20 @@ module Model
           h.except! *except
 
           # Reject nil and empty values
-          h.delete_if { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+          h.reject! { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+
+          # Remove non-hash, non-value keys
+          h.reject! { |key, value| !value.kind_of? Enumerable } unless opts[:all_keys]
 
           # Sort keys
           Hash[h.sort]
         end
 
-        # Remove keys not declared in mapping
-        hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key } unless 'Group' == self.name
-
         # Modify Object ID references if specified
         if opts[:ids]
 
           hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
+
             vocab.each do |field, locales|
               # special case for 'version' tracking field
               next unless locales.kind_of? Enumerable
@@ -191,7 +195,7 @@ module Model
                       end
 
                       # modify the value in-place
-                      if !! opts[:localize]
+                      if opts[:localize]
                         hash[name][field][values.index(value)] = {model.to_sym => value.to_s}
                       else
                         hash[name][field][locale][values.index(value)] = {model.to_sym => value.to_s}
@@ -210,9 +214,6 @@ module Model
           end
 
         end
-
-        # Remove non-hash keys
-        hash.delete_if { |key, value| !value.is_a? Hash } unless opts[:all_keys]
 
         hash
       end
