@@ -57,8 +57,7 @@ module Model
     end
 
     def generate_md5
-      # FIXME :except is temporary
-      hash = self.to_normalized_hash({:ids => :omit, :except => [:_id, :version, :resource_ids, :concept_ids, :agent_ids, :group_ids]})
+      hash = self.to_normalized_hash({:ids => :omit})
 
       self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize))
     end
@@ -82,9 +81,9 @@ module Model
 
     def locales
       items = self.to_normalized_hash.values.map do |vocab|
-        vocab.map do |field, values|
-          next unless values.is_a? Hash
-          values.keys
+        vocab.map do |field, locales|
+          next unless locales.is_a? Hash
+          locales.keys
         end
       end
 
@@ -150,7 +149,7 @@ module Model
             must_not { term :_id, id.to_s }
 
             # NB: use this as a template for recursing in normalized documents?
-            hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
+            hash.each do |name, vocab|
               vocab.each do |field, locales|
                 locales.each do |locale, values|
                   values.each do |value|

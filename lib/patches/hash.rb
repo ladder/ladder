@@ -1,4 +1,15 @@
 class Hash
+=begin
+  attr_accessor :localized
+
+  def localized?
+    @localized || false
+  end
+
+  def localized=(bool)
+    @localized = !! bool
+  end
+=end
   def to_string_recursive
     self.recurse do |h|
       h.inject('') do |string, (key, values)|
