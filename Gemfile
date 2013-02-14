@@ -34,7 +34,7 @@ gem 'whatlanguage',# language detection
       :git => 'git://github.com/niknikjaja/whatlanguage.git'
 
 # Ruby facets methods
-gem 'facets', :require => ['facets/hash/recurse', 'facets/ostruct']
+gem 'facets', :require => ['facets/hash/recurse']
 
 # model gems
 gem 'tire', :git => 'git://github.com/cjbottaro/tire.git', :branch => 'put_mapping'
