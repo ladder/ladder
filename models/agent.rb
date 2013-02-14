@@ -4,8 +4,8 @@ class Agent
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :foaf,     class_name: 'FOAF'#,   autobuild: true
-  embeds_one :vcard,    class_name: 'VCard'#,  autobuild: true
+  embeds_one :foaf,     class_name: 'FOAF',   cascade_callbacks: true, autobuild: false
+  embeds_one :vcard,    class_name: 'VCard',  cascade_callbacks: true, autobuild: false
 
   @rdf_types = [[:dbpedia, :Agent],
                 [:foaf, :Agent]]
@@ -22,6 +22,9 @@ class Agent
   has_and_belongs_to_many :groups, index: true
   has_and_belongs_to_many :resources, index: true
   has_and_belongs_to_many :concepts, index: true
+
+  # Enable history tracking for embedded documents
+  track_history :on => vocabs.keys
 
   define_scopes
 end

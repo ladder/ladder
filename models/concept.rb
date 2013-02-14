@@ -4,7 +4,7 @@ class Concept
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :skos, class_name: 'SKOS'#, autobuild: true
+  embeds_one :skos, class_name: 'SKOS', cascade_callbacks: true, autobuild: false
 
   @rdf_types = [[:dbpedia, :TopicalConcept],
                 [:skos, :Concept]]
@@ -20,6 +20,9 @@ class Concept
   has_and_belongs_to_many :groups, index: true
   has_and_belongs_to_many :resources, index: true
   has_and_belongs_to_many :agents, index: true
+
+  # Enable history tracking for embedded documents
+  track_history :on => vocabs.keys
 
   define_scopes
 end
