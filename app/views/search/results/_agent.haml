@@ -1,6 +1,6 @@
 .span8
   %a{:href => url_for(:agent, :id => agent.id)}
-    %h4= agent.load.heading.first.truncate(100, :separator => ' ').humanize
+    %h4= [agent.load.ancestors.map(&:heading) + agent.load.heading].join(' -- ').truncate(100, :separator => ' ').humanize
 
   - desc = []
   - desc.push ignore_nil {agent.dbpedia.birthName.first || agent.foaf.name.first}
@@ -11,9 +11,6 @@
     - death = ignore_nil {agent.dbpedia.deathYear.first || agent.dbpedia.deathDate.first}
     - death = Date.parse(death).year.to_s
     - desc.push "#{birth}-#{death}"
-
-  -# if ignore_nil {agent.foaf.name}
-    -# desc.push ignore_nil {agent.foaf.name.join(' -- ')}
 
   - if ignore_nil {agent.resource_ids.size > 3}
     - desc.push "#{agent.resource_ids.size} #{I18n.t('search.resources')}"
