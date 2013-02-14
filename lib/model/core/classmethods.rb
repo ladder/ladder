@@ -14,7 +14,8 @@ module Model
 
         # use md5 fingerprint to query if a document already exists
         obj = self.new(attrs)
-        hash = obj.to_normalized_hash({:ids => :omit})
+        # FIXME :except is temporary
+        hash = obj.to_normalized_hash({:ids => :omit, :except => [:_id, :version, :resource_ids, :concept_ids, :agent_ids, :group_ids]})
         query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize)))
 
         result = query.first
@@ -39,11 +40,6 @@ module Model
       end
 
       def define_scopes
-=begin
-        self.vocabs.keys.each do |vocab|
-          scope vocab, ->(exists=true) { where(vocab.exists => exists) }
-        end
-=end
         # add scope to check for documents not in ES index
         scope :unindexed, -> do
 
@@ -158,6 +154,7 @@ module Model
         # Modify Object ID references if specified
         if opts[:ids]
 
+          # FIXME: ids:omit should catch top-level IDs as well
           hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
 
             vocab.each do |field, locales|
