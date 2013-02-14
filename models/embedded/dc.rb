@@ -1,4 +1,4 @@
-class DC
+class DCTerms
   include Model::Embedded
 
   bind_to RDF::DC, :type => Array, :localize => true, :only => [:title, :alternative, :issued, :format,
