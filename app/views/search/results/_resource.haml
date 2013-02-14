@@ -1,7 +1,7 @@
 %a{:href => url_for(:resource, :id => resource.id)}
   %h4= resource.load.heading.first.truncate(100, :separator => ' ').humanize
 
-- resource = resource.normalize({:ids => :resolve, :localize => true}).to_ostruct_recurse
+- resource = resource.to_normalized_hash({:ids => :resolve, :localize => true}).to_ostruct_recurse
 
 - desc = []
 - desc.push ignore_nil {resource.dcterms.format.first.capitalize}
