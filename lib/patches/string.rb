@@ -1,12 +1,12 @@
 class String
   def normalize(opts={})
     space_char = opts[:space_char] || ''
-    self.gsub(/[-+!\(\)\{\}\[\]\n\s^"'~*?:;,.\\\/]|&&|\|\|/, space_char).strip rescue self
+    self.gsub(/[-+!\(\)\{\}\[\]\n\s^"'~*?:;,.\\\/]|&&|\|\|/, space_char).squeeze(space_char).strip rescue self
   end
 
   def normalize!(opts={})
     space_char = opts[:space_char] || ''
-    self.gsub!(/[-+!\(\)\{\}\[\]\n\s^"'~*?:;,.\\\/]|&&|\|\|/, space_char).strip rescue nil
+    self.gsub!(/[-+!\(\)\{\}\[\]\n\s^"'~*?:;,.\\\/]|&&|\|\|/, space_char).squeeze!(space_char).strip! rescue nil
   end
 
   def -(other)

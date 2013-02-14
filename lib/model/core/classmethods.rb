@@ -14,8 +14,7 @@ module Model
 
         # use md5 fingerprint to query if a document already exists
         obj = self.new(attrs)
-        # FIXME :except is temporary
-        hash = obj.to_normalized_hash({:ids => :omit, :except => [:_id, :version, :resource_ids, :concept_ids, :agent_ids, :group_ids]})
+        hash = obj.to_normalized_hash({:ids => :omit})
         query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize)))
 
         result = query.first
@@ -32,6 +31,7 @@ module Model
 
       def vocabs
         vocabs = {}
+
         embedded_relations.each do |vocab, meta|
           vocabs[vocab.to_sym] = meta.class_name.constantize
         end
@@ -128,12 +128,27 @@ module Model
         @mapping ||= self.define_mapping
       end
 
+      # Convert a hashed instance of the class to a stripped-down version
+      #
+      # @option options [ Symbol ] :except   List of keys to recursively strip.
+      # @option options [ Bool ]   :all_keys Include internal tracking keys.
+      # @option options [ Bool ]   :localize Localize fields based on current I18n.locale.
+      # @option options [ Symbol ] :ids      One of:  :omit    Strip all ID-type values
+      #                                               :resolve Turn into Hash eg. {:model => ID}
+      #
+      # @param [ Hash ] hash The hash to convert.
+      #
+      # @return [ Hash ] The converted hash.
+      #
       def normalize(hash, opts={})
         # set default keys to strip
         except = opts[:except] || [:_id, :version]
 
-        # Remove keys not declared in mapping
+        # Remove keys not declared in index mapping
         hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key.to_sym } unless 'Group' == self.name
+
+        # Only keep defined vocabs by default
+        hash.select! {|key| vocabs.keys.include? key.to_sym} unless opts[:all_keys]
 
         hash = hash.recurse do |h|
           h.symbolize_keys!
@@ -153,6 +168,30 @@ module Model
 
         # Modify Object ID references if specified
         if opts[:ids]
+=begin
+          hash.each do |name, vocab|
+            next unless vocab.is_a? Hash
+
+            vocab.each do |field, locales|
+
+              if locales.is_a? Hash
+                # we have a non-localized hash
+                locales.each do |locale, values|
+                  values.each do |value|
+puts "#{name} / #{field} / #{locale} / #{value}"
+                  end
+                end
+              else
+                # we have a localized hash
+                locales.each do |value|
+puts "#{name} / #{field} / #{value}"
+
+                end
+              end
+
+            end
+          end
+=end
 
           # FIXME: ids:omit should catch top-level IDs as well
           hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
