@@ -14,6 +14,7 @@ module Model
       base.send :include, Mongoid::Timestamps
       base.send :include, Mongoid::Tree
       #base.send :include, Mongoid::Tree::Ordering
+      base.send :include, Mongoid::History::Trackable
 
       # Pagination
       base.send :include, Kaminari::MongoidExtension::Criteria
@@ -42,6 +43,9 @@ module Model
       # Include default embedded vocabularies
       base.send :embeds_one, :dbpedia,  class_name: 'DBpedia'#,  autobuild: true
       base.send :embeds_one, :rdfs,     class_name: 'RDFS'#,     autobuild: true
+
+      # Enable history tracking for documents
+      base.send :track_history
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
@@ -87,7 +91,8 @@ module Model
           # NB: default is localized
           if opts[:delocalize]
             target = self[vocab][field.to_s]
-            target.symbolize_keys! unless target.nil?
+# FIXME: i think this mutates the field
+            target = target.symbolize_keys unless target.nil?
           else
             target = send(vocab).send(field)
           end
@@ -100,7 +105,14 @@ module Model
     end
 
     def locales
-      self.normalize.values.map {|vocab| vocab.map {|field, values| values.keys} }.flatten.uniq
+      items = self.normalize.values.map do |vocab|
+        vocab.map do |field, values|
+          next unless values.is_a? Hash
+          values.keys
+        end
+      end
+
+      items.flatten.compact
     end
 
     # Return a HashDiff array computed between the two model instances
@@ -149,6 +161,7 @@ module Model
             # do not include self
             must_not { term :_id, id.to_s }
 
+# use this as a template for recursing in normalized documents
             hash.each do |name, vocab|
               vocab.each do |field, locales|
                 locales.each do |locale, values|
@@ -183,7 +196,8 @@ module Model
       hash = self.normalize(:all_keys => true)
 
       # add heading
-      hash[:heading] = heading(:delocalize => true)
+# FIXME: this breaks embedded field values
+#      hash[:heading] = heading(:delocalize => true)
 
       # add locales
       hash[:locales] = locales
