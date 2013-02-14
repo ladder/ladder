@@ -57,7 +57,8 @@ module Model
     end
 
     def generate_md5
-      hash = self.to_normalized_hash({:ids => :omit})
+      # FIXME :except is temporary
+      hash = self.to_normalized_hash({:ids => :omit, :except => [:_id, :version, :resource_ids, :concept_ids, :agent_ids, :group_ids]})
 
       self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize))
     end
