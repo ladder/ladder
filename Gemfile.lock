@@ -1,4 +1,13 @@
 GIT
+  remote: git://github.com/aq1018/mongoid-history.git
+  revision: a14cc3294b21b12f4342ca79f5f4d37d0234a982
+  specs:
+    mongoid-history (0.3.2)
+      activesupport
+      easy_diff
+      mongoid (~> 3.0)
+
+GIT
   remote: git://github.com/cjbottaro/tire.git
   revision: e72b409009461181727f471438ce6045f67ae9f3
   branch: put_mapping
@@ -91,6 +100,7 @@ GEM
       bson (~> 1.8.0)
     builder (3.0.4)
     coderay (1.0.8)
+    easy_diff (0.0.2)
     enhanced_marc (0.2.3)
       locale
       marc
@@ -101,7 +111,6 @@ GEM
     gyoku (0.4.6)
       builder (>= 2.1.2)
     haml (3.1.7)
-    hashdiff (0.0.5)
     hashr (0.0.22)
     heroku (2.33.4)
       heroku-api (~> 0.3.7)
@@ -215,7 +224,6 @@ DEPENDENCIES
   facets
   gyoku
   haml
-  hashdiff
   heroku
   httpclient
   ignore_nil
@@ -226,6 +234,7 @@ DEPENDENCIES
   marc
   mongo
   mongoid
+  mongoid-history!
   mongoid-tree
   nokogiri
   oj

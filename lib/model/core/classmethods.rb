@@ -39,10 +39,11 @@ module Model
       end
 
       def define_scopes
+=begin
         self.vocabs.keys.each do |vocab|
           scope vocab, ->(exists=true) { where(vocab.exists => exists) }
         end
-
+=end
         # add scope to check for documents not in ES index
         scope :unindexed, -> do
 
@@ -133,7 +134,7 @@ module Model
 
       def normalize(hash, opts={})
         # set default keys to strip
-        except = opts[:except] || [:_id]
+        except = opts[:except] || [:_id, :version]
 
         hash = hash.recurse do |h|
           h.symbolize_keys!
@@ -156,6 +157,9 @@ module Model
 
           hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
             vocab.each do |field, locales|
+              # special case for 'version' tracking field
+              next unless locales.kind_of? Enumerable
+
               locales.each do |locale, values|
 
                 if values.nil?

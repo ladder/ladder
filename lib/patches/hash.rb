@@ -5,7 +5,7 @@ class Hash
         if values.is_a? Array
           string += values.join
         else
-          string += values
+          string += values.to_s
         end
       end
     end
