@@ -183,8 +183,7 @@ module Model
       hash = self.to_normalized_hash(:all_keys => true)
 
       # add heading
-# FIXME: this breaks embedded field values
-      hash[:heading] = {:en => ['TEST']}#heading(:delocalize => true)
+      hash[:heading] = heading(:delocalize => true)
 
       # add locales
       hash[:locales] = locales
@@ -207,7 +206,7 @@ module Model
           # resolve IDs
           value = statement.object.object
 
-          # TODO: refactor as Model/Core/ClassMethods#normalize
+          # NB: this is duplicated from Model/Core/ClassMethods#normalize
           if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
             if defined? resource_ids and resource_ids.include? value
               model = :resource
