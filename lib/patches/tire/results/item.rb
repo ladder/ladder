@@ -13,18 +13,25 @@ module Tire
       end
 
       def to_normalized_hash(opts={})
-        # NB: refactor/reconsider :localize option in ClassMethods#normalize
-        hash = self.class.normalize(self.to_hash, opts.except(:localize))
+        hash = Marshal.load(Marshal.dump(self.to_hash))
 
         if opts[:localize]
           hash.each do |name, vocab|
+            next unless vocab.is_a? Hash
+
             vocab.each do |field, locales|
-              hash[name][field] = lookup(locales) unless locales.nil?
+              if locales.is_a? Hash
+                # we have a non-localized hash
+                locales.each do |locale, values|
+                  hash[name][field] = values
+                end
+              end
             end
           end
+
         end
 
-        hash
+        self.class.normalize(hash, opts)
       end
 
       def lookup(object)

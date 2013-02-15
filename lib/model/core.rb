@@ -155,7 +155,7 @@ module Model
                   values.each do |value|
                     should do
                       match "#{name}.#{field}.#{locale}", \
-                            value.normalize({:space_char => ' '}).truncate(100, :separator => ' ')
+                            value.to_s.normalize({:space_char => ' '}).truncate(100, :separator => ' ')
                     end
                   end
                 end
@@ -184,7 +184,7 @@ module Model
 
       # add heading
 # FIXME: this breaks embedded field values
-#      hash[:heading] = heading(:delocalize => true)
+      hash[:heading] = {:en => ['TEST']}#heading(:delocalize => true)
 
       # add locales
       hash[:locales] = locales
