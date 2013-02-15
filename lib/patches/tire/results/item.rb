@@ -29,11 +29,15 @@ module Tire
             end
           end
 
+          hash[:heading] = lookup(hash[:heading])
         end
 
         self.class.normalize(hash, opts)
       end
 
+      #
+      # Copied from Mongoid::Fields::Localized
+      #
       def lookup(object)
         locale = ::I18n.locale
         if ::I18n.respond_to?(:fallbacks)

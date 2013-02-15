@@ -130,8 +130,8 @@ module Model
 
       # Convert a hashed instance of the class to a stripped-down version
       #
-      # @option options [ Symbol ] :except   List of keys to recursively strip.
       # @option options [ Bool ]   :all_keys Include internal tracking keys.
+      # @option options [ Symbol ] :except   List of keys to recursively strip.
       # @option options [ Symbol ] :ids      One of:  :omit    Strip all ID-type values
       #                                               :resolve Turn into Hash eg. {:model => ID}
       #
