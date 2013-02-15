@@ -132,7 +132,6 @@ module Model
       #
       # @option options [ Symbol ] :except   List of keys to recursively strip.
       # @option options [ Bool ]   :all_keys Include internal tracking keys.
-      # @option options [ Bool ]   :localize Localize fields based on current I18n.locale.
       # @option options [ Symbol ] :ids      One of:  :omit    Strip all ID-type values
       #                                               :resolve Turn into Hash eg. {:model => ID}
       #
@@ -168,78 +167,37 @@ module Model
 
         # Modify Object ID references if specified
         if opts[:ids]
-=begin
+
           hash.each do |name, vocab|
             next unless vocab.is_a? Hash
 
-            vocab.each do |field, locales|
+            hash[name] = vocab.recurse do |h|
+              h.each do |k, values|
+                next unless values.is_a? Array
 
-              if locales.is_a? Hash
-                # we have a non-localized hash
-                locales.each do |locale, values|
-                  values.each do |value|
-puts "#{name} / #{field} / #{locale} / #{value}"
-                  end
-                end
-              else
-                # we have a localized hash
-                locales.each do |value|
-puts "#{name} / #{field} / #{value}"
-
-                end
-              end
-
-            end
-          end
-=end
-
-          # FIXME: ids:omit should catch top-level IDs as well
-          hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
-
-            vocab.each do |field, locales|
-              # special case for 'version' tracking field
-              next unless locales.kind_of? Enumerable
-
-              locales.each do |locale, values|
-
-                if values.nil?
-                  values = hash[name][field]
-                  opts[:localize] = true
-                end
-
-                # traverse through ID-like values
-                # TODO: refactor me somewhere reusable
-                values.select {|value| value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)}.each do |value|
-                  case opts[:ids]
-                    when :omit
-                      # modify the value in-place
-                      if opts[:localize]
-                        hash[name][field].delete value
-                      else
-                        hash[name][field][locale].delete value
-                      end
-
-                    when :resolve
-                      if hash[:resource_ids] and hash[:resource_ids].include? value
-                        model = :resource
-                      elsif hash[:agent_ids] and hash[:agent_ids].include? value
-                        model = :agent
-                      elsif hash[:concept_ids] and hash[:concept_ids].include? value
-                        model = :concept
-                      else
-                        model = hash[:type] || self.name.underscore
-                      end
-
-                      # modify the value in-place
-                      if opts[:localize]
-                        hash[name][field][values.index(value)] = {model.to_sym => value.to_s}
-                      else
-                        hash[name][field][locale][values.index(value)] = {model.to_sym => value.to_s}
-                      end
+                h[k] = values.map! do |value|
+                  # traverse through ID-like values
+                  if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+                    case opts[:ids]
+                      when :omit then value = nil
+                      when :resolve
+                        if hash[:resource_ids] and hash[:resource_ids].include? value
+                          model = :resource
+                        elsif hash[:agent_ids] and hash[:agent_ids].include? value
+                          model = :agent
+                        elsif hash[:concept_ids] and hash[:concept_ids].include? value
+                          model = :concept
+                        else
+                          model = hash[:type] || self.name.underscore
+                        end
+                        value = {model.to_sym => value}
+                    end
                   end
 
+                  value
                 end
 
+                values.compact!
               end
             end
           end
