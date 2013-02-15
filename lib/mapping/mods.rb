@@ -7,7 +7,7 @@ module Mapping
       mapped = {}
 
       hash.each do |symbol, xpath|
-        nodes = xml_node.xpath(xpath).map(&:text).map(&:strip).uniq
+        nodes = xml_node.xpath(xpath).map(&:text).uniq#.map(&:strip).uniq
         mapped[symbol] = nodes unless nodes.empty?
       end
 
@@ -84,8 +84,8 @@ module Mapping
 
       dcterms = map_xpath node, {
           # descriptive elements
-          :title         => 'titleInfo[not(@type = "alternative")]/*[not(name() = "nonSort")]',
-          :alternative   => 'titleInfo[@type = "alternative"]/*[not(name() = "nonSort")]',
+          :title         => 'titleInfo[not(@type = "alternative")]',
+          :alternative   => 'titleInfo[@type = "alternative"]',
           :issued        => 'originInfo/dateIssued',
           :format        => 'physicalDescription/form[not(@authority = "marcsmd")]',
           :medium        => 'physicalDescription/form[@authority = "marcsmd"]',

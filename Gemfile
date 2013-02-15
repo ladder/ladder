@@ -13,9 +13,14 @@ group :development do
   #gem 'ruby-prof'
 end
 
+# Padrino master branch
+gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
+gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
+
 # Project requirements
 gem 'rake'
 gem 'haml'
+#gem 'rabl'
 
 # Component requirements
 gem 'fabrication' # object generation
@@ -23,10 +28,13 @@ gem 'lz4-ruby'    # binary compression
 gem 'nokogiri'    # xml manipulation
 gem 'parallel'    # multi-core processing
 gem 'iso-639'     # english/french lists
+gem 'language_list' # multiple language lists
 gem 'hashdiff'    # hash comparison
 gem 'amatch'      # string comparison
 gem 'oj'          # JSON parser/serializer
 gem 'ignore_nil'  # cleanly access chained property methods
+gem 'whatlanguage',# language detection
+      :git => 'git://github.com/niknikjaja/whatlanguage.git'
 
 # Ruby facets methods
 gem 'facets', :require => ['facets/hash/recurse',
@@ -54,7 +62,3 @@ gem 'gyoku'
 gem 'httpclient'
 #gem 'oai'
 #gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
-
-# Padrino master branch
-gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
-gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'

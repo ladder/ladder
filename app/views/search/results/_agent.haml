@@ -1,5 +1,5 @@
 .span8
-  %a{:href => url_for(:agent, :index, :id => agent.id)}
+  %a{:href => url_for(:agent, :id => agent.id)}
     %h4= agent.load.heading.first.truncate(100, :separator => ' ').humanize
 
   - desc = []
@@ -23,6 +23,6 @@
 .span4
   .together
     - Resource.find(agent.resource_ids.take(3)).each do |resource|
-      %a.thumbnail.pull-right{:href => url_for(:resource, :index, :id => resource.id), :style => 'margin-left: 9px;'}
+      %a.thumbnail.pull-right{:href => url_for(:resource, :id => resource.id), :style => 'margin-left: 9px;'}
         .half-small
           = partial 'image', :object => resource

@@ -1,6 +1,6 @@
-Ladder.controllers :resource do
+Ladder.controllers do
 
-  get :index, :with => :id, :cache => true do
+  get :resource, :map => '/resource/:id', :cache => true do
     @resource = Resource.find(params[:id])
 
     # TODO: DRY this out somehow
@@ -11,4 +11,5 @@ Ladder.controllers :resource do
 
     render 'resource'
   end
+
 end

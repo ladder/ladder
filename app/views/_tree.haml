@@ -6,7 +6,7 @@
     %a= tree.heading.send(show)
 - else
   %li
-    %a{:href => url_for(reference.class.to_s.underscore.to_sym, :index, :id => tree.id)}= tree.heading.send(show)
+    %a{:href => url_for(reference.class.to_s.underscore.to_sym, :id => tree.id)}= tree.heading.send(show)
 
 - if stem
   - if (reference.parent_ids + [reference.id]).include? tree.id
