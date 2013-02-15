@@ -14,5 +14,7 @@ class Group
   has_and_belongs_to_many :concepts
   has_and_belongs_to_many :resources
 
+#  track_history
+
   define_scopes
 end

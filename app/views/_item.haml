@@ -17,14 +17,14 @@
   .tab-content
     .tab-pane.active#item
       %table.table.table-bordered.table-striped.table-condensed
-        - hash = item.normalize({:localize => true, :ids => :resolve})
+        - hash = item.to_normalized_hash({:localize => true, :ids => :resolve, :all_keys => true})
         - hash.each do |name, vocab|
+          - next unless vocab.is_a? Enumerable
           -#%tr
             %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= name
 
           - vocab.each do |field, values|
-            - next if values.nil?
-            -# next if 'thumbnail' == name
+            - next unless values.is_a? Enumerable
 
             %tr
               %td.span2
@@ -67,9 +67,9 @@
                         - if 1 == results.values.count(results[lang])
                           .pull-right
                             - if match > 0.85
-                              .label.label-info= LanguageList::LanguageInfo.find(lang.capitalize.to_s).name
+                              .label.label-info= ignore_nil {LanguageList::LanguageInfo.find(lang.capitalize.to_s).name} || lang.capitalize.to_s
                             - else
-                              .label= LanguageList::LanguageInfo.find(lang.capitalize.to_s).name
+                              .label= ignore_nil {LanguageList::LanguageInfo.find(lang.capitalize.to_s).name} || lang.capitalize.to_s
                             %small.muted (#{(100 * match).round}%)
 
                   - unless values.last == value
@@ -81,18 +81,15 @@
 
     - item.files.each do |file|
       - mime = MIME::Type.new(file.content_type).sub_type
+
       - if 'marc' == mime
+        - marc = MARC::Record.new_from_marc(file.data, :forgiving => true)
+        - mapping = Mapping::MARC2.new
+        - mapping.map(marc)
         .tab-pane#mods
-          - mapping = Mapping::MARC2.new
-          - mapping.map(MARC::Record.new_from_marc(file.data, :forgiving => true))
           %pre
             %code&= mapping.mods
 
       .tab-pane{:id => mime}
-        - if 'marc' == mime
-          %pre
-            %code= MultiJson.dump(MARC::Record.new_from_marc(file.data, :forgiving => true).to_hash, :pretty => true)
-        - else
-          %pre
-            %code&= file.data
-
+        %pre
+          %code= 'marc' == mime ? marc.to_s.force_encoding('UTF-8') : file.data

@@ -14,7 +14,7 @@ module Model
 
         # use md5 fingerprint to query if a document already exists
         obj = self.new(attrs)
-        hash = obj.normalize({:ids => :omit})
+        hash = obj.to_normalized_hash({:ids => :omit})
         query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize)))
 
         result = query.first
@@ -31,6 +31,7 @@ module Model
 
       def vocabs
         vocabs = {}
+
         embedded_relations.each do |vocab, meta|
           vocabs[vocab.to_sym] = meta.class_name.constantize
         end
@@ -39,10 +40,6 @@ module Model
       end
 
       def define_scopes
-        self.vocabs.keys.each do |vocab|
-          scope vocab, ->(exists=true) { where(vocab.exists => exists) }
-        end
-
         # add scope to check for documents not in ES index
         scope :unindexed, -> do
 
@@ -131,9 +128,26 @@ module Model
         @mapping ||= self.define_mapping
       end
 
+      # Convert a hashed instance of the class to a stripped-down version
+      #
+      # @option options [ Bool ]   :all_keys Include internal tracking keys.
+      # @option options [ Symbol ] :except   List of keys to recursively strip.
+      # @option options [ Symbol ] :ids      One of:  :omit    Strip all ID-type values
+      #                                               :resolve Turn into Hash eg. {:model => ID}
+      #
+      # @param [ Hash ] hash The hash to convert.
+      #
+      # @return [ Hash ] The converted hash.
+      #
       def normalize(hash, opts={})
         # set default keys to strip
-        except = opts[:except] || [:_id]
+        except = opts[:except] || [:_id, :version]
+
+        # Remove keys not declared in index mapping
+        hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key.to_sym } unless 'Group' == self.name
+
+        # Only keep defined vocabs by default
+        hash.select! {|key| vocabs.keys.include? key.to_sym} unless opts[:all_keys]
 
         hash = hash.recurse do |h|
           h.symbolize_keys!
@@ -142,60 +156,48 @@ module Model
           h.except! *except
 
           # Reject nil and empty values
-          h.delete_if { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+          h.reject! { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+
+          # Remove non-hash, non-value keys
+          h.reject! { |key, value| !value.kind_of? Enumerable } unless opts[:all_keys]
 
           # Sort keys
           Hash[h.sort]
         end
 
-        # Remove keys not declared in mapping
-        hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key } unless 'Group' == self.name
-
         # Modify Object ID references if specified
         if opts[:ids]
 
-          hash.select {|key| vocabs.keys.include? key}.each do |name, vocab|
-            vocab.each do |field, locales|
-              locales.each do |locale, values|
+          hash.each do |name, vocab|
+            next unless vocab.is_a? Hash
 
-                if values.nil?
-                  values = hash[name][field]
-                  opts[:localize] = true
-                end
+            hash[name] = vocab.recurse do |h|
+              h.each do |k, values|
+                next unless values.is_a? Array
 
-                # traverse through ID-like values
-                # TODO: refactor me somewhere reusable
-                values.select {|value| value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)}.each do |value|
-                  case opts[:ids]
-                    when :omit
-                      # modify the value in-place
-                      if opts[:localize]
-                        hash[name][field].delete value
-                      else
-                        hash[name][field][locale].delete value
-                      end
-
-                    when :resolve
-                      if hash[:resource_ids] and hash[:resource_ids].include? value
-                        model = :resource
-                      elsif hash[:agent_ids] and hash[:agent_ids].include? value
-                        model = :agent
-                      elsif hash[:concept_ids] and hash[:concept_ids].include? value
-                        model = :concept
-                      else
-                        model = hash[:type] || self.name.underscore
-                      end
-
-                      # modify the value in-place
-                      if !! opts[:localize]
-                        hash[name][field][values.index(value)] = {model.to_sym => value.to_s}
-                      else
-                        hash[name][field][locale][values.index(value)] = {model.to_sym => value.to_s}
-                      end
+                h[k] = values.map! do |value|
+                  # traverse through ID-like values
+                  if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+                    case opts[:ids]
+                      when :omit then value = nil
+                      when :resolve
+                        if hash[:resource_ids] and hash[:resource_ids].include? value
+                          model = :resource
+                        elsif hash[:agent_ids] and hash[:agent_ids].include? value
+                          model = :agent
+                        elsif hash[:concept_ids] and hash[:concept_ids].include? value
+                          model = :concept
+                        else
+                          model = hash[:type] || self.name.underscore
+                        end
+                        value = {model.to_sym => value}
+                    end
                   end
 
+                  value
                 end
 
+                values.compact!
               end
             end
           end
@@ -206,9 +208,6 @@ module Model
           end
 
         end
-
-        # Remove non-hash keys
-        hash.delete_if { |key, value| !value.is_a? Hash } unless opts[:all_keys]
 
         hash
       end

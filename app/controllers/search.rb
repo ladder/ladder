@@ -144,7 +144,7 @@ Ladder.controllers :search do
 
     if 1 == @results.size.to_i and 1 == @page.to_i
       result = @results.first
-      redirect url_for(result.class.to_s.underscore.to_sym, :index, :id => result.id)
+      redirect url_for(result.class.to_s.underscore.to_sym, :id => result.id)
     end
 
     # get a list of IDs from facets and query ES for the headings to display

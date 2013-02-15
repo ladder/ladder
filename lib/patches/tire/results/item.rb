@@ -12,20 +12,32 @@ module Tire
         super
       end
 
-      def normalize(opts={})
-        hash = self.to_hash
+      def to_normalized_hash(opts={})
+        hash = Marshal.load(Marshal.dump(self.to_hash))
 
         if opts[:localize]
-          hash.select {|key| self.class.vocabs.keys.include? key}.each do |name, vocab|
-            vocab.each do |field, values|
-              hash[name][field] = lookup(values)
+          hash.each do |name, vocab|
+            next unless vocab.is_a? Hash
+
+            vocab.each do |field, locales|
+              if locales.is_a? Hash
+                # we have a non-localized hash
+                locales.each do |locale, values|
+                  hash[name][field] = values
+                end
+              end
             end
           end
+
+          hash[:heading] = lookup(hash[:heading])
         end
 
-        self.class.normalize(Marshal.load(Marshal.dump(hash)), opts)
+        self.class.normalize(hash, opts)
       end
 
+      #
+      # Copied from Mongoid::Fields::Localized
+      #
       def lookup(object)
         locale = ::I18n.locale
         if ::I18n.respond_to?(:fallbacks)

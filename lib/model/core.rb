@@ -14,6 +14,7 @@ module Model
       base.send :include, Mongoid::Timestamps
       base.send :include, Mongoid::Tree
       #base.send :include, Mongoid::Tree::Ordering
+      base.send :include, Mongoid::History::Trackable
 
       # Pagination
       base.send :include, Kaminari::MongoidExtension::Criteria
@@ -40,23 +41,23 @@ module Model
       base.send :field, :rdf_types
 
       # Include default embedded vocabularies
-      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia'#,  autobuild: true
-      base.send :embeds_one, :rdfs,     class_name: 'RDFS'#,     autobuild: true
+      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: false
+      base.send :embeds_one, :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: false
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
       base.extend ClassMethods
     end
 
-    def normalize(opts={})
+    def to_normalized_hash(opts={})
       # get a hash that we can modify
-      !! opts[:localize] ? hash = self.to_hash : hash = Hash[self.as_document]
+      opts[:localize] ? hash = self.to_hash : hash = Hash[self.as_document]
 
       self.class.normalize(Marshal.load(Marshal.dump(hash)), opts)
     end
 
     def generate_md5
-      hash = self.normalize({:ids => :omit})
+      hash = self.to_normalized_hash({:ids => :omit})
 
       self.md5 = Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize))
     end
@@ -78,6 +79,17 @@ module Model
       update_attributes(hash)
     end
 
+    def locales
+      items = self.to_normalized_hash.values.map do |vocab|
+        vocab.map do |field, locales|
+          next unless locales.is_a? Hash
+          locales.keys
+        end
+      end
+
+      items.flatten.compact.uniq
+    end
+
     def heading(opts={})
       self.class.headings.each do |heading|
         vocab = heading.keys.first
@@ -87,7 +99,7 @@ module Model
           # NB: default is localized
           if opts[:delocalize]
             target = self[vocab][field.to_s]
-            target.symbolize_keys! unless target.nil?
+            target = target.symbolize_keys unless target.nil?
           else
             target = send(vocab).send(field)
           end
@@ -96,22 +108,8 @@ module Model
         return target if target
       end
 
-#      {I18n.locale => [I18n.t('model.untitled')]}
-      [I18n.t('model.untitled')]
-    end
-
-    def locales
-      self.normalize.values.map {|vocab| vocab.map {|field, values| values.keys} }.flatten.uniq
-    end
-
-    # Return a HashDiff array computed between the two model instances
-    def diff(model, opts={})
-
-      p1 = self.normalize(opts.slice(:ids))
-      p2 = model.normalize(opts.slice(:ids))
-
-      # TODO: use to calculate a similarity score somehow
-      HashDiff.diff(p1, p2)
+      # FIXME: return 'untitled' for no heading
+      opts[:delocalize] ? {I18n.locale => [I18n.t('model.untitled')]} : [I18n.t('model.untitled')]
     end
 
     def amatch(model, opts={})
@@ -126,8 +124,8 @@ module Model
       # if we have selected specific comparisons, use those
       options = opts if opts.is_a? Hash and ! opts.empty?
 
-      p1 = self.normalize(options.slice(:ids)).to_string_recursive.normalize
-      p2 = model.normalize(options.slice(:ids)).to_string_recursive.normalize
+      p1 = self.to_normalized_hash(options.slice(:ids)).to_string_recursive.normalize
+      p2 = model.to_normalized_hash(options.slice(:ids)).to_string_recursive.normalize
 
       # calculate amatch score for each algorithm
       options.delete :ids
@@ -140,7 +138,8 @@ module Model
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
     def similar(opts={})
-      hash = self.normalize({:ids => :omit})
+      hash = self.to_normalized_hash({:ids => :omit})
+      vocabs = self.vocabs
       id = self.id
 
       results = self.class.search do
@@ -149,13 +148,14 @@ module Model
             # do not include self
             must_not { term :_id, id.to_s }
 
+            # NB: use this as a template for recursing in normalized documents?
             hash.each do |name, vocab|
               vocab.each do |field, locales|
                 locales.each do |locale, values|
                   values.each do |value|
                     should do
                       match "#{name}.#{field}.#{locale}", \
-                            value.normalize({:space_char => ' '}).truncate(100, :separator => ' ')
+                            value.to_s.normalize({:space_char => ' '}).truncate(100, :separator => ' ')
                     end
                   end
                 end
@@ -180,7 +180,7 @@ module Model
     # more precise serialization for Tire
     def to_indexed_json
       # Use normalized copy of document
-      hash = self.normalize(:all_keys => true)
+      hash = self.to_normalized_hash(:all_keys => true)
 
       # add heading
       hash[:heading] = heading(:delocalize => true)
@@ -206,7 +206,7 @@ module Model
           # resolve IDs
           value = statement.object.object
 
-          # TODO: refactor as Model/Core/ClassMethods#normalize
+          # NB: this is duplicated from Model/Core/ClassMethods#normalize
           if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
             if defined? resource_ids and resource_ids.include? value
               model = :resource

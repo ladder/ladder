@@ -1,5 +1,6 @@
 class VCard
   include Model::Embedded
+
   bind_to Vocab::VCard, :type => Array, :localize => true
 
   # enable camelCase field aliases
@@ -8,4 +9,6 @@ class VCard
   end
 
   embedded_in :agent
+
+  track_history :on => Vocab::VCard.properties
 end

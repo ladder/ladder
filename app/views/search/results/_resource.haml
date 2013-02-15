@@ -1,14 +1,9 @@
-%a{:href => url_for(:resource, :id => resource.id)}
-  %h4= resource.load.heading.first.truncate(100, :separator => ' ').humanize
-
-- resource = resource.normalize({:ids => :resolve, :localize => true}).to_ostruct_recurse
-
 - desc = []
-- desc.push ignore_nil {resource.dcterms.format.first.capitalize}
-- desc.push ignore_nil {resource.dcterms.issued.first}
-- desc.push ISO_639.find(resource.dcterms.language.first).english_name.capitalize rescue nil
+- desc.push ignore_nil {resource[:dcterms][:format].first.capitalize}
+- desc.push ignore_nil {resource[:dcterms][:issued].first}
+- desc.push ISO_639.find(resource[:dcterms][:language].first).english_name.capitalize rescue nil
 
-- agents = ignore_nil {resource.dcterms.creator || resource.dcterms.contributor ||resource.dcterms.publisher}
+- agents = nil#ignore_nil {resource[:dcterms][:creator] || resource[:dcterms][:contributor] ||resource[:dcterms][:publisher]}
 - if agents
   - agents = agents.take(3).map do |value|
     - if value.is_a? Hash
