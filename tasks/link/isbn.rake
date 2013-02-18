@@ -17,7 +17,7 @@ namespace :link do
       resources = resources.without(:marc, :mods)
 
       # only select resources which have not already been linked
-      resources = resources.dbpedia(false) unless !!args.relink
+      resources = resources.where(:dbpedia.exists => false) unless !!args.relink
       exit if resources.empty?
 
       puts "Linking #{resources.size} Resources using #{Parallel.processor_count} processors... "
