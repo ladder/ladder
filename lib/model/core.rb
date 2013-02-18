@@ -138,7 +138,7 @@ module Model
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
     def similar(opts={})
-      hash = self.to_normalized_hash({:ids => :omit})
+      hash = self.to_normalized_hash
       vocabs = self.vocabs
       id = self.id
 
