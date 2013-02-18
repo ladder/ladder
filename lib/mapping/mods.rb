@@ -7,8 +7,12 @@ module Mapping
       mapped = {}
 
       hash.each do |symbol, xpath|
-        nodes = xml_node.xpath(xpath).map(&:text).uniq#.map(&:strip).uniq
-        mapped[symbol] = nodes unless nodes.empty?
+        nodes = []
+        xml_node.xpath(xpath).each do |node|
+          # include all whitespace between nodes, but collapse to single spaces
+          nodes << node.to_xml.gsub(/<[^>]*>/ui,'').gsub(/(\s|\u00A0)+/, ' ').strip
+        end
+        mapped[symbol] = nodes.uniq unless nodes.empty?
       end
 
       mapped

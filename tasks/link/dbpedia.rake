@@ -20,7 +20,7 @@ namespace :link do
         collection = klass # NB: this seems ... naked
 
         # only select documents which have not already been linked
-        collection = collection.dbpedia(false) unless !!args.relink
+        collection = collection.where(:dbpedia.exists => false) unless !!args.relink
         next if collection.empty?
 
         puts "Linking #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors... "

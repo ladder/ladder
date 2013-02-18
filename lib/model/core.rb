@@ -138,7 +138,7 @@ module Model
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
     def similar(opts={})
-      hash = self.to_normalized_hash({:ids => :omit})
+      hash = self.to_normalized_hash
       vocabs = self.vocabs
       id = self.id
 
@@ -152,6 +152,9 @@ module Model
             hash.each do |name, vocab|
               vocab.each do |field, locales|
                 locales.each do |locale, values|
+                  # FIXME: temporary workaround for non-localized (dynamic) fields
+                  next if values.nil?
+
                   values.each do |value|
                     should do
                       match "#{name}.#{field}.#{locale}", \
