@@ -99,6 +99,10 @@ p.lead {
     opacity: 0.75;
 }
 
+.nav-list > .facet > a {
+    opacity: 0.4;
+}
+
 .nav-list > .active > a:hover {
     opacity: 1;
 }

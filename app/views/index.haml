@@ -12,7 +12,10 @@
         = text_field_tag :q, :class => 'input-xxlarge search-query', :value => @querystring, :autofocus => true
         %button{:type => 'submit', :class => 'btn'} Search
 
-    .span6{:style => 'text-align: center; margin-left: 0;'}
+    %hr
+
+    .span1{:style => 'margin-left: 0;'} Examples
+    .span5
       %a.btn.mini-btn{:href => 'search/*?fi%5Brdf_types%5D%5Brdf_types%5D%5B%5D=Film&fi%5Bdcterms%5D%5Blanguage%5D%5B%5D=fre'} French films
       %a.btn.mini-btn{:href => 'search/rock?fi%5Brdf_types%5D%5Brdf_types%5D%5B%5D=Album'} Rock albums
       %a.btn.mini-btn{:href => 'search/communist?page=1&fi%5Brdf_types%5D%5Brdf_types%5D%5B%5D=Country'} Communist countries

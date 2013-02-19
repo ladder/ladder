@@ -38,7 +38,7 @@
         - @new_fi = @filters.deep_merge({ns.to_s => {name => @filters[ns][name].to_a | f['term'].to_a}})
 
       - if @results.total == f['count']
-        %li.active
+        %li.active.facet
           %a= display
       - else
         %li= link_to display + " (#{f['count']})", current_path('page' => @page, 'fi' => @new_fi)
