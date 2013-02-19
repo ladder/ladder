@@ -1,17 +1,20 @@
 - desc = []
-- desc.push ignore_nil {agent[:dbpedia][:birthName].first || agent[:foaf][:name].first}
+- altname = ignore_nil {agent[:dbpedia][:birthName].first} || ignore_nil {agent[:foaf][:name].first}
+- desc.push altname unless agent[:heading].include? altname
 
-- birth = ignore_nil {agent[:dbpedia][:birthYear].first || agent[:dbpedia][:birthDate].first || agent[:foaf][:birthday].first}
-- if birth
-  - birth = Date.parse(birth).year.to_s
-  - death = ignore_nil {agent[:dbpedia][:deathYear].first || agent[:dbpedia][:deathDate].first}
-  - death = Date.parse(death).year.to_s
-  - desc.push "#{birth}-#{death}"
+- birth = ignore_nil {agent[:dbpedia][:birthYear].first} || ignore_nil {agent[:dbpedia][:birthDate].first} || ignore_nil {agent[:foaf][:birthday].first}
+- birth = Date.parse(birth).year.to_s if birth.match(/^[0-9]{4}.+$/)
+- death = ignore_nil {agent[:dbpedia][:deathYear].first} || ignore_nil {agent[:dbpedia][:deathDate].first}
+- death = Date.parse(death).year.to_s if ! death.nil? and death.match(/^[0-9]{4}.+$/)
+
+- life_dates = "#{birth}-" unless birth.nil?
+- life_dates += "#{death}" unless death.nil?
+- desc.push life_dates
 
 - if ignore_nil {agent[:resource_ids].size > 3}
   - desc.push "#{agent[:resource_ids].size} #{I18n.t('search.resources')}"
 
-.description #{desc.join('; ')}
+.description #{desc.compact.join('; ')}
 
 - if agent[:resource_ids]
   .together

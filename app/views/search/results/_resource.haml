@@ -11,4 +11,4 @@
       - link_to(heading.first, url_for(value.keys.first, :id => value.values.first))
 - else agents = []
 
-.description #{[agents + desc].join('; ')}
+.description #{[agents + desc].compact.join('; ')}
