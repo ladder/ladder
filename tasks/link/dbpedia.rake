@@ -199,6 +199,7 @@ namespace :link do
                       # END TODO
 
                       # NB: this will overwrite existing values in set fields
+                      # FIXME: this has to be manually localized
                       item.update_attributes(update_hash)
                       item.files << Model::File.new(:data => message.content, :content_type => 'application/rdf+xml')
 

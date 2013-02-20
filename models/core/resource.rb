@@ -1,5 +1,3 @@
-require 'embedded'
-
 class Resource
   include Model::Core
 

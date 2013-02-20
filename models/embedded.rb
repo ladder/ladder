@@ -1,6 +1,6 @@
 require 'embedded/bibo'
 require 'embedded/dbpedia'
-require 'embedded/dc'
+require 'embedded/dcterms'
 require 'embedded/foaf'
 require 'embedded/prism'
 require 'embedded/rdfs'

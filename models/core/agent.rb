@@ -1,5 +1,3 @@
-require 'embedded'
-
 class Agent
   include Model::Core
 

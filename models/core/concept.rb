@@ -1,5 +1,3 @@
-require 'embedded'
-
 class Concept
   include Model::Core
 
