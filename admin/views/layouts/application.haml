@@ -63,11 +63,7 @@
 
           =yield
       %footer.footer
-        %p.center-block
-          Copyright &copy;
-          =Time.now.year
-          Your Site -
-          %b Powered by Padrino v.#{Padrino.version}
+        %p.center-block &copy; #{Time.now.year} Deliberate Data
         %ul.footer-links
           %li= link_to tag_icon(:home, "Padrino web"), "http://www.padrinorb.com", :target => :_blank, :class=>'btn btn-info btn-mini'
           %li= link_to tag_icon(:heart, "Padrino blog"), "http://www.padrinorb.com/blog", :target => :_blank, :class=>'btn btn-success btn-mini'

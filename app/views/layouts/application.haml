@@ -19,7 +19,7 @@
       =javascript_include_tag %w[bootstrap/bootstrap-modal bootstrap/bootstrap-popover bootstrap/bootstrap-scrollspy bootstrap/bootstrap-tab]
     - else
       =javascript_include_tag 'bootstrap/bootstrap-responsive.min'
-    =stylesheet_link_tag 'bootstrap/bootstrap.min', 'main', 'github', 'font-awesome'
+    =stylesheet_link_tag 'bootstrap/bootstrap.min', 'font-awesome/font-awesome.min', 'main', 'github'
     =javascript_include_tag 'highlight.pack'
 
     :javascript
@@ -71,4 +71,4 @@
       .container
         .row
           .span3.offset6
-            .pull-right &copy; 2012 Deliberate Data
+            .pull-right &copy; #{Time.now.year} Deliberate Data
