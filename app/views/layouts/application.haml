@@ -1,26 +1,26 @@
 !!! 5
 %html{:lang => "en"}
   %head
-    %meta{:charset => "utf-8"}/
-    %title= @title
-    %link{:rel => "apple-touch-icon", :href => "/img/apple-touch-icon.png"}
-    %meta{:content => "", :name => "description"}/
-    %meta{:content => "", :name => "author"}/
-    %meta{:name => "viewport", :content => "width=device-width"}/
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
     /[if lt IE 9]
       = javascript_include_tag 'http://html5shim.googlecode.com/svn/trunk/html5.js'
-
-    :css
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-      .sidebar-nav {
-        padding: 9px 0;
-      }
-    = stylesheet_link_tag 'bootstrap.min.css'
-    = stylesheet_link_tag 'main.css', 'github.css', 'font-awesome.css'
-    = stylesheet_link_tag 'bootstrap-responsive.min.css'
+    %link{:rel => "apple-touch-icon", :href => "/images/apple-touch-icon.png"}
+    %meta{:name => "viewport", :content => "width=device-width"}/
+    %meta{:content => 'text/html; charset=utf-8', 'http-equiv' => 'Content-Type'}
+    %title= @title
+    =javascript_include_tag 'jquery-1.8.2.min'
+    - unless PADRINO_ENV == 'production'
+      -#=tag :link , :rel => 'stylesheet/less', :type => 'text/css', :href => asset_path('stylesheets', 'admin.less')
+      =javascript_include_tag 'less-1.3.0.min'
+      /! Twitter Bootstrap
+      =javascript_include_tag %w[bootstrap/bootstrap-affix bootstrap/bootstrap-alert bootstrap/bootstrap-button]
+      =javascript_include_tag %w[bootstrap/bootstrap-carousel bootstrap/bootstrap-collapse bootstrap/bootstrap-dropdown]
+      =javascript_include_tag %w[ bootstrap/bootstrap-tooltip bootstrap/bootstrap-transition bootstrap/bootstrap-typeahead]
+      =javascript_include_tag %w[bootstrap/bootstrap-modal bootstrap/bootstrap-popover bootstrap/bootstrap-scrollspy bootstrap/bootstrap-tab]
+    - else
+      =javascript_include_tag 'bootstrap/bootstrap-responsive.min'
+    =stylesheet_link_tag 'bootstrap/bootstrap.min', 'main', 'github', 'font-awesome'
+    =javascript_include_tag 'highlight.pack'
 
     :javascript
       function imgFallback(object, i_class, i_style) {
@@ -29,9 +29,8 @@
         new_i.style.cssText = i_style;
         object.parentNode.replaceChild(new_i, object);
       }
-    = javascript_include_tag 'highlight.pack.js'
-    = javascript_include_tag 'http://code.jquery.com/jquery-1.8.2.min.js'
     %script hljs.initHighlightingOnLoad();
+
   %body
     %header
       .navbar.navbar-fixed-top
@@ -67,7 +66,7 @@
 
     #main.container= yield
 
-    = javascript_include_tag 'bootstrap.min.js'
+    = javascript_include_tag 'bootstrap/bootstrap.min.js'
     %footer
       .container
         .row

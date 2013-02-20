@@ -4,6 +4,10 @@ class Admin < Padrino::Application
   register Padrino::Helpers
   register Padrino::Admin::AccessControl
 
+  configure do
+    set :public, Padrino.root('public')
+  end
+
   ##
   # Application configuration options
   #

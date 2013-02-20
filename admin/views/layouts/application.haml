@@ -2,11 +2,10 @@
 %html{:lang => 'en', :xmlns => 'http://www.w3.org/1999/xhtml'}
   %head
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    /[if lt IE 9]
+      = javascript_include_tag 'http://html5shim.googlecode.com/svn/trunk/html5.js'
     %meta{:content => 'text/html; charset=utf-8', 'http-equiv' => 'Content-Type'}
-    %title Padrino Admin
+    %title Ladder Admin
     =javascript_include_tag 'jquery-1.8.2.min'
     - unless PADRINO_ENV == 'production'
       =tag :link , :rel => 'stylesheet/less', :type => 'text/css', :href => asset_path('stylesheets', 'admin.less')
@@ -17,7 +16,7 @@
       =javascript_include_tag %w[ bootstrap/bootstrap-tooltip bootstrap/bootstrap-transition bootstrap/bootstrap-typeahead]
       =javascript_include_tag %w[bootstrap/bootstrap-modal bootstrap/bootstrap-popover bootstrap/bootstrap-scrollspy bootstrap/bootstrap-tab]
     - else
-      =stylesheet_link_tag 'compiled/admin'
+      =stylesheet_link_tag 'admin'
       =javascript_include_tag 'bootstrap/bootstrap.min'
     =javascript_include_tag 'application'
 
@@ -25,7 +24,7 @@
     .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
-          =link_to 'Padrino Admin', url(:base_index), :class => 'brand'
+          =link_to 'Ladder Admin', url(:base_index), :class => 'brand'
 
           %ul.nav.pull-right
             %li.dropdown
