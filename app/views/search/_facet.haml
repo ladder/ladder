@@ -6,6 +6,7 @@
 
   - facet.last['terms'].each do |f|
 
+    -# 1: Determine what we are going to display
     - if f['term'].match(/^[0-9a-f]{24}$/)
       - heading = @headings.results.find {|i| i.id == f['term']} rescue []
 
@@ -31,6 +32,7 @@
 
     - else display = f['term']
 
+    -# 2: Actually display it contextually
     - if @filters[ns].nil? or @filters[ns][name].nil? or !@filters[ns][name].to_a.include?(f['term'])
       - if @filters[ns].nil?
         - @new_fi = @filters.deep_merge({ns.to_s => {name => f['term'].to_a}})
@@ -44,4 +46,7 @@
         %li= link_to display + " (#{f['count']})", current_path('page' => @page, 'fi' => @new_fi)
 
     - else
-      %li.active= link_to display, current_path('page' => @page, 'fi' => @filters.deep_merge({ns.to_s => {name => @filters[ns][name].reject { |x| f['term'] == x}}}))
+      %li.active
+        %a{:href => current_path('page' => @page, 'fi' => @filters.deep_merge({ns.to_s => {name => @filters[ns][name].reject { |x| f['term'] == x}}}))}
+          #{display}
+          .pull-right &times;

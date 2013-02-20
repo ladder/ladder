@@ -28,24 +28,21 @@
       .navbar.navbar-fixed-top
         .navbar-inner
           .container
+            %a.brand{:href => "/", :style => 'margin-right: 20px;'} Ladder
             %a.btn.btn-navbar{"data-target" => ".nav-collapse", "data-toggle" => "collapse"}
               %span.icon-bar
               %span.icon-bar
               %span.icon-bar
-            %a.brand{:href => "/"} Ladder
+              %span.icon-bar
             .nav-collapse
-              %ul.nav
-                %li{:class => request.path_info == '/about' ? 'active' : ''}
-                  %a{:href => "/about"}= I18n.t('about')
-                %li
-                  %a{:href => "http://www.deliberatedata.com"}= I18n.t('contact')
               - unless request.path_info == '/'
                 - form_tag '/search', :method => 'get', :class => 'navbar-search' do
                   = text_field_tag :q, :class => 'input-xxlarge search-query', :placeholder => 'Search', :value => @querystring
-              -#%p.navbar-text.pull-right
-                Logged in as
-                %a{:href => "#"} username
               %ul.nav.pull-right
+                %li{:class => request.path_info == '/about' ? 'active' : ''}
+                  = link_to I18n.t('about'), url_for(:about)
+                %li
+                  = link_to I18n.t('contact'), url_for('http://deliberatedata.com')
                 %li.dropdown
                   %a.dropdown-toggle{:href => "#", :'data-toggle' => 'dropdown'}
                     = I18n.t('language')
@@ -55,6 +52,9 @@
                       = link_to I18n.t('en'), current_path('locale' => 'en') rescue nil
                     %li{:class => 'fr' == I18n.locale.to_s ? 'active' : ''}
                       = link_to I18n.t('fr'), current_path('locale' => 'fr') rescue nil
+                %li.divider-vertical
+                %li= link_to 'Login', url_for('admin/sessions/new')
+                %li.divider-vertical
 
     #main.container= yield
 

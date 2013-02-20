@@ -10,7 +10,7 @@ Ladder.controllers do
      render 'index'
   end
 
-  get '/about', :cache => true do
+  get :about, :cache => true do
     render 'about'
   end
 

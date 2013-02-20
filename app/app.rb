@@ -1,6 +1,8 @@
 class Ladder < Padrino::Application
-
   register Padrino::Rendering
+  register Padrino::Mailer
+  register Padrino::Helpers
+  register Padrino::Admin::AccessControl
   register Kaminari::Helpers::SinatraHelpers
 
   configure :development do
@@ -42,6 +44,21 @@ class Ladder < Padrino::Application
 
   error 404 do
     render('errors/40x', :layout => :application)
+  end
+
+  set :admin_model, 'Account'
+  set :login_page, "/admin/sessions/new"
+
+  enable  :sessions
+  disable :store_location
+
+  access_control.roles_for :any do |role|
+#    role.protect '/'
+    role.allow '/'
+  end
+
+  access_control.roles_for :admin do |role|
+    role.project_module :accounts, '/accounts'
   end
 
 end
