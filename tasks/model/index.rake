@@ -14,6 +14,9 @@ namespace :model do
 
         next if klass.empty? # nothing to index
 
+        # make sure the mapping is defined
+        klass.put_mapping
+
         # only retrieve fields that are mapped in index
         collection = klass.only(klass.get_mapping[:properties].keys)
 
@@ -25,9 +28,6 @@ namespace :model do
 
         # break collection into chunks for multi-processing
         chunks = collection.chunkify
-
-        # make sure the mapping is defined
-        klass.put_mapping
 
         # temporary settings to improve indexing performance
         klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30

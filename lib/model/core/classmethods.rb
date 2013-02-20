@@ -42,7 +42,10 @@ module Model
       def define_scopes
         # add scope to check for documents not in ES index
         scope :unindexed, -> do
+          # only query on an existing index
+          return self.queryable unless tire.index.exists?
 
+          # NB: this will fail on empty indexes
           # get the most recent timestamp
           s = self.search {
             query { all }

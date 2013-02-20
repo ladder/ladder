@@ -26,6 +26,9 @@
           - vocab.each do |field, values|
             - next unless values.is_a? Enumerable
 
+            -# TODO: helper to allow specifying 'except, slice' type field mapping
+            -# next if :thumbnail == field
+
             %tr
               %td.span2
                 %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
