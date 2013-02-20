@@ -1,0 +1,8 @@
+%ul.nav.nav-tabs
+  %li=link_to tag_icon(:list, :list), url(:accounts, :index)
+  %li=link_to tag_icon(:plus, :new), url(:accounts, :new)
+  %li.active=link_to tag_icon(:edit, :edit), url(:accounts, :edit, :id => @account.id)
+
+.tabs-content
+  -form_for :account, url(:accounts, :update, :id => @account.id), :method => :put, :class => 'form-horizontal' do |f|
+    =partial 'accounts/form', :locals => { :f => f }

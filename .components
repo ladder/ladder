@@ -5,3 +5,4 @@
 :renderer: haml
 :orm: mongoid
 :mock: none
+:admin_renderer: haml

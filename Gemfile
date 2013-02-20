@@ -20,6 +20,7 @@ gem 'haml'
 #gem 'rabl'
 
 # Component requirements
+gem 'bcrypt-ruby', :require => 'bcrypt'
 gem 'fabrication' # object generation
 gem 'lz4-ruby'    # binary compression
 gem 'nokogiri'    # xml manipulation
