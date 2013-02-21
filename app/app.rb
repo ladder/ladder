@@ -48,17 +48,15 @@ class Ladder < Padrino::Application
 
   set :admin_model, 'Account'
   set :login_page, "/admin/sessions/new"
-
-  enable  :sessions
-  disable :store_location
+  enable :store_location
+  set :session_id, "my_shared_session_id"
 
   access_control.roles_for :any do |role|
-#    role.protect '/'
     role.allow '/'
   end
 
   access_control.roles_for :admin do |role|
-    role.project_module :accounts, '/accounts'
+    role.project_module :search, '/search'
   end
 
 end
