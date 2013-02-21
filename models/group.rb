@@ -5,7 +5,7 @@ class Group
 
   field :type
 
-  @rdf_types = [[:rdfs, :Container]]
+  @rdf_types = {:rdfs => [:Container]}
 
   @headings = [{:rdfs => :label}]
 

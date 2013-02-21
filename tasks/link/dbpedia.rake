@@ -64,6 +64,7 @@ namespace :link do
             next if 'untitled' == querystring
 
             # attempt to lookup based on types in decreasing order of specificity
+            # FIXME: this has changed to a hash of arrays
             rdf_types = klass.rdf_types + (item.rdf_types || [])
             types = [''] + rdf_types.reject {|type| :dbpedia != type.first}.map(&:last).uniq.dup
 

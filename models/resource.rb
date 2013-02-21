@@ -8,10 +8,10 @@ class Resource
   embeds_one :bibo,     class_name: 'Bibo',     cascade_callbacks: true, autobuild: false
   embeds_one :prism,    class_name: 'Prism',    cascade_callbacks: true, autobuild: false
 
-  @rdf_types = [[:dbpedia, :Work],
-                [:schema, :CreativeWork],
-                [:dc, :BibliographicResource],
-                [:bibo, :Document]]
+  @rdf_types = {:dbpedia => [:Work],
+                 :schema => [:CreativeWork],
+                   :bibo => [:Document],
+                     :dc => [:BibliographicResource]}
 
   @headings = [{:rdfs => :label},
                {:dcterms => :title},

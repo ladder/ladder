@@ -192,7 +192,7 @@ module Model
       hash[:locales] = locales
 
       # store RDF type for faceting; property only, not qname
-      hash[:rdf_types] = rdf_types.map(&:last).uniq unless rdf_types.nil?
+      hash[:rdf_types] = rdf_types.values.flatten.uniq rescue {}
 
       hash.to_json
     end
@@ -234,10 +234,16 @@ module Model
         # FIXME: this is necessary to write a rdf:Description element
         writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.intern(''))
 
-        types = self.class.rdf_types + (rdf_types || [])
+        self.class.rdf_types.each do |qname, properties|
+          properties.each do |property|
+            writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
+          end
+        end
 
-        types.each do |qname, property|
-          writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
+        rdf_types.each do |qname, properties|
+          properties.each do |property|
+            writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
+          end
         end
 
         graphs.each do |graph|

@@ -207,13 +207,13 @@ module Mapping
 
         case node['type']
           when 'personal'
-            mapped[:rdf_types] = [[:foaf, :Person],
-                                  [:dbpedia, :Person],
-                                  [:schema, :Person]]
+            mapped[:rdf_types] = {:dbpedia => [:Person],
+                                   :schema => [:Person],
+                                     :foaf => [:Person]}
           when 'corporate'
-            mapped[:rdf_types] = [[:foaf, :Organization],
-                                  [:dbpedia, :Organisation],
-                                  [:schema, :Organization]]
+            mapped[:rdf_types] = {:dbpedia => [:Organisation],
+                                   :schema => [:Organization],
+                                     :foaf => [:Organization]}
         end
 
         agent = Agent.find_or_create_by(mapped)
