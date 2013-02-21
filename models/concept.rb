@@ -7,6 +7,7 @@ class Concept
   embeds_one :skos, class_name: 'SKOS', cascade_callbacks: true, autobuild: false
 
   @rdf_types = {:dbpedia => [:TopicalConcept],
+                :rdafrbr => [:Concept],
                    :skos => [:Concept]}
 
   @headings = [{:skos => :prefLabel},

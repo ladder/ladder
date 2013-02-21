@@ -8,6 +8,7 @@ class Agent
   embeds_one :vcard,    class_name: 'VCard',  cascade_callbacks: true, autobuild: false
 
   @rdf_types = {:dbpedia => [:Agent],
+                :rdafrbr => [:Agent],
                    :foaf => [:Agent]}
 
   @headings = [{:rdfs => :label},

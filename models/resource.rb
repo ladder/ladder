@@ -9,6 +9,7 @@ class Resource
   embeds_one :prism,    class_name: 'Prism',    cascade_callbacks: true, autobuild: false
 
   @rdf_types = {:dbpedia => [:Work],
+                :rdafrbr => [:Work],
                  :schema => [:CreativeWork],
                    :bibo => [:Document],
                      :dc => [:BibliographicResource]}

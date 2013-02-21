@@ -208,10 +208,12 @@ module Mapping
         case node['type']
           when 'personal'
             mapped[:rdf_types] = {:dbpedia => [:Person],
+                                  :rdafrbr => [:Person],
                                    :schema => [:Person],
                                      :foaf => [:Person]}
           when 'corporate'
-            mapped[:rdf_types] = {:dbpedia => [:Organisation],
+            mapped[:rdf_types] = {:rdafrbr => [:CorporateBody],
+                                  :dbpedia => [:Organisation],
                                    :schema => [:Organization],
                                      :foaf => [:Organization]}
         end
@@ -270,8 +272,9 @@ module Mapping
               mapped[:skos][:broader] = [current.id] unless current.nil?
 
               if 'geographic' == subnode.name
-                mapped[:rdf_types] = [[:dbpedia, :Place],
-                                      [:schema, :Place]]
+                mapped[:rdf_types] = {:dbpedia => [:Place],
+                                      :rdafrbr => [:Place],
+                                       :schema => [:Place]}
               end
 
               concept = Concept.find_or_create_by(mapped)

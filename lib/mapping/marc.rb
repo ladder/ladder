@@ -16,21 +16,25 @@ module Mapping
       case marc
         when MARC::BookRecord
           rdf_types = {:dbpedia => [:Book],
+                        :schema => [:Book],
                           :bibo => [:Book]}
         when MARC::SerialRecord
           rdf_types = {:dbpedia => [:PeriodicalLiterature],
                           :bibo => [:Periodical]}
         when MARC::MapRecord
-          rdf_types = {:bibo    => [:Map]}
+          rdf_types = { :schema => [:Map],
+                          :bibo => [:Map]}
         when MARC::ScoreRecord
-          rdf_types = {:dbpedia => [:MusicalWork]}
+          rdf_types = {:dbpedia => [:MusicalWork],
+                        :schema => [:MusicRecording]}
         when MARC::SoundRecord
           rdf_types = {:dbpedia => [:AudioDocument]}
         when MARC::VisualRecord
           rdf_types = {:dbpedia => [:AudioVisualDocument]}
         when MARC::ComputerRecord
           # NB: not 100% sure about this one
-          rdf_types = {:dbpedia => [:SoftwareApplication]}
+          rdf_types = {:dbpedia => [:SoftwareApplication],
+                        :schema => [:SoftwareApplication]}
 #        when MARC::MixedRecord
       end
 
