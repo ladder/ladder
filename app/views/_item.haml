@@ -17,14 +17,14 @@
   .tab-content
     .tab-pane.active#item
       %table.table.table-bordered.table-striped.table-condensed
-        - hash = item.to_normalized_hash({:localize => true, :ids => :resolve, :all_keys => true})
+        - hash = item.to_normalized_hash({:localize => true, :ids => :resolve, :all_keys => true}).except(:rdf_types)
         - hash.each do |name, vocab|
-          - next unless vocab.is_a? Enumerable
+          - next unless vocab.is_a? Hash
           -#%tr
             %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= name
 
           - vocab.each do |field, values|
-            - next unless values.is_a? Enumerable
+            - next unless values.is_a? Array
 
             %tr
               %td.span2

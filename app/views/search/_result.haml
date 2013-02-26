@@ -7,7 +7,7 @@
 
   .span10
     %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
-      - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true})
+      - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
 
       %h4= hash[:heading].first.truncate(100, :separator => ' ').titleize
       -#%h4= [concept.load.ancestors.map(&:heading) + concept.load.heading].join(' -- ').truncate(100, :separator => ' ').humanize
