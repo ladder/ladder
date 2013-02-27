@@ -1,6 +1,12 @@
--# NB: rdf_types will be an array of strings from search results (['dbpedia', 'book', 'foaf' ... ])
-- type = type || image.class.rdf_types + (image.rdf_types || []) rescue nil
-- type = type.join(' ').strip rescue type
+-# TODO: refactor me into a helper!
+- image = image
+
+- if image.nil?
+- elsif image.rdf_types.is_a? Hash then rdf_types = image.rdf_types.values.flatten
+- else rdf_types = image.rdf_types
+
+- type = type || rdf_types || image.class.rdf_types.values.flatten
+- type = type.uniq.join(' ').strip rescue type
 
 - style = style || nil
 
@@ -14,6 +20,7 @@
   - when /artist/i then 'icon-picture'
   - when /person/i then 'icon-user'
   - when /organi[sz]ation/i then 'icon-group'
+  - when /corporate/i then 'icon-group'
   - when /agent/i then 'icon-user-md'
 
   - when /film/i then 'icon-film'
