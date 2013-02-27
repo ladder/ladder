@@ -10,7 +10,7 @@ Bundler.require(:default, PADRINO_ENV)
 ##
 # ## Enable devel logging
 
-Padrino::Logger::Config[:development][:log_level]  = :devel
+Padrino::Logger::Config[:development][:log_level]  = :warn#:devel
 Padrino::Logger::Config[:development][:log_static] = true
 
 if 'development' == PADRINO_ENV
@@ -44,7 +44,7 @@ I18n.fallbacks[:fr] = [ :fr, :en ]
 # Add your before (RE)load hooks here
 #
 Padrino.before_load do
-  Encoding.default_internal = nil
+  Encoding.default_internal = 'UTF-8'
 end
 
 ##

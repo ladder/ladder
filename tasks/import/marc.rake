@@ -34,12 +34,7 @@ namespace :import do
 
           # ensure we are importing valid UTF-8 MARC
           marc = record.to_marc
-
-          if !marc.valid_encoding?# or !marc.force_encoding('UTF-8').valid_encoding?
-            puts 'Detected bad encoding, fixing...'
-            marc = marc.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
-            marc = marc.encode!('UTF-8', 'UTF-16')
-          end
+          marc = marc.encode!('UTF-16', :undef => :replace, :invalid => :replace, :replace => '').encode!('UTF-8')
 
           # create a new db_file for this MARC record
           db_file = Model::File.new(:data => marc, :content_type => 'application/marc')

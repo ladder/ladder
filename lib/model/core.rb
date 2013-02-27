@@ -234,15 +234,18 @@ module Model
         # FIXME: this is necessary to write a rdf:Description element
         writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.intern(''))
 
+        # TODO: merge these somehow and process as one
         self.class.rdf_types.each do |qname, properties|
           properties.each do |property|
             writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
           end
         end
 
-        rdf_types.each do |qname, properties|
-          properties.each do |property|
-            writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
+        unless rdf_types.nil?
+          rdf_types.each do |qname, properties|
+            properties.each do |property|
+              writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
+            end
           end
         end
 
