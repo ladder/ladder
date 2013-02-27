@@ -4,9 +4,10 @@ class Resource
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :dcterms,  class_name: 'DCTerms',  cascade_callbacks: true, autobuild: false
-  embeds_one :bibo,     class_name: 'Bibo',     cascade_callbacks: true, autobuild: false
-  embeds_one :prism,    class_name: 'Prism',    cascade_callbacks: true, autobuild: false
+  embeds_one :dcterms,  class_name: 'DCTerms',      cascade_callbacks: true, autobuild: false
+  embeds_one :bibo,     class_name: 'Bibo',         cascade_callbacks: true, autobuild: false
+  embeds_one :prism,    class_name: 'Prism',        cascade_callbacks: true, autobuild: false
+  embeds_one :mods,     class_name: 'ModsResource', cascade_callbacks: true, autobuild: false
 
   @rdf_types = {:dbpedia => [:Work],
                 :rdafrbr => [:Work],
