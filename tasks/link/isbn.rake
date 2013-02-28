@@ -12,8 +12,8 @@ namespace :link do
       http_client.receive_timeout = 10
 
       # TODO: use ISBNs from dbpedia? (may not be the same edition/version)
-      #resources = Resource.any_of({:'bibo.isbn'.exists => true}, {:'dbpedia.isbn'.exists => true})
-      resources = Resource.where(:'bibo.isbn'.exists => true)
+      #resources = Resource.any_of({:'bibo.isbn'.exists => true}, {:'prism.isbn'.exists => true}, {:'dbpedia.isbn'.exists => true})
+      resources = Resource.where(:'prism.isbn'.exists => true)
       resources = resources.without(:marc, :mods)
 
       # only select resources which have not already been linked
@@ -32,7 +32,7 @@ namespace :link do
         # spin up a lot of threads; we're heavily request-bound
         Parallel.each(chunk, :in_threads => Parallel.processor_count) do |resource|
           update_hash = {}
-          isbns = resource.bibo.isbn.dup
+          isbns = resource.prism.isbn.dup
 
           while !isbns.empty?
             # get a numeric-only ISBN to look up

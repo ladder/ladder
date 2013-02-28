@@ -90,6 +90,7 @@ module Mapping
           # descriptive elements
           :title         => 'titleInfo[not(@type = "alternative")]',
           :alternative   => 'titleInfo[@type = "alternative"]',
+          :created       => 'originInfo/dateCreated',
           :issued        => 'originInfo/dateIssued',
           :format        => 'physicalDescription/form[not(@authority = "marcsmd")]',
           :medium        => 'physicalDescription/form[@authority = "marcsmd"]',
@@ -104,20 +105,22 @@ module Mapping
           :tableOfContents => 'tableOfContents',
       }
 
-      bibo = map_xpath node, {
+      prism = map_xpath node, {
           # dereferenceable identifiers
+          :doi      => 'identifier[@type = "doi" and not(@invalid)]',
           :isbn     => 'identifier[@type = "isbn" and not(@invalid)]',
           :issn     => 'identifier[@type = "issn" and not(@invalid)]',
+
+          :edition          => 'originInfo/edition',
+          :issueIdentifier  => 'identifier[@type = "issue-number" or @type = "issue number"]',
+      }
+
+      bibo = map_xpath node, {
+          # dereferenceable identifiers
           :lccn     => 'identifier[@type = "lccn" and not(@invalid)]',
           :oclcnum  => 'identifier[@type = "oclc" and not(@invalid)]',
           :upc      => 'identifier[@type = "upc" and not(@invalid)]',
-          :doi      => 'identifier[@type = "doi" and not(@invalid)]',
           :uri      => 'identifier[@type = "uri" and not(@invalid)]',
-      }
-
-      prism = map_xpath node, {
-          :edition          => 'originInfo/edition',
-          :issueIdentifier  => 'identifier[@type = "issue-number" or @type = "issue number"]',
       }
 
       mods = map_xpath node, {
