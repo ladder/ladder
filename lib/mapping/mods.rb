@@ -121,11 +121,12 @@ module Mapping
       }
 
       mods = map_xpath node, {
-          :note               => 'note',
           :accessCondition    => 'accessCondition',
-          :issuance           => 'originInfo/issuance',
           :frequency          => 'originInfo/frequency',
+          :genre              => 'genre',
+          :issuance           => 'originInfo/issuance',
           :locationOfResource => 'location',
+          :note               => 'note',
       }
 
       vocabs[:dcterms] = dcterms unless dcterms.empty?
