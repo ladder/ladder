@@ -45,6 +45,7 @@ I18n.fallbacks[:fr] = [ :fr, :en ]
 #
 Padrino.before_load do
   Encoding.default_internal = 'UTF-8'
+  Encoding.default_external = 'UTF-8'
 end
 
 ##

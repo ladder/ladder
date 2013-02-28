@@ -26,18 +26,13 @@ namespace :import do
       Parallel.each(files) do |file|
 
         # load records from file
-        reader = MARC::Reader.new(file)
+        reader = MARC::Reader.new(file, :invalid => :replace)
 
         db_files = []
 
         reader.each do |record|
-
-          # ensure we are importing valid UTF-8 MARC
-          marc = record.to_marc
-          marc = marc.encode!('UTF-16', :undef => :replace, :invalid => :replace, :replace => '').encode!('UTF-8')
-
           # create a new db_file for this MARC record
-          db_file = Model::File.new(:data => marc, :content_type => 'application/marc')
+          db_file = Model::File.new(:data => record.to_marc, :content_type => 'application/marc')
           db_file.set_created_at
 
           # add file to mongoid bulk stack
