@@ -148,6 +148,9 @@ module Model
             # do not include self
             must_not { term :_id, id.to_s }
 
+            # do a structure-free search
+            should { match '_all', hash.to_string_recursive.normalize(:space_char => ' ')}
+
             # NB: use this as a template for recursing in normalized documents?
             hash.each do |name, vocab|
               vocab.each do |field, locales|
@@ -169,11 +172,14 @@ module Model
         min_score 1
       end
 
+      # find the maximum score
+      maximum = results.max_by {|result| result._score}._score unless results.empty?
+
       if opts[:amatch]
         # calculate amatch score for each result
         results.each do |result|
           match = self.amatch(result, opts[:amatch])
-          result.diff = match.values.sum / match.size
+          result.diff = (match.values.sum / match.size) * (result._score / maximum)
         end
       end
 
