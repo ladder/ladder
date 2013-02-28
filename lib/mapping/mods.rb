@@ -102,19 +102,17 @@ module Mapping
           # indexable textual content
           :abstract        => 'abstract',
           :tableOfContents => 'tableOfContents',
-
-          # TODO: add <note> etc.
       }
 
       bibo = map_xpath node, {
           # dereferenceable identifiers
-          :isbn     => 'identifier[@type = "isbn"]',
-          :issn     => 'identifier[@type = "issn"]',
-          :lccn     => 'identifier[@type = "lccn"]',
-          :oclcnum  => 'identifier[@type = "oclc"]',
-          :upc      => 'identifier[@type = "upc"]',
-          :doi      => 'identifier[@type = "doi"]',
-          :uri      => 'identifier[@type = "uri"]',
+          :isbn     => 'identifier[@type = "isbn" and not(@invalid)]',
+          :issn     => 'identifier[@type = "issn" and not(@invalid)]',
+          :lccn     => 'identifier[@type = "lccn" and not(@invalid)]',
+          :oclcnum  => 'identifier[@type = "oclc" and not(@invalid)]',
+          :upc      => 'identifier[@type = "upc" and not(@invalid)]',
+          :doi      => 'identifier[@type = "doi" and not(@invalid)]',
+          :uri      => 'identifier[@type = "uri" and not(@invalid)]',
       }
 
       prism = map_xpath node, {
@@ -122,9 +120,18 @@ module Mapping
           :issueIdentifier  => 'identifier[@type = "issue-number" or @type = "issue number"]',
       }
 
+      mods = map_xpath node, {
+          :note               => 'note',
+          :accessCondition    => 'accessCondition',
+          :issuance           => 'originInfo/issuance',
+          :frequency          => 'originInfo/frequency',
+          :locationOfResource => 'location',
+      }
+
       vocabs[:dcterms] = dcterms unless dcterms.empty?
-      vocabs[:bibo] = bibo unless bibo.empty?
-      vocabs[:prism] = prism unless prism.empty?
+      vocabs[:bibo]    = bibo    unless bibo.empty?
+      vocabs[:prism]   = prism   unless prism.empty?
+      vocabs[:mods]    = mods    unless mods.empty?
 
       vocabs
     end
@@ -207,13 +214,15 @@ module Mapping
 
         case node['type']
           when 'personal'
-            mapped[:rdf_types] = [[:foaf, :Person],
-                                  [:dbpedia, :Person],
-                                  [:schema, :Person]]
+            mapped[:rdf_types] = {:dbpedia => [:Person],
+                                  :rdafrbr => [:Person],
+                                   :schema => [:Person],
+                                     :foaf => [:Person]}
           when 'corporate'
-            mapped[:rdf_types] = [[:foaf, :Organization],
-                                  [:dbpedia, :Organisation],
-                                  [:schema, :Organization]]
+            mapped[:rdf_types] = {:rdafrbr => [:CorporateBody],
+                                  :dbpedia => [:Organisation],
+                                   :schema => [:Organization],
+                                     :foaf => [:Organization]}
         end
 
         agent = Agent.find_or_create_by(mapped)
@@ -270,8 +279,9 @@ module Mapping
               mapped[:skos][:broader] = [current.id] unless current.nil?
 
               if 'geographic' == subnode.name
-                mapped[:rdf_types] = [[:dbpedia, :Place],
-                                      [:schema, :Place]]
+                mapped[:rdf_types] = {:dbpedia => [:Place],
+                                      :rdafrbr => [:Place],
+                                       :schema => [:Place]}
               end
 
               concept = Concept.find_or_create_by(mapped)

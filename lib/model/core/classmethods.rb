@@ -75,17 +75,17 @@ module Model
         dates = [:created_at, :deleted_at, :updated_at].each_with_object({}) {|(key,val), h| h[key] = {:type => 'date'}}
 
         # Hierarchy/Group information
-        ids = [:parent_id, :parent_ids, :group_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string'}}
+        ids = [:parent_id, :parent_ids, :group_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string', :index => 'not_analyzed'}}
 
         # Relation information
-        relations = [:agent_ids, :concept_ids, :resource_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string'}}
+        relations = [:agent_ids, :concept_ids, :resource_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string', :index => 'not_analyzed'}}
 
         properties = {
             # Heading is what users will correlate with most
             :heading => {:type => 'object', :boost => 2},
 
             # RDF class information
-            :rdf_types => { :type => 'string', :index => 'not_analyzed' },
+            :rdf_types => {:type => 'string', :index => 'not_analyzed'},
 
         }.merge(vocabs).merge(dates).merge(ids).merge(relations)
 
