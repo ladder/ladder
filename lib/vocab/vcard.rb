@@ -51,19 +51,19 @@ module Vocab
 
     def self.aliases
       # camelCase aliases
-      map = {:'family-name' => :familyName,
-             :'given-name' => :givenName,
-             :'additional-name' => :additionalName,
-             :'honorific-prefix' => :honorificPrefix,
-             :'honorific-suffix' => :honorificSuffix,
-             :'post-office-box' => :postOfficeBox,
-             :'extended-address' => :extendedAddress,
-             :'street-address' => :streetAddress,
-             :'postal-code' => :postalCode,
-             :'country-name' => :countryName,
+      map = {:'family-name'       => :familyName,
+             :'given-name'        => :givenName,
+             :'additional-name'   => :additionalName,
+             :'honorific-prefix'  => :honorificPrefix,
+             :'honorific-suffix'  => :honorificSuffix,
+             :'post-office-box'   => :postOfficeBox,
+             :'extended-address'  => :extendedAddress,
+             :'street-address'    => :streetAddress,
+             :'postal-code'       => :postalCode,
+             :'country-name'      => :countryName,
              :'organization-name' => :organizationName,
              :'organization-unit' => :organizationUnit,
-             :'sort-string' => :sortString
+             :'sort-string'       => :sortString
       }
     end
   end

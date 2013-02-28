@@ -3,7 +3,9 @@ class DBpedia
 
   bind_to Vocab::DBpedia, :type => Array, :localize => true
 
-  embedded_in :resource # NB: this is embedded in all models
+  embedded_in :resource
+  embedded_in :agent
+  embedded_in :concept
 
   track_history :on => Vocab::DBpedia.properties
 end
