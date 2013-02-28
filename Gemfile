@@ -1,7 +1,6 @@
 source :rubygems
 ruby "1.9.3"
 
-gem 'unicorn'
 gem 'rvm-capistrano'
 
 group :development do
@@ -11,6 +10,10 @@ group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
   #gem 'ruby-prof'
+end
+
+group :test do
+  gem 'unicorn'
 end
 
 # Padrino master branch

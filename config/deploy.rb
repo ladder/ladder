@@ -7,7 +7,6 @@ set :rvm_ruby_string, '1.9.3-p286'
 set :rvm_type, :user
 
 set :application, "ladder"
-set :branch, "re-enable-staging"
 set :repository,  "git@github.com:Marbletank/Ladder.git"
 
 set :scm, :git
