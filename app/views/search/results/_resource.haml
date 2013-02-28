@@ -3,7 +3,7 @@
 - desc.push ignore_nil {resource[:dcterms][:issued].first}
 - desc.push ISO_639.find(resource[:dcterms][:language].first).english_name.capitalize rescue nil
 
-- agents = nil#ignore_nil {resource[:dcterms][:creator] || resource[:dcterms][:contributor] ||resource[:dcterms][:publisher]}
+- agents = ignore_nil {resource[:dcterms][:creator] || resource[:dcterms][:contributor] ||resource[:dcterms][:publisher]}
 - if agents
   - agents = agents.take(3).map do |value|
     - if value.is_a? Hash
@@ -11,4 +11,4 @@
       - link_to(heading.first, url_for(value.keys.first, :id => value.values.first))
 - else agents = []
 
-.description #{[agents + desc].compact.join('; ')}
+.description= (agents + desc).compact.join('; ')

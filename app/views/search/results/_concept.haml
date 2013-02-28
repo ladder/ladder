@@ -2,7 +2,7 @@
 - if ignore_nil {concept[:resource_ids].size > 3}
   - desc.push "#{concept[:resource_ids].size} #{I18n.t('search.resources')}"
 
-.description #{desc.compact.join('; ')}
+.description= desc.compact.join('; ')
 
 - if concept[:resource_ids]
   .media
