@@ -12,6 +12,14 @@ Ladder.controllers do
     @page = params[:page] || 1
     @per_page = params[:pp] || 10
 
+    # do a faceted search to enumerate used locales
+    @locales = Tire.search Tire::Index.default do |search|
+      search.query { all }
+      search.size 0
+      search.facet('locales') {terms 'locales', :size => 10}
+    end
+    locales = @locales.results.facets['locales']['terms'].map {|locale| locale['term']}
+
     # set facets
     @facets = {:dcterms => %w[format language issued creator contributor publisher subject]}
 
@@ -28,7 +36,13 @@ Ladder.controllers do
           @filters.each do |ns, filter|
             filter.each do |f, arr|
               arr.each do |v|
-                filtered.filter :term, "#{ns}.#{f}.raw" => v
+                # FIXME: refactor me with dynamic templates
+                filter_fields = []
+                locales.each do |locale|
+                  filter_fields << {:term => {"#{ns}.#{f}.#{locale}" => v}}
+                end
+
+                filtered.filter :or, filter_fields
               end
             end
           end
@@ -38,7 +52,12 @@ Ladder.controllers do
 
       @facets.each do |ns, fields|
         fields.each do |field|
-          s.facet("#{ns}.#{field}") {terms "#{ns}.#{field}.raw", :size => 10}
+          facet_fields = []
+          locales.each do |locale|
+            facet_fields << "#{ns}.#{field}.#{locale}"
+          end
+
+          s.facet("#{ns}.#{field}") {terms facet_fields, :size => 10}
         end
       end
 

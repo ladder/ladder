@@ -30,10 +30,12 @@ a.thumbnail:hover {
     .half {
         float: left !important;
     }
+/*
     .half-small {
         float: right !important;
         width: 40px !important;
     }
+*/
     .row-fluid .half {
         padding-right: 9px !important;
     }
@@ -45,11 +47,11 @@ a.thumbnail:hover {
 a .half {
     max-width: 60px;
 }
-
+/*
 a .half-small {
     width: 50px
 }
-
+*/
 .row-fluid .half {
     max-width: 80px;
 }

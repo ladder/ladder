@@ -1,7 +1,7 @@
 - @title = [@concept.ancestors.map(&:heading) + @concept.heading].join(' -- ')
 
-.container
-  .row
+.container-fluid
+  .row-fluid
     .span9
       %h2.page-header= @title
       .row-fluid
@@ -35,10 +35,10 @@
               = partial 'similar', :locals => {:document => @concept, :show => [:join, ' -- ']}
 
       -# FACETS
-      - unless @results.empty? or 1 == @results.size
-        .well.sidebar-nav.accordion-body#collapseFilters{:class => (@concept.leaf? and @concept.root? and @concept.similar.empty? or !@filters.empty?) ? '' : 'collapse'}
+      - unless @results.empty? or (1 == @results.size and @filters.empty?)
+        .well.sidebar-nav.accordion-body#collapseFilters{:class => (@filters.empty?) ? 'collapse' : ''}
           %ul.nav.nav-list
-            - unless @concept.leaf? and @concept.root? and @concept.similar.empty?
+            - unless @results.facets.empty?
               %li.nav-header
                 %a{:href => '#collapseFilters', :'data-toggle' => "collapse"}= I18n.t('search.filters')
-            = partial 'search/facet', :collection => @results.facets
+              = partial 'search/facet', :collection => @results.facets
