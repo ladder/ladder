@@ -10,7 +10,7 @@ module Mapping
         nodes = []
         xml_node.xpath(xpath).each do |node|
           # include all whitespace between nodes, but collapse to single spaces
-          nodes << node.to_xml.gsub(/<[^>]*>/ui,'').gsub(/(\s|\u00A0)+/, ' ').strip
+          nodes << node.to_xml(:encoding => 'UTF-8').gsub(/<[^>]*>/ui,'').gsub(/(\s|\u00A0)+/, ' ').strip
         end
         mapped[symbol] = nodes.uniq unless nodes.empty?
       end

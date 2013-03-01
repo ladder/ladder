@@ -15,7 +15,7 @@ namespace :app do
     %w[Agent Concept Resource].each {|model| model.classify.constantize.put_mapping}
 
     # create default admin account
-    account = Account.create(:email => 'admin@deliberatedata.com',
+    account = Account.create(:email => 'ladder@deliberatedata.com',
                              :name => 'Ladder',
                              :surname => 'Admin',
                              :password => 'ladder',

@@ -10,7 +10,12 @@ module Mapping
 
     def map(marc)
       # create MODS XML from MARC record
-      @mods = @xslt.transform(Nokogiri::XML(Gyoku.xml(marc.to_gyoku_hash))).remove_namespaces!
+      marc_xml = Gyoku.xml(marc.to_gyoku_hash)
+
+      # ensure weird encodings are turned into valid UTF-8
+      marc_xml = marc_xml.encode('UTF-8', 'binary', :undef => :replace, :invalid => :replace, :replace =>'') unless marc_xml.force_encoding('UTF-8').valid_encoding?
+
+      @mods = @xslt.transform(Nokogiri::XML(marc_xml)).remove_namespaces!
 
       # assign RDF class based on MARC class
       case marc
