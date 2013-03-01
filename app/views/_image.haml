@@ -30,7 +30,7 @@
   - when /software/i then 'icon-save'
   - when /map/i then 'icon-globe'
   - when /periodical/i then 'icon-copy'
-  - when /musical/i then 'icon-music'
+  - when /music/i then 'icon-music'
   - when /(audio)?visual/i then 'icon-facetime-video'
   - when /audio/i then 'icon-volume-down'
   - when /resource/i then 'icon-file'
@@ -43,7 +43,7 @@
   - when /concept/i then 'icon-cloud'
 
   - else 'icon-question-sign'
-- raise 'pry'if 'icon-question-sign' == icon_class
+
 - if url = image.dbpedia.thumbnail.first rescue nil
   %img{:src => url, :onError => "imgFallback(this, '#{icon_class}', '#{style}');"}
 
