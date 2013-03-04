@@ -1,7 +1,7 @@
 class Bibo
   include Model::Embedded
 
-  bind_to Vocab::Bibo, :type => Array, :localize => true, :only => [:isbn, :issn, :lccn, :oclcnum, :upc, :doi, :uri]
+  bind_to Vocab::Bibo, :type => Array, :localize => true
 
   embedded_in :resource
 

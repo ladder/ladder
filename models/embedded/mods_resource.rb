@@ -1,7 +1,7 @@
 class ModsResource
   include Model::Embedded
 
-  bind_to Vocab::ModsResource, :type => Array, :localize => true, :only => [:note]
+  bind_to Vocab::ModsResource, :type => Array, :localize => true
 
   embedded_in :resource
 
