@@ -41,6 +41,7 @@ a.thumbnail:hover {
 a .half {
     max-width: 60px;
 }
+
 .row-fluid .half {
     max-width: 80px;
 }
@@ -94,6 +95,11 @@ p.lead {
     margin-top: -6px;
 }
 
+.well.sidebar-nav {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
 .nav-list > .active > a {
     opacity: 0.75;
 }
@@ -121,10 +127,6 @@ p.lead {
 
 .nav-list li:nth-last-child(odd):not(.active) a:hover {
     background-color: #e5e5e5;
-}
-
-li.nav-header {
-    padding-left: 0px;
 }
 
 .media {

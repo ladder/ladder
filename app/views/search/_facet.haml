@@ -2,7 +2,7 @@
   - ns = facet.first.split('.').first
   - name = facet.first.split('.').last
 
-  %li.nav-header= I18n.t("resource.#{name}", :default => name.titleize) unless 'rdf_types' == name
+  %li.nav-header= 'rdf_types' == name ? 'rdf type' : I18n.t("resource.#{name}", :default => name)
 
   - facet.last['terms'].each do |f|
 

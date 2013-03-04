@@ -41,25 +41,28 @@
 
                     - if value[:concept]
                       - concept = Concept.find(value.values.first)
-                      .media
-                        %a.thumbnail.pull-left{:style => 'min-width: 60px;'}
-                          = partial 'image', :object => concept
-                        .media-body
-                        = link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :id => value.values.first)
+
+                      %a{:href => url_for(:concept, :id => concept.id)}
+                        .span1.pull-left{:style => 'text-align:center; margin-right: 5px;'}
+                          = partial 'image', :object => concept, :locals => {:style => 'font-size: 1.5em;'}
+                        = [reference.ancestors.map(&:heading) + reference.heading].join(' -- ')
+                      .clearfix
 
                     - elsif value[:agent]
                       - agent = Agent.find(value.values.first)
-                      .media
-                        %a.thumbnail.pull-left{:style => 'min-width: 60px;'}
-                          = partial 'image', :object => agent
-                        .media-body
-                          = link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :id => value.values.first)
+
+                      %a{:href => url_for(:agent, :id => agent.id)}
+                        .span1.pull-left{:style => 'text-align:center; margin-right: 5px;'}
+                          = partial 'image', :object => agent, :locals => {:style => 'font-size: 2em;'}
+                        = reference.heading.first
+                      .clearfix
 
                     - else
                       = link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :id => value.values.first)
 
                   - elsif :language == field
                     = ISO_639.find(value).english_name rescue nil
+                    %br
 
                   - else
                     = value
@@ -78,7 +81,7 @@
                               .label= ignore_nil {LanguageList::LanguageInfo.find(lang.capitalize.to_s).name} || lang.capitalize.to_s
                             %small.muted (#{(100 * match).round}%)
                           .clearfix
-                        - next
+                          - next
 
                     - unless values.last == value
                       %br

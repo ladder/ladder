@@ -1,12 +1,13 @@
 - show = show || :join
 
 - docs = document.similar({:amatch => true}).to_a
+- docs.delete_if {|doc| doc.diff < 0.15}
 -# docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
 
 - unless docs.empty?
   %li.nav-header= I18n.t('model.similar')
   %ul
-  - docs.take(5).each do |doc|
+  - docs.each do |doc|
 
     - if doc.diff > 0.85
       %li.active
