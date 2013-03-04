@@ -4,7 +4,7 @@
   %ul.nav.nav-tabs
     %li.active
       %a{:href => '#item', :'data-toggle' => "tab"}= item.class.name
-    %li
+    %li.hidden-phone
       %a{:href => '#rdf', :'data-toggle' => "tab"} RDF/XML
     - item.files.each do |file|
       - mime = MIME::Type.new(file.content_type).sub_type
@@ -40,7 +40,12 @@
                     - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
                     - if value[:concept]
-                      = link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :id => value.values.first)
+                      - concept = Concept.find(value.values.first)
+                      .media
+                        %a.thumbnail.pull-left{:style => 'min-width: 60px;'}
+                          = partial 'image', :object => concept
+                        .media-body
+                        = link_to [reference.ancestors.map(&:heading) + reference.heading].join(' -- '), url_for(value.keys.first, :id => value.values.first)
 
                     - elsif value[:agent]
                       - agent = Agent.find(value.values.first)
@@ -72,9 +77,11 @@
                             - else
                               .label= ignore_nil {LanguageList::LanguageInfo.find(lang.capitalize.to_s).name} || lang.capitalize.to_s
                             %small.muted (#{(100 * match).round}%)
+                          .clearfix
+                        - next
 
-                  - unless values.last == value
-                    %br
+                    - unless values.last == value
+                      %br
 
     .tab-pane#rdf
       %pre

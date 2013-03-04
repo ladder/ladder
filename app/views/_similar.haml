@@ -1,8 +1,7 @@
 - show = show || :join
 
 - docs = document.similar({:amatch => true}).to_a
-- docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
-- docs.sort! {|a, b| b.diff <=> a.diff}
+-# docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
 
 - unless docs.empty?
   %li.nav-header= I18n.t('model.similar')
@@ -14,7 +13,11 @@
         %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
           .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
-          %strong.text-warning #{doc.load.heading.send(*show)}
+          %strong.text-warning
+            - if document.is_a? Concept
+              = [doc.load.ancestors.map(&:heading) + doc.load.heading].send(*show)
+            - else
+              = doc.load.heading.send(*show)
           %small.muted (#{(doc.diff * 100).round}%)
           .clearfix
 
@@ -24,8 +27,8 @@
           .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
           - if document.is_a? Concept
-            #{[doc.load.ancestors.map(&:heading) + doc.load.heading].send(*show)}
+            = [doc.load.ancestors.map(&:heading) + doc.load.heading].send(*show)
           - else
-            #{doc.load.heading.send(*show)}
+            = doc.load.heading.send(*show)
           %small.muted (#{(doc.diff * 100).round}%)
           .clearfix

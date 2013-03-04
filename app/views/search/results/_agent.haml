@@ -11,14 +11,4 @@
 - life_dates += "#{death}" unless death.nil?
 - desc.push life_dates
 
-- if ignore_nil {agent[:resource_ids].size > 3}
-  - desc.push "#{agent[:resource_ids].size} #{I18n.t('search.resources')}"
-
 .description= desc.compact.join('; ')
-
-- if agent[:resource_ids]
-  .media
-    - Resource.find(agent[:resource_ids].take(3)).each do |resource|
-      %a.thumbnail.pull-right{:href => url_for(:resource, :id => resource.id), :style => 'margin-left: 9px; min-width: 60px;'}
-        = partial 'image', :object => resource
-  .clearfix

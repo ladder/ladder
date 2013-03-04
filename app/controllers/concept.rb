@@ -26,6 +26,9 @@ Ladder.controllers do
     # create Tire search object
     @results = Resource.search(:page => @page, :per_page => @per_page) do |s|
 
+      s.facet('group') {terms 'group_ids', :size => 10}
+      s.facet('rdf_types') {terms 'rdf_types', :size => 10}
+
       s.query do |query|
 
         query.filtered do |filtered|
@@ -33,7 +36,24 @@ Ladder.controllers do
             q.term :concept_ids, @concept.id.to_s
           end
 
+          # special treatment for groups filter
+          if @filters['group']
+            @filters['group']['group'].each do |v|
+              filtered.filter :term, "group_ids" => v
+            end
+          end
+
+          # special treatment for rdf types filter
+          if @filters['rdf_types']
+            @filters['rdf_types']['rdf_types'].each do |v|
+              filtered.filter :term, "rdf_types" => v
+            end
+          end
+
           @filters.each do |ns, filter|
+            next if 'group' == ns
+            next if 'rdf_types' == ns
+
             filter.each do |f, arr|
               arr.each do |v|
                 # FIXME: refactor me with dynamic templates
@@ -66,6 +86,11 @@ Ladder.controllers do
     if @results.empty? and @results.total > 0 and @page.to_i > 1
       params[:page] = 1
       redirect current_path(params)
+    end
+
+    if 1 == @results.size.to_i and 1 == @page.to_i and !@filters.empty?
+      result = @results.first
+      redirect url_for(result.class.to_s.underscore.to_sym, :id => result.id)
     end
 
     # get a list of IDs from facets and query ES for the headings to display

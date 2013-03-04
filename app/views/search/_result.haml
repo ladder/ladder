@@ -6,9 +6,24 @@
       = partial 'image', :object => result
 
   .span10
+    - if result.resource_ids
+      - resources = Resource.search do |s|
+        - s.size 0
+        - s.query do |query|
+          - query.term (result.class.to_s.underscore + '_ids').to_sym, result.id
+        - s.facet 'rdf_types' do
+          - terms 'rdf_types', :size => 10
+
+      %ul.nav.nav-list.pull-right
+        - resources.facets.first.last['terms'].each do |f|
+          %li
+            %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id, :fi => {'rdf_types' => {'rdf_types' => f['term'].to_a}})}
+
+              - display = partial 'image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
+              = display + pluralize(f['count'], f['term']).titleize
+
     %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
       - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
-
       %h4= hash[:heading].first.truncate(100, :separator => ' ')
       -#%h4= [concept.load.ancestors.map(&:heading) + concept.load.heading].join(' -- ').truncate(100, :separator => ' ').humanize
 

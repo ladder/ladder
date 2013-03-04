@@ -183,7 +183,8 @@ module Model
         end
       end
 
-      results
+      # return sorted results
+      results.sort {|a, b| b.diff <=> a.diff}
     end
 
     # more precise serialization for Tire
