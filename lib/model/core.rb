@@ -11,7 +11,12 @@ module Model
 
       # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
       base.send :include, Mongoid::Paranoia # soft deletes
+      base.send :index, 'deleted_at' => 1
+
       base.send :include, Mongoid::Timestamps
+      base.send :index, 'created_at' => 1
+      base.send :index, 'updated_at' => 1
+
       base.send :include, Mongoid::Tree
       #base.send :include, Mongoid::Tree::Ordering
       base.send :include, Mongoid::History::Trackable
@@ -29,7 +34,7 @@ module Model
       end
 
       # Generate MD5 fingerprint for this document
-      base.send :field, :md5
+      base.send :field, :md5, type: Moped::BSON::Binary
       base.send :index, 'md5' => 1
       base.send :set_callback, :save, :before, :generate_md5
 

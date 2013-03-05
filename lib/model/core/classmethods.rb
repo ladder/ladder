@@ -15,7 +15,7 @@ module Model
         # use md5 fingerprint to query if a document already exists
         obj = self.new(attrs)
         hash = obj.to_normalized_hash({:ids => :omit})
-        query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize)))
+        query = self.where(:md5 => Moped::BSON::Binary.new(:md5, Digest::MD5.digest(hash.to_string_recursive.normalize))).hint(:md5 => 1)
 
         result = query.first
         return result unless result.nil?
