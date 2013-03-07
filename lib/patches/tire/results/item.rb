@@ -30,6 +30,7 @@ module Tire
           end
 
           hash[:heading] = lookup(hash[:heading])
+          hash[:heading_ancestors] = lookup(hash[:heading_ancestors])
         end
 
         self.class.normalize(hash, opts)

@@ -1,4 +1,4 @@
-- @title = [@concept.ancestors.map(&:heading) + @concept.heading].join(' -- ')
+- @title = @concept.heading_ancestors.join(' -- ').truncate(100, :separator => ' ')
 
 .row-fluid
   .span9

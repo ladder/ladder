@@ -37,6 +37,7 @@
                 - values.each do |value|
 
                   - if value.is_a? Hash
+                    -# resolve ID to an object by querying the DB
                     - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
                     - if value[:concept]
@@ -45,7 +46,7 @@
                       %a{:href => url_for(:concept, :id => concept.id)}
                         .span1.pull-left{:style => 'text-align:center; margin-right: 5px;'}
                           = partial 'image', :object => concept, :locals => {:style => 'font-size: 1.5em;'}
-                        = [reference.ancestors.map(&:heading) + reference.heading].join(' -- ')
+                        = reference.heading_ancestors.join(' -- ')
                       .clearfix
 
                     - elsif value[:agent]
@@ -58,7 +59,7 @@
                       .clearfix
 
                     - else
-                      = link_to reference.heading.first.truncate(100, :separator => ' '), url_for(value.keys.first, :id => value.values.first)
+                      = link_to reference.heading.first, url_for(value.keys.first, :id => value.values.first)
 
                   - elsif :language == field
                     = ISO_639.find(value).english_name rescue nil

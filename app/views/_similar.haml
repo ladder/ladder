@@ -8,6 +8,7 @@
   %li.nav-header= I18n.t('model.similar')
   %ul
   - docs.each do |doc|
+    - hash = doc.to_normalized_hash({:ids => :omit, :localize => true, :all_keys => true}).except(:rdf_types)
 
     - if doc.diff > 0.85
       %li.active
@@ -15,10 +16,10 @@
           .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
           %strong.text-warning
-            - if document.is_a? Concept
-              = [doc.load.ancestors.map(&:heading) + doc.load.heading].send(*show)
+            - if Resource == doc.class
+              = hash[:heading].send(*show).truncate(100, :separator => ' ')
             - else
-              = doc.load.heading.send(*show)
+              = hash[:heading_ancestors].send(*show).truncate(100, :separator => ' ')
           %small.muted (#{(doc.diff * 100).round}%)
           .clearfix
 
@@ -27,9 +28,10 @@
         %a{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
           .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
-          - if document.is_a? Concept
-            = [doc.load.ancestors.map(&:heading) + doc.load.heading].send(*show)
+          - if Resource == doc.class
+            = hash[:heading].send(*show).truncate(100, :separator => ' ')
           - else
-            = doc.load.heading.send(*show)
+            = hash[:heading_ancestors].send(*show).truncate(100, :separator => ' ')
+
           %small.muted (#{(doc.diff * 100).round}%)
           .clearfix

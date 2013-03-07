@@ -103,18 +103,36 @@ module Model
         unless send(vocab).nil?
           # NB: default is localized
           if opts[:delocalize]
-            target = self[vocab][field.to_s]
-            target = target.symbolize_keys unless target.nil?
+            value = self[vocab][field.to_s]
+            value = value.symbolize_keys unless value.nil?
           else
-            target = send(vocab).send(field)
+            value = send(vocab).send(field)
           end
+          return value unless value.nil?
         end
-
-        return target if target
       end
 
       # FIXME: return 'untitled' for no heading
       opts[:delocalize] ? {I18n.locale => [I18n.t('model.untitled')]} : [I18n.t('model.untitled')]
+    end
+
+    def heading_ancestors(opts={})
+      test = ancestors_and_self.map do |node|
+        node.heading(opts)
+      end
+
+      # NB: default is localized
+      if opts[:delocalize]
+        test.reduce({}) do |h,pairs|
+          pairs.each do |k,v|
+            (h[k] ||= []) << v.first
+          end
+          h
+        end
+      else
+        test.map(&:first)
+      end
+
     end
 
     def amatch(model, opts={})
@@ -197,8 +215,9 @@ module Model
       # Use normalized copy of document
       hash = self.to_normalized_hash(:all_keys => true)
 
-      # add heading
+      # add heading and ancestor heading
       hash[:heading] = heading(:delocalize => true)
+      hash[:heading_ancestors] = heading_ancestors(:delocalize => true)
 
       # add locales
       hash[:locales] = locales

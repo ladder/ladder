@@ -36,9 +36,6 @@ Ladder.controllers :search do
     @search.facet('type') {terms '_type', :size => 10}
     @search.facet('rdf_types') {terms 'rdf_types', :size => 10}
 
-    # set fields; prefer matches in heading, but search everywhere
-    @fields = ['heading', '_all']
-
     # do a faceted search to enumerate used locales
     @locales = Tire.search Tire::Index.default do |search|
       search.query { all }
@@ -46,6 +43,9 @@ Ladder.controllers :search do
       search.facet('locales') {terms 'locales', :size => 10}
     end
     locales = @locales.results.facets['locales']['terms'].map {|locale| locale['term']}
+
+    # set fields; prefer matches in (localized) heading, but search everywhere
+    @fields = locales.map {|locale| "heading.#{locale}"} + ['_all']
 
     # set facets
     @facets = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
@@ -161,7 +161,7 @@ Ladder.controllers :search do
         @headings = Tire.search Tire::Index.default do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
-          search.fields ['heading']
+          search.fields ['heading', 'heading_ancestors']
         end
       end
     end

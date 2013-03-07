@@ -11,9 +11,7 @@
       - heading = @headings.results.find {|i| i.id == f['term']} rescue []
 
       - if 'dcterms.LCSH' == facet.first or 'dcterms.subject' == facet.first
-        -# NB: this requires multiple hits to the DB
-        - reference = heading.type.to_s.classify.constantize.find(heading.id)
-        - display = [reference.ancestors.map(&:heading) + reference.heading].join(' -- ')
+        - display = heading.heading_ancestors.lookup(heading.heading_ancestors).join(' -- ').truncate(100, :separator => ' ')
       - elsif 'group' == facet.first
         - display = Group.find(f['term']).rdfs.label.first
       - else

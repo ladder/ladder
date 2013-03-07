@@ -24,8 +24,12 @@
 
     %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
       - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
-      %h4= hash[:heading].first.truncate(100, :separator => ' ')
-      -#%h4= [concept.load.ancestors.map(&:heading) + concept.load.heading].join(' -- ').truncate(100, :separator => ' ').humanize
+
+      %h4{:style => 'margin-top: 3px;'}
+        - if Resource == result.class
+          = hash[:heading].first.truncate(100, :separator => ' ')
+        - else
+          = hash[:heading_ancestors].join(' -- ').truncate(100, :separator => ' ')
 
     = partial "search/results/#{result.class.to_s.underscore}", :object => hash
 
