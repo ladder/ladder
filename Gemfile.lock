@@ -1,21 +1,12 @@
 GIT
-  remote: git://github.com/aq1018/mongoid-history.git
-  revision: a14cc3294b21b12f4342ca79f5f4d37d0234a982
+  remote: git://github.com/karmi/tire.git
+  revision: 53cf972eca9db6ccae794d5dbe7f25b1bbd4da85
   specs:
-    mongoid-history (0.3.2)
-      activesupport
-      easy_diff
-      mongoid (~> 3.0)
-
-GIT
-  remote: git://github.com/cjbottaro/tire.git
-  revision: e72b409009461181727f471438ce6045f67ae9f3
-  branch: put_mapping
-  specs:
-    tire (0.5.1)
+    tire (0.5.4)
       activemodel (>= 3.0)
+      activesupport
       hashr (~> 0.0.19)
-      multi_json (~> 1.0)
+      multi_json (~> 1.3)
       rake
       rest-client (~> 1.6)
 
@@ -38,7 +29,7 @@ GIT
 
 GIT
   remote: git://github.com/padrino/padrino-framework.git
-  revision: 5173465336716426f99b971df16e9bdee8b8c39a
+  revision: 2eb060ab502a5f9aa520ec56f876bda248ae460b
   specs:
     padrino (0.10.7)
       padrino-admin (= 0.10.7)
@@ -52,8 +43,9 @@ GIT
       padrino-helpers (= 0.10.7)
     padrino-cache (0.10.7)
       padrino-core (= 0.10.7)
+      padrino-helpers (= 0.10.7)
     padrino-core (0.10.7)
-      activesupport (~> 3.2.0)
+      activesupport (>= 3.1.0)
       http_router (~> 0.10.2)
       sinatra (~> 1.3.1)
       thor (~> 0.16.0)
@@ -69,71 +61,74 @@ GIT
       padrino-core (= 0.10.7)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
-    actionpack (3.2.9)
-      activemodel (= 3.2.9)
-      activesupport (= 3.2.9)
+    actionpack (3.2.12)
+      activemodel (= 3.2.12)
+      activesupport (= 3.2.12)
       builder (~> 3.0.0)
       erubis (~> 2.7.0)
       journey (~> 1.0.4)
-      rack (~> 1.4.0)
+      rack (~> 1.4.5)
       rack-cache (~> 1.2)
       rack-test (~> 0.6.1)
       sprockets (~> 2.2.1)
-    activemodel (3.2.9)
-      activesupport (= 3.2.9)
+    activemodel (3.2.12)
+      activesupport (= 3.2.12)
       builder (~> 3.0.0)
-    activesupport (3.2.9)
+    activesupport (3.2.12)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    addressable (2.3.2)
-    amatch (0.2.10)
+    addressable (2.3.3)
+    amatch (0.2.11)
       tins (~> 0.3)
+    backports (3.1.0)
     bcrypt-ruby (3.0.1)
-    better_errors (0.3.2)
+    better_errors (0.7.0)
       coderay (>= 1.0.0)
-      erubis (>= 2.7.0)
-    binding_of_caller (0.6.8)
-    bson (1.8.0)
-      activesupport
-    bson_ext (1.8.0)
-      bson (~> 1.8.0)
+      erubis (>= 2.6.6)
+    binding_of_caller (0.7.1)
+      debug_inspector (>= 0.0.1)
+    bson (1.8.3)
+    bson_ext (1.8.3)
+      bson (~> 1.8.3)
     builder (3.0.4)
-    capistrano (2.14.1)
+    capistrano (2.14.2)
       highline
       net-scp (>= 1.0.0)
       net-sftp (>= 2.0.0)
       net-ssh (>= 2.0.14)
       net-ssh-gateway (>= 1.1.0)
-    coderay (1.0.8)
+    coderay (1.0.9)
+    debug_inspector (0.0.2)
     easy_diff (0.0.2)
     enhanced_marc (0.2.3)
       locale
       marc
     erubis (2.7.0)
     excon (0.16.10)
-    fabrication (2.5.4)
+    fabrication (2.6.2)
     facets (2.9.3)
-    gyoku (0.4.6)
+    gyoku (1.0.0)
       builder (>= 2.1.2)
-    haml (3.1.7)
+    haml (4.0.0)
+      tilt
     hashr (0.0.22)
-    heroku (2.33.4)
+    heroku (2.35.0)
       heroku-api (~> 0.3.7)
       launchy (>= 0.3.2)
       netrc (~> 0.7.7)
       rest-client (~> 1.6.1)
       rubyzip
-    heroku-api (0.3.7)
+    heroku-api (0.3.8)
       excon (~> 0.16.10)
     highline (1.6.15)
     hike (1.2.1)
     http_router (0.10.2)
       rack (>= 1.0.0)
       url_mount (~> 0.2.1)
-    httpclient (2.3.0.1)
-    i18n (0.6.1)
+    httpclient (2.3.3)
+    i18n (0.6.4)
     ignore_nil (1.0.3)
     iso-639 (0.1.0)
     journey (1.0.4)
@@ -142,7 +137,7 @@ GEM
       activesupport (>= 3.0.0)
     kgio (2.8.0)
     language_list (0.1.0)
-    launchy (2.1.2)
+    launchy (2.2.0)
       addressable (~> 2.3)
     locale (2.0.8)
     lz4-ruby (0.1.7)
@@ -152,80 +147,86 @@ GEM
       treetop (~> 1.4.8)
     marc (0.5.0)
     method_source (0.8.1)
-    mime-types (1.19)
-    mongo (1.8.0)
-      bson (~> 1.8.0)
-    mongoid (3.0.15)
-      activemodel (~> 3.1)
-      moped (~> 1.1)
+    mime-types (1.21)
+    mongo (1.8.3)
+      bson (~> 1.8.3)
+    mongoid (3.1.2)
+      activemodel (~> 3.2)
+      moped (~> 1.4.2)
       origin (~> 1.0)
       tzinfo (~> 0.3.22)
+    mongoid-history (0.3.2)
+      activesupport
+      easy_diff
+      mongoid (~> 3.0)
     mongoid-tree (1.0.1)
       mongoid (>= 3.0, <= 4.0)
-    moped (1.3.1)
-    multi_json (1.5.0)
+    moped (1.4.3)
+    multi_json (1.6.1)
     net-scp (1.1.0)
       net-ssh (>= 2.6.5)
     net-sftp (2.1.1)
       net-ssh (>= 2.6.5)
-    net-ssh (2.6.5)
+    net-ssh (2.6.6)
     net-ssh-gateway (1.2.0)
       net-ssh (>= 2.6.5)
     netrc (0.7.7)
     nokogiri (1.5.6)
-    oj (2.0.0)
+    oj (2.0.9)
     origin (1.0.11)
     padrino-contrib (0.1.13)
-    parallel (0.6.1)
+    parallel (0.6.2)
     polyglot (0.3.3)
-    pry (0.9.10)
+    pry (0.9.12)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
-      slop (~> 3.3.1)
+      slop (~> 3.4)
     pry-padrino (0.1.2)
       pry (>= 0.8)
-    rack (1.4.1)
+    rack (1.4.5)
     rack-cache (1.2)
       rack (>= 0.4)
-    rack-protection (1.3.2)
+    rack-protection (1.4.0)
       rack
     rack-test (0.6.2)
       rack (>= 1.0)
     raindrops (0.10.0)
     rake (10.0.3)
-    rdf (0.3.11)
-      addressable (>= 2.2.6)
-    rdf-rdfxml (0.3.9)
-      rdf (>= 0.3.11)
-      rdf-xsd (>= 0.3.8)
+    rdf (1.0.3)
+      addressable (>= 2.2)
+    rdf-rdfxml (1.0.0)
+      rdf (>= 1.0)
+      rdf-xsd (>= 1.0)
     rdf-xml (0.0.3)
       nokogiri (>= 1.4.1)
       rdf (>= 0.1.1)
-    rdf-xsd (0.3.8)
+    rdf-xsd (1.0.0)
+      backports
+      nokogiri (>= 1.5.0)
       rdf (>= 0.3.4)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rubyzip (0.9.9)
     rvm-capistrano (1.2.7)
       capistrano (>= 2.0.0)
-    sinatra (1.3.3)
-      rack (~> 1.3, >= 1.3.6)
-      rack-protection (~> 1.2)
+    sinatra (1.3.5)
+      rack (~> 1.4)
+      rack-protection (~> 1.3)
       tilt (~> 1.3, >= 1.3.3)
-    slop (3.3.3)
+    slop (3.4.3)
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
     thor (0.16.0)
-    tilt (1.3.3)
-    tins (0.6.0)
+    tilt (1.3.5)
+    tins (0.7.1)
     treetop (1.4.12)
       polyglot
       polyglot (>= 0.3.1)
-    tzinfo (0.3.35)
-    unicorn (4.6.0)
+    tzinfo (0.3.36)
+    unicorn (4.6.2)
       kgio (~> 2.6)
       rack
       raindrops (~> 0.7)
@@ -252,13 +253,13 @@ DEPENDENCIES
   httpclient
   ignore_nil
   iso-639
-  kaminari
+  kaminari (>= 0.14)
   language_list
   lz4-ruby
   marc
   mongo
   mongoid
-  mongoid-history!
+  mongoid-history
   mongoid-tree
   nokogiri
   oj

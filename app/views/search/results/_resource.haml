@@ -3,12 +3,10 @@
 - desc.push ignore_nil {resource[:dcterms][:issued].first}
 - desc.push ISO_639.find(resource[:dcterms][:language].first).english_name.capitalize rescue nil
 
-- agents = ignore_nil {resource[:dcterms][:creator] || resource[:dcterms][:contributor] ||resource[:dcterms][:publisher]}
-- if agents
-  - agents = agents.take(3).map do |value|
-    - if value.is_a? Hash
-      - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
-      - link_to(heading.first, url_for(value.keys.first, :id => value.values.first))
-- else agents = []
+- agents = ignore_nil {resource[:dcterms][:creator] || resource[:dcterms][:contributor] ||resource[:dcterms][:publisher]} || []
+- agents.take(3).each do |value|
+  - if value.is_a? Hash
+    - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
+    = link_to(heading.first, url_for(value.keys.first, :id => value.values.first))
 
-.description= (agents + desc).compact.join('; ')
+.description= desc.compact.join('; ')

@@ -1,19 +1,18 @@
-source :rubygems
-ruby "1.9.3"
-
-gem 'rvm-capistrano'
+source 'https://rubygems.org'
+ruby '1.9.3'
 
 group :development do
-  gem 'wirble'
-  gem 'heroku'
-  gem 'pry-padrino'
-  gem 'better_errors'
-  gem 'binding_of_caller'
+  gem 'better_errors'     # debugging
+  gem 'binding_of_caller' # debugging
+  gem 'pry-padrino'       # debugging console
+  gem 'wirble'            # syntax highlighting
+  gem 'heroku'            # deployment
+  gem 'rvm-capistrano'    # deployment
   #gem 'ruby-prof'
 end
 
 group :test do
-  gem 'unicorn'
+  gem 'unicorn' # application server
 end
 
 # Padrino master branch
@@ -27,31 +26,31 @@ gem 'haml'
 
 # Component requirements
 gem 'bcrypt-ruby', :require => 'bcrypt'
-gem 'fabrication' # object generation
-gem 'lz4-ruby'    # binary compression
-gem 'nokogiri'    # xml manipulation
-gem 'parallel'    # multi-core processing
-gem 'iso-639'     # english/french lists
+gem 'fabrication'   # object generation
+gem 'lz4-ruby'      # binary compression
+gem 'nokogiri'      # xml manipulation
+gem 'parallel'      # multi-core processing
+gem 'iso-639'       # english/french lists
 gem 'language_list' # multiple language lists
-#gem 'hashdiff'    # hash comparison
-gem 'amatch'      # string comparison
-gem 'oj'          # JSON parser/serializer
-gem 'ignore_nil'  # cleanly access chained property methods
-gem 'whatlanguage',# language detection
-      :git => 'git://github.com/niknikjaja/whatlanguage.git'
+gem 'amatch'        # string comparison
+gem 'oj'            # JSON parser/serializer
+gem 'ignore_nil'    # cleanly access chained property methods
+gem 'whatlanguage', # language detection
+  :git => 'git://github.com/niknikjaja/whatlanguage.git'
+#gem 'hashdiff'     # hash comparison
 
 # Ruby facets methods
 gem 'facets', :require => ['facets/hash/recurse']
 
 # model gems
-gem 'tire', :git => 'git://github.com/cjbottaro/tire.git', :branch => 'put_mapping'
-gem 'kaminari', :require => 'kaminari/sinatra'
+gem 'tire', :git => 'git://github.com/karmi/tire.git'
+gem 'kaminari', '>=0.14', :require => 'kaminari/sinatra' # NB: shouldn't require version pinning
 gem 'bson_ext', :require => 'mongo'
 gem 'mongo', :require => 'mongo'
 gem 'mongoid'
 gem 'mongoid-tree', :require => 'mongoid/tree'
+gem 'mongoid-history'
 #gem 'mongoid-grid_fs'
-gem 'mongoid-history', :git => 'git://github.com/aq1018/mongoid-history.git'
 
 # linked data gems
 gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'
