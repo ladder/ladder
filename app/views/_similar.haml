@@ -13,7 +13,8 @@
     - if doc.diff > 0.85
       %li.active
         %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
-          .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
+          .half.pull-left{:style => 'margin-right: 5px;'}
+            = partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
           %strong.text-warning
             - if Resource == doc.class
@@ -26,7 +27,8 @@
     - else
       %li
         %a{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
-          .half.pull-left= partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
+          .half.pull-left{:style => 'margin-right: 5px;'}
+            = partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em;'}
 
           - if Resource == doc.class
             = hash[:heading].send(*show).truncate(100, :separator => ' ')

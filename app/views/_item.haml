@@ -27,7 +27,7 @@
             - next unless values.is_a? Array
 
             -# TODO: helper to allow specifying 'except, slice' type field mapping
-            -# next if :thumbnail == field
+            - next if :thumbnail == field
 
             %tr
               %td.span2
@@ -60,6 +60,13 @@
 
                     - else
                       = link_to reference.heading.first, url_for(value.keys.first, :id => value.values.first)
+
+                  - elsif value.match(URI.regexp(['http', 'https']))
+                    %a{:href => value}
+                      .span1.pull-left{:style => 'text-align:center; margin-right: 5px;'}
+                        %i{:class => 'icon-share-alt', :style => ''}
+                      = value
+                    .clearfix
 
                   - elsif :language == field
                     = ISO_639.find(value).english_name rescue nil

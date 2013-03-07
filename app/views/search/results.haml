@@ -9,8 +9,7 @@
         %span.muted (#{@results.time} ms)
 
         = partial 'search/result', :collection => @results
-        .pagination-centered
-          = paginate @results, :window => 3
+        .pagination-centered= paginate @results, :window => 3
 
       - else
         = I18n.t("search.empty")

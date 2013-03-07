@@ -6,8 +6,13 @@
       %h2.page-header= @title
 
       .row-fluid
-        .span2.thumbnail
-          = partial 'image', :object => @resource
+        .span2{:style => 'text-align: center;'}
+          .thumbnail
+            = partial 'image', :object => @resource
+
+          - locations = ignore_nil {@resource.prism.url} || ignore_nil {@resource.bibo.uri} || ignore_nil {@resource.mods.locationOfResource} || []
+          - locations.take(1).each do |location|
+            %a.btn.btn-success{:href => location, :style => 'margin-top: 10px;'} Access Online
 
         .span10
           = partial 'item', :object => @resource
