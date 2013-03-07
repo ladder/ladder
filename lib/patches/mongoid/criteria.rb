@@ -7,8 +7,10 @@ module Mongoid
   class Criteria
 
     def chunkify(opts = {})
-      # default to chunks of 1000 to avoid mongo cursor timeouts for large sets
-      options = {:per => 1000}.merge(opts)
+
+      # maximum chunks of 1000 to avoid mongo cursor timeouts for large sets
+      per = [(self.size / Parallel.processor_count) + Parallel.processor_count, 1000].min
+      options = {:per => per}.merge(opts)
 
       chunks = []
 

@@ -161,6 +161,7 @@ Ladder.controllers :search do
         @headings = Tire.search Tire::Index.default do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
+          # TODO: I think these need to be localized as above
           search.fields ['heading', 'heading_ancestors']
         end
       end

@@ -5,7 +5,7 @@
 
 module Vocab
 
-  class ModsResource < RDF::Vocabulary("http://www.loc.gov/mods/rdf/v1#ModsResource")
+  class ModsResource < RDF::Vocabulary("http://www.loc.gov/mods/rdf/v1#")
     property :abstract
     property :accessCondition
     property :adminMetadata
