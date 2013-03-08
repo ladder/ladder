@@ -1,3 +1,4 @@
+=begin
 module Mongoid
   module Tree
     def ancestors_and_self
@@ -5,3 +6,4 @@ module Mongoid
     end
   end
 end
+=end

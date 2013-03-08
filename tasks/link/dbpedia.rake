@@ -52,7 +52,7 @@ namespace :link do
             # TODO: handle concept LCSH hierarchy
             # TODO: handle 'untitled' better in Model#heading
             if item.is_a? Concept
-              querystring = [item.ancestors.map(&:heading) + item.heading].join(' ')
+              querystring = item.heading_ancestors.join(' ')
             else
               querystring = item.heading.join()
             end
@@ -64,9 +64,9 @@ namespace :link do
             next if 'untitled' == querystring
 
             # attempt to lookup based on types in decreasing order of specificity
-            # FIXME: this has changed to a hash of arrays
-            rdf_types = klass.rdf_types + (item.rdf_types || [])
-            types = [''] + rdf_types.reject {|type| :dbpedia != type.first}.map(&:last).uniq.dup
+            rdf_types = klass.rdf_types[:dbpedia]
+            rdf_types = rdf_types + item.rdf_types.symbolize_keys[:dbpedia] unless item.rdf_types.nil?
+            types = rdf_types.uniq.reverse
 
             while !types.empty?
               # query the URI
@@ -94,11 +94,13 @@ namespace :link do
 
                   # TODO: pass through ability to set a threshold here
                   if score >= 0.9 then
+
                     # we have a heading match, check class intersection
                     classes = result.xpath('Classes/Class/URI').map {|rdf_class| RDF::URI.intern(rdf_class.text).qname}
+                    classes = classes.select {|vocab, name| :dbpedia == vocab}.map {|pair| pair.last}
 
                     # if classes intersect, consider it a match
-                    if ! (classes & rdf_types).empty?
+                    unless (classes & rdf_types).empty?
 
                       # TODO: MOAR REFACTOR
                       resource_uri = result.at_xpath('URI').text
@@ -116,7 +118,6 @@ namespace :link do
                       rdf_props = rdf_xml.at_xpath("//*[@rdf:about='#{live_uri}']")
                       next if rdf_props.nil?
 
-                      update_hash = {}
                       rdf_props.element_children.each do |node|
 
                         # skip properties with no namespace, since we don't know what vocab to use
@@ -141,7 +142,7 @@ namespace :link do
                               resource_uri = RDF::URI.intern(node.attribute('resource')).qname
 
                               if resource_uri and klass.vocabs.keys.include? resource_uri.first
-                                (item.rdf_types ||= []) << resource_uri unless rdf_types.include? resource_uri
+                                (item.rdf_types['dbpedia'] ||= []) << resource_uri.last #unless rdf_types.include? resource_uri
                               end
                               value = ''
 
@@ -171,42 +172,18 @@ namespace :link do
                         # skip if value is empty
                         next if value.strip.empty?
 
-                        # build a hash here and use atomic update()
-                        update_hash[vocab] ||= {}
-                        (update_hash[vocab][node.name.to_sym] ||= []) << value
-
-                        update_hash[vocab][node.name.to_sym].uniq!
+                        # set the field value in-place
+                        # FIXME: this will overwrite existing values
+                        field = node.name.to_sym
+                        item.send(vocab)[field] = [value]
                       end
 
-                      # TODO: move this to mapping tools somewhere
-                      rdfs_comment = update_hash[:rdfs][:comment].first rescue ''
-                      dbpedia_abstract = update_hash[:dbpedia][:abstract].first rescue ''
-                      abstract = (dbpedia_abstract - rdfs_comment)
-
-                      case abstract
-                        when nil
-                          # abstract does not contain comment; do nothing
-                        when ''
-                          # abstract and comment are equal
-                          update_hash[:dbpedia][:abstract].shift rescue nil
-                        else
-                          # abstract has more information
-                          update_hash[:dbpedia][:abstract] = [abstract.strip]
-                      end
-
-                      # limit dbpedia.abstract and rdfs.comment to one value
-                      update_hash[:dbpedia][:abstract] = update_hash[:dbpedia][:abstract].take(1) rescue [] if update_hash[:dbpedia]
-                      update_hash[:rdfs][:comment] = update_hash[:rdfs][:comment].take(1) rescue [] if update_hash[:rdfs]
-                      # END TODO
-
-                      # NB: this will overwrite existing values in set fields
-                      # FIXME: this has to be manually localized
-                      item.update_attributes(update_hash)
+                      # save RDF data for later processing
                       item.files << Model::File.new(:data => message.content, :content_type => 'application/rdf+xml')
 
                       # we're done here
+                      item.save
                       types = []
-                      break
                     end
                   end
                 end

@@ -1,14 +1,20 @@
 - desc = []
 - altname = ignore_nil {agent[:dbpedia][:birthName].first} || ignore_nil {agent[:foaf][:name].first}
-- desc.push altname unless agent[:heading].include? altname
 
-- birth = ignore_nil {agent[:dbpedia][:birthYear].first} || ignore_nil {agent[:dbpedia][:birthDate].first} || ignore_nil {agent[:foaf][:birthday].first}
-- birth = Date.parse(birth).year.to_s if ! birth.nil? and birth.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$/)
-- death = ignore_nil {agent[:dbpedia][:deathYear].first} || ignore_nil {agent[:dbpedia][:deathDate].first}
-- death = Date.parse(death).year.to_s if ! death.nil? and death.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$/)
+- comments = ignore_nil {agent[:rdfs][:comment]} || ignore_nil {agent[:dbpedia][:abstract]} || []
 
-- life_dates = "#{birth}-" unless birth.nil?
-- life_dates += "#{death}" unless death.nil?
-- desc.push life_dates
+- if comments.empty?
+  - desc.push altname unless agent[:heading].include? altname
+
+  - birth = ignore_nil {agent[:dbpedia][:birthYear].first} || ignore_nil {agent[:dbpedia][:birthDate].first} || ignore_nil {agent[:foaf][:birthday].first}
+  - birth = Date.parse(birth).year.to_s if ! birth.nil? and birth.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$/)
+  - death = ignore_nil {agent[:dbpedia][:deathYear].first} || ignore_nil {agent[:dbpedia][:deathDate].first}
+  - death = Date.parse(death).year.to_s if ! death.nil? and death.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$/)
+
+  - life_dates = "#{birth}-" unless birth.nil?
+  - life_dates += "#{death}" unless death.nil?
+  - desc.push life_dates
 
 .description= desc.compact.join('; ')
+
+= comments.first

@@ -27,9 +27,9 @@
 
       %h4{:style => 'margin-top: 3px;'}
         - if Resource == result.class
-          = hash[:heading].first.truncate(100, :separator => ' ')
+          = hash[:heading].first.truncate(85, :separator => ' ')
         - else
-          = hash[:heading_ancestors].join(' -- ').truncate(100, :separator => ' ')
+          = hash[:heading_ancestors].join(' -- ').truncate(85, :separator => ' ')
 
     = partial "search/results/#{result.class.to_s.underscore}", :object => hash
 

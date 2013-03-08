@@ -10,7 +10,7 @@ module Mapping
         nodes = []
         xml_node.xpath(xpath).each do |node|
           # include all whitespace between nodes
-          text = node.xpath('descendant-or-self::text()').to_a.join(' ')
+          text = node.xpath('descendant-or-self::text()').text
 
           # decode HTML entities
           text = CGI.unescapeHTML(text)
