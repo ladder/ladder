@@ -5,6 +5,7 @@ en:
   language: "Language"
   about:    "About"
   contact:  "Contact"
+  accessOnline: "Access Online"
 
   search:
     empty:     "Your search did not match any documents. Perhaps try different keywords?"
@@ -15,6 +16,7 @@ en:
   resource:
     type:             "type" # NB: move this to model?
     abstract:         "abstract"
+    accessCondition:  "access condition"
     alternative:      "alternative"
     contributor:      "contributor"
     creator:          "creator"
@@ -30,6 +32,7 @@ en:
     issued:           "issued"
     isVersionOf:      "is version of"
     language:         "language"
+    locationOfResource: "location of resource"
     publisher:        "publisher"
     references:       "references"
     spatial:          "spatial"

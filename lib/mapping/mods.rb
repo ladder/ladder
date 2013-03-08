@@ -9,8 +9,14 @@ module Mapping
       hash.each do |symbol, xpath|
         nodes = []
         xml_node.xpath(xpath).each do |node|
-          # include all whitespace between nodes, but collapse to single spaces
-          nodes << node.to_xml(:encoding => 'UTF-8').gsub(/<[^>]*>/ui,'').gsub(/(\s|\u00A0)+/, ' ').strip
+          # include all whitespace between nodes
+          text = node.xpath('descendant-or-self::text()').to_a.join(' ')
+
+          # decode HTML entities
+          text = CGI.unescapeHTML(text)
+
+          # collapse whitespace to single spaces
+          nodes << text.gsub(/(\s|\u00A0)+/, ' ').strip
         end
         mapped[symbol] = nodes.uniq unless nodes.empty?
       end

@@ -3,7 +3,7 @@
 .tabbable
   %ul.nav.nav-tabs
     %li.active
-      %a{:href => '#item', :'data-toggle' => "tab"}= item.class.name
+      %a{:href => '#item', :'data-toggle' => "tab"}= I18n.t(item.class.name, :default => item.class.name)
     %li.hidden-phone
       %a{:href => '#rdf', :'data-toggle' => "tab"} RDF/XML
     - item.files.each do |file|
@@ -61,9 +61,9 @@
                     - else
                       = link_to reference.heading.first, url_for(value.keys.first, :id => value.values.first)
 
-                  - elsif value.match(URI.regexp(['http', 'https']))
+                  - elsif value.is_uri?
                     %a{:href => value}
-                      .span1.pull-left{:style => 'text-align:center; margin-right: 5px;'}
+                      .span1.pull-left{:style => 'text-align: center; margin-right: 5px;'}
                         %i{:class => 'icon-share-alt', :style => ''}
                       = value
                     .clearfix

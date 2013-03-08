@@ -12,4 +12,8 @@ class String
   def -(other)
     self.index(other) == 0 ? self[other.size..self.size] : nil
   end
+
+  def is_uri?(schemes = ['http', 'https'])
+    self.match(URI.regexp(schemes))
+  end
 end

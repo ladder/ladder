@@ -1,7 +1,7 @@
-- locations = ignore_nil {resource[:prism][:url]} || ignore_nil {resource[:bibo][:uri]} || ignore_nil {resource[:mods][:locationOfResource]} || []
+- uris = ignore_nil {resource[:prism][:url]} || ignore_nil {resource[:bibo][:uri]} || ignore_nil {resource[:mods][:locationOfResource]} || []
 .pull-right
-  - locations.take(1).each do |location|
-    %a.btn.btn-success.btn-small{:href => location, :style => 'margin-top: 10px;'} Access Online
+  - uris.select {|u| u.is_uri?}.take(1).each do |uri|
+    %a.btn.btn-success.btn-small{:href => uri, :style => 'margin-top: 10px;'}= I18n.t('accessOnline')
 
 - desc = []
 - desc.push ignore_nil {resource[:dcterms][:format].first.capitalize}

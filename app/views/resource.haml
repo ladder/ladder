@@ -6,13 +6,13 @@
       %h2.page-header= @title
 
       .row-fluid
-        .span2{:style => 'text-align: center;'}
+        .span2{:style => 'text-align: center; margin-bottom: 10px;'}
           .thumbnail
             = partial 'image', :object => @resource
 
-          - locations = ignore_nil {@resource.prism.url} || ignore_nil {@resource.bibo.uri} || ignore_nil {@resource.mods.locationOfResource} || []
-          - locations.take(1).each do |location|
-            %a.btn.btn-success{:href => location, :style => 'margin-top: 10px;'} Access Online
+          - uris = ignore_nil {@resource.prism.url} || ignore_nil {@resource.bibo.uri} || ignore_nil {@resource.mods.locationOfResource} || []
+          - uris.select {|u| u.is_uri?}.take(1).each do |uri|
+            %a.btn.btn-success{:href => uri, :style => 'margin-top: 10px;'}= I18n.t('accessOnline')
 
         .span10
           = partial 'item', :object => @resource

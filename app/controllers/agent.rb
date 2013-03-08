@@ -107,7 +107,7 @@ Ladder.controllers do
         @headings = Tire.search Tire::Index.default do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
-          search.fields ['heading']
+          search.fields ['heading', 'heading_ancestors']
         end
       end
     end

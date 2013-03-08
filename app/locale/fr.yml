@@ -5,6 +5,9 @@ fr:
   language: "Langue"
   about: "À propos"
   contact: "Contacter"
+  accessOnline: "l'Accès en Ligne"
+
+  Resource: "Ressource"
 
   search:
     empty:     "Votre recherche ne correspond à aucun document. Peut-être essayer différents mots clés?"
@@ -15,6 +18,7 @@ fr:
   resource:
     type:             "type" # NB: move this to model?
     abstract:         "abstrait"
+    accessCondition:  "condition d'accès"
     alternative:      "alternative"
     contributor:      "collaborateur"
     creator:          "créateur"
@@ -30,6 +34,7 @@ fr:
     issued:           "émis"
     isVersionOf:      "est la version de"
     language:         "langue"
+    locationOfResource: "localisation de ressource"
     publisher:        "éditeur"
     references:       "références"
     spatial:          "spatial"

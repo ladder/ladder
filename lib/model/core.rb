@@ -237,11 +237,11 @@ module Model
         graph = object.to_rdf(RDF::URI.intern(url))
 
         graph.statements.each do |statement|
-          # resolve IDs
           value = statement.object.object
 
           # NB: this is duplicated from Model/Core/ClassMethods#normalize
           if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+            # resolve IDs
             if defined? resource_ids and resource_ids.include? value
               model = :resource
             elsif defined? agent_ids and agent_ids.include? value
@@ -255,7 +255,14 @@ module Model
             new_statement = [statement.subject, statement.predicate, RDF::URI.intern("#{uri.scheme}://#{uri.host}/#{model}/#{statement.object}")]
             graph.delete(statement)
             graph << new_statement
+
+          # convert URI values to actual URIs
+          elsif value.is_uri?
+            new_statement = [statement.subject, statement.predicate, RDF::URI.intern(value)]
+            graph.delete(statement)
+            graph << new_statement
           end
+
         end
 
         graphs << graph
