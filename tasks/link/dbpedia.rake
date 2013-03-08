@@ -65,8 +65,8 @@ namespace :link do
 
             # attempt to lookup based on types in decreasing order of specificity
             # FIXME: this has changed to a hash of arrays
-            rdf_types = klass.rdf_types + (item.rdf_types || [])
-            types = [''] + rdf_types.reject {|type| :dbpedia != type.first}.map(&:last).uniq.dup
+            rdf_types = klass.rdf_types[:dbpedia] + (ignore_nil{item.rdf_types[:dbpedia]} || [])
+            types = rdf_types
 
             while !types.empty?
               # query the URI
