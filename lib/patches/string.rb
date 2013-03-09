@@ -14,6 +14,8 @@ class String
   end
 
   def is_uri?(schemes = ['http', 'https'])
-    self.match(URI.regexp(schemes))
+    match = self.match(URI.regexp(schemes))
+    return (0 == match.begin(0) and self.size == match.end(0)) if match
+    false
   end
 end
