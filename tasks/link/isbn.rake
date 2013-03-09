@@ -31,7 +31,6 @@ namespace :link do
 
         # spin up a lot of threads; we're heavily request-bound
         Parallel.each(chunk, :in_threads => Parallel.processor_count) do |resource|
-          update_hash = {}
           isbns = resource.prism.isbn.dup
 
           while !isbns.empty?
@@ -58,16 +57,14 @@ namespace :link do
               end
               next unless content_length > 100
 
-              # build a hash here and use atomic update()
-              update_hash[:dbpedia] ||= {}
-              (update_hash[:dbpedia][:thumbnail] ||= []) << service_uri
+              # set the field value in-place
+              # TODO: ensure we don't add duplicate values
+              (resource.dbpedia[:thumbnail] ||= []) << service_uri
             end
 
           end
 
-          # NB: this will overwrite existing values in set fields
-          resource.update_attributes(update_hash) unless update_hash.empty?
-
+          resource.save
         end
 
         puts "Finished chunk: #{(index+1)}/#{chunks.size}"

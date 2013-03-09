@@ -30,11 +30,9 @@ module Mapping
       @node = node
 
       # map MODS elements to embedded vocab
-      if resource.vocabs.empty?
-        vocabs = map_vocabs(node)
-        return if vocabs.values.map(&:values).flatten.empty?
-        resource.vocabs = vocabs
-      end
+      vocabs = map_vocabs(node)
+      return if vocabs.values.map(&:values).flatten.empty?
+      resource.vocabs = vocabs
 
       # map encoded agents to related Agent models
       map_agents('name[@usage="primary"]',      {:relation => {:dcterms => :creator}})
@@ -172,7 +170,6 @@ module Mapping
           field = opts[:relation].values.first
 
           # set the target field value if it's provided
-          @resource.send("#{vocab}=", @resource.class.vocabs[vocab].new) if @resource.send(vocab).nil?
           @resource.send(vocab).send("#{field}=", relations.map(&:id))
         end
 
@@ -182,7 +179,6 @@ module Mapping
 
           relations.each do |relation|
             # set the inverse field value if it's provided
-            relation.send("#{vocab}=", relation.class.vocabs[vocab].new) if relation.send(vocab).nil?
             relation.send(vocab).send("#{field}=", [@resource.id])
           end
         end
@@ -248,7 +244,6 @@ module Mapping
           field = opts[:relation].values.first
 
           # set the target field value if it's provided
-          @resource.send("#{vocab}=", @resource.class.vocabs[vocab].new) if @resource.send(vocab).nil?
           @resource.send(vocab).send("#{field}=", agents.map(&:id))
         end
 
@@ -319,7 +314,6 @@ module Mapping
           field = opts[:relation].values.first
 
           # set the target field value if it's provided
-          @resource.send("#{vocab}=", @resource.class.vocabs[vocab].new) if @resource.send(vocab).nil?
           @resource.send(vocab).send("#{field}=", concepts.map(&:id))
         end
 

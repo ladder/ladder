@@ -2,8 +2,8 @@ class Agent
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :foaf,     class_name: 'FOAF',   cascade_callbacks: true, autobuild: false
-  embeds_one :vcard,    class_name: 'VCard',  cascade_callbacks: true, autobuild: false
+  embeds_one :foaf,     class_name: 'FOAF',   cascade_callbacks: true, autobuild: true
+  embeds_one :vcard,    class_name: 'VCard',  cascade_callbacks: true, autobuild: true
 
   @rdf_types = {:dbpedia => [:Agent],
                 :rdafrbr => [:Agent],

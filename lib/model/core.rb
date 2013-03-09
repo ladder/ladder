@@ -46,8 +46,8 @@ module Model
       base.send :field, :rdf_types
 
       # Include default embedded vocabularies
-      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: false
-      base.send :embeds_one, :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: false
+      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: true
+      base.send :embeds_one, :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: true
 
       # add useful class methods
       # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
@@ -103,7 +103,7 @@ module Model
         unless send(vocab).nil?
           # NB: default is localized
           if opts[:delocalize]
-            value = self[vocab][field.to_s]
+            value = send(vocab)[field]
             value = value.symbolize_keys unless value.nil?
           else
             value = send(vocab).send(field)
