@@ -14,7 +14,7 @@ namespace :link do
       # TODO: use ISBNs from dbpedia? (may not be the same edition/version)
       #resources = Resource.any_of({:'bibo.isbn'.exists => true}, {:'prism.isbn'.exists => true}, {:'dbpedia.isbn'.exists => true})
       resources = Resource.where(:'prism.isbn'.exists => true)
-      resources = resources.without(:marc, :mods)
+      resources = resources
 
       # only select resources which have not already been linked
       resources = resources.where(:dbpedia.exists => false) unless !!args.relink
