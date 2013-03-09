@@ -1,12 +1,8 @@
-- uris = ignore_nil {resource[:prism][:url]} || ignore_nil {resource[:bibo][:uri]} || ignore_nil {resource[:mods][:locationOfResource]} || []
-.pull-right
-  - uris.select {|u| u.is_uri?}.take(1).each do |uri|
-    %a.btn.btn-success.btn-small{:href => uri, :style => 'margin-top: 10px;'}= I18n.t('accessOnline')
 
 - desc = []
-- desc.push ignore_nil {resource[:dcterms][:format].first.capitalize}
-- desc.push ignore_nil {resource[:dcterms][:issued].first}
 - desc.push ISO_639.find(resource[:dcterms][:language].first).english_name.capitalize rescue nil
+- desc.push ignore_nil {resource[:dcterms][:issued].first}
+- desc.push ignore_nil {resource[:dcterms][:format].first.capitalize}
 
 .description= desc.compact.join('; ')
 
@@ -15,3 +11,9 @@
   - if value.is_a? Hash
     - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
     = link_to(heading.first, url_for(value.keys.first, :id => value.values.first))
+
+- uris = ignore_nil {resource[:prism][:url]} || ignore_nil {resource[:bibo][:uri]} || ignore_nil {resource[:mods][:locationOfResource]} || []
+.clearfix
+.pull-left
+  - uris.select {|u| u.is_uri?}.take(1).each do |uri|
+    %a.btn.btn-success.btn-small{:href => uri, :style => 'margin-top: 10px;'}= I18n.t('accessOnline')
