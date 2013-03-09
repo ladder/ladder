@@ -72,8 +72,7 @@ module Model
       vocabs = {}
 
       self.class.vocabs.keys.each do |vocab|
-        value = self.method(vocab).call
-        vocabs[vocab] = value unless value.nil?
+        vocabs[vocab] = self.send(vocab) unless self[vocab].nil?
       end
 
       vocabs
