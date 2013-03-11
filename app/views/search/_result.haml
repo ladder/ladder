@@ -1,11 +1,21 @@
 %hr{:style => 'margin: 9px 0;'}
 
 .row-fluid
-  .span2.half
+  .span2.half{:style => 'max-width: 80px;'}
     %a.thumbnail{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
       = partial 'image', :object => result
 
   .span10
+    %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
+      - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
+
+      %h4{:style => 'margin-top: 3px;'}
+        - case result.class
+          - when Concept
+            = hash[:heading_ancestors].join(' -- ').truncate(85, :separator => ' ')
+          - else
+            = hash[:heading].first.truncate(85, :separator => ' ')
+
     - if result.resource_ids
       - resources = Resource.search do |s|
         - s.size 0
@@ -21,16 +31,6 @@
 
               - display = partial 'image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
               = display + pluralize(f['count'], f['term']).titleize
-
-    %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
-      - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
-
-      %h4{:style => 'margin-top: 3px;'}
-        - case result.class
-          - when Concept
-            = hash[:heading_ancestors].join(' -- ').truncate(85, :separator => ' ')
-          - else
-            = hash[:heading].first.truncate(85, :separator => ' ')
 
     = partial "search/results/#{result.class.to_s.underscore}", :object => hash
 
