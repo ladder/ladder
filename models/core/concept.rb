@@ -2,7 +2,7 @@ class Concept
   include Model::Core
 
   # embedded RDF vocabularies
-  embeds_one :skos, class_name: 'SKOS', cascade_callbacks: true, autobuild: false
+  embeds_one :skos, class_name: 'SKOS', cascade_callbacks: true, autobuild: true
 
   @rdf_types = {:dbpedia => [:TopicalConcept],
                 :rdafrbr => [:Concept],

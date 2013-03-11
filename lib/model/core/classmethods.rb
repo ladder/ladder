@@ -90,7 +90,7 @@ module Model
 
         }.merge(vocabs).merge(dates).merge(ids).merge(relations)
 
-        # store mapping as a class variable for future lookups
+        # memoize mapping as a class variable
         @mapping = {:_source => { :compress => true },
                      :_timestamp => { :enabled => true, :store => 'yes' },
                      :properties => properties,

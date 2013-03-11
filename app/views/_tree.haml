@@ -2,11 +2,19 @@
 - stem = stem || nil
 
 - if reference.id == tree.id
-  %li.active
-    %a= tree.heading.send(show)
+  %li.active{:style =>'line-height:175%;'}
+    %a
+      .span2{:style => 'margin-right: 5px;'}
+        = partial 'image', :object => tree, :locals => {:style => 'font-size: 175%;'}
+      = tree.heading.send(show)
+      .clearfix
 - else
-  %li
-    %a{:href => url_for(reference.class.to_s.underscore.to_sym, :id => tree.id)}= tree.heading.send(show)
+  %li{:style =>'line-height:175%;'}
+    %a{:href => url_for(reference.class.to_s.underscore.to_sym, :id => tree.id)}
+      .span2{:style => 'margin-right: 5px;'}
+        = partial 'image', :object => tree, :locals => {:style => 'font-size: 175%;'}
+      = tree.heading.send(show)
+    .clearfix
 
 - if stem
   - if (reference.parent_ids + [reference.id]).include? tree.id
