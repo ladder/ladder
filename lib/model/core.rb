@@ -171,7 +171,7 @@ module Model
             must_not { term :_id, id.to_s }
 
             # do a structure-free search
-            should { match '_all', hash.to_string_recursive.normalize(:space_char => ' ')}
+            should { match '_all', hash.to_string_recursive.normalize(:space_char => ' ').truncate(4096, :separator => ' ', :omission => '')}
 
             # NB: use this as a template for recursing in normalized documents?
             hash.each do |name, vocab|
@@ -183,7 +183,7 @@ module Model
                   values.each do |value|
                     should do
                       match "#{name}.#{field}.#{locale}", \
-                            value.to_s.normalize({:space_char => ' '}).truncate(100, :separator => ' ')
+                            value.to_s.normalize({:space_char => ' '}).truncate(4096, :separator => ' ', :omission => '')
                     end
                   end
                 end
