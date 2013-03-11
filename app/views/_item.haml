@@ -45,7 +45,7 @@
                         %a.thumbnail{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
                           = partial 'image', :object => reference, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
 
-                      .span11{:style => 'margin-left: 5px;'}
+                      .span10{:style => 'margin-left: 5px;'}
                         %a{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
                           - case reference.class
                             - when Concept
@@ -54,15 +54,14 @@
                               = reference.heading.first
 
                   - elsif value.is_uri?
-
                     .row-fluid
                       .span1.half
                         %a.thumbnail{:href => value}
                           %i{:class => 'icon-share-alt', :style => 'font-size: 1.5em; margin: 0px;'}
 
-                      .span11{:style => 'margin-left: 5px;'}
+                      .span11.hidden-phone{:style => 'margin-left: 5px;'}
                         %a{:href => value}
-                          = value
+                          != value.split(/(\s+)/).map! { |word| (/\s/ === word) ? word : word.gsub(/.{10}/, '\0<wbr />')}.join
 
                   - elsif :language == field
                     = ISO_639.find(value).english_name rescue nil
@@ -78,7 +77,7 @@
                       - if results[lang] > 1
                         - match = results[lang].to_f / value.split.size
                         - if 1 == results.values.count(results[lang])
-                          .pull-right
+                          .pull-right.hidden-phone
                             - if match > 0.85
                               .label.label-info= ignore_nil {LanguageList::LanguageInfo.find(lang.capitalize.to_s).name} || lang.capitalize.to_s
                             - else

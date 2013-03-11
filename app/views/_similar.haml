@@ -16,7 +16,7 @@
           .span2.half
             .thumbnail
               = partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
-          .span10
+          .span9
             - case doc.class
               - when Concept
                 = hash[:heading_ancestors].send(*show).truncate(100, :separator => ' ')

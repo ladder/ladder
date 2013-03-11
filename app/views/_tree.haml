@@ -4,7 +4,7 @@
 %li{:class => (reference.id == tree.id) ? 'active' : ''}
   %a{:href => (reference.id == tree.id) ? '' : url_for(reference.class.to_s.underscore.to_sym, :id => tree.id)}
     .row-fluid
-      .span2.half{:style =>'min-width: 35px;'}
+      .span2.half
         .thumbnail
           = partial 'image', :object => tree, :locals => {:style => 'font-size: 1.5em;'}
       .span9

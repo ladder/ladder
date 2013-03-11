@@ -35,6 +35,10 @@ a.thumbnail:hover {
     }
 }
 
+.span1.half, .span2.half {
+    min-width: 35px;
+}
+
 h4 {
     margin-top: 0px;
 }
@@ -72,8 +76,8 @@ p.lead {
     text-align: center;
 }
 
-.input-xxlarge {
-    width: 330px;
+input.search-query {
+    max-width: 450px;
 }
 
 .search {
