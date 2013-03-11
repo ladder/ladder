@@ -1,0 +1,4 @@
+- desc = []
+- desc.push ignore_nil {concept[:rdfs][:comment].first.truncate(250, :separator => '. ', :omission => '.')}
+
+.description= desc.compact.join('; ')

@@ -17,4 +17,4 @@
 
 .description= desc.compact.join('; ')
 
-= comments.first
+= comments.first.truncate(250, :separator => '. ', :omission => '.')

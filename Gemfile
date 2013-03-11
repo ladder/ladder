@@ -37,6 +37,8 @@ gem 'oj'            # JSON parser/serializer
 gem 'ignore_nil'    # cleanly access chained property methods
 gem 'whatlanguage', # language detection
   :git => 'git://github.com/niknikjaja/whatlanguage.git'
+#gem 'charlock_holmes', #encoding detection
+# :require => 'charlock_holmes/string'
 #gem 'hashdiff'     # hash comparison
 
 # Ruby facets methods
