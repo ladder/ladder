@@ -6,7 +6,7 @@ Ladder.controllers do
     session[:locale] = I18n.locale if params[:locale]
   end
 
-  get '/', :cache => true do
+  get :index, :cache => true do
      render 'index'
   end
 

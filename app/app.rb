@@ -52,11 +52,11 @@ class Ladder < Padrino::Application
   set :session_id, "my_shared_session_id"
 
   access_control.roles_for :any do |role|
-    role.allow '/'
+    role.protect '/'
   end
 
-  access_control.roles_for :admin do |role|
-    role.project_module :search, '/search'
-  end
+#  access_control.roles_for :admin do |role|
+#    role.project_module :search, '/search'
+#  end
 
 end

@@ -17,7 +17,7 @@
       #padrino-modal.login
         .modal-header
           .logo
-            =image_tag('logo.png', :title => 'Login Logo', :alt => 'Login Logo')
+            =image_tag('logo.png', :title => 'Login Logo', :alt => 'Login Logo', :style => 'width: 50%;')
             %h1 Ladder
         #padrino-modal-body.modal-body
           =[:error, :warning, :notice].map { |type| flash_tag(type, :class => "alert alert-#{type}") }.join

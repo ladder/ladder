@@ -16,12 +16,20 @@ namespace :app do
     end
 
     # create default admin account
-    account = Account.create(:email => 'ladder@deliberatedata.com',
+    account = Account.create(:email => 'admin@deliberatedata.com',
                              :name => 'Ladder',
                              :surname => 'Admin',
+                             :password => 'admin',
+                             :password_confirmation => 'admin',
+                             :role => 'admin')
+
+    # create default user account
+    account = Account.create(:email => 'ladder@deliberatedata.com',
+                             :name => 'Ladder',
+                             :surname => 'Test',
                              :password => 'ladder',
                              :password_confirmation => 'ladder',
-                             :role => 'admin')
+                             :role => 'user')
 
 =begin
     # Create groups for controlled vocabs
