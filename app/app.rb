@@ -55,8 +55,8 @@ class Ladder < Padrino::Application
     role.protect '/'
   end
 
-#  access_control.roles_for :admin do |role|
-#    role.project_module :search, '/search'
-#  end
+  access_control.roles_for :admin do |role|
+    role.project_module :accounts, '/accounts'
+  end
 
 end
