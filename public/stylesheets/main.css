@@ -123,3 +123,7 @@ p.lead {
 pre.accordion-body.collapse code {
     background-color: #F4F4F4;
 }
+
+td .row-fluid:not(:last-child) {
+    margin-bottom: 5px;
+}
