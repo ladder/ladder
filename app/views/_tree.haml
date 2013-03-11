@@ -4,10 +4,10 @@
 %li{:class => (reference.id == tree.id) ? 'active' : ''}
   %a{:href => (reference.id == tree.id) ? '' : url_for(reference.class.to_s.underscore.to_sym, :id => tree.id)}
     .row-fluid
-      .span2.half
+      .span2.half{:style =>'min-width: 35px;'}
         .thumbnail
-          = partial 'image', :object => tree, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
-      .span10
+          = partial 'image', :object => tree, :locals => {:style => 'font-size: 1.5em;'}
+      .span9
         - case tree.class
           - when Concept
             = tree.heading_ancestors.send(*show).truncate(100, :separator => ' ')

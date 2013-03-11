@@ -21,7 +21,7 @@
       .well.sidebar-nav
         %ul.nav.nav-list
           %li.nav-header= I18n.t('model.related')
-          = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :stem => true, :show => :first}
+          = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
 
     - unless @resource.similar.empty?
       .well.sidebar-nav
