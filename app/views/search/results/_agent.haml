@@ -17,4 +17,4 @@
 
 .description= desc.compact.join('; ')
 
-= comments.first.truncate(250, :separator => '. ', :omission => '.')
+= ignore_nil {comments.first.truncate(250, :separator => '. ', :omission => '.')}
