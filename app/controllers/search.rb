@@ -71,7 +71,7 @@ Ladder.controllers :search do
             # query for the provided query string
             b.positive do |p|
 #              p.match @fields, @querystring, :operator => 'and'
-              p.string @querystring, {:fields => @fields, :default_operator => 'and'}
+              p.string @querystring, {:fields => @fields, :default_operator => 'and', :analyzer => 'snowball'}
             end
 
             b.negative do

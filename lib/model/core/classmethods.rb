@@ -93,6 +93,8 @@ module Model
         # memoize mapping as a class variable
         @mapping = {:_source => { :compress => true },
                      :_timestamp => { :enabled => true, :store => 'yes' },
+                     :index_analyzer => 'snowball',
+                     :search_analyzer => 'snowball',
                      :properties => properties,
 =begin
                      # dynamic templates to store un-analyzed values for faceting
