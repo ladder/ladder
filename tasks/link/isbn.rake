@@ -59,6 +59,7 @@ namespace :link do
 
               # set the field value in-place
               # TODO: ensure we don't add duplicate values
+              # NB: this will not be localized
               (resource.dbpedia[:thumbnail] ||= []) << service_uri
             end
 

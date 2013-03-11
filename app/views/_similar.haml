@@ -10,36 +10,16 @@
   - docs.each do |doc|
     - hash = doc.to_normalized_hash({:ids => :omit, :localize => true, :all_keys => true}).except(:rdf_types)
 
-    - if doc.diff > 0.85
-      %li.active
-        %a.active{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
-
-          .row-fluid
-            .span2.half
-              .thumbnail
-                = partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
-
-            .span10
-              %strong.text-warning
-                - if Resource == doc.class
-                  = hash[:heading].send(*show).truncate(100, :separator => ' ')
-                - else
-                  = hash[:heading_ancestors].send(*show).truncate(100, :separator => ' ')
-
-              %small.muted (#{(doc.diff * 100).round}%)
-
-    - else
-      %li
-        %a{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
-          .row-fluid
-            .span2.half
-              .thumbnail
-                = partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
-
-            .span10
-              - if Resource == doc.class
-                = hash[:heading].send(*show).truncate(100, :separator => ' ')
-              - else
+    %li{:class => (doc.diff > 0.85) ? 'active' : ''}
+      %a{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
+        .row-fluid
+          .span2.half
+            .thumbnail
+              = partial 'image', :object => doc, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
+          .span10
+            - case doc.class
+              - when Concept
                 = hash[:heading_ancestors].send(*show).truncate(100, :separator => ' ')
-
-              %small.muted (#{(doc.diff * 100).round}%)
+              - else
+                = hash[:heading].send(*show).truncate(100, :separator => ' ')
+            %small.muted (#{(doc.diff * 100).round}%)

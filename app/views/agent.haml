@@ -3,10 +3,11 @@
 .row-fluid
   .span9
     %h2.page-header= @title
+
     .row-fluid
-      .span2
+      .span2{:style => 'text-align:center;'}
         .thumbnail{:style => 'min-height: 80px; margin-bottom: 10px;'}
-          = partial 'image', :object => @agent, :locals => {:style => 'font-size: 6em;line-height:125%;'}
+          = partial 'image', :object => @agent, :locals => {:style => 'font-size: 6em; line-height:125%;'}
 
       .span10
         = partial 'item', :object => @agent

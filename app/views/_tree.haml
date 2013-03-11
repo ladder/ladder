@@ -1,20 +1,17 @@
 - show = show || :join
 - stem = stem || nil
 
-- if reference.id == tree.id
-  %li.active{:style =>'line-height:175%;'}
-    %a
-      .span2{:style => 'margin-right: 5px;'}
-        = partial 'image', :object => tree, :locals => {:style => 'font-size: 175%;'}
-      = tree.heading.send(show)
-      .clearfix
-- else
-  %li{:style =>'line-height:175%;'}
-    %a{:href => url_for(reference.class.to_s.underscore.to_sym, :id => tree.id)}
-      .span2{:style => 'margin-right: 5px;'}
-        = partial 'image', :object => tree, :locals => {:style => 'font-size: 175%;'}
-      = tree.heading.send(show)
-    .clearfix
+%li{:class => (reference.id == tree.id) ? 'active' : ''}
+  %a.row-fluid
+    .span2.half
+      .thumbnail
+        = partial 'image', :object => tree, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
+    .span10
+      - case tree.class
+        - when Concept
+          = tree.heading_ancestors.send(*show).truncate(100, :separator => ' ')
+        - else
+          = tree.heading.send(*show).truncate(100, :separator => ' ')
 
 - if stem
   - if (reference.parent_ids + [reference.id]).include? tree.id

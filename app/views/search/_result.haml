@@ -26,10 +26,11 @@
       - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
 
       %h4{:style => 'margin-top: 3px;'}
-        - if Resource == result.class
-          = hash[:heading].first.truncate(85, :separator => ' ')
-        - else
-          = hash[:heading_ancestors].join(' -- ').truncate(85, :separator => ' ')
+        - case result.class
+          - when Concept
+            = hash[:heading_ancestors].join(' -- ').truncate(85, :separator => ' ')
+          - else
+            = hash[:heading].first.truncate(85, :separator => ' ')
 
     = partial "search/results/#{result.class.to_s.underscore}", :object => hash
 
