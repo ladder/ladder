@@ -82,8 +82,8 @@ p.lead {
     margin-top: 20px;
 }
 
-.nav li.nav-header a {
-    margin-top: -6px;
+.nav li.nav-header {
+    font-size: 100%;
 }
 
 .well.sidebar-nav {

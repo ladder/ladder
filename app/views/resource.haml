@@ -17,14 +17,13 @@
         = partial 'item', :object => @resource
 
   .span3
-    - unless @resource.leaf? and @resource.root? and @resource.similar.empty?
+    - unless @resource.leaf? and @resource.root?
       .well.sidebar-nav
         %ul.nav.nav-list
-          -# RELATION TREE
-          - unless @resource.leaf? and @resource.root?
-            %li.nav-header= I18n.t('model.related')
-            = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
+          %li.nav-header= I18n.t('model.related')
+          = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :stem => true, :show => :first}
 
-          -# SIMILAR ITEMS
-          - unless @resource.similar.empty?
-            = partial 'similar', :locals => {:document => @resource, :show => :first}
+    - unless @resource.similar.empty?
+      .well.sidebar-nav
+        %ul.nav.nav-list
+          = partial 'similar', :locals => {:document => @resource, :show => :first}

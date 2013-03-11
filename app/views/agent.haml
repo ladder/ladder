@@ -1,4 +1,4 @@
-- @title = @agent.heading.first
+- @title = @agent.heading_ancestors.join(' -- ')
 
 .row-fluid
   .span9
@@ -23,25 +23,19 @@
           = paginate @results, :window => 3
 
   .span3
-    - unless @agent.leaf? and @agent.root? and @agent.similar.empty?
+    - unless @agent.leaf? and @agent.root?
       .well.sidebar-nav
         %ul.nav.nav-list
-          -# RELATION TREE
-          - unless @agent.leaf? and @agent.root?
-            %li.nav-header= I18n.t('model.related')
-            = partial 'tree', :collection => @agent.root.to_a, :locals => {:reference => @agent}
+          %li.nav-header= I18n.t('model.related')
+          = partial 'tree', :collection => @agent.root.to_a, :locals => {:reference => @agent, :stem => true, :show => :last}
 
-          -# SIMILAR ITEMS
-          - unless @agent.similar.empty?
-            = partial 'similar', :locals => {:document => @agent, :show => [:join, ' -- ']}
+    - unless @agent.similar.empty?
+      .well.sidebar-nav
+        %ul.nav.nav-list
+          = partial 'similar', :locals => {:document => @agent, :show => [:join, ' -- ']}
 
-    -# FACETS
     - unless @results.empty? or (1 == @results.size and @filters.empty?)
-      .well.sidebar-nav.accordion-body#collapseFilters{:class => (@filters.empty?) ? 'collapse' : ''}
+      .well.sidebar-nav
         %ul.nav.nav-list
           - unless @results.facets.empty?
-            %li.nav-header
-              %a{:href => '#collapseFilters', :'data-toggle' => "collapse", :style => 'font-size: 1.1em;'}
-                = I18n.t('search.filters')
-                %i.icon-plus-sign-alt
             = partial 'search/facet', :collection => @results.facets

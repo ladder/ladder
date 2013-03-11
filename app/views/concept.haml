@@ -23,25 +23,19 @@
           = paginate @results, :window => 3
 
   .span3
-    - unless @concept.leaf? and @concept.root? and @concept.similar.empty?
+    - unless @concept.leaf? and @concept.root?
       .well.sidebar-nav
         %ul.nav.nav-list
-          -# RELATION TREE
-          - unless @concept.leaf? and @concept.root?
-            %li.nav-header= I18n.t('model.related')
-            = partial 'tree', :collection => @concept.root.to_a, :locals => {:reference => @concept, :stem => true, :show => :last}
+          %li.nav-header= I18n.t('model.related')
+          = partial 'tree', :collection => @concept.root.to_a, :locals => {:reference => @concept, :stem => true, :show => :last}
 
-          -# SIMILAR ITEMS
-          - unless @concept.similar.empty?
-            = partial 'similar', :locals => {:document => @concept, :show => [:join, ' -- ']}
+    - unless @concept.similar.empty?
+      .well.sidebar-nav
+        %ul.nav.nav-list
+          = partial 'similar', :locals => {:document => @concept, :show => [:join, ' -- ']}
 
-    -# FACETS
     - unless @results.empty? or (1 == @results.size and @filters.empty?)
-      .well.sidebar-nav.accordion-body#collapseFilters{:class => (@filters.empty?) ? 'collapse' : ''}
+      .well.sidebar-nav
         %ul.nav.nav-list
           - unless @results.facets.empty?
-            %li.nav-header
-              %a{:href => '#collapseFilters', :'data-toggle' => "collapse", :style => 'font-size: 1.1em;'}
-                = I18n.t('search.filters')
-                %i.icon-plus-sign-alt
             = partial 'search/facet', :collection => @results.facets
