@@ -40,33 +40,29 @@
                     -# resolve ID to an object by querying the DB
                     - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
 
-                    - if value[:concept]
-                      - concept = Concept.find(value.values.first)
+                    .row-fluid
+                      .span1.half
+                        %a.thumbnail{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
+                          = partial 'image', :object => reference, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
 
-                      %a{:href => url_for(:concept, :id => concept.id)}
-                        .span1.pull-left{:style => 'text-align:center; margin-right: 5px;'}
-                          = partial 'image', :object => concept, :locals => {:style => 'font-size: 1.5em;'}
-                        = reference.heading_ancestors.join(' -- ')
-                      .clearfix
-
-                    - elsif value[:agent]
-                      - agent = Agent.find(value.values.first)
-
-                      %a{:href => url_for(:agent, :id => agent.id)}
-                        .span1.pull-left{:style => 'text-align:center; margin-right: 5px;'}
-                          = partial 'image', :object => agent, :locals => {:style => 'font-size: 2em;'}
-                        = reference.heading.first
-                      .clearfix
-
-                    - else
-                      = link_to reference.heading.first, url_for(value.keys.first, :id => value.values.first)
+                      .span11{:style => 'margin-left: 5px;'}
+                        %a{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
+                          - case reference.class
+                            - when Concept
+                              = reference.heading_ancestors.join(' -- ')
+                            - else
+                              = reference.heading.first
 
                   - elsif value.is_uri?
-                    %a{:href => value}
-                      .span1.pull-left{:style => 'text-align: center; margin-right: 5px;'}
-                        %i{:class => 'icon-share-alt', :style => ''}
-                      = value
-                    .clearfix
+
+                    .row-fluid
+                      .span1.half
+                        %a.thumbnail{:href => value}
+                          %i{:class => 'icon-share-alt', :style => 'font-size: 1.5em; margin: 0px;'}
+
+                      .span11{:style => 'margin-left: 5px;'}
+                        %a{:href => value}
+                          = value
 
                   - elsif :language == field
                     = ISO_639.find(value).english_name rescue nil

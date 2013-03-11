@@ -26,24 +26,15 @@ a.thumbnail:hover {
     margin-top: 10px;
 }
 
-@media all and (max-width: 480px)  {
+@media all and (max-width: 600px)  {
     .half {
         float: left !important;
+        max-width: 60px;
     }
     .row-fluid .half {
         padding-right: 9px !important;
+        max-width: 80px;
     }
-    .half-small  i {
-        font-size: 3em;
-    }
-}
-
-a .half {
-    max-width: 60px;
-}
-
-.row-fluid .half {
-    max-width: 80px;
 }
 
 h4 {
