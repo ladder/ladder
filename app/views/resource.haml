@@ -1,31 +1,29 @@
 - @title = @resource.heading.first
 
-.container-fluid
-  .row-fluid
-    .span9
-      %h2.page-header= @title
+.row-fluid
+  .span9
+    %h2.page-header= @title
 
-      .row-fluid
-        .span2{:style => 'text-align: center; margin-bottom: 10px;'}
-          .thumbnail
-            = partial 'image', :object => @resource
+    .row-fluid
+      .span2.thumbnail{:style => 'min-height: 80px; margin-bottom: 10px;'}
+        = partial 'image', :object => @resource, :locals => {:style => 'font-size: 6em;line-height:125%;'}
 
-          - uris = ignore_nil {@resource.prism.url} || ignore_nil {@resource.bibo.uri} || ignore_nil {@resource.mods.locationOfResource} || []
-          - uris.select {|u| u.is_uri?}.take(1).each do |uri|
-            %a.btn.btn-success{:href => uri, :style => 'margin-top: 10px;'}= I18n.t('accessOnline')
+        - uris = ignore_nil {@resource.prism.url} || ignore_nil {@resource.bibo.uri} || ignore_nil {@resource.mods.locationOfResource} || []
+        - uris.select {|u| u.is_uri?}.take(1).each do |uri|
+          %a.btn.btn-success{:href => uri, :style => 'margin-top: 10px;'}= I18n.t('accessOnline')
 
-        .span10
-          = partial 'item', :object => @resource
+      .span10
+        = partial 'item', :object => @resource
 
-    .span3
-      - unless @resource.leaf? and @resource.root? and @resource.similar.empty?
-        .well.sidebar-nav
-          %ul.nav.nav-list
-            -# RELATION TREE
-            - unless @resource.leaf? and @resource.root?
-              %li.nav-header= I18n.t('model.related')
-              = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
+  .span3
+    - unless @resource.leaf? and @resource.root? and @resource.similar.empty?
+      .well.sidebar-nav
+        %ul.nav.nav-list
+          -# RELATION TREE
+          - unless @resource.leaf? and @resource.root?
+            %li.nav-header= I18n.t('model.related')
+            = partial 'tree', :collection => @resource.root.to_a, :locals => {:reference => @resource, :show => :first}
 
-            -# SIMILAR ITEMS
-            - unless @resource.similar.empty?
-              = partial 'similar', :locals => {:document => @resource, :show => :first}
+          -# SIMILAR ITEMS
+          - unless @resource.similar.empty?
+            = partial 'similar', :locals => {:document => @resource, :show => :first}
