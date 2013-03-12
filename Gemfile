@@ -11,9 +11,7 @@ group :development do
   #gem 'ruby-prof'
 end
 
-group :test do
-  gem 'unicorn' # application server
-end
+gem 'unicorn' # application server
 
 # Padrino master branch
 gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
