@@ -16,7 +16,7 @@
 
       %br
     .span3
-      - unless @results.facets.nil? or @results.empty? or 1 == @results.size
+      - unless @results.empty? or @results.facets.empty? or (1 == @results.size and @filters.empty?)
         .well.sidebar-nav
           %ul.nav.nav-list
             = partial 'search/facet', :collection => @results.facets

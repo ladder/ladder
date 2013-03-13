@@ -25,7 +25,7 @@
       - display = f['term'].titleize
 
     - elsif 'type' == facet.first or 'rdf_types' == facet.first
-      - display = partial 'image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
+      - display = partial 'partials/image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
       - display = display + f['term'].titleize
 
     - else display = f['term']

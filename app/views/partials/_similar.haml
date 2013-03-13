@@ -1,0 +1,27 @@
+- show = show || :join
+
+- docs = document.similar({:amatch => true}).to_a
+- docs.delete_if {|doc| doc.diff < 0.15}
+- docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
+
+- unless docs.empty?
+  .well.sidebar-nav
+    %ul.nav.nav-list
+      %li.nav-header= I18n.t('model.similar')
+      %ul
+      - docs.each do |doc|
+        - hash = doc.to_normalized_hash({:ids => :omit, :localize => true, :all_keys => true}).except(:rdf_types)
+
+        %li{:class => (doc.diff > 0.85) ? 'active' : ''}
+          %a{:href => url_for(document.class.to_s.underscore.to_sym, :id => doc.id)}
+            .row-fluid
+              .span2.half
+                .thumbnail
+                  = partial 'partials/image', :object => doc, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
+              .span9
+                - case doc.class
+                  - when Concept
+                    = hash[:heading_ancestors].send(*show).truncate(100, :separator => ' ')
+                  - else
+                    = hash[:heading].send(*show).truncate(100, :separator => ' ')
+                %small.muted (#{(doc.diff * 100).round}%)

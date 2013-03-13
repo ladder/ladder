@@ -3,7 +3,7 @@
 .row-fluid
   .span2.half{:style => 'max-width: 80px;'}
     %a.thumbnail{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
-      = partial 'image', :object => result
+      = partial 'partials/image', :object => result
 
   .span10
     %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
@@ -29,7 +29,7 @@
           %li
             %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id, :fi => {'rdf_types' => {'rdf_types' => f['term'].to_a}})}
 
-              - display = partial 'image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
+              - display = partial 'partials/image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
               = display + pluralize(f['count'], f['term']).titleize
 
     = partial "search/results/#{result.class.to_s.underscore}", :object => hash

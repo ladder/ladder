@@ -6,7 +6,7 @@
     .row-fluid
       .span2.half
         .thumbnail
-          = partial 'image', :object => tree, :locals => {:style => 'font-size: 1.5em;'}
+          = partial 'partials/image', :object => tree, :locals => {:style => 'font-size: 1.5em;'}
       .span9
         - case tree.class
           - when Concept
@@ -20,11 +20,11 @@
 
     - unless next_tree.nil?
       %ul.nav.nav-list
-        = partial 'tree', :collection => reference.class.find(next_tree).to_a, :locals => {:show => show, :reference => reference, :stem => stem}
+        = partial 'partials/tree', :collection => reference.class.find(next_tree).to_a, :locals => {:show => show, :reference => reference, :stem => stem}
     - else
       %ul.nav.nav-list
-        = partial 'tree', :collection => tree.children.page(1).sort_by {|child| child.heading}, :locals => {:show => show, :reference => reference, :stem => stem}
+        = partial 'partials/tree', :collection => tree.children.page(1).sort_by {|child| child.heading}, :locals => {:show => show, :reference => reference, :stem => stem}
 
 - elsif tree.children.size > 0
   %ul.nav.nav-list
-    = partial 'tree', :collection => tree.children.page(1).sort_by {|child| child.heading}, :locals => {:show => show, :reference => reference}
+    = partial 'partials/tree', :collection => tree.children.page(1).sort_by {|child| child.heading}, :locals => {:show => show, :reference => reference}

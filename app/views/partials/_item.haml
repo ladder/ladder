@@ -43,7 +43,7 @@
                     .row-fluid
                       .span1.half
                         %a.thumbnail{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
-                          = partial 'image', :object => reference, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
+                          = partial 'partials/image', :object => reference, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
 
                       .span10{:style => 'margin-left: 5px;'}
                         %a{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
