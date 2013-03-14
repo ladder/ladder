@@ -12,5 +12,5 @@ class Bibframe
   embedded_in :agent
   embedded_in :concept
 
-  track_history :on => Vocab::Bibframe.properties
+  track_history :on => Vocab::Bibframe.properties#, :scope => :resource
 end

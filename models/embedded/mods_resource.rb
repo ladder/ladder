@@ -5,5 +5,5 @@ class ModsResource
 
   embedded_in :resource
 
-  track_history :on => Vocab::ModsResource.properties
+  track_history :on => Vocab::ModsResource.properties, :scope => :resource
 end

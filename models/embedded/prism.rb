@@ -5,5 +5,5 @@ class Prism
 
   embedded_in :resource
 
-  track_history :on => Vocab::Prism.properties
+  track_history :on => Vocab::Prism.properties, :scope => :resource
 end

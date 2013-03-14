@@ -8,5 +8,5 @@ class DCTerms
 
   embedded_in :resource
 
-  track_history :on => RDF::DC.properties + Vocab::DC.properties
+  track_history :on => RDF::DC.properties + Vocab::DC.properties, :scope => :resource
 end

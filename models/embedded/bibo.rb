@@ -5,5 +5,5 @@ class Bibo
 
   embedded_in :resource
 
-  track_history :on => Vocab::Bibo.properties
+  track_history :on => Vocab::Bibo.properties, :scope =>:resource
 end

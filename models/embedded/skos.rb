@@ -5,5 +5,5 @@ class SKOS
 
   embedded_in :concept
 
-  track_history :on => RDF::SKOS.properties
+  track_history :on => RDF::SKOS.properties, :scope => :concept
 end

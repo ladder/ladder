@@ -5,5 +5,5 @@ class FOAF
 
   embedded_in :agent
 
-  track_history :on => RDF::FOAF.properties
+  track_history :on => RDF::FOAF.properties, :scope => :agent
 end

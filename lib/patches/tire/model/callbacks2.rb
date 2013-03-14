@@ -10,7 +10,7 @@ module Tire
 
         # Update index on model instance change or destroy.
         #
-        set_callback :save, :after, :update_index
+        set_callback :save, :after, :update_index_if_changed
         set_callback :destroy, :after, :update_index
 
         # Add neccessary infrastructure for the model, when missing in
@@ -28,8 +28,8 @@ module Tire
 
       private
 
-      def update_index
-        tire.update_index
+      def update_index_if_changed
+        tire.update_index if self.changed?
       end
 
     end

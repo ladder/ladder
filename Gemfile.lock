@@ -1,4 +1,13 @@
 GIT
+  remote: git://github.com/aq1018/mongoid-history.git
+  revision: 9148d6e36d8a1bde9c421feb854da5ae886b40eb
+  specs:
+    mongoid-history (0.3.2)
+      activesupport
+      easy_diff
+      mongoid (~> 3.0)
+
+GIT
   remote: git://github.com/karmi/tire.git
   revision: 53cf972eca9db6ccae794d5dbe7f25b1bbd4da85
   specs:
@@ -156,10 +165,6 @@ GEM
       moped (~> 1.4.2)
       origin (~> 1.0)
       tzinfo (~> 0.3.22)
-    mongoid-history (0.3.2)
-      activesupport
-      easy_diff
-      mongoid (~> 3.0)
     mongoid-tree (1.0.1)
       mongoid (>= 3.0, <= 4.0)
     moped (1.4.3)
@@ -261,7 +266,7 @@ DEPENDENCIES
   marc
   mongo
   mongoid
-  mongoid-history
+  mongoid-history!
   mongoid-tree
   nokogiri
   oj

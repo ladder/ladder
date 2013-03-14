@@ -10,5 +10,5 @@ class VCard
 
   embedded_in :agent
 
-  track_history :on => Vocab::VCard.properties
+  track_history :on => Vocab::VCard.properties, :scope => :agent
 end

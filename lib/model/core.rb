@@ -46,7 +46,7 @@ module Model
       base.send :field, :rdf_types
 
       # Include default embedded vocabularies
-      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: true
+      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: true unless 'Group' == base.name
       base.send :embeds_one, :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: true
 
       # add useful class methods

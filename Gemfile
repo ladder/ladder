@@ -49,7 +49,7 @@ gem 'bson_ext', :require => 'mongo'
 gem 'mongo', :require => 'mongo'
 gem 'mongoid'
 gem 'mongoid-tree', :require => 'mongoid/tree'
-gem 'mongoid-history'
+gem 'mongoid-history', :git => 'git://github.com/aq1018/mongoid-history.git'
 #gem 'mongoid-grid_fs'
 
 # linked data gems

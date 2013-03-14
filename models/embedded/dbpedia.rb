@@ -7,5 +7,5 @@ class DBpedia
   embedded_in :agent
   embedded_in :concept
 
-  track_history :on => Vocab::DBpedia.properties
+  track_history :on => Vocab::DBpedia.properties#, :scope => :resource
 end
