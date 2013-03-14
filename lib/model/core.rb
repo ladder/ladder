@@ -246,6 +246,11 @@ module Model
       hash.to_json
     end
 
+    # overloading for Tire after_save callback
+    def update_index
+      tire.update_index if self.changed?
+    end
+
     def to_rdfxml(url)
       uri = URI.parse(url)
 

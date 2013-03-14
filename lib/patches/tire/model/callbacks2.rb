@@ -1,39 +1,32 @@
 module Tire
-
   module Model
 
     module Callbacks2
 
-      extend ActiveSupport::Concern
-
-      included do
+      # A hook triggered by the `include Tire::Model::Callbacks` statement in the model.
+      #
+      def self.included(base)
 
         # Update index on model instance change or destroy.
         #
-        set_callback :save, :after, :update_index_if_changed
-        set_callback :destroy, :after, :update_index
+        if base.respond_to?(:after_save) && base.respond_to?(:after_destroy)
+          base.send :after_save,    :update_index
+          base.send :after_destroy, :update_index
+        end
 
         # Add neccessary infrastructure for the model, when missing in
         # some half-baked ActiveModel implementations.
         #
-        if respond_to?(:before_destroy) && !instance_methods.map(&:to_sym).include?(:destroyed?)
-          class_eval do
+        if base.respond_to?(:before_destroy) && !base.instance_methods.map(&:to_sym).include?(:destroyed?)
+          base.class_eval do
             before_destroy  { @destroyed = true }
             def destroyed?; !!@destroyed; end
           end
         end
 
-        class_eval "def base_class; ::#{self.name}; end"
-      end
-
-      private
-
-      def update_index_if_changed
-        tire.update_index if self.changed?
       end
 
     end
 
   end
-
 end
