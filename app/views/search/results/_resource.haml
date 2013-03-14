@@ -2,9 +2,9 @@
 
 - agents.take(3).each do |value|
   - if value.is_a? Hash
-    - heading = value.keys.first.to_s.classify.constantize.find(value.values.first).heading
-    - display = partial 'partials/image', :locals => {:type => 'agent', :style => 'font-size: 1.25em;'}
-    = link_to display + heading.first, url_for(value.keys.first, :id => value.values.first), :style => 'margin-right: 5px;'
+    - agent = value.keys.first.to_s.classify.constantize.find(value.values.first)
+    - display = partial 'partials/image', :object => agent, :locals => {:style => 'font-size: 1.25em;'}
+    = link_to display + agent.heading_ancestors.join(' -- '), url_for(value.keys.first, :id => value.values.first), :style => 'margin-right: 5px;'
 
 - desc = []
 - desc.push ISO_639.find(resource[:dcterms][:language].first).english_name.capitalize rescue nil
