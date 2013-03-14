@@ -5,7 +5,7 @@
     %a.thumbnail{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
       = partial 'partials/image', :object => result
 
-  .span10
+  .span10{:style => 'line-height: 1em;'}
     %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
       - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
 
