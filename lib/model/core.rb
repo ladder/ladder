@@ -159,7 +159,7 @@ module Model
     end
 
     # Search the index and return a Tire::Collection of documents that have a similarity score
-    def similar(opts={})
+    def similar(opts={:amatch => true, :hashdiff => true})
       hash = self.to_normalized_hash
       vocabs = self.vocabs
       id = self.id
@@ -194,15 +194,34 @@ module Model
         min_score 1
       end
 
-      # find the maximum score
-      maximum = results.max_by {|result| result._score}._score unless results.empty?
-
       if opts[:amatch]
+        # find the maximum score
+        maximum = results.max_by {|result| result._score}._score unless results.empty?
+      end
+
+      if opts[:hashdiff]
+        # find the number of values in the document
+        hash_size = hash.values.map(&:values).flatten.map(&:values).flatten.size
+      end
+
+      # generate a score for each result
+      results.each do |result|
+        diffs = []
+
         # calculate amatch score for each result
-        results.each do |result|
+        if opts[:amatch]
           match = self.amatch(result, opts[:amatch])
-          result.diff = (match.values.sum / match.size) * (result._score / maximum)
+          diffs << (match.values.sum / match.size) * (result._score / maximum)
         end
+
+        # calculate hashdiff score for each result
+        if opts[:hashdiff]
+          hashdiff = HashDiff.best_diff(hash, result.to_normalized_hash({:localize => true})).map(&:last).flatten.size
+          diffs << (hash_size - (hashdiff / 2)) / hash_size
+        end
+
+        # average result of all scoring methods
+        result.diff = diffs.empty? ? 0 : diffs.inject(:+) / diffs.size
       end
 
       # return sorted results

@@ -37,7 +37,7 @@ gem 'whatlanguage', # language detection
   :git => 'git://github.com/niknikjaja/whatlanguage.git'
 #gem 'charlock_holmes', #encoding detection
 # :require => 'charlock_holmes/string'
-#gem 'hashdiff'     # hash comparison
+gem 'hashdiff'     # hash comparison
 
 # Ruby facets methods
 gem 'facets', :require => ['facets/hash/recurse']

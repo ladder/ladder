@@ -113,6 +113,7 @@ GEM
       builder (>= 2.1.2)
     haml (4.0.0)
       tilt
+    hashdiff (0.0.5)
     hashr (0.0.22)
     heroku (2.35.0)
       heroku-api (~> 0.3.7)
@@ -249,6 +250,7 @@ DEPENDENCIES
   facets
   gyoku
   haml
+  hashdiff
   heroku
   httpclient
   ignore_nil
