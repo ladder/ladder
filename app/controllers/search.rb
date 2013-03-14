@@ -45,7 +45,7 @@ Ladder.controllers :search do
     locales = @locales.results.facets['locales']['terms'].map {|locale| locale['term']}
 
     # set fields; prefer matches in (localized) heading, but search everywhere
-    @fields = locales.map {|locale| "heading.#{locale}"} + ['_all']
+    @fields = locales.map {|locale| "heading.#{locale}"} + ['_all'] + ['_id']
 
     # set facets
     @facets = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
@@ -78,7 +78,8 @@ Ladder.controllers :search do
               boolean do
                 # suppress results that are not document roots
                 # eg. sub-concepts, items within a hierarchy, etc.
-                should { string '_exists_:parent_id' }
+                should { string '-_exists_:parent_id' }
+                should { string '-_exists_:parent_ids' }
 
                 # suppress Concepts/Agents with no resource_ids
                 should { string '-_exists_:resource_ids AND _type:concept'}
@@ -202,7 +203,32 @@ def search_stuff
 
       query.filtered do |filtered|
         filtered.query do |q|
-          q.term (@model.class.to_s.underscore + '_ids').to_sym, @model.id.to_s
+          q.boosting(:negative_boost => 0.1) do |b|
+
+            # query for the provided query string
+            b.positive do |p|
+              p.term (@model.class.to_s.underscore + '_ids').to_sym, @model.id.to_s
+            end
+
+            b.negative do
+              boolean do
+                # suppress results that are not document roots
+                # eg. sub-concepts, items within a hierarchy, etc.
+                should { string '-_exists_:parent_id' }
+                should { string '-_exists_:parent_ids' }
+
+                # suppress Concepts/Agents with no resource_ids
+                should { string '-_exists_:resource_ids AND _type:concept'}
+                should { string '-_exists_:resource_ids AND _type:agent'}
+
+                # suppress Resources with no agent_ids or concept_ids
+                should { string '-_exists_:concept_ids AND _type:resource'}
+                should { string '-_exists_:agent_ids AND _type:resource'}
+              end
+            end
+
+          end
+
         end
 
         # special treatment for groups filter
