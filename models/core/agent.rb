@@ -23,7 +23,7 @@ class Agent
   has_and_belongs_to_many :concepts, index: true
 
   # Enable history tracking for embedded documents
-  track_history :on => vocabs.keys
+  track_history :on => vocabs.keys + [:md5]
 
   define_scopes
 end
