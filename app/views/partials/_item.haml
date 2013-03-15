@@ -14,6 +14,20 @@
       %li
         %a{:href => "##{mime.gsub('+','')}", :'data-toggle' => "tab"}= mime.upcase
 
+    - if item.version
+
+      %li.pull-right.hidden-phone{:style => 'width: 35px;'}
+        %a{:href => '#next_version', :'rel' => 'tooltip', :title => 'Next version'}
+          %i.icon-chevron-right{:style => 'text-align: left;'}
+
+      %li.pull-right.hidden-phone{:style => 'width: 35px;'}
+        %a{:href => '#prev_version', :'rel' => 'tooltip', :title => 'Previous version'}
+          %i.icon-chevron-left{:style => 'text-align: left;'}
+      :javascript
+        $(function () {
+            $("[rel='tooltip']").tooltip();
+        });
+
   .tab-content
     .tab-pane.fade.in.out.active#item
       %table.table.table-bordered.table-striped.table-condensed
