@@ -1,5 +1,3 @@
-- wl = WhatLanguage.new(:all)
-
 .tabbable
   %ul.nav.nav-tabs
     %li.active
@@ -83,22 +81,6 @@
 
                   - else
                     = value
-
-                    - if value.is_a? String
-                      -# TODO: refactor into a helper and improve logic
-                      - lang = wl.language(value)
-                      - results = wl.process_text(value)
-                      - if results[lang] > 1
-                        - match = results[lang].to_f / value.split.size
-                        - if 1 == results.values.count(results[lang])
-                          .pull-right.hidden-phone
-                            - if match > 0.85
-                              .label.label-info= ignore_nil {LanguageList::LanguageInfo.find(lang.capitalize.to_s).name} || lang.capitalize.to_s
-                            - else
-                              .label= ignore_nil {LanguageList::LanguageInfo.find(lang.capitalize.to_s).name} || lang.capitalize.to_s
-                            %small.muted (#{(100 * match).round}%)
-                          .clearfix
-                          - next
 
                     - unless values.last == value
                       %br

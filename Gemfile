@@ -33,10 +33,6 @@ gem 'language_list' # multiple language lists
 gem 'amatch'        # string comparison
 gem 'oj'            # JSON parser/serializer
 gem 'ignore_nil'    # cleanly access chained property methods
-gem 'whatlanguage', # language detection
-  :git => 'git://github.com/niknikjaja/whatlanguage.git'
-#gem 'charlock_holmes', #encoding detection
-# :require => 'charlock_holmes/string'
 gem 'hashdiff'     # hash comparison
 
 # Ruby facets methods
@@ -44,7 +40,7 @@ gem 'facets', :require => ['facets/hash/recurse']
 
 # model gems
 gem 'tire', :git => 'git://github.com/karmi/tire.git'
-gem 'kaminari', '>=0.14', :require => 'kaminari/sinatra' # NB: shouldn't require version pinning
+gem 'kaminari', :require => 'kaminari/sinatra'
 gem 'bson_ext', :require => 'mongo'
 gem 'mongo', :require => 'mongo'
 gem 'mongoid'

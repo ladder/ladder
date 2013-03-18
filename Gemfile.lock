@@ -31,12 +31,6 @@ GIT
       rdf-xml
 
 GIT
-  remote: git://github.com/niknikjaja/whatlanguage.git
-  revision: 9ae91e769cf511a681086f3032519efbff221b69
-  specs:
-    whatlanguage (1.0.5)
-
-GIT
   remote: git://github.com/padrino/padrino-framework.git
   revision: 2eb060ab502a5f9aa520ec56f876bda248ae460b
   specs:
@@ -260,7 +254,7 @@ DEPENDENCIES
   httpclient
   ignore_nil
   iso-639
-  kaminari (>= 0.14)
+  kaminari
   language_list
   lz4-ruby
   marc
@@ -279,5 +273,4 @@ DEPENDENCIES
   rvm-capistrano
   tire!
   unicorn
-  whatlanguage!
   wirble
