@@ -6,58 +6,56 @@ group :development do
   gem 'binding_of_caller' # debugging
   gem 'pry-padrino'       # debugging console
   gem 'wirble'            # syntax highlighting
-  gem 'heroku'            # deployment
-  gem 'rvm-capistrano'    # deployment
+  #gem 'heroku'            # deployment
+  #gem 'rvm-capistrano'    # deployment
   #gem 'ruby-prof'
 end
 
-gem 'unicorn' # application server
+group :test do
+  gem 'unicorn' # application server
+end
 
 # Padrino master branch
 gem 'padrino', :git => 'git://github.com/padrino/padrino-framework.git'
 gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
 
-# Project requirements
-gem 'rake'
+# Front-end stuff
 gem 'haml'
-#gem 'rabl'
-
-# Component requirements
-gem 'bcrypt-ruby', :require => 'bcrypt'
-gem 'fabrication'   # object generation
-gem 'lz4-ruby'      # binary compression
-gem 'nokogiri'      # xml manipulation
-gem 'parallel'      # multi-core processing
+gem 'bcrypt-ruby', :require => 'bcrypt'         # for padrino-auth
+gem 'kaminari', :require => 'kaminari/sinatra'  # view paging
 gem 'iso-639'       # english/french lists
 gem 'language_list' # multiple language lists
-gem 'amatch'        # string comparison
-gem 'oj'            # JSON parser/serializer
 gem 'ignore_nil'    # cleanly access chained property methods
-gem 'hashdiff'     # hash comparison
 
-# Ruby facets methods
+# Back-end stuff
+gem 'rake'
+gem 'parallel'      # multi-core processing
+#gem 'fabrication'   # object generation
+
+  # gems for service endpoints
+  gem 'httpclient'
+  #gem 'oai'
+  #gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'
+
+# Core stuff
 gem 'facets', :require => ['facets/hash/recurse']
+gem 'lz4-ruby'      # binary compression
+gem 'oj'            # JSON parser/serializer
+gem 'nokogiri'      # xml manipulation
+gem 'hashdiff'      # hash comparison
+gem 'amatch'        # string comparison
+gem 'marc'
+gem 'enhanced_marc'
+gem 'gyoku'
 
-# model gems
+gem 'rdf-rdfxml' # linked data
+gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'
+
+# Model gems
 gem 'tire', :git => 'git://github.com/karmi/tire.git'
-gem 'kaminari', :require => 'kaminari/sinatra'
 gem 'bson_ext', :require => 'mongo'
 gem 'mongo', :require => 'mongo'
 gem 'mongoid'
 gem 'mongoid-tree', :require => 'mongoid/tree'
 gem 'mongoid-history', :git => 'git://github.com/aq1018/mongoid-history.git'
 #gem 'mongoid-grid_fs'
-
-# linked data gems
-gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'
-gem 'rdf-rdfxml'
-
-# gems for importing existing data
-gem 'marc'
-gem 'enhanced_marc'
-gem 'gyoku'
-
-# gems for service endpoints
-gem 'httpclient'
-#gem 'oai'
-#gem 'zoom', :git => 'git://github.com/bricestacey/ruby-zoom.git'

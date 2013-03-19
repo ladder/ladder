@@ -96,12 +96,6 @@ GEM
     bson_ext (1.8.3)
       bson (~> 1.8.3)
     builder (3.0.4)
-    capistrano (2.14.2)
-      highline
-      net-scp (>= 1.0.0)
-      net-sftp (>= 2.0.0)
-      net-ssh (>= 2.0.14)
-      net-ssh-gateway (>= 1.1.0)
     coderay (1.0.9)
     debug_inspector (0.0.2)
     easy_diff (0.0.2)
@@ -109,8 +103,6 @@ GEM
       locale
       marc
     erubis (2.7.0)
-    excon (0.16.10)
-    fabrication (2.6.2)
     facets (2.9.3)
     gyoku (1.0.0)
       builder (>= 2.1.2)
@@ -118,15 +110,6 @@ GEM
       tilt
     hashdiff (0.0.5)
     hashr (0.0.22)
-    heroku (2.35.0)
-      heroku-api (~> 0.3.7)
-      launchy (>= 0.3.2)
-      netrc (~> 0.7.7)
-      rest-client (~> 1.6.1)
-      rubyzip
-    heroku-api (0.3.8)
-      excon (~> 0.16.10)
-    highline (1.6.15)
     hike (1.2.1)
     http_router (0.10.2)
       rack (>= 1.0.0)
@@ -141,8 +124,6 @@ GEM
       activesupport (>= 3.0.0)
     kgio (2.8.0)
     language_list (1.0.0)
-    launchy (2.2.0)
-      addressable (~> 2.3)
     locale (2.0.8)
     lz4-ruby (0.1.7)
     mail (2.5.3)
@@ -163,14 +144,6 @@ GEM
       mongoid (>= 3.0, <= 4.0)
     moped (1.4.3)
     multi_json (1.6.1)
-    net-scp (1.1.0)
-      net-ssh (>= 2.6.5)
-    net-sftp (2.1.1)
-      net-ssh (>= 2.6.5)
-    net-ssh (2.6.6)
-    net-ssh-gateway (1.2.0)
-      net-ssh (>= 2.6.5)
-    netrc (0.7.7)
     nokogiri (1.5.6)
     oj (2.0.9)
     origin (1.0.11)
@@ -206,9 +179,6 @@ GEM
       rdf (>= 0.3.4)
     rest-client (1.6.7)
       mime-types (>= 1.16)
-    rubyzip (0.9.9)
-    rvm-capistrano (1.2.7)
-      capistrano (>= 2.0.0)
     sinatra (1.3.5)
       rack (~> 1.4)
       rack-protection (~> 1.3)
@@ -245,12 +215,10 @@ DEPENDENCIES
   bson_ext
   easel!
   enhanced_marc
-  fabrication
   facets
   gyoku
   haml
   hashdiff
-  heroku
   httpclient
   ignore_nil
   iso-639
@@ -270,7 +238,6 @@ DEPENDENCIES
   pry-padrino
   rake
   rdf-rdfxml
-  rvm-capistrano
   tire!
   unicorn
   wirble

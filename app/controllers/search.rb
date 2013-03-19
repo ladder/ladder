@@ -22,7 +22,8 @@ Ladder.controllers :search do
     session[:locale] = I18n.locale if params[:locale]
 
     # create Tire search object
-    @search = Tire::Search::Search.new(Tire::Index.default)
+    index = Mongoid::Sessions.default.options[:database]
+    @search = Tire::Search::Search.new(index)
     @search.from (@page.to_i - 1) * @per_page.to_i
     @search.size @per_page.to_i
 
@@ -37,7 +38,7 @@ Ladder.controllers :search do
     @search.facet('rdf_types') {terms 'rdf_types', :size => 10}
 
     # do a faceted search to enumerate used locales
-    @locales = Tire.search Tire::Index.default do |search|
+    @locales = Tire.search index do |search|
       search.query { all }
       search.size 0
       search.facet('locales') {terms 'locales', :size => 10}
@@ -159,7 +160,7 @@ Ladder.controllers :search do
 
       ids = ids.flatten.uniq.compact
       unless ids.empty?
-        @headings = Tire.search Tire::Index.default do |search|
+        @headings = Tire.search index do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
           # TODO: I think these need to be localized as above
@@ -183,7 +184,8 @@ def search_stuff
   @per_page = params[:pp] || 10
 
   # do a faceted search to enumerate used locales
-  @locales = Tire.search Tire::Index.default do |search|
+  index = Mongoid::Sessions.default.options[:database]
+  @locales = Tire.search index do |search|
     search.query { all }
     search.size 0
     search.facet('locales') {terms 'locales', :size => 10}
@@ -299,7 +301,7 @@ def search_stuff
 
     ids = ids.flatten.uniq.compact
     unless ids.empty?
-      @headings = Tire.search Tire::Index.default do |search|
+      @headings = Tire.search index do |search|
         search.query { |q| q.ids ids }
         search.size ids.size
         search.fields ['heading', 'heading_ancestors']

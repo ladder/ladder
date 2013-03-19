@@ -22,6 +22,7 @@ module Tire
             vocab.each do |field, locales|
               if locales.is_a? Hash
                 # we have a non-localized hash
+                # FIXME: this looks like it only works for one locale; double-check
                 locales.each do |locale, values|
                   hash[name][field] = values
                 end
