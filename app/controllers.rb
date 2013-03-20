@@ -1,7 +1,7 @@
 Ladder.controllers  do
 
   get :index, :provides => :json do
-    # TODO: this is a good place for ROAR / hypermedia links
+    # TODO: this might be a good place for ROAR / hypermedia links
     status 200 # this is assumed
     content_type 'json' # just in case
 
