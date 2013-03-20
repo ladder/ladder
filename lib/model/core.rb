@@ -22,8 +22,8 @@ module Model
       base.send :include, Mongoid::History::Trackable
 
       # Pagination
-      base.send :include, Kaminari::MongoidExtension::Criteria
-      base.send :include, Kaminari::MongoidExtension::Document
+#      base.send :include, Kaminari::MongoidExtension::Criteria
+#      base.send :include, Kaminari::MongoidExtension::Document
 
       # ElasticSearch integration
       # don't index group since they are only a structural construct
@@ -56,6 +56,7 @@ module Model
 
     def to_normalized_hash(opts={})
       # get a hash that we can modify
+      # FIXME: #to_hash breaks on Group models (undefined method in method_missing)
       opts[:localize] ? hash = self.to_hash : hash = Hash[self.as_document]
 
       self.class.normalize(Marshal.load(Marshal.dump(hash)), opts)

@@ -4,10 +4,16 @@ class Group
   include Model::Core
 
   field :type
+  validates_inclusion_of :type, in: ['Agent', 'Concept', 'Resource']
 
   @rdf_types = {:rdfs => [:Container]}
 
   @headings = [{:rdfs => :label}]
 
   define_scopes
+
+  # this is basically a reverse-scope query due to one-sided relation on grouped models
+  def models
+    self.type.classify.constantize.where(:group_ids => self.id)
+  end
 end

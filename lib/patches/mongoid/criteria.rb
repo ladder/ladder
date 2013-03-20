@@ -15,7 +15,7 @@ module Mongoid
       chunks = []
 
       0.step(self.size, options[:per]) do |offset|
-        chunks << self.limit(options[:per]).skip(offset)
+        chunks << self.limit(options[:per]).skip(offset).batch_size(per)
       end
 
       puts "Using #{chunks.size} chunks of #{options[:per]} objects..."

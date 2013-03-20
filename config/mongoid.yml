@@ -2,18 +2,12 @@ production:
   sessions:
     default:
       uri: <%= ENV['MONGOLAB_URI'] || 'mongodb://localhost' %>
-      options:
-        skip_version_check: true
-        identity_map_enabled: true
 development:
   sessions:
     default:
       database: ladder_development
       hosts:
         - localhost:27017
-      options:
-        consistency: :strong
-        identity_map_enabled: true
   options:
 test:
   sessions:
@@ -21,6 +15,7 @@ test:
       database: ladder_test
       hosts:
         - localhost:27017
-      options:
-        consistency: :strong
-        identity_map_enabled: true
+options:
+  scope_overwrite_exception: true
+  skip_version_check: true
+  identity_map_enabled: true

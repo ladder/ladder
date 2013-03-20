@@ -9,8 +9,9 @@ Bundler.require(:default, PADRINO_ENV)
 
 ##
 # ## Enable devel logging
-
-Padrino::Logger::Config[:development][:log_level]  = :warn#:devel
+#
+Padrino::Logger::Config[:development][:log_level]  = :devel
+# Padrino::Logger::Config[:development][:stream]     = :to_file
 Padrino::Logger::Config[:development][:log_static] = true
 
 if 'development' == PADRINO_ENV
@@ -22,7 +23,7 @@ end
 #
 # ## Configure your I18n
 #
-require "i18n/backend/fallbacks"
+require 'i18n/backend/fallbacks'
 I18n::Backend::Simple.send(:include, I18n::Backend::Fallbacks)
 I18n.default_locale = :en
 I18n.fallbacks[:fr] = [ :fr, :en ]
