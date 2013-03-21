@@ -1,7 +1,7 @@
 Ladder.controllers :resource do
-  provides :json, :xml, :rdf
+  provides :json
 
-  get :index, :with => :id do
+  get :index, :with => :id, :provides => [:json, :xml, :rdf] do
     @model = Resource.find(params[:id])
 
     if :rdf == content_type or :xml == content_type
@@ -11,6 +11,13 @@ Ladder.controllers :resource do
       render 'model'
     end
 
+  end
+
+  get :files, :map => '/resource/:id/files' do
+    @files = Resource.find(params[:id]).files
+
+    content_type 'json'
+    render 'files', :format => :json
   end
 
   post :index do

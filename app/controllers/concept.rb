@@ -1,7 +1,7 @@
 Ladder.controllers :concept do
-  provides :json, :xml, :rdf
+  provides :json
 
-  get :index, :with => :id do
+  get :index, :with => :id, :provides => [:json, :xml, :rdf] do
     @model = Concept.find(params[:id])
 
     if :rdf == content_type or :xml == content_type
@@ -11,6 +11,13 @@ Ladder.controllers :concept do
       render 'model'
     end
 
+  end
+
+  get :files, :map => '/concept/:id/files' do
+    @files = Concept.find(params[:id]).files
+
+    content_type 'json'
+    render 'files', :format => :json
   end
 
   post :index do

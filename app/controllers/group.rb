@@ -1,13 +1,12 @@
 Ladder.controllers :group do
+  provides :json
 
-  get :index, :with => :id, :provides => [:json, :xml] do
+  get :index, :with => :id do
     @group = Group.find(params[:id])
-
-    # if you ask for something other than xml, you get json. deal with it.
-    content_type 'json' unless :xml == content_type
-
     @opts = params.symbolize_keys.slice(:all_keys) # localize is broken, :localize)
-    render 'group'
+
+    content_type 'json'
+    render 'group', :format => :json
   end
 
   post :index, :with => :type do
