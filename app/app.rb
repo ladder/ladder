@@ -2,6 +2,11 @@ class Ladder < Padrino::Application
   register Padrino::Rendering
   register Padrino::Helpers
 
+  configure do
+    mime_type :marc, 'application/marc'
+    mime_type :mods, 'application/mods+xml'
+  end
+
   configure :development do
     disable :asset_stamp
 

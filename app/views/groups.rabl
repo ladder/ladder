@@ -1,5 +1,5 @@
-object @group
-cache @group
+collection @groups, :root => :groups, :object_root => false
+cache @groups
 
 node do |g|
   if !! @opts[:all_keys]
@@ -11,8 +11,4 @@ node do |g|
   end
 
   h
-end
-
-node @group.type.underscore.pluralize.to_sym do
-  @group.models.only(:id).map(&:id)
 end

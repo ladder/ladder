@@ -1,5 +1,5 @@
-object @model
-cache @model
+collection @models, :root => @models.first.class.to_s.underscore.pluralize, :object_root => false
+cache @models
 
 node do |m|
   h = m.to_normalized_hash(@opts)
