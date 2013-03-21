@@ -7,7 +7,7 @@ node do |g|
     h[:_id] = g.id
     h[:md5] = Digest.hexencode(g.md5.to_s)
   else
-    h = {:_id => g.id, :heading => g.heading}
+    h = {:_id => g.id, :md5 => Digest.hexencode(g.md5.to_s), :heading => g.heading}
   end
 
   h

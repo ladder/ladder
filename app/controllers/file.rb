@@ -2,33 +2,21 @@ Ladder.controllers :file do
   provides :json
 
   get :index do
-    @files = Model::File.all.without(:data)
+    @files = Model::File.without(:data)
 
-    content_type 'json'
+    halt 205 if @files.empty?
+
+    content_type :json
     render 'files', :format => :json
   end
                             # NB: this list has to be maintained
   get :index, :with => :id, :provides => [:json, :xml, :marc, :mods, :rdf] do
+    @file = Model::File.without(:data).find(params[:id])
 
-    # Special selector instead of using #find, so we can limit fields
-    @file = Model::File.where(:id => params[:id]).without(:data).first
+    halt 200, @file.reload.data if content_type == MIME::Type.new(@file.content_type).sub_type.to_sym
 
-    # Send data stream directly if that content-type is requested
-    if content_type == MIME::Type.new(@file.content_type).sub_type.to_sym
-      # NB: re-load the file from DB to get the :data field
-      @file = Model::File.find(params[:id])
-
-      halt 200, @file.data
-    end
-
-    content_type 'json'
+    content_type :json
     render 'file', :format => :json
-  end
-
-  post :index do
-    # TODO: create a new File using POST chunked upload
-    status 200 # this is assumed
-    {:success => true}.to_json
   end
 
 end
