@@ -12,14 +12,16 @@ Ladder.controllers :resource do
   end
 
   get :files, :map => '/resource/:id/files' do
-    @files = Resource.find(params[:id]).files
+    @files = Resource.find(params[:id]).files.without(:data)
 
     content_type :json
     render 'files', :format => :json
   end
 
   get :similar, :map => '/resource/:id/similar' do
-    @models = Resource.find(params[:id]).similar
+    @similar_opts = params.symbolize_keys.slice(:amatch, :hashdiff)
+    @models = Resource.find(params[:id]).similar(@similar_opts)
+
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
 
     content_type :json
