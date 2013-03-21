@@ -4,7 +4,7 @@ class Group
   include Model::Core
 
   field :type
-  validates_inclusion_of :type, in: ['Agent', 'Concept', 'Resource']
+  validates_inclusion_of :type, in: %w[Agent Concept Resource]
 
   @rdf_types = {:rdfs => [:Container]}
 

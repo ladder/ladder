@@ -8,7 +8,7 @@ Ladder.controllers  do
     {:name => 'Ladder',
      :ok => true,
      :status => 200,
-     :version => '0.4',
+     :version => '0.4.0',
      :tagline => 'Born in a library, raised on the Semantic Web'}.to_json
   end
 
@@ -21,6 +21,8 @@ Ladder.controllers  do
     index.delete
 
     # Re-map indexes
+    # TODO: ultimately this will come from an external PUT mapping
+
     %w[Agent Concept Resource].each do |model|
       klass = model.classify.constantize
       klass.create_indexes
