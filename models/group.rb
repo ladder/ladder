@@ -16,4 +16,9 @@ class Group
   def models
     self.type.classify.constantize.where(:group_ids => self.id)
   end
+
+  # for parity with Tire::Model::Search to allow localized normalization
+  def to_hash
+    self.serializable_hash
+  end
 end

@@ -3,7 +3,7 @@ Ladder.controllers :group do
 
   get :index do
     @groups = Group.all
-    @opts = params.symbolize_keys.slice(:all_keys) # :localize is broken
+    @opts = params.symbolize_keys.slice(:all_keys, :localize)
 
     halt 205 if @groups.empty?
 
@@ -13,7 +13,7 @@ Ladder.controllers :group do
 
   get :index, :with => :id do
     @group = Group.find(params[:id])
-    @opts = params.symbolize_keys.slice(:all_keys) # :localize is broken
+    @opts = params.symbolize_keys.slice(:all_keys, :localize)
 
     content_type 'json'
     render 'group', :format => :json

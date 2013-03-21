@@ -9,7 +9,8 @@ Ladder.controllers :file do
     content_type :json
     render 'files', :format => :json
   end
-                            # NB: this list has to be maintained
+
+  # NB: this list has to be maintained
   get :index, :with => :id, :provides => [:json, :xml, :marc, :mods, :rdf] do
     @file = Model::File.without(:data).find(params[:id])
 
