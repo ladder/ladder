@@ -14,8 +14,6 @@ Ladder.controllers :agent do
   get :files, :map => '/agent/:id/files' do
     @files = Agent.find(params[:id]).files
 
-    halt 205 if @files.empty?
-
     content_type :json
     render 'files', :format => :json
   end
@@ -23,8 +21,6 @@ Ladder.controllers :agent do
   get :similar, :map => '/agent/:id/similar' do
     @models = Agent.find(params[:id]).similar
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
-
-    halt 205 if @models.empty?
 
     content_type :json
     render 'models', :format => :json

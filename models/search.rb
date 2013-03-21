@@ -92,31 +92,24 @@ class Search
 
           end
         end
-=begin
-        # special treatment for groups filter
-        if @filters['group']
-          @filters['group']['group'].each do |v|
-            filtered.filter :term, "group_ids" => v
-          end
-        end
-
-        # special treatment for 'model type' filter
-        if @filters['type']
-          filtered.filter :type, :value => @filters['type']['type'].first
-        end
-
-        # special treatment for rdf types filter
-        if @filters['rdf_types']
-          @filters['rdf_types']['rdf_types'].each do |v|
-            filtered.filter :term, "rdf_types" => v
-          end
-        end
 
         # add filters for selected facets
         @filters.each do |ns, filter|
-          next if 'group' == ns
-          next if 'type' == ns
-          next if 'rdf_types' == ns
+
+          if 'type' == ns
+            filtered.filter :type, :value => filter['type'].first
+            next
+          end
+
+          if 'rdf_types' == ns
+            filter['rdf_types'].each {|v| filtered.filter :term, "rdf_types" => v}
+            next
+          end
+
+          if 'group' == ns
+            filter['group'].each {|v| filtered.filter :term, "group_ids" => v}
+            next
+          end
 
           filter.each do |f, arr|
             arr.each do |v|
@@ -130,7 +123,7 @@ class Search
             end
           end
         end
-=end
+
       end
 
     end

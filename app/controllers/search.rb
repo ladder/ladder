@@ -10,8 +10,6 @@ Ladder.controllers :search do
     @search = Search.new(params)
     @search.query
 
-    halt 205 if @search.results.empty?
-
     content_type :json
     render 'search', :format => :json
   end

@@ -5,8 +5,6 @@ Ladder.controllers :group do
     @groups = Group.all
     @opts = params.symbolize_keys.slice(:all_keys, :localize)
 
-    halt 205 if @groups.empty?
-
     content_type :json
     render 'groups', :format => :json
   end
@@ -22,7 +20,6 @@ Ladder.controllers :group do
   get :index, :map => '/group/:id/models' do
     @models = Group.find(params[:id]).models.only(:id, :md5, :version)
     @opts = {}
-    halt 205 if @models.empty?
 
     content_type 'json'
     render 'models', :format => :json

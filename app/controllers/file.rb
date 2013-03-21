@@ -4,8 +4,6 @@ Ladder.controllers :file do
   get :index do
     @files = Model::File.without(:data)
 
-    halt 205 if @files.empty?
-
     content_type :json
     render 'files', :format => :json
   end

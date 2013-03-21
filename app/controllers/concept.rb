@@ -14,8 +14,6 @@ Ladder.controllers :concept do
   get :files, :map => '/concept/:id/files' do
     @files = Concept.find(params[:id]).files
 
-    halt 205 if @files.empty?
-
     content_type :json
     render 'files', :format => :json
   end
@@ -23,8 +21,6 @@ Ladder.controllers :concept do
   get :similar, :map => '/concept/:id/similar' do
     @models = Concept.find(params[:id]).similar
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
-
-    halt 205 if @models.empty?
 
     content_type :json
     render 'models', :format => :json

@@ -1,11 +1,25 @@
-collection @search.results.to_a, :root => :results, :object_root => false
-cache @search.results.to_a
+object @search
+cache @search
 
-node do |m|
-  h = m.to_normalized_hash(@opts)
-  h[:_id] = m.id
-  h[:_score] = m._score
-  h[:_explanation] = m._explanation if @search.explain
-  h[:_type] = m._type
-  h
+node :results do |search|
+  search.results.map do |result|
+    h = result.to_normalized_hash(@opts)
+    h[:_id] = result.id
+    h[:_score] = result._score
+    h[:_explanation] = result._explanation if @search.explain
+    h[:_type] = result._type
+    h
+  end
+end
+
+node :facets do
+  @search.results.facets
+end
+
+node :time do
+  @search.results.time
+end
+
+node :total do
+  @search.results.total
 end

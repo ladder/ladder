@@ -14,8 +14,6 @@ Ladder.controllers :resource do
   get :files, :map => '/resource/:id/files' do
     @files = Resource.find(params[:id]).files
 
-    halt 205 if @files.empty?
-
     content_type :json
     render 'files', :format => :json
   end
@@ -23,8 +21,6 @@ Ladder.controllers :resource do
   get :similar, :map => '/resource/:id/similar' do
     @models = Resource.find(params[:id]).similar
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
-
-    halt 205 if @models.empty?
 
     content_type :json
     render 'models', :format => :json
