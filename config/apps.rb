@@ -30,5 +30,21 @@
 #  set :session_secret, '12e0272045a0a8a9f67ffb28697eac705a7060b2afe30c5fdb12b4a57644b407'
 #end
 
-# Mounts the core application for this project
+Padrino.configure_apps do
+  # Set the POST upload limit to be large
+  Rack::Utils.key_space_limit = 10485760
+end
+
+# Mount the core application
 Padrino.mount('Ladder').to('/')
+
+# Mount the Sidekiq status UI
+require 'sidekiq'
+class Sidekiq::Web < ::Sinatra::Base
+  class << self
+    def dependencies; []; end
+    def setup_application!; end
+  end
+end
+
+Padrino.mount('Sidekiq', :app_class => 'Sidekiq::Web').to('/sidekiq')

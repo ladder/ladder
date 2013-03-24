@@ -30,7 +30,9 @@ gem 'bson_ext', :require => 'mongo'
 gem 'mongo', :require => 'mongo'
 
 # Async / task-based stuff
-gem 'parallel'
+gem 'parallel' # TO REMOVE
+gem 'sidekiq', :require => 'sidekiq/web'
+gem 'slim'
 
 # Model core stuff
 gem 'facets', :require => ['facets/hash/recurse']
@@ -39,6 +41,7 @@ gem 'hashdiff'
 gem 'amatch'
 
 # File handling
+gem 'ruby-filemagic', :require => 'filemagic' # TO REMOVE
 gem 'lz4-ruby'
 #gem 'mongoid-grid_fs'
 

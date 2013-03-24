@@ -1,11 +1,4 @@
 .DS_Store
-log/**/*
-tmp/**/*
-bin/
-tmp/
-vendor/
-public/system/**/*
-.sass-cache/
-.idea/
-.bundle/
-.powenv
+.idea
+tmp
+public
