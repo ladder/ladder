@@ -2,7 +2,7 @@ Ladder.controllers :group do
   provides :json
 
   get :index do
-    @groups = Group.all
+    @groups = Group.all # TODO: implement limit
     @opts = params.symbolize_keys.slice(:all_keys, :localize)
 
     content_type :json

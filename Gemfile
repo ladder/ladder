@@ -31,7 +31,7 @@ gem 'mongo', :require => 'mongo'
 
 # Async / task-based stuff
 gem 'parallel' # TO REMOVE
-gem 'sidekiq', :require => 'sidekiq/web'
+gem 'sidekiq', :require => ['sidekiq', 'sidekiq/web']
 gem 'slim'
 
 # Model core stuff

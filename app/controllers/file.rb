@@ -2,7 +2,7 @@ Ladder.controllers :file do
   provides :json
 
   get :index do
-    @files = Model::File.without(:data)
+    @files = Model::File.without(:data) # TODO: implement limit
 
     content_type :json
     render 'files', :format => :json
@@ -16,6 +16,16 @@ Ladder.controllers :file do
 
     content_type :json
     render 'file', :format => :json
+  end
+
+  post :index do
+    data = request.env['rack.input'] # StringIO
+
+#    mime = MIME::Type.new(FileMagic.fm(:mime).buffer(file.read))
+#    mime.sub_type
+#    mime.simplified
+
+    {:success => true}.to_json
   end
 
 end

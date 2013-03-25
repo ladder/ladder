@@ -37,14 +37,3 @@ end
 
 # Mount the core application
 Padrino.mount('Ladder').to('/')
-
-# Mount the Sidekiq status UI
-require 'sidekiq'
-class Sidekiq::Web < ::Sinatra::Base
-  class << self
-    def dependencies; []; end
-    def setup_application!; end
-  end
-end
-
-Padrino.mount('Sidekiq', :app_class => 'Sidekiq::Web').to('/sidekiq')

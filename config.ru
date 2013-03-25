@@ -7,3 +7,6 @@
 require File.expand_path("../config/boot.rb", __FILE__)
 
 run Padrino.application
+
+# Mount Sidekiq admin UI directly
+map('/sidekiq') { run Sidekiq::Web }
