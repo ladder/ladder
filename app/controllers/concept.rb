@@ -1,4 +1,4 @@
-Ladder.controllers :concept do
+Ladder.controllers :concepts do
   provides :json
 
   get :index, :with => :id, :provides => [:json, :xml, :rdf] do
@@ -11,14 +11,14 @@ Ladder.controllers :concept do
     render 'model', :format => :json
   end
 
-  get :files, :map => '/concept/:id/files' do
+  get :files, :map => '/concepts/:id/files' do
     @files = Concept.find(params[:id]).files
 
     content_type :json
     render 'files', :format => :json
   end
 
-  get :similar, :map => '/concept/:id/similar' do
+  get :similar, :map => '/concepts/:id/similar' do
     @models = Concept.find(params[:id]).similar
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
 

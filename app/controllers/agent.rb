@@ -1,4 +1,4 @@
-Ladder.controllers :agent do
+Ladder.controllers :agents do
   provides :json
 
   get :index, :with => :id, :provides => [:json, :xml, :rdf] do
@@ -11,14 +11,14 @@ Ladder.controllers :agent do
     render 'model', :format => :json
   end
 
-  get :files, :map => '/agent/:id/files' do
+  get :files, :map => '/agents/:id/files' do
     @files = Agent.find(params[:id]).files
 
     content_type :json
     render 'files', :format => :json
   end
 
-  get :similar, :map => '/agent/:id/similar' do
+  get :similar, :map => '/agents/:id/similar' do
     @models = Agent.find(params[:id]).similar
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
 

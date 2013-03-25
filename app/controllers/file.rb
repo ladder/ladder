@@ -1,4 +1,4 @@
-Ladder.controllers :file do
+Ladder.controllers :files do
   provides :json
 
   get :index do
