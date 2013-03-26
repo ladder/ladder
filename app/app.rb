@@ -3,7 +3,7 @@ class Ladder < Padrino::Application
   register Padrino::Helpers
 
   configure do
-    mime_type :marc, 'application/marc'
+    mime_type :marc, ['application/marc', 'application/marc+xml', 'application/marc+json']
     mime_type :mods, 'application/mods+xml'
   end
 

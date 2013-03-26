@@ -1,6 +1,10 @@
 Ladder.controllers :search do
   provides :json
 
+  before do
+    content_type :json
+  end
+
   get :index, :with => :q do
     # TEMPORARY
     params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
@@ -10,7 +14,6 @@ Ladder.controllers :search do
     @search = Search.new(params)
     @search.query
 
-    content_type :json
     render 'search', :format => :json
   end
 

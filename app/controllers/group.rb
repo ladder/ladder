@@ -1,11 +1,14 @@
 Ladder.controllers :groups do
   provides :json
 
+  before do
+    content_type :json
+  end
+
   get :index do
     @groups = Group.all # TODO: implement limit
     @opts = params.symbolize_keys.slice(:all_keys, :localize)
 
-    content_type :json
     render 'groups', :format => :json
   end
 
@@ -13,7 +16,6 @@ Ladder.controllers :groups do
     @group = Group.find(params[:id])
     @opts = params.symbolize_keys.slice(:all_keys, :localize)
 
-    content_type 'json'
     render 'group', :format => :json
   end
 
@@ -21,7 +23,6 @@ Ladder.controllers :groups do
     @models = Group.find(params[:id]).models.only(:id, :md5, :version)
     @opts = {}
 
-    content_type 'json'
     render 'models', :format => :json
   end
 
