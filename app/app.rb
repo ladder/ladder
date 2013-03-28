@@ -30,10 +30,6 @@ class Ladder < Padrino::Application
     halt 404
   end
 
-  error do
-    "Error is: " + params['captures'].first.inspect
-  end
-
   ##
   # Caching support
   #

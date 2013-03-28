@@ -21,16 +21,16 @@ namespace :import do
 
     puts "Importing #{files.size} MODS files using #{[files.size, Parallel.processor_count].min} processors..."
 
+    # create an importer for this content
+    importer = Importer.create('application/mods+xml')
+
     Mongoid.unit_of_work(disable: :all) do
 
-      Parallel.each(files) do |file|
+      Parallel.each(files) do |file_name|
 
-        # create a new db_file for this MODS file
-        # NB: we don't do this using batch insert because files may be large (multiple MB)
-        db_file = Model::File.new(:data => IO.read(file), :content_type => 'application/mods+xml')
-        db_file.save
+        importer.import(File.open(file_name), 'application/mods+xml')
 
-        puts "Finished importing: #{file}"
+        puts "Finished importing_name: #{file}"
       end
 
     end

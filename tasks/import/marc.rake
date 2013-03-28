@@ -26,11 +26,11 @@ namespace :import do
 
     Mongoid.unit_of_work(disable: :all) do
 
-      Parallel.each(files) do |file|
+      Parallel.each(files) do |file_name|
 
-        importer.import(file, 'application/marc')
+        importer.import(File.open(file_name), 'application/marc')
 
-        puts "Finished importing: #{file}"
+        puts "Finished importing_name: #{file}"
       end
 
     end

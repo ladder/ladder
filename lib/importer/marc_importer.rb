@@ -33,8 +33,17 @@ class MarcImporter < Importer
   end
 
   def parse_marcxml(xml, content_type)
-    # TODO: NOT IMPLEMENTED YET
-    []
+    files = []
+
+    # parse XML into records using XPath
+    records = Nokogiri::XML(xml).remove_namespaces!.xpath('//record') # TODO: smarter namespace handling
+
+    records.each do |record|
+      # create a new file for this <record> element
+      files << Model::File.find_or_create_by(:data => record.to_xml(:encoding => 'UTF-8', :save_with => Nokogiri::XML::Node::SaveOptions::AS_XML), :content_type => content_type)
+    end
+
+    files
   end
 
 end

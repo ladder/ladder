@@ -22,12 +22,12 @@ Ladder.controllers :files do
 
   post :index do
     # ensure we have content to process
-    halt 400, {:error => 'No content provided'}.to_json if 0 == request.body.length
+    halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.body.length
 
     # create an importer for this content
     importer = Importer.create(request.content_type)
 
-    halt 415, {:error => 'Unsupported content type', :accepts => Importer.content_types}.to_json if importer.nil?
+    halt 415, {:error => 'Unsupported content type', :status => 415, :accepts => Importer.content_types}.to_json if importer.nil?
 
     @files = importer.import(request.body, request.content_type)
     render 'files', :format => :json
