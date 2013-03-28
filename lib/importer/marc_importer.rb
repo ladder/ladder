@@ -22,7 +22,7 @@ class MarcImporter < Importer
     files = []
 
     # parse MARC data and return an array of File objects
-    reader = MARC::Reader.new(marc, :invalid => :replace) # TODO: may wish to include encoding options
+    reader = MARC::ForgivingReader.new(marc, :invalid => :replace) # TODO: may wish to include encoding options
 
     reader.each do |record|
       # create a new file for this MARC record
