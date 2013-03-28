@@ -1,7 +1,8 @@
 class ModsImporter < Importer
-  @content_types = ['application/mods+xml']
 
-  class << self; attr_reader :content_types end
+  def self.content_types
+    ['application/mods+xml']
+  end
 
   def import(data, content_type)
     case content_type

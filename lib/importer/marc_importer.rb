@@ -1,7 +1,8 @@
 class MarcImporter < Importer
-  @content_types = ['application/marc', 'application/marc+xml', 'application/marc+json']
 
-  class << self; attr_reader :content_types end
+  def self.content_types
+    ['application/marc', 'application/marc+xml', 'application/marc+json']
+  end
 
   def import(data, content_type)
     case content_type
