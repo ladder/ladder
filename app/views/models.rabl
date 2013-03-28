@@ -1,4 +1,4 @@
-collection @models, :root => @models.first.class.to_s.underscore.pluralize, :object_root => false
+collection @models, :root => @models.empty? ? 'models' : @models.first.class.to_s.underscore.pluralize, :object_root => false
 cache @models
 
 node do |model|
