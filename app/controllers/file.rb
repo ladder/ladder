@@ -24,20 +24,13 @@ Ladder.controllers :files do
     # ensure we have content to process
     halt 400, {:error => 'No content provided'}.to_json if 0 == request.body.length
 
-    # choose file import based on content type
-    valid_types = []
+    # create an importer for this content
+    importer = Importer.create(request.content_type)
 
-    Model::File.descendants.each do |klass|
-      if klass.content_types.include? request.content_type
-        # TODO: consider moving to Sidekiq
-        @files = klass.import(request.body, request.content_type)
+    halt 415, {:error => 'Unsupported content type', :accepts => Importer.content_types}.to_json if importer.nil?
 
-        halt render 'files', :format => :json
-      end
-      valid_types += klass.content_types
-    end
-
-    halt 415, {:error => 'Unsupported content type', :accepts => valid_types}.to_json
+    @files = importer.import(request.body, request.content_type)
+    render 'files', :format => :json
   end
 
 end

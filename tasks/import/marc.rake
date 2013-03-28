@@ -21,31 +21,14 @@ namespace :import do
 
     puts "Importing #{files.size} MARC files using #{[files.size, Parallel.processor_count].min} processors..."
 
+    # create an importer for this content
+    importer = Importer.create('application/marc')
+
     Mongoid.unit_of_work(disable: :all) do
 
       Parallel.each(files) do |file|
 
-        # load records from file
-        reader = MARC::Reader.new(file, :invalid => :replace)
-
-        db_files = []
-
-        reader.each do |record|
-          # create a new db_file for this MARC record
-          db_file = Model::File.new(:data => record.to_marc, :content_type => 'application/marc')
-          db_file.set_created_at
-
-          # add file to mongoid bulk stack
-          db_files << db_file.as_document
-
-          if db_files.size > 1000
-            Model::File.collection.insert(db_files)
-            db_files = []
-          end
-        end
-
-        # make sure we insert anything left over from the last chunk
-        Model::File.collection.insert(db_files)
+        importer.import(file, 'application/marc')
 
         puts "Finished importing: #{file}"
       end

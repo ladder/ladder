@@ -5,10 +5,14 @@ module Model
     include Mongoid::Paranoia
     include Mongoid::Timestamps
 
+    extend Model::Core::FOCB
+
     field :data,          type: Model::CompressedBinary
     field :content_type,  type: String  # IANA MIME-type
     field :length,        type: Integer
     field :md5,           type: Moped::BSON::Binary
+
+    index({ md5: 1 })
 
     set_callback :save, :before, :find_length
     set_callback :save, :before, :generate_md5
@@ -16,11 +20,6 @@ module Model
     belongs_to :resource
     belongs_to :concept
     belongs_to :agent
-
-    # retrieve a list of descendant classes
-    def self.descendants
-      ObjectSpace.each_object(Class).select { |klass| klass < self }
-    end
 
     def find_length
       self.length = self.data.size

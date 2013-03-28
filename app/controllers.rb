@@ -29,6 +29,8 @@ Ladder.controllers  do
       klass.put_mapping
     end
 
+    Model::File.create_indexes
+
     content_type :json
     status index.response.code
     body index.response.body

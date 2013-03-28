@@ -50,8 +50,10 @@ module Model
       base.send :embeds_one, :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: true
 
       # add useful class methods
-      # NB: This has to be at the end to monkey-patch Tire, Kaminari, etc.
       base.extend ClassMethods
+
+      # NB: This has to be at the end to overload Mongoid
+      base.extend FOCB
     end
 
     def to_normalized_hash(opts={})
