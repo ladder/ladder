@@ -1,10 +1,11 @@
 class ModsImporter < Importer
+  include Sidekiq::Worker
 
   def self.content_types
     ['application/mods+xml']
   end
 
-  def import(data, content_type)
+  def perform(data, content_type)
     case content_type
       when 'application/mods+xml'
         parse_modsxml(data, content_type)

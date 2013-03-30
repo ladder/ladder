@@ -29,8 +29,20 @@ Ladder.controllers :files do
 
     halt 415, {:error => 'Unsupported content type', :status => 415, :accepts => Importer.content_types}.to_json if importer.nil?
 
-    @files = importer.import(request.body, request.content_type)
+    # TODO: refactor this to use #perform_async on the class
+    @files = importer.perform(request.body, request.content_type)
+
+    status 201 # resource created
     render 'files', :format => :json
+  end
+
+  post :index, :map => '/files/:id/map' do
+    @file = Model::File.without(:data).find(params[:id])
+
+    # TODO: map file to a root model and associated models
+    #mapper = Mapper.create(@file.content_type)
+
+    halt 202, {:ok => true, :status => 202}.to_json
   end
 
 end

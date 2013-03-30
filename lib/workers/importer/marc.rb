@@ -1,10 +1,11 @@
 class MarcImporter < Importer
+  include Sidekiq::Worker
 
   def self.content_types
     ['application/marc', 'application/marc+xml', 'application/marc+json']
   end
 
-  def import(data, content_type)
+  def perform(data, content_type)
     case content_type
       when 'application/marc'
         parse_marc(data, content_type)
