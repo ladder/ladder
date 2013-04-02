@@ -85,6 +85,9 @@ GEM
       moped (~> 1.4.2)
       origin (~> 1.0)
       tzinfo (~> 0.3.22)
+    mongoid-pagination (0.2.0)
+      activesupport
+      mongoid
     mongoid-tree (1.0.1)
       mongoid (>= 3.0, <= 4.0)
     moped (1.4.3)
@@ -175,6 +178,7 @@ DEPENDENCIES
   mongo
   mongoid
   mongoid-history!
+  mongoid-pagination
   mongoid-tree
   nokogiri
   oj

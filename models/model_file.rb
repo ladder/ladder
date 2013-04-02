@@ -2,6 +2,7 @@ module Model
 
   class File
     include Mongoid::Document
+    include Mongoid::Pagination
     include Mongoid::Paranoia
     include Mongoid::Timestamps
 

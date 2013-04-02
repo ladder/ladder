@@ -8,22 +8,19 @@ module Model
 
     def self.included(base)
       base.send :include, Mongoid::Document
+      base.send :include, Mongoid::Pagination
 
       # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
       base.send :include, Mongoid::Paranoia # soft deletes
-      base.send :index, { deleted_at: 1 }#, { sparse: true }
+      base.send :index, { deleted_at: 1 }
 
       base.send :include, Mongoid::Timestamps
-      base.send :index, { created_at: 1 }#, { sparse: true }
-      base.send :index, { updated_at: 1 }#, { sparse: true }
+      base.send :index, { created_at: 1 }
+      base.send :index, { updated_at: 1 }
 
       base.send :include, Mongoid::Tree
       #base.send :include, Mongoid::Tree::Ordering
       base.send :include, Mongoid::History::Trackable
-
-      # Pagination
-#      base.send :include, Kaminari::MongoidExtension::Criteria
-#      base.send :include, Kaminari::MongoidExtension::Document
 
       # ElasticSearch integration
       # don't index group since they are only a structural construct

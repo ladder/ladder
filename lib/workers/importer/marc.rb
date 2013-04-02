@@ -12,7 +12,8 @@ class MarcImporter < Importer
       when 'application/marc+xml'
         parse_marcxml(data, content_type)
       when 'application/marc+json'
-        [Model::File.find_or_create_by({:data => data, :content_type => content_type})]
+        json = JSON.parse(data.read).to_json
+        [Model::File.find_or_create_by({:data => json, :content_type => content_type})]
       else
         raise ArgumentError, "Unsupported content type : #{content_type}"
     end

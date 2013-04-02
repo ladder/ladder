@@ -21,6 +21,7 @@ gem 'rabl'
 
 # MongoDB / ElasticSearch
 gem 'mongoid'
+gem 'mongoid-pagination'
 gem 'mongoid-tree', :require => 'mongoid/tree'
 gem 'mongoid-history', :git => 'git://github.com/aq1018/mongoid-history.git'
 
