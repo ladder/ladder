@@ -23,17 +23,14 @@ Ladder.controllers :files do
     # ensure we have content to process
     halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.body.length
 
-    # create an importer for this content-type
-    importer = Importer.create(request.content_type)
+    # ensure it is something we CAN process
+    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Importer.content_types}.to_json unless Importer.content_types.include? request.content_type
 
-    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Importer.content_types}.to_json if importer.nil?
-
-    # TODO: refactor this to use #perform_async on the class
-    # NB: if request.body is large, it will ALL be serialized to sidekiq!
-    @files = importer.perform(request.body, request.content_type)
+    # NB: importing is NOT performed asynchronously
+    @file = Importer.perform(request.body, request.content_type)
 
     status 201 # resource created
-    render 'files', :format => :json
+    render 'file', :format => :json
   end
 
   post :index, :map => '/files/:id/map' do
@@ -47,7 +44,8 @@ Ladder.controllers :files do
     # TODO: refactor this to use #perform_async on the class
     mapper.perform(@file.id, @file.content_type)
 
-    halt 202, {:ok => true, :status => 202}.to_json
+    status 202 # processing started
+    body({:ok => true, :status => 202}.to_json)
   end
 
 end

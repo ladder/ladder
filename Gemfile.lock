@@ -85,6 +85,9 @@ GEM
       moped (~> 1.4.2)
       origin (~> 1.0)
       tzinfo (~> 0.3.22)
+    mongoid-grid_fs (1.7.0)
+      mime-types (~> 1.19)
+      mongoid (~> 3.0)
     mongoid-pagination (0.2.0)
       activesupport
       mongoid
@@ -177,6 +180,7 @@ DEPENDENCIES
   marc
   mongo
   mongoid
+  mongoid-grid_fs
   mongoid-history!
   mongoid-pagination
   mongoid-tree

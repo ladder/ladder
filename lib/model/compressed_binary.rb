@@ -26,7 +26,7 @@ module Model
 
     def mongoize
       return unless self
-      compressed_string = LZ4::compress(Marshal.dump(object))
+      compressed_string = LZ4::compress(Marshal.dump(@object))
 
       # if the object is larger than a single GridFS chunk, use GridFS
 #      if compressed_string.size > Mongoid::GridFs::file_model.new.chunkSize

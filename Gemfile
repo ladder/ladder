@@ -43,7 +43,7 @@ gem 'amatch'
 
 # File handling
 gem 'lz4-ruby'
-#gem 'mongoid-grid_fs'
+gem 'mongoid-grid_fs'
 #gem 'ruby-filemagic', :require => 'filemagic' # TO REMOVE  mime = MIME::Type.new(FileMagic.fm(:mime).buffer(data_string))
 
 # MARC handling
