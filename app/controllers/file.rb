@@ -24,16 +24,15 @@ Ladder.controllers :files do
     halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.body.length
 
     # ensure it is something we CAN process
-    content_types = ['application/mods+xml', 'application/marc', 'application/marc+xml', 'application/marc+json']
-
-    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => content_types}.to_json unless content_types.include? request.content_type
-
+    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Mapper.content_types}.to_json unless Mapper.content_types.include? request.content_type
+=begin
     # pipe the incoming data through GZip compression
     reader, writer = IO.pipe; reader.binmode; writer.binmode
     gz = Zlib::GzipWriter.new(writer, Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
     gz.write request.body.read; gz.close
     @file = Mongoid::GridFS.put(reader, :content_type => request.content_type, :compression => :gzip)
-    #@file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
+=end
+    @file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
 
     status 201 # resource created
     render 'file', :format => :json
