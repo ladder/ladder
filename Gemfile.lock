@@ -74,7 +74,6 @@ GEM
       url_mount (~> 0.2.1)
     i18n (0.6.1)
     locale (2.0.8)
-    lz4-ruby (0.1.7)
     marc (0.5.0)
     method_source (0.8.1)
     mime-types (1.21)
@@ -176,7 +175,6 @@ DEPENDENCIES
   facets
   gyoku
   hashdiff
-  lz4-ruby
   marc
   mongo
   mongoid

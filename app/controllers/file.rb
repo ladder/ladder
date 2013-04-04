@@ -6,15 +6,15 @@ Ladder.controllers :files do
   end
 
   get :index do
-    @files = Model::File.without(:data).paginate(params)
+    @files = Mongoid::GridFS.file_model.all.entries # .paginate(params)
 
     render 'files', :format => :json
   end
 
   get :index, :with => :id do
-    @file = Model::File.without(:data).find(params[:id])
+    @file = Mongoid::GridFS.get(params[:id])
 
-    halt 200, @file.reload.data if request.content_type == @file.content_type
+    halt 200, @file.data if request.content_type == @file.content_type
 
     render 'file', :format => :json
   end
@@ -24,17 +24,18 @@ Ladder.controllers :files do
     halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.body.length
 
     # ensure it is something we CAN process
-    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Importer.content_types}.to_json unless Importer.content_types.include? request.content_type
+    content_types = ['application/mods+xml', 'application/marc', 'application/marc+xml', 'application/marc+json']
 
-    # NB: importing is NOT performed asynchronously
-    @file = Importer.perform(request.body, request.content_type)
+    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => content_types}.to_json unless content_types.include? request.content_type
+
+    @file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
 
     status 201 # resource created
     render 'file', :format => :json
   end
 
   post :index, :map => '/files/:id/map' do
-    @file = Model::File.only(:id, :content_type).find(params[:id])
+    @file = Mongoid::GridFS.get(params[:id])
 
     # create a mapper for this content-type
     mapper = Mapper.create(@file.content_type)

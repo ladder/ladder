@@ -15,7 +15,7 @@ Ladder.controllers :resources do
   end
 
   get :files, :map => '/resources/:id/files' do
-    @files = Resource.find(params[:id]).files.without(:data)
+    @files = Resource.find(params[:id]).files
 
     render 'files', :format => :json
   end

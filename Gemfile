@@ -24,6 +24,7 @@ gem 'mongoid'
 gem 'mongoid-pagination'
 gem 'mongoid-tree', :require => 'mongoid/tree'
 gem 'mongoid-history', :git => 'git://github.com/aq1018/mongoid-history.git'
+gem 'mongoid-grid_fs'
 
 gem 'tire', :git => 'git://github.com/karmi/tire.git'
 
@@ -42,8 +43,7 @@ gem 'hashdiff'
 gem 'amatch'
 
 # File handling
-gem 'lz4-ruby'
-gem 'mongoid-grid_fs'
+#gem 'lz4-ruby'
 #gem 'ruby-filemagic', :require => 'filemagic' # TO REMOVE  mime = MIME::Type.new(FileMagic.fm(:mime).buffer(data_string))
 
 # MARC handling
