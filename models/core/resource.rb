@@ -18,7 +18,7 @@ class Resource
                {:dcterms => :alternative}]
 
   # imported data objects
-  has_many :files, class_name: Mongoid::GridFS.file_model.to_s
+  has_many :files, class_name: 'Mongoid::GridFS::Fs::File'
 
   # model relations
   has_and_belongs_to_many :groups, index: true

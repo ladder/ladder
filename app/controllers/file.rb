@@ -6,7 +6,7 @@ Ladder.controllers :files do
   end
 
   get :index do
-    @files = Mongoid::GridFS.file_model.all.entries # .paginate(params)
+    @files = Mongoid::GridFS::Fs::File.all.paginate(params)
 
     render 'files', :format => :json
   end
@@ -28,7 +28,12 @@ Ladder.controllers :files do
 
     halt 415, {:error => 'Unsupported content type', :status => 415, :valid => content_types}.to_json unless content_types.include? request.content_type
 
-    @file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
+    # pipe the incoming data through GZip compression
+    reader, writer = IO.pipe; reader.binmode; writer.binmode
+    gz = Zlib::GzipWriter.new(writer, Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
+    gz.write request.body.read; gz.close
+    @file = Mongoid::GridFS.put(reader, :content_type => request.content_type, :compression => :gzip)
+    #@file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
 
     status 201 # resource created
     render 'file', :format => :json

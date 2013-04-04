@@ -4,9 +4,9 @@ module Model
 
     def self.included(base)
       base.send :include, Mongoid::Document
-      base.send :include, Easel::Bindable
-      base.send :include, Mongoid::Timestamps
+#      base.send :include, Mongoid::Timestamps
       base.send :include, Mongoid::History::Trackable
+      base.send :include, Easel::Bindable
     end
 
     def to_uri
