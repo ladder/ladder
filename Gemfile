@@ -23,13 +23,12 @@ gem 'rabl'
 gem 'mongoid'
 gem 'mongoid-pagination'
 gem 'mongoid-tree', :require => 'mongoid/tree'
-gem 'mongoid-history'#, :git => 'git://github.com/aq1018/mongoid-history.git'
+gem 'mongoid-history'
 gem 'mongoid-grid_fs'
+gem 'tire'
 
-gem 'tire'#, :git => 'git://github.com/karmi/tire.git'
-
-gem 'bson_ext', :require => 'mongo'
-gem 'mongo', :require => 'mongo'
+#gem 'bson_ext', :require => 'mongo'
+#gem 'mongo', :require => 'mongo'
 
 # Model core stuff
 gem 'facets', :require => ['facets/hash/recurse']
@@ -47,8 +46,8 @@ gem 'sidekiq', :require => ['sidekiq', 'sidekiq/web']
 gem 'slim'
 
 # File handling
-#gem 'lz4-ruby'
-#gem 'snappy'
+gem 'lz4-ruby'
+gem 'snappy'
 #gem 'ruby-filemagic', :require => 'filemagic' # TO REMOVE  mime = MIME::Type.new(FileMagic.fm(:mime).buffer(data_string))
 
 # MARC handling
