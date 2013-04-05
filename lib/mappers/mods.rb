@@ -9,30 +9,26 @@ class ModsMapper < Mapper
 
     case @file.content_type
       when 'application/mods+xml'
-        map_mods
+        parse_xml(@file.data)
       else
         raise ArgumentError, "Unsupported content type : #{@file.content_type}"
     end
 
   end
 
-  private
-
-=begin
-  def parse_modsxml(xml, content_type)
-    files = []
-
+  # TODO: make this a method on parent class
+  def parse_xml(xml)
     # parse XML into records using XPath
     records = Nokogiri::XML(xml).remove_namespaces!.xpath('//mods') # TODO: smarter namespace handling
 
     records.each do |record|
-      # create a new file for this <mods> element
-      files << Model::File.find_or_create_by(:data => record.to_xml(:encoding => 'UTF-8'), :content_type => content_type)
+      map_xml(record.to_xml(:encoding => 'UTF-8'))
     end
-
-    files
   end
-=end
+
+  def map_xml(mods_xml)
+
+  end
 
 end
 

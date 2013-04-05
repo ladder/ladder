@@ -37,9 +37,9 @@ Ladder.controllers :files do
 
     halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper.content_types}.to_json unless Mapper.content_types.include? @file.content_type
 
-    # create a mapper for this content-type
+    # create a mapper and map this file to models
     # TODO: refactor this to use #perform_async on the class
-    mapper = Mapper.create(@file.content_type).perform(@file.id)
+    Mapper.create(@file.content_type).perform(@file.id)
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)

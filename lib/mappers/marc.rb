@@ -5,87 +5,92 @@ class MarcMapper < Mapper
   end
 
   def perform(file_id)
-    @file = Model::File.find(file_id)
+    @file = Mongoid::GridFS.get(file_id)
 
     case @file.content_type
       when 'application/marc'
-        map_marc
+        parse_marc(@file.data)
       when 'application/marc+xml'
-        map_marcxml
+        parse_xml(@file.data)
       when 'application/marc+json'
-        map_json
+        map_json(@file.data)
       else
         raise ArgumentError, "Unsupported content type : #{@file.content_type}"
     end
-
-    rdf_types = detect_types(@marc)
-
-    mods_xml = marc_to_mods(@marc_xml)
-
-#    resource = Resource.create({:rdf_types => rdf_types})
-#    resource.files << file
-#    resource.groups << group
-
-#    mods_mapping.map(resource, mods_xml.at_xpath('/mods'))
   end
 
-  private
-=begin
-  def parse_marc(marc, content_type)
-    files = []
-
+  def parse_marc(data)
     # parse MARC data and return an array of File objects
-    reader = MARC::ForgivingReader.new(marc, :invalid => :replace) # TODO: may wish to include encoding options
+    records = MARC::ForgivingReader.new(data, :invalid => :replace) # TODO: may wish to include encoding options
 
-    reader.each do |record|
-      # create a new file for this MARC record
-      files << Model::File.find_or_create_by(:data => record.to_marc, :content_type => content_type)
+    records.each do |record|
+      map_marc(record)
     end
-
-    files
   end
 
-  def parse_marcxml(xml, content_type)
-    files = []
-
+  # TODO: make this a method on parent class
+  def parse_xml(xml)
     # parse XML into records using XPath
     records = Nokogiri::XML(xml).remove_namespaces!.xpath('//record') # TODO: smarter namespace handling
 
     records.each do |record|
-      # create a new file for this <record> element
-      files << Model::File.find_or_create_by(:data => record.to_xml(:encoding => 'UTF-8', :save_with => Nokogiri::XML::Node::SaveOptions::AS_XML), :content_type => content_type)
+      map_xml(record)
     end
-
-    files
   end
-=end
-  def map_marc
+
+  # map an individual binary MARC record
+  def map_marc(marc)
     # load MARC record
-    @marc = MARC::Record.new_from_marc(@file.data, :forgiving => true)
+    marc_record = MARC::Record.new_from_marc(marc, :forgiving => true)
 
     # create MARC XML from MARC record
-    @marc_xml = Gyoku.xml(marc.to_gyoku_hash)
+    marc_xml = Gyoku.xml(marc_record.to_gyoku_hash)
 
     # ensure weird encodings are turned into valid UTF-8
-    @marc_xml = marc_xml.encode('UTF-8', 'binary', :undef => :replace, :invalid => :replace, :replace =>'') unless marc_xml.force_encoding('UTF-8').valid_encoding?
+    marc_xml = marc_xml.encode('UTF-8', 'binary', :undef => :replace, :invalid => :replace, :replace =>'') unless marc_xml.force_encoding('UTF-8').valid_encoding?
+
+    resource_from_marc(marc_record, marc_xml)
   end
 
-  def map_marcxml
+  # map an individual MARCHASH record
+  def map_json(marc_json)
     # load MARC record
-    @marc = MARC::XMLReader.new(StringIO.new(@file.data)).first # TODO: switch to :parser => :nokogiri
-
-    @marc_xml = @file.data
-  end
-
-  def map_json
-    # load MARC record
-    @marc = MARC::Record.new_from_marchash(JSON.parse(@file.data).to_hash)
+    marc_record = MARC::Record.new_from_marchash(JSON.parse(marc_json))
 
     # create MARC XML from MARC record
-    @marc_xml = Gyoku.xml(@marc.to_gyoku_hash)
+    marc_xml = Gyoku.xml(marc.to_gyoku_hash)
+
+    resource_from_marc(marc_record, marc_xml)
+  end
+
+  # map an individual MARCXML record
+  def map_xml(marc_xml)
+    # load MARC record
+    marc_record = MARC::XMLReader.new(StringIO.new(marc_xml)).first # TODO: switch to :parser => :nokogiri
+
+    resource_from_marc(marc_record, marc_xml)
   end
 
   private
+
+  # generate a fully-mapped Resource
+  # by deferring to ModsMapper
+  def resource_from_marc(marc, marc_xml)
+    mods_xml = marc_to_mods(marc_xml)
+
+    resource = ModsMapper.map_xml(mods_xml)
+
+    resource.rdf_types.merge! detect_types(marc)
+    resource.files << @file
+    resource.save
+
+=begin
+    rdf_types = detect_types(marc)
+    resource = Resource.create({:rdf_types => rdf_types})
+    resource.groups << group
+    mods_mapping.map(resource, mods_xml.at_xpath('/mods'))
+=end
+  end
 
   def marc_to_mods(marc_xml)
     # load MARC2MODS XSL
