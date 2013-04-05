@@ -11,9 +11,7 @@ group :development do
 end
 
 # Padrino core framework
-#gem 'padrino-core'
-#gem 'padrino-helpers'
-gem 'padrino-cache' # will include helpers and core
+gem 'padrino-cache' # will include padrino-helpers and padrino-core
 
 # API framework stuff
 #gem 'roar', :require => ['roar/representer/json', 'roar/representer/feature/hypermedia']
@@ -26,9 +24,6 @@ gem 'mongoid-tree', :require => 'mongoid/tree'
 gem 'mongoid-history'
 gem 'mongoid-grid_fs'
 gem 'tire'
-
-#gem 'bson_ext', :require => 'mongo'
-#gem 'mongo', :require => 'mongo'
 
 # Model core stuff
 gem 'facets', :require => ['facets/hash/recurse']

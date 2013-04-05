@@ -5,7 +5,7 @@ class ModsMapper < Mapper
   end
 
   def perform(file_id)
-    @file = Model::File.find(file_id)
+    @file = Mongoid::GridFS.get(file_id)
 
     case @file.content_type
       when 'application/mods+xml'
@@ -22,20 +22,17 @@ class ModsMapper < Mapper
     records = Nokogiri::XML(xml).remove_namespaces!.xpath('//mods') # TODO: smarter namespace handling
 
     records.each do |record|
-      map_xml(record.to_xml(:encoding => 'UTF-8'))
+      map_xml(record) # Nokogiri::XML::Element
+#      map_xml(record.to_xml(:encoding => 'UTF-8')) # String
     end
   end
 
-  def map_xml(mods_xml)
-
+  def map_xml(xml_element)
+    resource = map_mods(Resource.new, xml_element)
   end
 
 end
 
-=begin
-  module Mapping
-
-  class MODS
 
     # TODO: abstract to generic mapping module/class
     def map_xpath(xml_node, hash)
@@ -59,10 +56,7 @@ end
       mapped
     end
 
-    def map(resource, node)
-      # make resource accessible to other methods
-      @resource = resource
-      @node = node
+    def map_mods(resource, node)
 
       # map MODS elements to embedded vocab
       vocabs = map_vocabs(node)
@@ -70,56 +64,56 @@ end
       resource.vocabs = vocabs
 
       # map encoded agents to related Agent models
-      map_agents('name[@usage="primary"]',      {:relation => {:dcterms => :creator}})
-      map_agents('name[not(@usage="primary")]', {:relation => {:dcterms => :contributor}})
-      map_agents('originInfo/publisher',        {:relation => {:dcterms => :publisher},
+      map_agents(resource, node, 'name[@usage="primary"]',      {:relation => {:dcterms => :creator}})
+      map_agents(resource, node, 'name[not(@usage="primary")]', {:relation => {:dcterms => :contributor}})
+      map_agents(resource, node, 'originInfo/publisher',        {:relation => {:dcterms => :publisher},
                                                  :mapping  => {:foaf => {:name => '.'}}})
 
       # map encoded concepts to related Concept models
-      map_concepts('subject/geographicCode',               {:relation => {:dcterms => :spatial}})
-      map_concepts('subject[not(@authority="lcsh")
+      map_concepts(resource, node, 'subject/geographicCode',               {:relation => {:dcterms => :spatial}})
+      map_concepts(resource, node, 'subject[not(@authority="lcsh")
                     and not(geographicCode)]',             {:relation => {:dcterms => :subject}})
-      map_concepts('subject[@authority="lcsh"]',           {:relation => {:dcterms => :LCSH}})
-      map_concepts('subject[@authority="rvm"]',            {:relation => {:dcterms => :RVM}})
-      map_concepts('classification[@authority="ddc"]',     {:relation => {:dcterms => :DDC}})
-      map_concepts('classification[@authority="lcc"]',     {:relation => {:dcterms => :LCC}})
+      map_concepts(resource, node, 'subject[@authority="lcsh"]',           {:relation => {:dcterms => :LCSH}})
+      map_concepts(resource, node, 'subject[@authority="rvm"]',            {:relation => {:dcterms => :RVM}})
+      map_concepts(resource, node, 'classification[@authority="ddc"]',     {:relation => {:dcterms => :DDC}})
+      map_concepts(resource, node, 'classification[@authority="lcc"]',     {:relation => {:dcterms => :LCC}})
 
       # map related Resources as tree hierarchy
       # @see: http://www.loc.gov/standards/mods/userguide/relateditem.html
 
       # limit to one relation to avoid a multi-parent situation
-      map_relations('relatedItem[@type="host"
+      map_relations(resource, node, 'relatedItem[@type="host"
                      or @type="series"][1]',               {:parent   => true,
                                                             :relation => {:dcterms => :isPartOf},
                                                             :inverse  => {:dcterms => :hasPart}})
-      map_relations('relatedItem[@type="constituent"]',    {:relation => {:dcterms => :hasPart},
+      map_relations(resource, node, 'relatedItem[@type="constituent"]',    {:relation => {:dcterms => :hasPart},
                                                             :inverse  => {:dcterms => :isPartOf}})
-      map_relations('relatedItem[@type="otherVersion"]',   {:siblings => true,
+      map_relations(resource, node, 'relatedItem[@type="otherVersion"]',   {:siblings => true,
                                                             :relation => {:dcterms => :hasVersion},
                                                             :inverse  => {:dcterms => :isVersionOf}})
-      map_relations('relatedItem[@type="otherFormat"]',    {:siblings => true,
+      map_relations(resource, node, 'relatedItem[@type="otherFormat"]',    {:siblings => true,
                                                             :relation => {:dcterms => :hasFormat},
                                                             :inverse  => {:dcterms => :isFormatOf}})
-      map_relations('relatedItem[@type="isReferencedBy"]', {:siblings => true,
+      map_relations(resource, node, 'relatedItem[@type="isReferencedBy"]', {:siblings => true,
                                                             :relation => {:dcterms => :isReferencedBy},
                                                             :inverse  => {:dcterms => :references}})
-      map_relations('relatedItem[@type="references"]',     {:siblings => true,
+      map_relations(resource, node, 'relatedItem[@type="references"]',     {:siblings => true,
                                                             :relation => {:dcterms => :references},
                                                             :inverse  => {:dcterms => :isReferencedBy}})
       # NB: these relationships are poorly defined
-      map_relations('relatedItem[not(@type)]')
+      map_relations(resource, node, 'relatedItem[not(@type)]')
 
       # TODO: find an appropriate relation type for these
-      map_relations('relatedItem[@type="original"
+      map_relations(resource, node, 'relatedItem[@type="original"
                      or @type="preceding"
                      or @type="succeeding"
                      or @type="reviewOf"]',                {:siblings => true})
 
       # save mapped resources
-      @resource.parent.save if @resource.parent_id
-      @resource.save
+      resource.parent.save if resource.parent_id
+      resource.save
 
-      @resource
+      resource
     end
 
     def map_vocabs(node)
@@ -179,24 +173,24 @@ end
       vocabs
     end
 
-    def map_relations(xpath, opts={})
+    def map_relations(resource, node, xpath, opts={})
       relations = []
 
-      @node.xpath(xpath).each do |node|
+      node.xpath(xpath).each do |subnode|
         # create/map related resource
-        vocabs = map_vocabs(node)
+        vocabs = map_vocabs(subnode)
 
         next if vocabs.values.map(&:values).flatten.empty?
 
         # recursively map related resources
-        resource = Resource.find_or_create_by(vocabs)
+        rel_resource = Resource.find_or_create_by(vocabs)
 
-        resource = Mapping::MODS.new.map(resource, node)
-        resource.groups = @resource.groups
+        rel_resource = map_mods(rel_resource, subnode)
+#        rel_resource.groups = resource.groups
 
-        next if resource.nil? or relations.include? resource
+        next if rel_resource.nil? or relations.include? rel_resource
 
-        relations << resource
+        relations << rel_resource
       end
 
       unless relations.empty?
@@ -205,7 +199,7 @@ end
           field = opts[:relation].values.first
 
           # set the target field value if it's provided
-          @resource.send(vocab).send("#{field}=", relations.map(&:id))
+          resource.send(vocab).send("#{field}=", relations.map(&:id))
         end
 
         if opts[:inverse]
@@ -214,31 +208,31 @@ end
 
           relations.each do |relation|
             # set the inverse field value if it's provided
-            relation.send(vocab).send("#{field}=", [@resource.id])
+            relation.send(vocab).send("#{field}=", [resource.id])
           end
         end
 
         if opts[:parent]
           # if we are parenting, assign the relation as the resource's parent
-          @resource.parent = relations.first
+          resource.parent = relations.first
 
         elsif opts[:siblings]
           # try to assign relations as siblings if possible
-          if @resource.root? then @resource.children << relations
-          else @resource.parent.children << relations
+          if resource.root? then resource.children << relations
+          else resource.parent.children << relations
           end
 
         else
           # otherwise assign relations as the resource's children (default)
-          @resource.children << relations
+          resource.children << relations
         end
 
       end
     end
 
-    def map_agents(xpath, opts={})
+    def map_agents(resource, node, xpath, opts={})
       agents = []
-      agent_ids = @resource.agents.map(&:id)
+      agent_ids = resource.agents.map(&:id)
 
       mapping = opts[:mapping] || { :foaf => {
           :name     => 'namePart[not(@type)] | displayForm',
@@ -247,13 +241,13 @@ end
         }
       }
 
-      @node.xpath(xpath).each do |node|
+      node.xpath(xpath).each do |subnode|
         mapped = {}
 
-        mapped[:foaf] = map_xpath node, mapping[:foaf]
+        mapped[:foaf] = map_xpath subnode, mapping[:foaf]
         next if mapped[:foaf].values.flatten.empty?
 
-        case node['type']
+        case subnode['type']
           when 'personal'
             mapped[:rdf_types] = {:dbpedia => [:Person],
                                   :rdafrbr => [:Person],
@@ -279,27 +273,27 @@ end
           field = opts[:relation].values.first
 
           # set the target field value if it's provided
-          @resource.send(vocab).send("#{field}=", agents.map(&:id))
+          resource.send(vocab).send("#{field}=", agents.map(&:id))
         end
 
-        @resource.agents << agents
+        resource.agents << agents
       end
     end
 
-    def map_concepts(xpath, opts={})
+    def map_concepts(resource, node, xpath, opts={})
       concepts = []
-      concept_ids = @resource.concepts.map(&:id)
+      concept_ids = resource.concepts.map(&:id)
 
-      @node.xpath(xpath).each do |node|
+      node.xpath(xpath).each do |subnode|
         # in MODS, each subject access point is usually composed of multiple
         # ordered sub-elements; so that's what we process for hierarchy
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
         current = nil
 
-        node.children.each do |subnode| # xpath('./text() | ./*')
-          next if subnode.text.strip.empty?
+        subnode.children.each do |subsubnode| # xpath('./text() | ./*')
+          next if subsubnode.text.strip.empty?
 
-          case subnode.name
+          case subsubnode.name
             when 'NEVER MATCH'
 #            when 'name'       # Agent
 #            when 'titleInfo'  # Resource
@@ -313,12 +307,12 @@ end
                 }
               }
 
-              mapped[:skos] = map_xpath subnode, mapping[:skos]
+              mapped[:skos] = map_xpath subsubnode, mapping[:skos]
               next if mapped[:skos].values.flatten.empty?
 
               mapped[:skos][:broader] = [current.id] unless current.nil?
 
-              if 'geographic' == subnode.name
+              if 'geographic' == subsubnode.name
                 mapped[:rdf_types] = {:dbpedia => [:Place],
                                       :rdafrbr => [:Place],
                                        :schema => [:Place]}
@@ -349,14 +343,9 @@ end
           field = opts[:relation].values.first
 
           # set the target field value if it's provided
-          @resource.send(vocab).send("#{field}=", concepts.map(&:id))
+          resource.send(vocab).send("#{field}=", concepts.map(&:id))
         end
 
-        @resource.concepts << concepts
+        resource.concepts << concepts
       end
     end
-
-  end
-
-end
-=end

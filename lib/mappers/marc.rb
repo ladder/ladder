@@ -21,7 +21,7 @@ class MarcMapper < Mapper
 
   def parse_marc(data)
     # parse MARC data and return an array of File objects
-    records = MARC::ForgivingReader.new(data, :invalid => :replace) # TODO: may wish to include encoding options
+    records = MARC::ForgivingReader.new(StringIO.new(data), :invalid => :replace) # TODO: may wish to include encoding options
 
     records.each do |record|
       map_marc(record)
@@ -39,9 +39,9 @@ class MarcMapper < Mapper
   end
 
   # map an individual binary MARC record
-  def map_marc(marc)
+  def map_marc(marc_record)
     # load MARC record
-    marc_record = MARC::Record.new_from_marc(marc, :forgiving => true)
+#    marc_record = MARC::Record.new_from_marc(marc, :forgiving => true)
 
     # create MARC XML from MARC record
     marc_xml = Gyoku.xml(marc_record.to_gyoku_hash)
@@ -58,7 +58,7 @@ class MarcMapper < Mapper
     marc_record = MARC::Record.new_from_marchash(JSON.parse(marc_json))
 
     # create MARC XML from MARC record
-    marc_xml = Gyoku.xml(marc.to_gyoku_hash)
+    marc_xml = Gyoku.xml(marc_record.to_gyoku_hash)
 
     resource_from_marc(marc_record, marc_xml)
   end
@@ -68,7 +68,7 @@ class MarcMapper < Mapper
     # load MARC record
     marc_record = MARC::XMLReader.new(StringIO.new(marc_xml)).first # TODO: switch to :parser => :nokogiri
 
-    resource_from_marc(marc_record, marc_xml)
+    resource = resource_from_marc(marc_record, marc_xml)
   end
 
   private
@@ -78,12 +78,13 @@ class MarcMapper < Mapper
   def resource_from_marc(marc, marc_xml)
     mods_xml = marc_to_mods(marc_xml)
 
-    resource = ModsMapper.map_xml(mods_xml)
+    resource = ModsMapper.new.map_xml(mods_xml.root)
 
     resource.rdf_types.merge! detect_types(marc)
     resource.files << @file
     resource.save
 
+    resource
 =begin
     rdf_types = detect_types(marc)
     resource = Resource.create({:rdf_types => rdf_types})

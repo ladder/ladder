@@ -166,7 +166,7 @@ module Model
 
                 h[k] = values.map! do |value|
                   # traverse through ID-like values
-                  if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+                  if value.is_a? Moped::BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
                     case opts[:ids].to_sym
                       when :omit then value = nil
                       when :resolve

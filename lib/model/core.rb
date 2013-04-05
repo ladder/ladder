@@ -263,7 +263,7 @@ module Model
           value = statement.object.object
 
           # NB: this is duplicated from Model/Core/ClassMethods#normalize
-          if value.is_a? BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+          if value.is_a? Moped::BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
             # resolve IDs
             if defined? resource_ids and resource_ids.include? value
               model = :resource
