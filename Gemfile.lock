@@ -1,25 +1,4 @@
 GIT
-  remote: git://github.com/aq1018/mongoid-history.git
-  revision: 9148d6e36d8a1bde9c421feb854da5ae886b40eb
-  specs:
-    mongoid-history (0.3.2)
-      activesupport
-      easy_diff
-      mongoid (~> 3.0)
-
-GIT
-  remote: git://github.com/karmi/tire.git
-  revision: 247c6ee3bc9b959fcd5674ad5df98c4971e3f424
-  specs:
-    tire (0.5.5)
-      activemodel (>= 3.0)
-      activesupport
-      hashr (~> 0.0.19)
-      multi_json (~> 1.3)
-      rake
-      rest-client (~> 1.6)
-
-GIT
   remote: git://github.com/mtrudel/easel.git
   revision: e592b5294c9d96159e86c194c06aec551c78ea8a
   branch: i18n
@@ -42,15 +21,16 @@ GEM
     addressable (2.3.3)
     amatch (0.2.11)
       tins (~> 0.3)
-    backports (3.1.1)
-    better_errors (0.7.2)
+    ansi (1.4.3)
+    backports (3.3.0)
+    better_errors (0.8.0)
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
     binding_of_caller (0.7.1)
       debug_inspector (>= 0.0.1)
-    bson (1.8.3)
-    bson_ext (1.8.3)
-      bson (~> 1.8.3)
+    bson (1.8.4)
+    bson_ext (1.8.4)
+      bson (~> 1.8.4)
     builder (3.0.4)
     celluloid (0.12.4)
       facter (>= 1.6.12)
@@ -69,60 +49,64 @@ GEM
       builder (>= 2.1.2)
     hashdiff (0.0.6)
     hashr (0.0.22)
-    http_router (0.10.2)
+    http_router (0.11.0)
       rack (>= 1.0.0)
       url_mount (~> 0.2.1)
     i18n (0.6.1)
     locale (2.0.8)
-    lz4-ruby (0.1.7)
     marc (0.5.0)
     method_source (0.8.1)
-    mime-types (1.21)
-    mongo (1.8.3)
-      bson (~> 1.8.3)
+    mime-types (1.22)
+    mongo (1.8.4)
+      bson (~> 1.8.4)
     mongoid (3.1.2)
       activemodel (~> 3.2)
       moped (~> 1.4.2)
       origin (~> 1.0)
       tzinfo (~> 0.3.22)
-    mongoid-grid_fs (1.7.0)
+    mongoid-grid_fs (1.7.1)
       mime-types (~> 1.19)
+      mongoid (~> 3.0)
+    mongoid-history (0.3.3)
+      activesupport
+      easy_diff
       mongoid (~> 3.0)
     mongoid-pagination (0.2.0)
       activesupport
       mongoid
     mongoid-tree (1.0.1)
       mongoid (>= 3.0, <= 4.0)
-    moped (1.4.3)
-    multi_json (1.7.1)
-    nokogiri (1.5.8)
+    moped (1.4.5)
+    multi_json (1.7.2)
+    nokogiri (1.5.9)
     oj (2.0.10)
     origin (1.0.11)
-    padrino-cache (0.10.7)
-      padrino-core (= 0.10.7)
-    padrino-core (0.10.7)
-      activesupport (~> 3.2.0)
-      http_router (~> 0.10.2)
-      sinatra (~> 1.3.1)
-      thor (~> 0.15.2)
+    padrino-cache (0.11.0)
+      padrino-core (= 0.11.0)
+      padrino-helpers (= 0.11.0)
+    padrino-core (0.11.0)
+      activesupport (>= 3.1.0)
+      http_router (~> 0.11.0)
+      rack-protection (>= 1.5.0)
+      sinatra (~> 1.4.2)
+      thor (~> 0.17.0)
       tilt (~> 1.3.0)
-    padrino-helpers (0.10.7)
+    padrino-helpers (0.11.0)
       i18n (~> 0.6)
-      padrino-core (= 0.10.7)
-    parallel (0.6.3)
+      padrino-core (= 0.11.0)
     pry (0.9.12)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
       slop (~> 3.4)
     pry-padrino (0.1.2)
       pry (>= 0.8)
-    rabl (0.8.0)
+    rabl (0.8.2)
       activesupport (>= 2.3.14)
     rack (1.5.2)
     rack-protection (1.5.0)
       rack
-    rake (10.0.3)
-    rdf (1.0.3)
+    rake (10.0.4)
+    rdf (1.0.4)
       addressable (>= 2.2)
     rdf-rdfxml (1.0.0)
       rdf (>= 1.0)
@@ -139,26 +123,33 @@ GEM
       redis (~> 3.0.0)
     rest-client (1.6.7)
       mime-types (>= 1.16)
-    sidekiq (2.8.0)
+    sidekiq (2.9.0)
       celluloid (~> 0.12.0)
       connection_pool (~> 1.0)
       multi_json (~> 1)
       redis (~> 3)
       redis-namespace
-    sinatra (1.3.6)
-      rack (~> 1.4)
-      rack-protection (~> 1.3)
-      tilt (~> 1.3, >= 1.3.3)
+    sinatra (1.4.2)
+      rack (~> 1.5, >= 1.5.2)
+      rack-protection (~> 1.4)
+      tilt (~> 1.3, >= 1.3.4)
     slim (1.3.6)
       temple (~> 0.5.5)
       tilt (~> 1.3.3)
     slop (3.4.4)
-    snappy (0.0.8)
     temple (0.5.5)
-    thor (0.15.4)
+    thor (0.17.0)
     tilt (1.3.6)
     timers (1.1.0)
     tins (0.7.2)
+    tire (0.5.7)
+      activemodel (>= 3.0)
+      activesupport
+      ansi
+      hashr (~> 0.0.19)
+      multi_json (~> 1.3)
+      rake
+      rest-client (~> 1.6)
     tzinfo (0.3.37)
     url_mount (0.2.1)
       rack
@@ -177,25 +168,20 @@ DEPENDENCIES
   facets
   gyoku
   hashdiff
-  lz4-ruby
   marc
   mongo
   mongoid
   mongoid-grid_fs
-  mongoid-history!
+  mongoid-history
   mongoid-pagination
   mongoid-tree
   nokogiri
   oj
   padrino-cache
-  padrino-core
-  padrino-helpers
-  parallel
   pry-padrino
   rabl
   rdf-rdfxml
   sidekiq
   slim
-  snappy
-  tire!
+  tire
   wirble
