@@ -43,7 +43,8 @@ gem 'hashdiff'
 gem 'amatch'
 
 # File handling
-#gem 'lz4-ruby'
+gem 'lz4-ruby'
+gem 'snappy'
 #gem 'ruby-filemagic', :require => 'filemagic' # TO REMOVE  mime = MIME::Type.new(FileMagic.fm(:mime).buffer(data_string))
 
 # MARC handling

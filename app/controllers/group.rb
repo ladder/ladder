@@ -19,7 +19,7 @@ Ladder.controllers :groups do
   end
 
   get :index, :map => '/groups/:id/models' do
-    @models = Group.find(params[:id]).models.only(:id, :md5, :version)
+    @models = Group.find(params[:id]).models#.only(:id, :md5, :version)
 
     render 'models', :format => :json
   end

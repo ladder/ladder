@@ -27,8 +27,8 @@ Ladder.controllers :concepts do
   end
 
   get :similar, :map => '/concepts/:id/similar' do
-    @models = Concept.find(params[:id]).similar
-    @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
+    @similar_opts = params.symbolize_keys.slice(:amatch, :hashdiff)
+    @models = Concept.find(params[:id]).similar(@similar_opts)
 
     render 'models', :format => :json
   end

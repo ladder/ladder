@@ -25,13 +25,7 @@ Ladder.controllers :files do
 
     # ensure it is something we CAN process
     halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Mapper.content_types}.to_json unless Mapper.content_types.include? request.content_type
-=begin
-    # pipe the incoming data through GZip compression
-    reader, writer = IO.pipe; reader.binmode; writer.binmode
-    gz = Zlib::GzipWriter.new(writer, Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
-    gz.write request.body.read; gz.close
-    @file = Mongoid::GridFS.put(reader, :content_type => request.content_type, :compression => :gzip)
-=end
+
     @file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
 
     status 201 # resource created
@@ -41,13 +35,13 @@ Ladder.controllers :files do
   post :index, :map => '/files/:id/map' do
     @file = Mongoid::GridFS.get(params[:id])
 
+    halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper.content_types}.to_json unless Mapper.content_types.include? @file.content_type
+
     # create a mapper for this content-type
-    mapper = Mapper.create(@file.content_type)
-
-    halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper.content_types}.to_json if mapper.nil?
-
     # TODO: refactor this to use #perform_async on the class
-    mapper.perform(@file.id, @file.content_type)
+    mapper = Mapper.create(@file.content_type).perform(@file.id)
+
+    mapper
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)

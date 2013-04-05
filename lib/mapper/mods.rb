@@ -4,14 +4,14 @@ class ModsMapper < Mapper
     ['application/mods+xml']
   end
 
-  def perform(file_id, content_type)
+  def perform(file_id)
     @file = Model::File.find(file_id)
 
-    case content_type
+    case @file.content_type
       when 'application/mods+xml'
         map_mods
       else
-        raise ArgumentError, "Unsupported content type : #{content_type}"
+        raise ArgumentError, "Unsupported content type : #{@file.content_type}"
     end
 
   end

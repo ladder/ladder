@@ -4,10 +4,10 @@ class MarcMapper < Mapper
     ['application/marc', 'application/marc+xml', 'application/marc+json']
   end
 
-  def perform(file_id, content_type)
+  def perform(file_id)
     @file = Model::File.find(file_id)
 
-    case content_type
+    case @file.content_type
       when 'application/marc'
         map_marc
       when 'application/marc+xml'
@@ -15,7 +15,7 @@ class MarcMapper < Mapper
       when 'application/marc+json'
         map_json
       else
-        raise ArgumentError, "Unsupported content type : #{content_type}"
+        raise ArgumentError, "Unsupported content type : #{@file.content_type}"
     end
 
     rdf_types = detect_types(@marc)

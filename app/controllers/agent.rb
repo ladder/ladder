@@ -27,8 +27,8 @@ Ladder.controllers :agents do
   end
 
   get :similar, :map => '/agents/:id/similar' do
-    @models = Agent.find(params[:id]).similar
-    @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
+    @similar_opts = params.symbolize_keys.slice(:amatch, :hashdiff)
+    @models = Agent.find(params[:id]).similar(@similar_opts)
 
     render 'models', :format => :json
   end
