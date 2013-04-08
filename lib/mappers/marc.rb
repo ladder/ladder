@@ -1,4 +1,5 @@
 module Mapper
+
   class Marc < Mapper
 
     def self.content_types
@@ -27,7 +28,7 @@ module Mapper
         file = Mongoid::GridFS.put(StringIO.new(marc_record.to_marchash.to_json), :content_type => 'application/marc+json')
 
         # spawn a Mapper for the record
-        Mapper::MarcHash.new.perform(file.id)
+        MarcHash.new.perform(file.id)
       end
 
       # delete source file
@@ -35,4 +36,5 @@ module Mapper
     end
 
   end
+
 end
