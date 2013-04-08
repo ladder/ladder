@@ -1,38 +1,35 @@
-class ModsMapper < Mapper
+module Mapper
+  class Mods < Mapper
 
-  def self.content_types
-    ['application/mods+xml']
-  end
-
-  def perform(file_id)
-    @file = Mongoid::GridFS.get(file_id)
-
-    case @file.content_type
-      when 'application/mods+xml'
-        parse_xml(@file.data)
-      else
-        raise ArgumentError, "Unsupported content type : #{@file.content_type}"
+    def self.content_types
+      ['application/mods+xml']
     end
 
-  end
+    def perform(file_id)
+      @file = Mongoid::GridFS.get(file_id)
 
-  # TODO: make this a method on parent class
-  def parse_xml(xml)
-    # parse XML into records using XPath
-    records = Nokogiri::XML(xml).remove_namespaces!.xpath('//mods') # TODO: smarter namespace handling
+      case @file.content_type
+        when 'application/mods+xml'
+          parse_xml(@file.data)
+        else
+          raise ArgumentError, "Unsupported content type : #{@file.content_type}"
+      end
 
-    records.each do |record|
-      map_xml(record) # Nokogiri::XML::Element
-#      map_xml(record.to_xml(:encoding => 'UTF-8')) # String
     end
-  end
 
-  def map_xml(xml_element)
-    resource = map_mods(Resource.new, xml_element)
-  end
+    # TODO: make this a method on parent class
+    def parse_xml(xml)
+      # parse XML into records using XPath
+      records = Nokogiri::XML(xml).remove_namespaces!.xpath('//mods') # TODO: smarter namespace handling
 
-end
+      records.each do |record|
+        map_xml(record) # Nokogiri::XML::Element
+      end
+    end
 
+    def map_xml(xml_element)
+      resource = map_mods(Resource.new, xml_element)
+    end
 
     # TODO: abstract to generic mapping module/class
     def map_xpath(xml_node, hash)
@@ -67,7 +64,7 @@ end
       map_agents(resource, node, 'name[@usage="primary"]',      {:relation => {:dcterms => :creator}})
       map_agents(resource, node, 'name[not(@usage="primary")]', {:relation => {:dcterms => :contributor}})
       map_agents(resource, node, 'originInfo/publisher',        {:relation => {:dcterms => :publisher},
-                                                 :mapping  => {:foaf => {:name => '.'}}})
+                                                                 :mapping  => {:foaf => {:name => '.'}}})
 
       # map encoded concepts to related Concept models
       map_concepts(resource, node, 'subject/geographicCode',               {:relation => {:dcterms => :spatial}})
@@ -87,19 +84,19 @@ end
                                                             :relation => {:dcterms => :isPartOf},
                                                             :inverse  => {:dcterms => :hasPart}})
       map_relations(resource, node, 'relatedItem[@type="constituent"]',    {:relation => {:dcterms => :hasPart},
-                                                            :inverse  => {:dcterms => :isPartOf}})
+                                                                            :inverse  => {:dcterms => :isPartOf}})
       map_relations(resource, node, 'relatedItem[@type="otherVersion"]',   {:siblings => true,
-                                                            :relation => {:dcterms => :hasVersion},
-                                                            :inverse  => {:dcterms => :isVersionOf}})
+                                                                            :relation => {:dcterms => :hasVersion},
+                                                                            :inverse  => {:dcterms => :isVersionOf}})
       map_relations(resource, node, 'relatedItem[@type="otherFormat"]',    {:siblings => true,
-                                                            :relation => {:dcterms => :hasFormat},
-                                                            :inverse  => {:dcterms => :isFormatOf}})
+                                                                            :relation => {:dcterms => :hasFormat},
+                                                                            :inverse  => {:dcterms => :isFormatOf}})
       map_relations(resource, node, 'relatedItem[@type="isReferencedBy"]', {:siblings => true,
-                                                            :relation => {:dcterms => :isReferencedBy},
-                                                            :inverse  => {:dcterms => :references}})
+                                                                            :relation => {:dcterms => :isReferencedBy},
+                                                                            :inverse  => {:dcterms => :references}})
       map_relations(resource, node, 'relatedItem[@type="references"]',     {:siblings => true,
-                                                            :relation => {:dcterms => :references},
-                                                            :inverse  => {:dcterms => :isReferencedBy}})
+                                                                            :relation => {:dcterms => :references},
+                                                                            :inverse  => {:dcterms => :isReferencedBy}})
       # NB: these relationships are poorly defined
       map_relations(resource, node, 'relatedItem[not(@type)]')
 
@@ -186,7 +183,7 @@ end
         rel_resource = Resource.find_or_create_by(vocabs)
 
         rel_resource = map_mods(rel_resource, subnode)
-#        rel_resource.groups = resource.groups
+        #        rel_resource.groups = resource.groups
 
         next if rel_resource.nil? or relations.include? rel_resource
 
@@ -238,7 +235,7 @@ end
           :name     => 'namePart[not(@type)] | displayForm',
           :birthday => 'namePart[@type = "date"]',
           :title    => 'namePart[@type = "termsOfAddress"]',
-        }
+      }
       }
 
       node.xpath(xpath).each do |subnode|
@@ -251,13 +248,13 @@ end
           when 'personal'
             mapped[:rdf_types] = {:dbpedia => [:Person],
                                   :rdafrbr => [:Person],
-                                   :schema => [:Person],
-                                     :foaf => [:Person]}
+                                  :schema => [:Person],
+                                  :foaf => [:Person]}
           when 'corporate'
             mapped[:rdf_types] = {:rdafrbr => [:CorporateBody],
                                   :dbpedia => [:Organisation],
-                                   :schema => [:Organization],
-                                     :foaf => [:Organization]}
+                                  :schema => [:Organization],
+                                  :foaf => [:Organization]}
         end
 
         agent = Agent.find_or_create_by(mapped)
@@ -304,7 +301,7 @@ end
               mapping = opts[:mapping] || { :skos => {
                   :prefLabel  => '.',
                   :hiddenLabel => 'preceding-sibling::*'
-                }
+              }
               }
 
               mapped[:skos] = map_xpath subsubnode, mapping[:skos]
@@ -315,7 +312,7 @@ end
               if 'geographic' == subsubnode.name
                 mapped[:rdf_types] = {:dbpedia => [:Place],
                                       :rdafrbr => [:Place],
-                                       :schema => [:Place]}
+                                      :schema => [:Place]}
               end
 
               concept = Concept.find_or_create_by(mapped)
@@ -349,3 +346,6 @@ end
         resource.concepts << concepts
       end
     end
+
+  end
+end

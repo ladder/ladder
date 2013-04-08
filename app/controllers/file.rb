@@ -24,7 +24,7 @@ Ladder.controllers :files do
     halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.body.length
 
     # ensure it is something we CAN process
-    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Mapper.content_types}.to_json unless Mapper.content_types.include? request.content_type
+    halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Mapper::Mapper.content_types}.to_json unless Mapper::Mapper.content_types.include? request.content_type
 
     @file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
 
@@ -35,11 +35,11 @@ Ladder.controllers :files do
   post :index, :map => '/files/:id/map' do
     @file = Mongoid::GridFS.get(params[:id])
 
-    halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper.content_types}.to_json unless Mapper.content_types.include? @file.content_type
+    halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper::Mapper.content_types}.to_json unless Mapper::Mapper.content_types.include? @file.content_type
 
     # create a mapper and map this file to models
     # TODO: refactor this to use #perform_async on the class
-    Mapper.create(@file.content_type).perform(@file.id)
+    Mapper::Mapper.create(@file.content_type).perform(@file.id)
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)
@@ -52,7 +52,7 @@ Ladder.controllers :files do
 
     # (re)compress this file
     # TODO: refactor this to use #perform_async on the class
-    Compressor.new.perform(@file.id, params[:compression].to_sym)
+    Compressor::Compressor.new.perform(@file.id, params[:compression].to_sym)
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)
