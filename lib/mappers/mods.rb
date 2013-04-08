@@ -1,4 +1,5 @@
 module Mapper
+
   class Mods < Mapper
 
     def self.content_types
@@ -348,4 +349,5 @@ module Mapper
     end
 
   end
+
 end

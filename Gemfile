@@ -1,10 +1,10 @@
 source 'https://rubygems.org'
-ruby '1.9.3'
+ruby '2.0.0'
 
 # Debugging stuff
 group :development do
   gem 'better_errors'
-  gem 'binding_of_caller'
+  gem 'binding_of_caller' # NOT JRUBY COMPATIBLE
   gem 'pry-padrino'
   gem 'wirble'
   #gem 'ruby-prof'
@@ -27,9 +27,9 @@ gem 'tire'
 
 # Model core stuff
 gem 'facets', :require => ['facets/hash/recurse']
-gem 'oj'
 gem 'hashdiff'
-gem 'amatch'
+gem 'oj' # NOT JRUBY COMPATIBLE
+gem 'amatch' # NOT JRUBY COMPATIBLE
 
 # RDF handling
 gem 'rdf-rdfxml'
@@ -41,8 +41,8 @@ gem 'sidekiq', :require => ['sidekiq', 'sidekiq/web']
 gem 'slim'
 
 # File handling
-gem 'lz4-ruby'
-gem 'snappy'
+gem 'lz4-ruby' # NOT JRUBY COMPATIBLE
+gem 'snappy' # NOT JRUBY COMPATIBLE
 #gem 'ruby-filemagic', :require => 'filemagic' # TO REMOVE  mime = MIME::Type.new(FileMagic.fm(:mime).buffer(data_string))
 
 # MARC handling

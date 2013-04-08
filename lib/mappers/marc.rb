@@ -28,7 +28,7 @@ module Mapper
         file = Mongoid::GridFS.put(StringIO.new(marc_record.to_marchash.to_json), :content_type => 'application/marc+json')
 
         # spawn a Mapper for the record
-        MarcHash.new.perform(file.id)
+        MarcHash.perform_async(file.id)
       end
 
       # delete source file

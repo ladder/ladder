@@ -2,3 +2,6 @@
 .idea
 tmp
 public
+.powenv
+
+*.log
