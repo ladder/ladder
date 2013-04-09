@@ -7,7 +7,7 @@ group :development do
   gem 'binding_of_caller' # NOT JRUBY COMPATIBLE
   gem 'pry-padrino'
   gem 'wirble'
-  #gem 'ruby-prof'
+  gem 'ruby-prof'
 end
 
 # Padrino core framework
@@ -36,17 +36,21 @@ gem 'rdf-rdfxml'
 gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'
 
 # Async / task-based stuff
-#gem 'parallel'
 gem 'sidekiq', :require => ['sidekiq', 'sidekiq/web']
-gem 'slim'
+gem 'slim' # WEB UI
 
 # File handling
 gem 'lz4-ruby' # NOT JRUBY COMPATIBLE
 gem 'snappy' # NOT JRUBY COMPATIBLE
-#gem 'ruby-filemagic', :require => 'filemagic' # TO REMOVE  mime = MIME::Type.new(FileMagic.fm(:mime).buffer(data_string))
 
 # MARC handling
 gem 'marc'
 gem 'enhanced_marc'
 gem 'nokogiri'
 gem 'gyoku'
+
+# TO EXPORT TO CLIENT GEM
+# Client Rake tasks
+#gem 'padrino'
+#gem 'parallel'
+#gem 'ruby-filemagic', :require => 'filemagic'

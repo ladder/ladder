@@ -21,19 +21,22 @@ namespace :import do
 
     puts "Importing #{files.size} MARC files using #{[files.size, Parallel.processor_count].min} processors..."
 
-    # create an importer for this content
-    importer = Importer.create('application/marc')
+#    mime = MIME::Type.new(FileMagic.fm(:mime).buffer(data_string))
 
+    files.each do |file_name|
+      records = MARC::ForgivingReader.new(file_name, :invalid => :replace) # TODO: may wish to include encoding options
+
+      Parallel.each(records) do |marc_record|
+        # POST the MARCHASH to Ladder
+        RestClient.post 'http://localhost/files/?map=true', marc_record.to_marchash.to_json, :content_type => 'application/marc+json'
+      end
+    end
+=begin
     Mongoid.unit_of_work(disable: :all) do
-
       Parallel.each(files) do |file_name|
-
-        importer.import(File.open(file_name), 'application/marc')
-
         puts "Finished importing_name: #{file}"
       end
-
     end
-
+=end
   end
 end

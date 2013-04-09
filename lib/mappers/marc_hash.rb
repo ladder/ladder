@@ -24,14 +24,13 @@ module Mapper
       resource = Mods.new.map_xml(mods_xml.root)
 
 =begin
-    rdf_types = detect_types(marc)
-    resource = Resource.create({:rdf_types => rdf_types})
-    resource.groups << group
-=end
+      rdf_types = detect_types(marc)
+      resource = Resource.create({:rdf_types => rdf_types})
+      resource.groups << group
+
       resource.files << @file
       resource.save
-
-      resource
+=end
     end
 
     def detect_types(marc)
