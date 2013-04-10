@@ -36,7 +36,10 @@ Ladder.controllers :files do
     # ensure it is something we CAN process
     halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Mapper::Mapper.content_types}.to_json unless Mapper::Mapper.content_types.include? request.content_type
 
-    @file = Mongoid::GridFS.put(request.body, :content_type => request.content_type)
+    attributes = {:content_type => request.content_type}
+    attributes[:compression] = params[:compression].to_sym if Compressor::Compressor.compression_types.map(&:to_s).include? params[:compression]
+
+    @file = Mongoid::GridFS.put(request.body, attributes)
 
     status 201 # resource created
 
@@ -67,7 +70,7 @@ Ladder.controllers :files do
   put :compress, :map => '/files/:id/compress/:compression' do
     @file = Mongoid::GridFS.get(params[:id])
 
-    halt 415, {:error => 'Unsupported compression type', :status => 501, :valid => Compressor.compression_types}.to_json unless Compressor.compression_types.include? params[:compression].to_sym
+    halt 415, {:error => 'Unsupported compression type', :status => 501, :valid => Compressor::Compressor.compression_types}.to_json unless Compressor::Compressor.compression_types.map(&:to_s).include? params[:compression]
 
     # (re)compress this file
     Compressor::Compressor.perform_async(@file.id, params[:compression].to_sym)
