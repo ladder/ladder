@@ -5,19 +5,15 @@ Ladder.controllers :files do
     content_type :json
   end
 
+  # List all Files (paginated)
   get :index do
     @files = Mongoid::GridFS::Fs::File.all.paginate(params)
 
     render 'files', :format => :json
   end
 
+  # Get an existing File representation or data stream
   get :index, :with => :id do
-    Mongoid::GridFS.delete(params[:id])
-
-    body({:ok => true, :status => 202}.to_json)
-  end
-
-  delete :index, :with => :id do
     @file = Mongoid::GridFS.get(params[:id])
 
     halt 200, @file.data if request.content_type == @file.content_type
@@ -25,6 +21,14 @@ Ladder.controllers :files do
     render 'file', :format => :json
   end
 
+  # Delete an existing File
+  delete :index, :with => :id do
+    Mongoid::GridFS.delete(params[:id])
+
+    body({:ok => true, :status => 200}.to_json)
+  end
+
+  # Upload a data stream to save as a File; optionally queue immediately
   post :index do
     # ensure we have content to process
     halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.body.length
@@ -46,7 +50,8 @@ Ladder.controllers :files do
     render 'file', :format => :json
   end
 
-  post :index, :map => '/files/:id/map' do
+  # Queue an existing file for processing
+  put :index, :map => '/files/:id/map' do
     @file = Mongoid::GridFS.get(params[:id])
 
     halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper::Mapper.content_types}.to_json unless Mapper::Mapper.content_types.include? @file.content_type
@@ -58,6 +63,7 @@ Ladder.controllers :files do
     body({:ok => true, :status => 202}.to_json)
   end
 
+  # Queue an existing file for compression
   put :index, :map => '/files/:id/compress/:compression' do
     @file = Mongoid::GridFS.get(params[:id])
 

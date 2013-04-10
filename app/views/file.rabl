@@ -1,4 +1,3 @@
-object @file
 cache @file
 
 node do

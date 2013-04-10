@@ -27,7 +27,6 @@ module Mapper
       rdf_types = detect_types(marc)
       resource = Resource.create({:rdf_types => rdf_types})
       resource.groups << group
-
       resource.files << @file
       resource.save
 =end

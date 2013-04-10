@@ -1,4 +1,3 @@
-collection @groups, :root => :groups, :object_root => false
 cache @groups
 
 node do |g|

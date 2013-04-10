@@ -1,10 +1,9 @@
-object @model
 cache @model
 
-node do |m|
-  h = m.to_normalized_hash(@opts)
-  h[:_id] = m.id
-  h[:md5] = Digest.hexencode(m.md5.to_s)
-  h[:version] = m.version
+node do
+  h = @model.to_normalized_hash(@opts)
+  h[:_id] = @model.id
+  h[:md5] = Digest.hexencode(@model.md5.to_s)
+  h[:version] = @model.version
   h
 end

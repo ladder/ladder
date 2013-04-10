@@ -1,6 +1,9 @@
-collection @files, :root => :files, :object_root => false
 cache @files
 
-node do |file|
-  file.as_document
+node :files do
+  @files.map(&:as_document)
+end
+
+node :total do
+  @files.size
 end

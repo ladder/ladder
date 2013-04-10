@@ -1,4 +1,3 @@
-object @group
 cache @group
 
 node do |g|
