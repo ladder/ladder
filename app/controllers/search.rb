@@ -11,13 +11,19 @@ Ladder.controllers :search do
   end
 
   get :index, :with => :q do
-    # TEMPORARY
-    params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
+    search
+  end
 
-    @search = Search.new(params)
-    @search.query
+  get :resources, :with => :q do
+    search({'filters' => { 'type' => {'type' => ['resource']}}}) # FIXME: allow symbols
+  end
 
-    render 'search', :format => :json
+  get :concepts, :with => :q do
+    search({'filters' => { 'type' => {'type' => ['concept']}}}) # FIXME: allow symbols
+  end
+
+  get :agents, :with => :q do
+    search({'filters' => { 'type' => {'type' => ['agent']}}}) # FIXME: allow symbols
   end
 
 end

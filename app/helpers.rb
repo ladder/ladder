@@ -1,8 +1,16 @@
-# Helper methods defined here can be accessed in any controller or view in the application
-=begin
 Ladder.helpers do
-  def current_url
-    url_for(request.path_info)
+#  def current_url
+#    url_for(request.path_info)
+#  end
+
+  def search(opts = {}, model = nil)
+    # TEMPORARY
+    params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
+
+    @search = Search.new(params.merge opts)
+    @search.model = model if model
+    @search.query
+
+    render 'search', :format => :json
   end
 end
-=end

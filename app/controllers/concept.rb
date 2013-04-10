@@ -51,14 +51,7 @@ Ladder.controllers :concepts do
   get :search, :map => '/concepts/:id/search', :with => :q do
     @model = Concept.find(params[:id])
 
-    # TEMPORARY
-    params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
-
-    @search = Search.new(params)
-    @search.model = @model
-    @search.query
-
-    render 'search', :format => :json
+    search({}, @model)
   end
 
 end
