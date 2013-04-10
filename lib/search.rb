@@ -1,5 +1,5 @@
 class Search
-  attr_accessor :q, :filters, :facets, :page, :per_page, :explain
+  attr_accessor :q, :filters, :facets, :page, :per_page, :explain, :model
   attr_reader :search, :results
 
   @index = Mongoid::Sessions.default.options[:database]
@@ -68,9 +68,12 @@ class Search
 
             # query for the provided query string
             b.positive do |p|
-#              p.term (@model.class.to_s.underscore + '_ids').to_sym, @model.id.to_s
+              if @model
+                p.term (@model.class.to_s.underscore + '_ids').to_sym, @model.id.to_s
+              else
 #              p.match @fields, @q, :operator => 'and'
-              p.string @q, {:fields => @fields, :default_operator => 'and', :analyzer => 'snowball'}
+                p.string @q, {:fields => @fields, :default_operator => 'and', :analyzer => 'snowball'}
+              end
             end
 
             b.negative do

@@ -3,6 +3,7 @@ Ladder.controllers :concepts do
 
   before do
     content_type :json
+    params[:limit] = params[:per_page] || 25
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
   end
 
@@ -31,7 +32,7 @@ Ladder.controllers :concepts do
 
   # TODO: Upload a JSON hash to save as a Concept
 
-  # List associated Files (paginated)
+  # List related Files (paginated)
   get :files, :map => '/concepts/:id/files' do
     @files = Concept.find(params[:id]).files.paginate(params)
 
@@ -44,6 +45,20 @@ Ladder.controllers :concepts do
     @models = Concept.find(params[:id]).similar(@similar_opts)
 
     render 'models', :format => :json
+  end
+
+  # Search within related models
+  get :search, :map => '/concepts/:id/search', :with => :q do
+    @model = Concept.find(params[:id])
+
+    # TEMPORARY
+    params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
+
+    @search = Search.new(params)
+    @search.model = @model
+    @search.query
+
+    render 'search', :format => :json
   end
 
 end

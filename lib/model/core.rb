@@ -32,7 +32,7 @@ module Model
 
       # Generate MD5 fingerprint for this document
       base.send :field, :md5, type: Moped::BSON::Binary
-      base.send :index, { md5: 1 }#, { unique: true }
+      base.send :index, { md5: 1 }
       base.send :set_callback, :save, :before, :generate_md5
 
       # Make :headings a readable class variable

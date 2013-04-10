@@ -3,6 +3,7 @@ Ladder.controllers :files do
 
   before do
     content_type :json
+    params[:limit] = params[:per_page] || 25
   end
 
   # List all Files (paginated)
@@ -26,7 +27,7 @@ Ladder.controllers :files do
     @file = Mongoid::GridFS.get(params[:id])
 
     # ensure we have a model to redirect to
-    halt 404 unless @file.model
+    halt 204 unless @file.model
 
     response.header['Location'] = url_for(@file.model.keys.first.to_s.pluralize.to_sym, :index, @file.model.values.first)
 

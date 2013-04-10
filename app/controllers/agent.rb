@@ -3,6 +3,7 @@ Ladder.controllers :agents do
 
   before do
     content_type :json
+    params[:limit] = params[:per_page] || 25
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
   end
 
@@ -31,7 +32,7 @@ Ladder.controllers :agents do
 
   # TODO: Upload a JSON hash to save as an Agent
 
-  # List associated Files (paginated)
+  # List related Files (paginated)
   get :files, :map => '/agents/:id/files' do
     @files = Agent.find(params[:id]).files.paginate(params)
 
@@ -44,6 +45,20 @@ Ladder.controllers :agents do
     @models = Agent.find(params[:id]).similar(@similar_opts)
 
     render 'models', :format => :json
+  end
+
+  # Search within related models
+  get :search, :map => '/agents/:id/search', :with => :q do
+    @model = Agent.find(params[:id])
+
+    # TEMPORARY
+    params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
+
+    @search = Search.new(params)
+    @search.model = @model
+    @search.query
+
+    render 'search', :format => :json
   end
 
 end

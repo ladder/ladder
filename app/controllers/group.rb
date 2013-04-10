@@ -3,6 +3,7 @@ Ladder.controllers :groups do
 
   before do
     content_type :json
+    params[:limit] = params[:per_page] || 25
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
   end
 
@@ -20,7 +21,7 @@ Ladder.controllers :groups do
     render 'group', :format => :json
   end
 
-  # List associated Models (paginated)
+  # List related Models (paginated)
   get :models, :map => '/groups/:id/models' do
     @models = Group.find(params[:id]).models.paginate(params)
 

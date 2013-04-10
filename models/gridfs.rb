@@ -3,6 +3,8 @@ class Mongoid::GridFS::Fs::File
 
   field :compression
 
+  index :md5 => 1
+
   belongs_to :agent, index: true
   belongs_to :concept, index: true
   belongs_to :resource, index: true
