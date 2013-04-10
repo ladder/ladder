@@ -51,7 +51,7 @@ Ladder.controllers :files do
   end
 
   # Queue an existing file for processing
-  put :index, :map => '/files/:id/map' do
+  put :map, :map => '/files/:id/map' do
     @file = Mongoid::GridFS.get(params[:id])
 
     halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper::Mapper.content_types}.to_json unless Mapper::Mapper.content_types.include? @file.content_type
@@ -64,7 +64,7 @@ Ladder.controllers :files do
   end
 
   # Queue an existing file for compression
-  put :index, :map => '/files/:id/compress/:compression' do
+  put :compress, :map => '/files/:id/compress/:compression' do
     @file = Mongoid::GridFS.get(params[:id])
 
     halt 415, {:error => 'Unsupported compression type', :status => 501, :valid => Compressor.compression_types}.to_json unless Compressor.compression_types.include? params[:compression].to_sym
