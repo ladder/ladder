@@ -1,7 +1,11 @@
 cache @files
 
 node :files do
-  @files.map(&:as_document)
+  @files.map do |file|
+    h = file.as_document
+    h[:model] = file.model if file.model
+    h
+  end
 end
 
 node :total do

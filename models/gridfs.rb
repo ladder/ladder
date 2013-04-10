@@ -13,4 +13,10 @@ class Mongoid::GridFS::Fs::File
     Compressor::Compressor.decompress(data, compression)
   end
 
+  def model
+    return {:resource => self.resource_id} if self.resource_id
+    return {:agent => self.agent_id} if self.agent_id
+    return {:concept => self.concept_id} if self.concept_id
+  end
+
 end

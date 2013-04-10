@@ -21,6 +21,19 @@ Ladder.controllers :files do
     render 'file', :format => :json
   end
 
+  # Get an existing model for a mapped file
+  get :model, :map => '/files/:id/model' do
+    @file = Mongoid::GridFS.get(params[:id])
+
+    # ensure we have a model to redirect to
+    halt 404 unless @file.model
+
+    response.header['Location'] = url_for(@file.model.keys.first.to_s.pluralize.to_sym, :index, @file.model.values.first)
+
+    status 303
+    body({:ok => true, :status => 303}.to_json)
+  end
+
   # Delete an existing File
   delete :index, :with => :id do
     Mongoid::GridFS.delete(params[:id])
@@ -56,6 +69,13 @@ Ladder.controllers :files do
   # Queue an existing file for processing
   put :map, :map => '/files/:id/map' do
     @file = Mongoid::GridFS.get(params[:id])
+
+    # if the file is already mapped, redirect to the model URI
+    if @file.model
+      response.header['Location'] = url_for(@file.model.keys.first.to_s.pluralize.to_sym, :index, @file.model.values.first)
+
+      halt 303, {:ok => true, :status => 303}.to_json
+    end
 
     halt 501, {:error => 'Unsupported content type', :status => 501, :valid => Mapper::Mapper.content_types}.to_json unless Mapper::Mapper.content_types.include? @file.content_type
 

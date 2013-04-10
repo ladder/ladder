@@ -1,5 +1,7 @@
 cache @file
 
 node do
-  @file.as_document
+  h = @file.as_document
+  h[:model] = file.model if file.model
+  h
 end
