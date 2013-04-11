@@ -5,7 +5,7 @@ Ladder.helpers do
 
   def search(opts = {}, model = nil)
     # TEMPORARY
-    params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]}
+    params[:facets] = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]} if params[:facets].nil?
 
     @search = Search.new(params.merge opts)
     @search.model = model if model

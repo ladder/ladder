@@ -53,6 +53,8 @@ Ladder.controllers :files do
     attributes = {:content_type => request.content_type}
     attributes[:compression] = params[:compression].to_sym if Compressor::Compressor.compression_types.map(&:to_s).include? params[:compression]
 
+    # FIXME: stream link here may break sometimes?
+    # not sure if this is on the rest-client side or server side
     @file = Mongoid::GridFS.put(request.body, attributes)
 
     status 201 # resource created
