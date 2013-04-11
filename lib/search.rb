@@ -1,10 +1,13 @@
 class Search
   attr_accessor :q, :filters, :facets, :page, :per_page, :explain, :model
-  attr_reader :search, :results
+  attr_reader :search, :results, :index
 
-  @index = Mongoid::Sessions.default.options[:database]
+  def self.index
+    Mongoid::Threaded.database_override || Mongoid::Sessions.default.options[:database]
+  end
 
   def initialize(opts={})
+    @index = self.class.index
     @page = 1
     @per_page = 10
     @filters = {}

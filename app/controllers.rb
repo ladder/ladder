@@ -1,4 +1,4 @@
-Ladder.controllers  do
+Ladder.controllers do
   provides :json
 
   get :index do
@@ -14,11 +14,10 @@ Ladder.controllers  do
 
   delete :index do
     # Remove existing Mongo DB and ES index
-    Mongoid::Config.purge!
+    Mongoid::Sessions.default.with(:database => Search.index).collections.each {|collection| collection.drop}
 
-    index_name = Mongoid::Sessions.default.options[:database]
-    index = Tire::Index.new(index_name)
-    index.delete
+    index = Tire::Index.new(Search.index)
+    index.delete if index.exists?
 
     # Re-map indexes
     # TODO: ultimately this will come from an external PUT mapping

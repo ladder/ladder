@@ -27,7 +27,7 @@ module Model
       unless 'Group' == base.name
         base.send :include, Tire::Model::Search
         base.send :include, Tire::Model::Callbacks2 # local patched version
-        base.send :index_name, base.database_name
+        base.send :index_name, Proc.new {Search.index} # index name is dynamically set to the mongoid database name
       end
 
       # Generate MD5 fingerprint for this document
