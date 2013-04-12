@@ -14,6 +14,15 @@ Ladder.controllers :agents do
     render 'models', :format => :json
   end
 
+  # Get a random Agent representation
+  get :random, :map => '/agents/random', :provides => [:json, :xml, :rdf] do
+    @model = Agent.random
+
+    halt 200, @model.to_rdfxml(url_for current_path) if :rdf == content_type or :xml == content_type
+
+    render 'model', :format => :json
+  end
+
   # Get an existing Agent representation
   get :index, :with => :id, :provides => [:json, :xml, :rdf] do
     @model = Agent.find(params[:id])

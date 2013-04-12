@@ -1,10 +1,11 @@
 Ladder.controllers do
   provides :json
 
-  get :index do
-    # TODO: this might be a good place for ROAR / hypermedia links
-
+  before do
     content_type :json
+  end
+
+  get :index do
     {:name => 'Ladder',
      :ok => true,
      :status => 200,
@@ -28,7 +29,6 @@ Ladder.controllers do
       klass.put_mapping
     end
 
-    content_type :json
     status index.response.code
     body index.response.body
   end

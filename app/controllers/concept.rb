@@ -14,6 +14,15 @@ Ladder.controllers :concepts do
     render 'models', :format => :json
   end
 
+  # Get a random Concept representation
+  get :random, :map => '/concepts/random', :provides => [:json, :xml, :rdf] do
+    @model = Concept.random
+
+    halt 200, @model.to_rdfxml(url_for current_path) if :rdf == content_type or :xml == content_type
+
+    render 'model', :format => :json
+  end
+
   # Get an existing Concept representation
   get :index, :with => :id, :provides => [:json, :xml, :rdf] do
     @model = Concept.find(params[:id])

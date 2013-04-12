@@ -14,6 +14,15 @@ Ladder.controllers :resources do
     render 'models', :format => :json
   end
 
+  # Get a random Resource representation
+  get :random, :map => '/resources/random', :provides => [:json, :xml, :rdf] do
+    @model = Resource.random
+
+    halt 200, @model.to_rdfxml(url_for current_path) if :rdf == content_type or :xml == content_type
+
+    render 'model', :format => :json
+  end
+
   # Get an existing Resource representation
   get :index, :with => :id, :provides => [:json, :xml, :rdf] do
     @model = Resource.find(params[:id])

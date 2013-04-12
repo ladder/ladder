@@ -12,6 +12,11 @@ module Model
         Mongoid::Criteria.new(self).chunkify(opts)
       end
 
+      # return a random document from the collection
+      def random
+        self.limit(1).skip(rand(0..self.count-1)).first
+      end
+
       def vocabs
         vocabs = {}
 
