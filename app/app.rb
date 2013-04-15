@@ -45,7 +45,7 @@ class Ladder < Padrino::Application
   error 404 do
     render('errors/40x', :layout => :application)
   end
-
+=begin
   set :admin_model, 'Account'
   set :login_page, "/admin/sessions/new"
   enable :store_location
@@ -58,5 +58,5 @@ class Ladder < Padrino::Application
   access_control.roles_for :admin do |role|
     role.project_module :accounts, '/accounts'
   end
-
+=end
 end

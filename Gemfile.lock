@@ -93,8 +93,6 @@ GEM
     binding_of_caller (0.7.1)
       debug_inspector (>= 0.0.1)
     bson (1.8.3)
-    bson_ext (1.8.3)
-      bson (~> 1.8.3)
     builder (3.0.4)
     coderay (1.0.9)
     debug_inspector (0.0.2)
@@ -212,7 +210,6 @@ DEPENDENCIES
   bcrypt-ruby
   better_errors
   binding_of_caller
-  bson_ext
   easel!
   enhanced_marc
   facets

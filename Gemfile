@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '1.9.3'
+#ruby '1.9.3'
 
 group :development do
   gem 'better_errors'     # debugging
@@ -53,7 +53,7 @@ gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'
 
 # Model gems
 gem 'tire', :git => 'git://github.com/karmi/tire.git'
-gem 'bson_ext', :require => 'mongo'
+#gem 'bson_ext', :require => 'mongo'
 gem 'mongo', :require => 'mongo'
 gem 'mongoid'
 gem 'mongoid-tree', :require => 'mongoid/tree'
