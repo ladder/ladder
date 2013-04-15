@@ -1,0 +1,106 @@
+.tabbable
+  %ul.nav.nav-tabs
+    %li.active
+      %a{:href => '#item', :'data-toggle' => "tab"}= I18n.t(item.class.name, :default => item.class.name)
+    %li.hidden-phone
+      %a{:href => '#rdf', :'data-toggle' => "tab"} RDF/XML
+    - item.files.each do |file|
+      - mime = MIME::Type.new(file.content_type).sub_type
+      - if 'marc' == mime
+        %li
+          %a{:href => '#mods', :'data-toggle' => "tab"} MODS
+      %li
+        %a{:href => "##{mime.gsub('+','')}", :'data-toggle' => "tab"}= mime.upcase
+
+    - if item.version
+
+      %li.pull-right.hidden-phone{:style => 'width: 35px;'}
+        %a{:href => '#next_version', :'rel' => 'tooltip', :title => 'Next version'}
+          %i.icon-chevron-right{:style => 'text-align: left;'}
+
+      %li.pull-right.hidden-phone{:style => 'width: 35px;'}
+        %a{:href => '#prev_version', :'rel' => 'tooltip', :title => 'Previous version'}
+          %i.icon-chevron-left{:style => 'text-align: left;'}
+      :javascript
+        $(function () {
+            $("[rel='tooltip']").tooltip();
+        });
+
+  .tab-content
+    .tab-pane.fade.in.out.active#item
+      %table.table.table-bordered.table-striped.table-condensed
+        - hash = item.to_normalized_hash({:localize => true, :ids => :resolve, :all_keys => true}).except(:rdf_types)
+        - hash.each do |name, vocab|
+          - next unless vocab.is_a? Hash
+          -#%tr
+            %th{:colspan => 2, :style => 'text-transform: uppercase; background: #c8e4f8;'}= name
+
+          - vocab.each do |field, values|
+            - next unless values.is_a? Array
+
+            -# TODO: helper to allow specifying 'except, slice' type field mapping
+            - next if :thumbnail == field
+
+            %tr
+              %td.span2
+                %strong{:style => 'text-transform: capitalize;'}= I18n.t("#{item.class.to_s.underscore}.#{field}", :default => field.to_s.underscore.humanize)
+
+              %td.span8
+                - values.each do |value|
+
+                  - if value.is_a? Hash
+                    -# resolve ID to an object by querying the DB
+                    - reference = value.keys.first.to_s.classify.constantize.find(value.values.first)
+
+                    .row-fluid
+                      .span1.half
+                        %a.thumbnail{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
+                          = partial 'partials/image', :object => reference, :locals => {:style => 'font-size: 1.5em; margin: 0px;'}
+
+                      .span10{:style => 'margin-left: 5px;'}
+                        %a{:href => url_for(value.keys.first.to_sym, :id => reference.id)}
+                          - case reference.class
+                            - when Concept
+                              = reference.heading_ancestors.join(' -- ')
+                            - else
+                              = reference.heading.first
+
+                  - elsif value.is_uri?
+                    .row-fluid
+                      .span1.half
+                        %a.thumbnail{:href => value}
+                          %i{:class => 'icon-share-alt', :style => 'font-size: 1.5em; margin: 0px;'}
+
+                      .span11.hidden-phone{:style => 'margin-left: 5px;'}
+                        %a{:href => value}
+                          != value.split(/(\s+)/).map! { |word| (/\s/ === word) ? word : word.gsub(/.{10}/, '\0<wbr />')}.join
+
+                  - elsif :language == field
+                    = ISO_639.find(value).english_name rescue nil
+                    %br
+
+                  - else
+                    = value
+
+                    - unless values.last == value
+                      %br
+
+    .tab-pane.fade.in.out#rdf
+      %pre
+        %code&= item.to_rdfxml(url_for(request.path_info))
+
+    - item.files.each do |file|
+      - mime = MIME::Type.new(file.content_type).sub_type
+
+      - if 'marc' == mime
+        - marc = MARC::Record.new_from_marc(file.data, :forgiving => true)
+        - mapping = Mapping::MARC2.new
+        - mapping.map(marc)
+        - marc_out = marc.to_s.force_encoding('UTF-8').valid_encoding? ? marc.to_s.force_encoding('UTF-8') : marc.to_s
+        .tab-pane.fade.in.out#mods
+          %pre
+            %code&= mapping.mods
+
+      .tab-pane.fade.in.out{:id => mime.gsub('+','')}
+        %pre
+          %code= 'marc' == mime ? marc_out : file.data

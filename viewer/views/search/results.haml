@@ -1,0 +1,22 @@
+- @title = "Results for '#{@querystring}'"
+
+.container
+  .row
+    .span9
+      - unless @results.empty?
+        %b= @results.total
+        =I18n.t("search.results")
+        %span.muted (#{@results.time} ms)
+
+        = partial 'search/result', :collection => @results
+        .pagination-centered= paginate @results, :window => 3
+
+      - else
+        = I18n.t("search.empty")
+
+      %br
+    .span3
+      - unless @results.empty? or @results.facets.empty? or (1 == @results.size and @filters.empty?)
+        .well.sidebar-nav
+          %ul.nav.nav-list
+            = partial 'search/facet', :collection => @results.facets

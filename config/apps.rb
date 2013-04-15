@@ -37,3 +37,5 @@ end
 
 # Mount the core application
 Padrino.mount('Ladder').to('/')
+
+Padrino.mount('Viewer').to('/viewer')

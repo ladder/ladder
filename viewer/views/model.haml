@@ -1,0 +1,53 @@
+- title = case @model.class
+  - when Resource then @model.heading.first
+  - else @model.heading_ancestors.join(' -- ')
+- @title = title
+
+.row-fluid
+  .span9
+    %h2.page-header= @title
+
+    .row-fluid
+      .span2{:style => 'text-align:center;'}
+        .thumbnail{:style => 'min-height: 80px; margin-bottom: 10px;'}
+          = partial 'partials/image', :object => @model, :locals => {:style => 'font-size: 6em; line-height:125%;'}
+
+        - if Resource == @model.class
+          - uris = ignore_nil {@model.prism.url} || ignore_nil {@model.bibo.uri} || ignore_nil {@model.mods.locationOfResource} || []
+          - uris.select {|u| u.is_uri?}.take(1).each do |uri|
+            %a.btn.btn-success{:href => uri, :style => 'margin-bottom: 10px;'}= I18n.t('accessOnline')
+
+      .span10
+        = partial 'partials/item', :object => @model
+
+    -# TODO: replace with an AJAX call to :search app
+    - unless @results.empty?
+      .row-fluid
+        %b= @results.total
+        =I18n.t("search.results")
+        %span.muted (#{@results.time} ms)
+
+        = partial 'search/result', :collection => @results
+        .pagination-centered
+          = paginate @results, :window => 3
+
+  .span3
+    - unless @model.leaf? and @model.root?
+      .well.sidebar-nav
+        %ul.nav.nav-list
+          %li.nav-header= I18n.t('model.related')
+
+          = case @model.class
+            - when Resource then partial 'partials/tree', :collection => @model.root.to_a, :locals => {:reference => @model, :show => :first}
+            - else partial 'partials/tree', :collection => @model.root.to_a, :locals => {:reference => @model, :stem => true, :show => :last}
+
+    - unless @model.similar.empty?
+      = case @model.class
+        - when Resource then partial 'partials/similar', :locals => {:document => @model, :show => :first}
+        - else partial 'partials/similar', :locals => {:document => @model, :show => [:join, ' -- ']}
+
+    -# TODO: replace with an AJAX call to :search app
+    - unless @results.empty? or @results.facets.empty? or (1 == @results.size and @filters.empty?)
+      .well.sidebar-nav
+        %ul.nav.nav-list
+          = partial 'search/facet', :collection => @results.facets

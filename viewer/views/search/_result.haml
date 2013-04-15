@@ -1,0 +1,39 @@
+%hr{:style => 'margin: 9px 0;'}
+
+.row-fluid
+  .span2.half{:style => 'max-width: 80px;'}
+    %a.thumbnail{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
+      = partial 'partials/image', :object => result
+
+  .span10{:style => 'line-height: 1em;'}
+    %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id)}
+      - hash = result.to_normalized_hash({:ids => :resolve, :localize => true, :all_keys => true}).except(:rdf_types)
+
+      %h4{:style => 'margin-top: 3px;'}
+        - case result.class
+          - when Concept
+            = hash[:heading_ancestors].join(' -- ').truncate(85, :separator => ' ')
+          - else
+            = hash[:heading].first.truncate(85, :separator => ' ')
+
+    - if result.resource_ids
+      - resources = Resource.search do |s|
+        - s.size 0
+        - s.query do |query|
+          - query.term (result.class.to_s.underscore + '_ids').to_sym, result.id
+        - s.facet 'rdf_types' do
+          - terms 'rdf_types', :size => 10
+
+      %ul.nav.nav-list.pull-right
+        - resources.facets.first.last['terms'].each do |f|
+          %li
+            %a{:href => url_for(result.class.to_s.underscore.to_sym, :id => result.id, :fi => {'rdf_types' => {'rdf_types' => f['term'].to_a}})}
+
+              - display = partial 'partials/image', :locals => {:type => f['term'].underscore, :style => 'font-size: 1.5em;'}
+              = display + pluralize(f['count'], f['term']).titleize
+
+    = partial "search/results/#{result.class.to_s.underscore}", :object => hash
+
+- if result._explanation
+  %pre
+    %code= MultiJson.dump(result._explanation.to_hash, :pretty => true)

@@ -48,3 +48,20 @@ gem 'marc'
 gem 'enhanced_marc'
 gem 'nokogiri'
 gem 'gyoku'
+
+#####################################
+#
+# TEMPORARY UI
+#
+# Viewer app
+gem 'padrino'
+gem 'padrino-core'
+gem 'padrino-helpers'
+#gem 'padrino-mailer'
+#gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
+gem 'haml'
+gem 'bcrypt-ruby', :require => 'bcrypt'         # for padrino-auth
+gem 'kaminari', :git => 'git://github.com/amatsuda/kaminari.git', :require => 'kaminari/sinatra'  # view paging
+gem 'iso-639'       # english/french lists
+gem 'language_list' # multiple language lists
+gem 'ignore_nil'    # cleanly access chained property methods

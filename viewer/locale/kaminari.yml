@@ -1,0 +1,17 @@
+en:
+  views:
+    pagination:
+      first: "<i class='icon-double-angle-left'></i> First"
+      last: "Last <i class='icon-double-angle-right'></i>"
+      previous: "<i class='icon-angle-left'></i> Prev"
+      next: "Next <i class='icon-angle-right'></i>"
+      truncate: "&hellip;"
+
+fr:
+  views:
+    pagination:
+      first: "<i class='icon-double-angle-left'></i> Premier"
+      last: "Dernier <i class='icon-double-angle-right'></i>"
+      previous: "<i class='icon-angle-left'></i> Précédent"
+      next: "Suivant <i class='icon-angle-right'></i>"
+      truncate: "&hellip;"
