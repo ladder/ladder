@@ -1,6 +1,7 @@
 class Ladder < Padrino::Application
   register Padrino::Rendering
   register Padrino::Helpers
+#  register Kaminari::Helpers::SinatraHelpers
 
   configure do
     mime_type :marc, ['application/marc', 'application/marc+xml', 'application/marc+json']
@@ -16,10 +17,26 @@ class Ladder < Padrino::Application
 
   configure :production do
     register Padrino::Cache
+    register Padrino::Contrib::ExceptionNotifier
+    register Padrino::Mailer
 
     enable :caching
     disable :raise_errors
     disable :show_exceptions
+
+    set :exceptions_from,    "errors@deliberatedata.com"
+    set :exceptions_to,      "errors@deliberatedata.com"
+    set :exceptions_page,    'errors/50x'
+    set :exceptions_layout,  :application
+    set :delivery_method, :smtp => {
+      :address              => "smtp.sendgrid.net",
+      :port                 => 587,
+      :authentication       => :plain,
+      :user_name            => ENV['SENDGRID_USERNAME'],
+      :password             => ENV['SENDGRID_PASSWORD'],
+      :domain               => 'heroku.com',
+      :enable_starttls_auto => true
+    }
   end
 
   use Rack::Mongoid::Middleware::IdentityMap
@@ -29,7 +46,11 @@ class Ladder < Padrino::Application
   error Mongoid::Errors::DocumentNotFound do
     halt 404
   end
-
+=begin
+  error 404 do
+    render('errors/40x', :layout => :application)
+  end
+=end
   before do
     # check API key
     tenant = Tenant.with(:database => :ladder).find_by(:api_key => params[:api_key]) rescue nil
@@ -40,55 +61,23 @@ class Ladder < Padrino::Application
     Mongoid::Config.override_database("ladder_#{tenant.database}")
   end
 
-  ##
-  # Caching support
-  #
-  # register Padrino::Cache
-  # enable :caching
-  #
-  # You can customize caching store engines:
-  #
-  #   set :cache, Padrino::Cache::Store::Memcache.new(::Memcached.new('127.0.0.1:11211', :exception_retry_limit => 1))
-  #   set :cache, Padrino::Cache::Store::Memcache.new(::Dalli::Client.new('127.0.0.1:11211', :exception_retry_limit => 1))
-  #   set :cache, Padrino::Cache::Store::Redis.new(::Redis.new(:host => '127.0.0.1', :port => 6379, :db => 0))
-  #   set :cache, Padrino::Cache::Store::Memory.new(50)
-  #   set :cache, Padrino::Cache::Store::File.new(Padrino.root('tmp', app_name.to_s, 'cache')) # default choice
-  #
+=begin
+  set :admin_model, 'Account'
+  set :login_page, "/admin/sessions/new"
+  enable :store_location
+  set :session_id, "my_shared_session_id"
+  before do
+    # check API key
+    tenant = Tenant.with(:database => :ladder).find_by(:api_key => params[:api_key]) rescue nil
 
-  ##
-  # Application configuration options
-  #
-  # set :raise_errors, true       # Raise exceptions (will stop application) (default for test)
-  # set :dump_errors, true        # Exception backtraces are written to STDERR (default for production/development)
-  # set :show_exceptions, true    # Shows a stack trace in browser (default for development)
-  # set :logging, true            # Logging in STDOUT for development and file for production (default only for development)
-  # set :public_folder, "foo/bar" # Location for static assets (default root/public)
-  # set :reload, false            # Reload application files (default in development)
-  # set :default_builder, "foo"   # Set a custom form builder (default 'StandardFormBuilder')
-  # set :locale_path, "bar"       # Set path for I18n translations (default your_app/locales)
-  # disable :sessions             # Disabled sessions by default (enable if needed)
-  # disable :flash                # Disables sinatra-flash (enabled by default if Sinatra::Flash is defined)
-  # layout  :my_layout            # Layout can be in views/layouts/foo.ext or views/foo.ext (default :application)
-  #
+    halt 401, {:ok => false, :status => 401}.to_json unless tenant
 
-  ##
-  # You can configure for a specified environment like:
-  #
-  #   configure :development do
-  #     set :foo, :bar
-  #     disable :asset_stamp # no asset timestamping for dev
-  #   end
-  #
+    # switch Mongoid to tenant's database
+    Mongoid::Config.override_database("ladder_#{tenant.database}")
+  end
 
-  ##
-  # You can manage errors like:
-  #
-  #   error 404 do
-  #     render 'errors/404'
-  #   end
-  #
-  #   error 505 do
-  #     render 'errors/505'
-  #   end
-  #
+  access_control.roles_for :admin do |role|
+    role.project_module :accounts, '/accounts'
+  end
+=end
 end
