@@ -1,0 +1,131 @@
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+.sidebar-nav {
+    padding: 9px 0;
+}
+
+/* Fix for Font-Awesome in links */
+[class^="icon-"], [class*=" icon-"] {
+    background: none!important;
+    width: auto;
+}
+
+a.thumbnail:hover {
+    text-decoration: none;
+}
+.thumbnail {
+    text-align: center;
+}
+
+.thumbnail i {
+    font-size: 4em;
+    color: #333333;
+}
+
+@media all and (max-width: 600px)  {
+    .half {
+        float: left !important;
+        max-width: 60px;
+    }
+    .row-fluid .half {
+        padding-right: 9px !important;
+        max-width: 80px;
+    }
+}
+
+.span1.half, .span2.half {
+    min-width: 35px;
+}
+
+h4 {
+    margin-top: 0px;
+}
+
+a h4 small {
+    color: #0088cc;
+}
+
+h2.page-header {
+    margin-top: 0px;
+}
+
+.hero-unit {
+    background-color: #efefef;
+    padding: 30px;
+}
+
+.hero-unit h1 {
+    color: #28529B;
+    text-align: center;
+    font-size: 80px;
+    margin-top: 0px;
+}
+
+.hero-unit h1,
+a.brand {
+    font-variant:small-caps;
+}
+
+p.lead {
+    font-size: 1.4em;
+}
+
+.logo, .search {
+    text-align: center;
+}
+
+input.search-query {
+    max-width: 450px;
+}
+
+.search {
+    margin-top: 20px;
+}
+
+.nav li.nav-header {
+    font-size: 100%;
+}
+
+.well.sidebar-nav {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.nav-list > .active > a {
+    opacity: 0.75;
+}
+
+.nav-list > .facet > a {
+    opacity: 0.4;
+}
+
+.nav-list > .active > a:hover {
+    opacity: 1;
+}
+
+.nav-list li a {
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.nav-list li:nth-last-child(odd):not(.active) a {
+    background-color: #f9f9f9;
+}
+
+.nav-list li:nth-last-child(odd):not(.active) a:hover {
+    background-color: #e5e5e5;
+}
+
+pre.accordion-body.collapse code {
+    background-color: #F4F4F4;
+}
+
+td .row-fluid:not(:last-child) {
+    margin-bottom: 5px;
+}
+
+.dropdown-form :hover,.dropdown-form :hover form{color:#ffffff;text-decoration:none;outline:0;background-color:#0088cc;background-color:#0081c2;background-image:-moz-linear-gradient(top, #0088cc, #0077b3);background-image:-webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0077b3));background-image:-webkit-linear-gradient(top, #0088cc, #0077b3);background-image:-o-linear-gradient(top, #0088cc, #0077b3);background-image:linear-gradient(to bottom, #0088cc, #0077b3);background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0);}
+.dropdown-form form a{display:block;padding:3px 20px;clear:both;font-weight:normal;line-height:20px;color:#333333;white-space:nowrap;}
