@@ -217,7 +217,7 @@ module Model
         # calculate hashdiff score for each result
         if opts[:hashdiff]
           hashdiff = HashDiff.best_diff(hash, result.to_normalized_hash({:localize => true})).map(&:last).flatten.size
-          diffs << (hash_size - (hashdiff / 2)) / hash_size
+          diffs << 1 - ((hash_size - (hashdiff / 2)) / hash_size)
         end
 
         # average result of all scoring methods

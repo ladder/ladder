@@ -22,19 +22,20 @@ module Mapper
 
       # generate a fully-mapped Resource by delegating to MODS Mapper
       resource = Mods.new.map_xml(mods_xml.root)
+      resource.rdf_types = detect_types(marc_record)
+
+      # associate new Resource with its source file
+      resource.files << @file
 
 =begin
-      rdf_types = detect_types(marc)
-      resource = Resource.create({:rdf_types => rdf_types})
       resource.groups << group
-      resource.files << @file
       resource.save
 =end
     end
 
-    def detect_types(marc)
+    def detect_types(marc_record)
       # assign RDF class based on MARC class
-      case marc
+      case marc_record
         when MARC::BookRecord
           {:dbpedia => [:Book], :schema => [:Book], :bibo => [:Book]}
         when MARC::SerialRecord

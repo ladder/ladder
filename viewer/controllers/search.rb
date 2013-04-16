@@ -22,7 +22,7 @@ Viewer.controllers :search do
     session[:locale] = I18n.locale if params[:locale]
 
     # create Tire search object
-    index = Mongoid::Sessions.default.options[:database]
+    index = Search.index #Mongoid::Sessions.default.options[:database]
     @search = Tire::Search::Search.new(index)
     @search.from (@page.to_i - 1) * @per_page.to_i
     @search.size @per_page.to_i
@@ -184,7 +184,7 @@ def search_stuff
   @per_page = params[:pp] || 10
 
   # do a faceted search to enumerate used locales
-  index = Mongoid::Sessions.default.options[:database]
+  index = Search.index #Mongoid::Sessions.default.options[:database]
   @locales = Tire.search index do |search|
     search.query { all }
     search.size 0

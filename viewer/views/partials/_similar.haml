@@ -2,7 +2,7 @@
 
 - docs = document.similar.to_a
 - docs.delete_if {|doc| doc.diff < 0.15}
-- docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
+-# docs.delete_if {|doc| document.parent_ids.first.to_s == doc.parent_ids.first unless doc.parent_ids.nil?}
 
 - unless docs.empty?
   .well.sidebar-nav
