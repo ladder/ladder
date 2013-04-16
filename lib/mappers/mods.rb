@@ -58,9 +58,13 @@ module Mapper
 
       # map MODS elements to embedded vocab
       vocabs = map_vocabs(node)
-      return if vocabs.values.map(&:values).flatten.empty?
+      return if vocabs.values.map(&:values).flatten.empty? # FIXME: make recursive flatten
       resource.vocabs = vocabs
-
+=begin
+      self.class.mapping[:agents].each do |mapping|
+        map_agents(resource, node, mapping)
+      end
+=end
       # map encoded agents to related Agent models
       map_agents(resource, node, 'name[@usage="primary"]',      {:relation => {:dcterms => :creator}})
       map_agents(resource, node, 'name[not(@usage="primary")]', {:relation => {:dcterms => :contributor}})
@@ -114,59 +118,64 @@ module Mapper
       resource
     end
 
+    # TODO: store as JSON in a 'mappings' collection
+    def self.mapping
+      {:vocabs => {
+          :dcterms => {
+              # descriptive elements
+              :title              => 'titleInfo[not(@type = "alternative")]',
+              :alternative        => 'titleInfo[@type = "alternative"]',
+              :created            => 'originInfo/dateCreated',
+              :issued             => 'originInfo/dateIssued',
+              :format             => 'physicalDescription/form[not(@authority = "marcsmd")]',
+              :medium             => 'physicalDescription/form[@authority = "marcsmd"]',
+              :extent             => 'physicalDescription/extent',
+              :language           => 'language/languageTerm',
+
+              # dereferenceable identifiers
+              :identifier         => 'identifier[not(@type) or @type="local"]',
+
+              # indexable textual content
+              :abstract           => 'abstract',
+              :tableOfContents    => 'tableOfContents',
+          },
+          :prism => {
+              # dereferenceable identifiers
+              :doi                => 'identifier[@type = "doi" and not(@invalid)]',
+              :isbn               => 'identifier[@type = "isbn" and not(@invalid)]',
+              :issn               => 'identifier[@type = "issn" and not(@invalid)]',
+
+              :edition            => 'originInfo/edition',
+              :issueIdentifier    => 'identifier[@type = "issue-number" or @type = "issue number"]',
+          },
+          :bibo => {
+              # dereferenceable identifiers
+              :lccn               => 'identifier[@type = "lccn" and not(@invalid)]',
+              :oclcnum            => 'identifier[@type = "oclc" and not(@invalid)]',
+              :upc                => 'identifier[@type = "upc" and not(@invalid)]',
+              :uri                => 'identifier[@type = "uri" and not(@invalid)]',
+          },
+          :mods => {
+              :accessCondition    => 'accessCondition',
+              :frequency          => 'originInfo/frequency',
+              :genre              => 'genre',
+              :issuance           => 'originInfo/issuance',
+              :locationOfResource => 'location',
+              :note               => 'note',
+          },
+        },
+       :agents => nil,
+       :concepts => nil,
+       :relations =>nil,
+      }
+    end
+
     def map_vocabs(node)
       vocabs = {}
 
-      dcterms = map_xpath node, {
-          # descriptive elements
-          :title         => 'titleInfo[not(@type = "alternative")]',
-          :alternative   => 'titleInfo[@type = "alternative"]',
-          :created       => 'originInfo/dateCreated',
-          :issued        => 'originInfo/dateIssued',
-          :format        => 'physicalDescription/form[not(@authority = "marcsmd")]',
-          :medium        => 'physicalDescription/form[@authority = "marcsmd"]',
-          :extent        => 'physicalDescription/extent',
-          :language      => 'language/languageTerm',
-
-          # dereferenceable identifiers
-          :identifier    => 'identifier[not(@type) or @type="local"]',
-
-          # indexable textual content
-          :abstract        => 'abstract',
-          :tableOfContents => 'tableOfContents',
-      }
-
-      prism = map_xpath node, {
-          # dereferenceable identifiers
-          :doi      => 'identifier[@type = "doi" and not(@invalid)]',
-          :isbn     => 'identifier[@type = "isbn" and not(@invalid)]',
-          :issn     => 'identifier[@type = "issn" and not(@invalid)]',
-
-          :edition          => 'originInfo/edition',
-          :issueIdentifier  => 'identifier[@type = "issue-number" or @type = "issue number"]',
-      }
-
-      bibo = map_xpath node, {
-          # dereferenceable identifiers
-          :lccn     => 'identifier[@type = "lccn" and not(@invalid)]',
-          :oclcnum  => 'identifier[@type = "oclc" and not(@invalid)]',
-          :upc      => 'identifier[@type = "upc" and not(@invalid)]',
-          :uri      => 'identifier[@type = "uri" and not(@invalid)]',
-      }
-
-      mods = map_xpath node, {
-          :accessCondition    => 'accessCondition',
-          :frequency          => 'originInfo/frequency',
-          :genre              => 'genre',
-          :issuance           => 'originInfo/issuance',
-          :locationOfResource => 'location',
-          :note               => 'note',
-      }
-
-      vocabs[:dcterms] = dcterms unless dcterms.empty?
-      vocabs[:bibo]    = bibo    unless bibo.empty?
-      vocabs[:prism]   = prism   unless prism.empty?
-      vocabs[:mods]    = mods    unless mods.empty?
+      self.class.mapping[:vocabs].each do |name, mapping|
+        vocabs[name] = map_xpath(node, mapping)
+      end
 
       vocabs
     end
