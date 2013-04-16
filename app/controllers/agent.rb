@@ -63,4 +63,12 @@ Ladder.controllers :agents do
     search({}, @model)
   end
 
+  # Reindex all Agents
+  put :reindex, :map => '/agents/reindex' do
+    Search::Indexer.perform_async('Agent')
+
+    status 202 # processing started
+    body({:ok => true, :status => 202}.to_json)
+  end
+
 end

@@ -26,4 +26,14 @@ Ladder.controllers :search do
     search({'filters' => { 'type' => {'type' => ['agent']}}}) # FIXME: allow symbols
   end
 
+  # Reindex all models
+  put :reindex do
+    %w[Agent Concept Resource].each do |model|
+      Search::Indexer.perform_async(model)
+    end
+
+    status 202 # processing started
+    body({:ok => true, :status => 202}.to_json)
+  end
+
 end

@@ -24,7 +24,7 @@ namespace :model do
         collection = collection.unindexed unless !!args.reindex
         next if collection.empty?
 
-        puts "Indexing #{collection.size} #{model.pluralize} using #{Parallel.processor_count} processors..."
+        puts "Indexing #{collection.size} #{model.pluralize} using some processors..."
 
         # break collection into chunks for multi-processing
         chunks = collection.chunkify
@@ -32,7 +32,7 @@ namespace :model do
         # temporary settings to improve indexing performance
         klass.settings :refresh_interval => -1, :'merge.policy.merge_factor' => 30
 
-        Parallel.each_with_index(chunks) do |chunk, index|
+        chunks.each do |chunk, index|
           # force mongoid to create a new session for each chunk
           Mongoid::Sessions.clear
 

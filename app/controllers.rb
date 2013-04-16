@@ -15,9 +15,9 @@ Ladder.controllers do
 
   delete :index do
     # Remove existing Mongo DB and ES index
-    Mongoid::Sessions.default.with(:database => Search.index).collections.each {|collection| collection.drop}
+    Mongoid::Sessions.default.with(:database => Search::Search.index).collections.each {|collection| collection.drop}
 
-    index = Tire::Index.new(Search.index)
+    index = Tire::Index.new(Search::Search.index)
     index.delete if index.exists?
 
     # Re-map indexes
