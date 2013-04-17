@@ -26,8 +26,8 @@ module Model
       # don't index group since they are only a structural construct
       unless 'Group' == base.name
         base.send :include, Tire::Model::Search
-        base.send :include, Tire::Model::Callbacks2 # local patched version
-        base.send :index_name, Proc.new {Search::Search.index} # index name is dynamically set to the mongoid database name
+        # index name is dynamically set to the mongoid database name
+        base.send :index_name, Proc.new {Search.index_name}
       end
 
       # Generate MD5 fingerprint for this document
@@ -116,7 +116,9 @@ module Model
     end
 
     def heading_ancestors(opts={})
-      test = ancestors_and_self.map do |node|
+      selector = parent_ids.empty? ? [self] : ancestors + [self]
+
+      test = selector.map do |node|
         node.heading(opts)
       end
 

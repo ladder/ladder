@@ -63,4 +63,12 @@ Ladder.controllers :concepts do
     search({}, @model)
   end
 
+  # Reindex all Concepts
+  put :reindex, :map => '/concepts/reindex' do
+    Concept.delay.import
+
+    status 202 # processing started
+    body({:ok => true, :status => 202}.to_json)
+  end
+
 end

@@ -63,4 +63,12 @@ Ladder.controllers :resources do
     search({}, @model)
   end
 
+  # Reindex all Resources
+  put :reindex, :map => '/resources/reindex' do
+    Resource.delay.import
+
+    status 202 # processing started
+    body({:ok => true, :status => 202}.to_json)
+  end
+
 end

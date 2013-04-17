@@ -26,10 +26,21 @@ Ladder.controllers :search do
     search({'filters' => { 'type' => {'type' => ['agent']}}}) # FIXME: allow symbols
   end
 
+  # Delete entire ES index
+  delete :index do
+    # Delete ES index
+    index = Tire::Index.new(Search.index_name)
+    index.delete if index.exists?
+    index.create
+
+    status index.response.code
+    body index.response.body
+  end
+
   # Reindex all models
   put :reindex do
     %w[Agent Concept Resource].each do |model|
-      Search::Indexer.perform_async(model)
+      model.constantize.delay.import
     end
 
     status 202 # processing started
