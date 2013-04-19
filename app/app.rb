@@ -47,4 +47,20 @@ class Ladder < Padrino::Application
     halt 404
   end
 
+  def self.destroy
+    # Remove existing Mongo DB
+    Mongoid::Sessions.default.with(:database => Search.index_name).collections.each {|collection| collection.drop}
+
+    # Remove existing ES index
+    index_response = Search.delete
+
+    # Send index/mapping
+    %w[Agent Concept Resource].each do |model|
+      klass = model.classify.constantize
+      klass.create_indexes
+      klass.put_mapping
+    end
+
+    index_response
+  end
 end

@@ -20,6 +20,7 @@ Ladder.controllers do
 
     tenant = Tenant.with(:database => :ladder).find_or_create_by({:email => params[:email], :database => params[:email].parameterize})
 
+    # TODO: initialize database & index
     # TODO: send email in background
 
     status 201 # resource created
@@ -29,24 +30,10 @@ Ladder.controllers do
   delete :index do
     check_api_key
 
-    # Remove existing Mongo DB and ES index
-    Mongoid::Sessions.default.with(:database => Search.index_name).collections.each {|collection| collection.drop}
+    index_response = Ladder.destroy
 
-    index = Tire::Index.new(Search.index_name)
-    index.delete if index.exists?
-    index.create
-
-    # Re-map indexes
-    # TODO: ultimately this will come from an external PUT mapping
-
-    %w[Agent Concept Resource].each do |model|
-      klass = model.classify.constantize
-      klass.create_indexes
-      klass.put_mapping
-    end
-
-    status index.response.code
-    body index.response.body
+    status index_response.code
+    body index_response.body
   end
 
 end

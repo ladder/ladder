@@ -6,6 +6,23 @@ class Search
     Mongoid::Threaded.database_override || Mongoid::Sessions.default.options[:database]
   end
 
+  def self.delete
+    # Delete ES index
+    index = Tire::Index.new(self.index_name)
+    index.delete if index.exists?
+    index.create
+
+    index.response
+  end
+
+  def self.reindex
+    self.delete # Not sure whether this is necessary
+
+    %w[Agent Concept Resource].each do |model|
+      model.constantize.delay.import
+    end
+  end
+
   def initialize(opts={})
     @index = self.class.index_name
     @page = 1

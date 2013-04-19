@@ -29,20 +29,15 @@ Ladder.controllers :search do
 
   # Delete entire ES index
   delete :index do
-    # Delete ES index
-    index = Tire::Index.new(Search.index_name)
-    index.delete if index.exists?
-    index.create
+    index_response = Search.delete
 
-    status index.response.code
-    body index.response.body
+    status index_response.code
+    body index_response.body
   end
 
   # Reindex all models
   put :reindex do
-    %w[Agent Concept Resource].each do |model|
-      model.constantize.delay.import
-    end
+    Search.reindex
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)
