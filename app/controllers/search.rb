@@ -4,6 +4,7 @@ Ladder.controllers :search do
   before do
     content_type :json
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
+    check_api_key
   end
 
   get :index do

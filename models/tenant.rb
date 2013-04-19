@@ -3,11 +3,13 @@ class Tenant
   include Mongoid::Timestamps
 
   field :api_key
+  field :email
   field :database
 
   before_validation :generate_api_key
 
   validates_presence_of :api_key
+  validates_presence_of :email
   validates_presence_of :database
 
   store_in database: 'ladder', collection: 'tenants'

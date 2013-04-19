@@ -5,6 +5,7 @@ Ladder.controllers :groups do
     content_type :json
     params[:limit] = params[:per_page] || 25
     @opts = params.symbolize_keys.slice(:all_keys, :ids, :localize)
+    check_api_key
   end
 
   # List all Groups (paginated)

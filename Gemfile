@@ -34,6 +34,7 @@ gem 'slim' # WEB UI
 # API framework
 #gem 'roar', :require => ['roar/representer/json', 'roar/representer/feature/hypermedia']
 gem 'rabl'
+gem 'email_veracity'
 
 # RDF handling
 gem 'rdf-rdfxml'

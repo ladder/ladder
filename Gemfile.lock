@@ -55,6 +55,7 @@ GEM
     connection_pool (1.0.0)
     debug_inspector (0.0.2)
     easy_diff (0.0.2)
+    email_veracity (0.6.0)
     enhanced_marc (0.2.3)
       locale
       marc
@@ -222,6 +223,7 @@ DEPENDENCIES
   better_errors
   binding_of_caller
   easel!
+  email_veracity
   enhanced_marc
   facets
   gyoku

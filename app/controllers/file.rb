@@ -4,6 +4,7 @@ Ladder.controllers :files do
   before do
     content_type :json
     params[:limit] = params[:per_page] || 25
+    check_api_key
   end
 
   # List all Files (paginated)
