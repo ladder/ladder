@@ -83,16 +83,19 @@ class Search
               boolean do
                 # suppress results that are not document roots
                 # eg. sub-concepts, items within a hierarchy, etc.
-                should { string '-_exists_:parent_id' }
-                should { string '-_exists_:parent_ids' }
+                should { string 'parent_id:*' }
+                should { string 'parent_ids:*' }
 
                 # suppress Concepts/Agents with no resource_ids
-                should { string '-_exists_:resource_ids AND _type:concept'}
-                should { string '-_exists_:resource_ids AND _type:agent'}
+                should { string '_type:concept AND NOT resource_ids:*'}
+                should { string '_type:agent AND NOT resource_ids:*'}
 
                 # suppress Resources with no agent_ids or concept_ids
-                should { string '-_exists_:concept_ids AND _type:resource'}
-                should { string '-_exists_:agent_ids AND _type:resource'}
+                should { string '_type:resource AND NOT concept_ids:*'}
+                should { string '_type:resource AND NOT agent_ids:*'}
+
+                # suppress Models without a group_ids
+                should { string '-group_ids:*' }
               end
             end
 

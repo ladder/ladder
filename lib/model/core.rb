@@ -26,6 +26,7 @@ module Model
       # don't index group since they are only a structural construct
       unless 'Group' == base.name
         base.send :include, Tire::Model::Search
+        base.send :include, Tire::Model::Callbacks
         # index name is dynamically set to the mongoid database name
         base.send :index_name, Proc.new {Search.index_name}
       end

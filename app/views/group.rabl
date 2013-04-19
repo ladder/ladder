@@ -1,13 +1,12 @@
 cache @group
 
-node do |g|
+node do
   if !! @opts[:all_keys]
-    h = g.to_normalized_hash(@opts)
-    h[:_id] = g.id
-    h[:md5] = Digest.hexencode(g.md5.to_s)
+    h = @group.to_normalized_hash(@opts)
+    h[:_id] = @group.id
+    h[:md5] = Digest.hexencode(@group.md5.to_s)
   else
-    h = {:_id => g.id, :md5 => Digest.hexencode(g.md5.to_s), :heading => g.heading, :type => g.type}
+    h = {:_id => @group.id, :md5 => Digest.hexencode(@group.md5.to_s), :heading => @group.heading, :type => @group.type}
   end
-
   h
 end
