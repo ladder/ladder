@@ -4,7 +4,7 @@ Ladder.helpers do
 #  end
 
   def check_api_key
-    #ensure we have an API key provided
+    # ensure we have an API key provided
     halt 400, {:ok => false, :status => 400, :error => 'No API key provided'}.to_json unless params[:api_key]
 
     # check API key

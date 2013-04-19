@@ -15,8 +15,8 @@ class Search
     index.response
   end
 
-  def self.reindex
-    self.delete # Not sure whether this is necessary
+  def self.reindex(delete = false)
+    self.delete if delete
 
     %w[Agent Concept Resource].each do |model|
       model.constantize.delay.import

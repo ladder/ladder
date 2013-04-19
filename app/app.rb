@@ -55,12 +55,16 @@ class Ladder < Padrino::Application
     index_response = Search.delete
 
     # Send index/mapping
+    self.create
+
+    index_response
+  end
+
+  def self.create
     %w[Agent Concept Resource].each do |model|
       klass = model.classify.constantize
       klass.create_indexes
       klass.put_mapping
     end
-
-    index_response
   end
 end
