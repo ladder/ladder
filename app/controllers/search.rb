@@ -8,7 +8,9 @@ Ladder.controllers :search do
   end
 
   get :index do
-    halt 400, {:error => 'No query provided'}.to_json
+    halt 400, {:ok => false, :status => 400, :error => 'No query provided'}.to_json unless params[:q]
+
+    search
   end
 
   get :index, :with => :q do
