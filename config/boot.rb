@@ -53,6 +53,9 @@ end
 # Add your after (RE)load hooks here
 #
 Padrino.after_load do
+  # Load other config files
+  require File.join(PADRINO_ROOT, 'config', 'rabl.rb')
+  require File.join(PADRINO_ROOT, 'config', 'sidekiq.rb')
 end
 
 Padrino.load!

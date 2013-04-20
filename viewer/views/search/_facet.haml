@@ -7,7 +7,8 @@
   - facet.last['terms'].each do |f|
 
     -# 1: Determine what we are going to display
-    - if f['term'].match(/^[0-9a-f]{24}$/)
+    -# FIXME: https://github.com/Marbletank/Ladder/issues/51
+    - if false #f['term'].match(/^[0-9a-f]{24}$/)
       - heading = @headings.results.find {|i| i.id == f['term']} rescue []
 
       - if 'dcterms.LCSH' == facet.first or 'dcterms.subject' == facet.first

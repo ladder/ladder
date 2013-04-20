@@ -29,6 +29,7 @@ gem 'amatch' # NOT JRUBY COMPATIBLE
 
 # Async / task-based stuff
 gem 'sidekiq', :require => ['sidekiq', 'sidekiq/web']
+gem 'kiqstand'
 gem 'slim' # WEB UI
 
 # API framework
