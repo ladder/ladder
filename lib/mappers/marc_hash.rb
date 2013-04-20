@@ -1,8 +1,6 @@
 module Mapper
 
   class MarcHash < Mapper
-    # preload XSLT into memory
-    @@xslt = Nokogiri::XSLT(File.read(Padrino.root('lib/xslt', 'MARC21slim2MODS3-4.xsl')))
 
     def self.content_types
       ['application/marc+json']
@@ -18,6 +16,7 @@ module Mapper
       marc_xml = Gyoku.xml(marc_record.to_gyoku_hash)
 
       # transform MARC XML to MODS via XSLT
+      @@xslt ||= Nokogiri::XSLT(File.read(Padrino.root('lib/xslt', 'MARC21slim2MODS3-4.xsl')))
       mods_xml = @@xslt.transform(Nokogiri::XML(marc_xml)).remove_namespaces!
 
       # generate a fully-mapped Resource by delegating to MODS Mapper

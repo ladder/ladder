@@ -3,7 +3,7 @@ require 'embedded'
 class Group
   include Model::Core
 
-  field :type
+  field :type, :type => String
   validates_inclusion_of :type, in: %w[Agent Concept Resource]
 
   @rdf_types = {:rdfs => [:Container]}

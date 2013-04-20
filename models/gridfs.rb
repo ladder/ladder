@@ -1,7 +1,7 @@
 class Mongoid::GridFS::Fs::File
   include Mongoid::Pagination
 
-  field :compression
+  field :compression, :type => String
 
   index :md5 => 1
 

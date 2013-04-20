@@ -2,9 +2,9 @@ class Tenant
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :api_key
-  field :email
-  field :database
+  field :api_key, :type => String
+  field :email, :type => String
+  field :database, :type => String
 
   before_validation :generate_api_key
   before_validation :generate_database

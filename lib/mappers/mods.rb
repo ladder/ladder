@@ -18,20 +18,6 @@ module Mapper
 
     end
 
-    # TODO: make this a method on parent class
-    def parse_xml(xml)
-      # parse XML into records using XPath
-      records = Nokogiri::XML(xml).remove_namespaces!.xpath('//mods') # TODO: smarter namespace handling
-
-      records.each do |record|
-        map_xml(record) # Nokogiri::XML::Element
-      end
-    end
-
-    def map_xml(xml_element)
-      resource = map_mods(Resource.new, xml_element)
-    end
-
     # TODO: abstract to generic mapping module/class
     def map_xpath(xml_node, hash)
       mapped = {}
@@ -54,62 +40,44 @@ module Mapper
       mapped
     end
 
+    # TODO: make this a method on parent class
+    def parse_xml(xml)
+      # parse XML into records using XPath
+      records = Nokogiri::XML(xml).remove_namespaces!.xpath('//mods') # TODO: smarter namespace handling
+
+      records.each do |record|
+        map_xml(record) # Nokogiri::XML::Element
+      end
+    end
+
+    def map_xml(xml_element)
+      resource = map_mods(Resource.new, xml_element)
+    end
+
     def map_mods(resource, node)
+      # TODO: make sure this works as expected
+      @@mapping ||= Mapping.find_by(:content_type => 'application/mods+xml') || Mapping.with(:database => :ladder).find_by(:content_type => 'application/mods+xml')
 
       # map MODS elements to embedded vocab
       vocabs = map_vocabs(node)
       return if vocabs.values.map(&:values).flatten.empty? # FIXME: make recursive flatten
       resource.vocabs = vocabs
-=begin
-      self.class.mapping[:agents].each do |mapping|
+
+      # map encoded agents to related Agent models
+      @@mapping.agents.each do |mapping|
         map_agents(resource, node, mapping)
       end
-=end
-      # map encoded agents to related Agent models
-      map_agents(resource, node, 'name[@usage="primary"]',      {:relation => {:dcterms => :creator}})
-      map_agents(resource, node, 'name[not(@usage="primary")]', {:relation => {:dcterms => :contributor}})
-      map_agents(resource, node, 'originInfo/publisher',        {:relation => {:dcterms => :publisher},
-                                                                 :mapping  => {:foaf => {:name => '.'}}})
 
       # map encoded concepts to related Concept models
-      map_concepts(resource, node, 'subject/geographicCode',               {:relation => {:dcterms => :spatial}})
-      map_concepts(resource, node, 'subject[not(@authority="lcsh")
-                    and not(geographicCode)]',             {:relation => {:dcterms => :subject}})
-      map_concepts(resource, node, 'subject[@authority="lcsh"]',           {:relation => {:dcterms => :LCSH}})
-      map_concepts(resource, node, 'subject[@authority="rvm"]',            {:relation => {:dcterms => :RVM}})
-      map_concepts(resource, node, 'classification[@authority="ddc"]',     {:relation => {:dcterms => :DDC}})
-      map_concepts(resource, node, 'classification[@authority="lcc"]',     {:relation => {:dcterms => :LCC}})
+      @@mapping.concepts.each do |mapping|
+        map_concepts(resource, node, mapping)
+      end
 
       # map related Resources as tree hierarchy
       # @see: http://www.loc.gov/standards/mods/userguide/relateditem.html
-
-      # limit to one relation to avoid a multi-parent situation
-      map_relations(resource, node, 'relatedItem[@type="host"
-                     or @type="series"][1]',               {:parent   => true,
-                                                            :relation => {:dcterms => :isPartOf},
-                                                            :inverse  => {:dcterms => :hasPart}})
-      map_relations(resource, node, 'relatedItem[@type="constituent"]',    {:relation => {:dcterms => :hasPart},
-                                                                            :inverse  => {:dcterms => :isPartOf}})
-      map_relations(resource, node, 'relatedItem[@type="otherVersion"]',   {:siblings => true,
-                                                                            :relation => {:dcterms => :hasVersion},
-                                                                            :inverse  => {:dcterms => :isVersionOf}})
-      map_relations(resource, node, 'relatedItem[@type="otherFormat"]',    {:siblings => true,
-                                                                            :relation => {:dcterms => :hasFormat},
-                                                                            :inverse  => {:dcterms => :isFormatOf}})
-      map_relations(resource, node, 'relatedItem[@type="isReferencedBy"]', {:siblings => true,
-                                                                            :relation => {:dcterms => :isReferencedBy},
-                                                                            :inverse  => {:dcterms => :references}})
-      map_relations(resource, node, 'relatedItem[@type="references"]',     {:siblings => true,
-                                                                            :relation => {:dcterms => :references},
-                                                                            :inverse  => {:dcterms => :isReferencedBy}})
-      # NB: these relationships are poorly defined
-      map_relations(resource, node, 'relatedItem[not(@type)]')
-
-      # TODO: find an appropriate relation type for these
-      map_relations(resource, node, 'relatedItem[@type="original"
-                     or @type="preceding"
-                     or @type="succeeding"
-                     or @type="reviewOf"]',                {:siblings => true})
+      @@mapping.resources.each do |mapping|
+        map_relations(resource, node, mapping)
+      end
 
       # save mapped resources
       resource.parent.save if resource.parent_id
@@ -118,72 +86,20 @@ module Mapper
       resource
     end
 
-    # TODO: store as JSON in a 'mappings' collection
-    def self.mapping
-      {:vocabs => {
-          :dcterms => {
-              # descriptive elements
-              :title              => 'titleInfo[not(@type = "alternative")]',
-              :alternative        => 'titleInfo[@type = "alternative"]',
-              :created            => 'originInfo/dateCreated',
-              :issued             => 'originInfo/dateIssued',
-              :format             => 'physicalDescription/form[not(@authority = "marcsmd")]',
-              :medium             => 'physicalDescription/form[@authority = "marcsmd"]',
-              :extent             => 'physicalDescription/extent',
-              :language           => 'language/languageTerm',
-
-              # dereferenceable identifiers
-              :identifier         => 'identifier[not(@type) or @type="local"]',
-
-              # indexable textual content
-              :abstract           => 'abstract',
-              :tableOfContents    => 'tableOfContents',
-          },
-          :prism => {
-              # dereferenceable identifiers
-              :doi                => 'identifier[@type = "doi" and not(@invalid)]',
-              :isbn               => 'identifier[@type = "isbn" and not(@invalid)]',
-              :issn               => 'identifier[@type = "issn" and not(@invalid)]',
-
-              :edition            => 'originInfo/edition',
-              :issueIdentifier    => 'identifier[@type = "issue-number" or @type = "issue number"]',
-          },
-          :bibo => {
-              # dereferenceable identifiers
-              :lccn               => 'identifier[@type = "lccn" and not(@invalid)]',
-              :oclcnum            => 'identifier[@type = "oclc" and not(@invalid)]',
-              :upc                => 'identifier[@type = "upc" and not(@invalid)]',
-              :uri                => 'identifier[@type = "uri" and not(@invalid)]',
-          },
-          :mods => {
-              :accessCondition    => 'accessCondition',
-              :frequency          => 'originInfo/frequency',
-              :genre              => 'genre',
-              :issuance           => 'originInfo/issuance',
-              :locationOfResource => 'location',
-              :note               => 'note',
-          },
-        },
-       :agents => nil,
-       :concepts => nil,
-       :relations =>nil,
-      }
-    end
-
     def map_vocabs(node)
       vocabs = {}
 
-      self.class.mapping[:vocabs].each do |name, mapping|
+      @@mapping.vocabs.each do |name, mapping|
         vocabs[name] = map_xpath(node, mapping)
       end
 
       vocabs
     end
 
-    def map_relations(resource, node, xpath, opts={})
+    def map_relations(resource, node, opts)
       relations = []
 
-      node.xpath(xpath).each do |subnode|
+      node.xpath(opts[:xpath]).each do |subnode|
         # create/map related resource
         vocabs = map_vocabs(subnode)
 
@@ -193,7 +109,7 @@ module Mapper
         rel_resource = Resource.find_or_create_by(vocabs)
 
         rel_resource = map_mods(rel_resource, subnode)
-        #        rel_resource.groups = resource.groups
+        # rel_resource.groups = resource.groups
 
         next if rel_resource.nil? or relations.include? rel_resource
 
@@ -237,18 +153,13 @@ module Mapper
       end
     end
 
-    def map_agents(resource, node, xpath, opts={})
+    def map_agents(resource, node, opts)
       agents = []
       agent_ids = resource.agents.map(&:id)
 
-      mapping = opts[:mapping] || { :foaf => {
-          :name     => 'namePart[not(@type)] | displayForm',
-          :birthday => 'namePart[@type = "date"]',
-          :title    => 'namePart[@type = "termsOfAddress"]',
-      }
-      }
+      mapping = opts[:vocabs]
 
-      node.xpath(xpath).each do |subnode|
+      node.xpath(opts[:xpath]).each do |subnode|
         mapped = {}
 
         mapped[:foaf] = map_xpath subnode, mapping[:foaf]
@@ -287,11 +198,11 @@ module Mapper
       end
     end
 
-    def map_concepts(resource, node, xpath, opts={})
+    def map_concepts(resource, node, opts)
       concepts = []
       concept_ids = resource.concepts.map(&:id)
 
-      node.xpath(xpath).each do |subnode|
+      node.xpath(opts[:xpath]).each do |subnode|
         # in MODS, each subject access point is usually composed of multiple
         # ordered sub-elements; so that's what we process for hierarchy
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
@@ -308,11 +219,7 @@ module Mapper
               mapped = {}
 
               # NB: the :hiddenLabel xpath is overkill, but required for uniqueness
-              mapping = opts[:mapping] || { :skos => {
-                  :prefLabel  => '.',
-                  :hiddenLabel => 'preceding-sibling::*'
-              }
-              }
+              mapping = opts[:vocabs]
 
               mapped[:skos] = map_xpath subsubnode, mapping[:skos]
               next if mapped[:skos].values.flatten.empty?
