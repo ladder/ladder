@@ -20,7 +20,7 @@ module Mapper
       mods_xml = @@xslt.transform(Nokogiri::XML(marc_xml)).remove_namespaces!
 
       # generate a fully-mapped Resource by delegating to MODS Mapper
-      resource = Mods.new.map_xml(mods_xml.root)
+      resource = Mods.new.map_mods(mods_xml.root)
       resource.rdf_types = detect_types(marc_record)
 
       # associate new Resource with its source file

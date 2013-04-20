@@ -6,4 +6,10 @@ class Hash
       end
     end
   end
+
+  def symbolize_keys_recursive
+    self.recurse do |h|
+      h.symbolize_keys
+    end
+  end
 end
