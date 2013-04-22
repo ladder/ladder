@@ -51,9 +51,8 @@ module Mapper
     end
 
     def map_mods(node, resource = Resource.new)
-      # TODO: make sure this works as expected
-      # FIXME: #find_by will throw an exception if it doesn't match
-      @@mapping ||= Mapping.find_by(:content_type => 'application/mods+xml') || Mapping.with(:database => :ladder).find_by(:content_type => 'application/mods+xml') || self.class.default_mapping
+      # NB: #find_by will throw an exception if it doesn't match
+      @@mapping ||= Mapping.find_by(:content_type => 'application/mods+xml') rescue self.class.default_mapping
 
       # map MODS elements to embedded vocab
       vocabs = map_vocabs(node)

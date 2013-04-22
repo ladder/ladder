@@ -1,57 +1,262 @@
-#
-# Instance methods for all model classes within the application
-#
-
 module Model
 
   module Core
 
     def self.included(base)
-      base.send :include, Mongoid::Document
-      base.send :include, Mongoid::Pagination
+      base.extend ClassMethods
+      base.class_eval do
+        include Mongoid::Document
+        include Mongoid::Pagination
+        include Mongoid::Tree
+#      include Mongoid::Tree::Ordering
+        include Mongoid::History::Trackable
 
-      # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
-      base.send :include, Mongoid::Paranoia # soft deletes
-      base.send :index, { deleted_at: 1 }
+        include Mongoid::Timestamps
+        index({ created_at: 1 })
+        index({ updated_at: 1 })
 
-      base.send :include, Mongoid::Timestamps
-      base.send :index, { created_at: 1 }
-      base.send :index, { updated_at: 1 }
+        # useful extras, see: http://mongoid.org/en/mongoid/docs/extras.html
+        include Mongoid::Paranoia # NB: this is deprecated in Mongoid 4.0
+        index({ deleted_at: 1 })
 
-      base.send :include, Mongoid::Tree
-      #base.send :include, Mongoid::Tree::Ordering
-      base.send :include, Mongoid::History::Trackable
+        # ElasticSearch integration
+        # don't index group since they are only a structural construct
+        unless 'Group' == name
+          include Tire::Model::Search
+          include Tire::Model::Callbacks
+          # index name is dynamically set to the mongoid database name
+          index_name(Proc.new {Search.index_name})
+        end
 
-      # ElasticSearch integration
-      # don't index group since they are only a structural construct
-      unless 'Group' == base.name
-        base.send :include, Tire::Model::Search
-        base.send :include, Tire::Model::Callbacks
-        # index name is dynamically set to the mongoid database name
-        base.send :index_name, Proc.new {Search.index_name}
+        # Generate MD5 fingerprint for this document
+        field :md5, type: Moped::BSON::Binary
+        index({ md5: 1 })
+        set_callback :save, :before, :generate_md5
+
+        # Make :headings a readable class variable
+        class << self; attr_reader :headings end
+
+        # Create rdf_types field and accessor
+        class << self; attr_reader :rdf_types end
+        field :rdf_types
+
+        # Include default embedded vocabularies
+        embeds_one :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: true
+        embeds_one :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: true unless 'Group' == name
+      end
+    end
+
+    module ClassMethods
+
+      # Override Mongoid #find_or_create_by
+      # @see: http://rdoc.info/github/mongoid/mongoid/Mongoid/Finders
+      def find_or_create_by(attrs = {})
+
+        # use md5 fingerprint to query if a document already exists
+        obj = self.new(attrs)
+        query = self.where(:md5 => obj.generate_md5).hint(:md5 => 1)
+
+        result = query.first
+        return result unless result.nil?
+
+        # otherwise create and return a new object
+        obj.save
+        obj
       end
 
-      # Generate MD5 fingerprint for this document
-      base.send :field, :md5, type: Moped::BSON::Binary
-      base.send :index, { md5: 1 }
-      base.send :set_callback, :save, :before, :generate_md5
+      # return a random document from the collection
+      def random
+        self.limit(1).skip(rand(0..self.count-1)).first
+      end
 
-      # Make :headings a readable class variable
-      base.send :class_eval, %(class << self; attr_reader :headings end)
+      def vocabs
+        vocabs = {}
 
-      # Create rdf_types field and accessor
-      base.send :class_eval, %(class << self; attr_reader :rdf_types end)
-      base.send :field, :rdf_types
+        embedded_relations.each do |vocab, meta|
+          vocabs[vocab.to_sym] = meta.class_name.constantize
+        end
 
-      # Include default embedded vocabularies
-      base.send :embeds_one, :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: true unless 'Group' == base.name
-      base.send :embeds_one, :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: true
+        vocabs
+      end
 
-      # add useful class methods
-      base.extend ClassMethods
+      def define_scopes
+        # add scope to check for documents not in ES index
+        scope :unindexed, -> do
+          # only query on an existing index
+          return self.queryable unless tire.index.exists?
 
-      # NB: This has to be at the end to overload Mongoid
-      base.extend FOCB
+          # NB: this will fail on empty indexes
+          # get the most recent timestamp
+          s = self.search {
+            query { all }
+            sort { by :_timestamp, 'desc' }
+            fields ['_timestamp']
+            size 1
+          }
+
+          # if there's a timestamp in the index, use that as the offset
+          unless s.results.empty?
+            timestamp = s.results.first._timestamp / 1000
+            self.queryable.or(:updated_at.gte => timestamp, :created_at.gte => timestamp)
+          else
+            self.queryable
+          end
+        end
+      end
+
+      def define_mapping
+        # basic object mapping for vocabs
+        # TODO: put explicit mapping here when removing dynamic templates
+        vocabs = self.vocabs.each_with_object({}) do |(key,val), h|
+          h[key] = {:type => 'object'}
+        end
+
+        # Timestamp information
+        dates = [:created_at, :deleted_at, :updated_at].each_with_object({}) {|(key,val), h| h[key] = {:type => 'date'}}
+
+        # Hierarchy/Group information
+        ids = [:parent_id, :parent_ids, :group_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string', :index => 'not_analyzed'}}
+
+        # Relation information
+        relations = [:agent_ids, :concept_ids, :resource_ids].each_with_object({}) {|(key,val), h| h[key] = {:type => 'string', :index => 'not_analyzed'}}
+
+        properties = {
+            # Heading is what users will correlate with most
+            :heading           => {:type => 'object', :boost => 2},
+            :heading_ancestors => {:type => 'object', :index => 'no'},
+
+            # RDF class information
+            :rdf_types => {:type => 'string', :index => 'not_analyzed'},
+
+        }.merge(vocabs).merge(dates).merge(ids).merge(relations)
+
+        # memoize mapping as a class variable
+        @mapping = {:_source => { :compress => true },
+                    :_timestamp => { :enabled => true, :store => 'yes' },
+                    :index_analyzer => 'snowball',
+                    :search_analyzer => 'snowball',
+                    :properties => properties}
+=begin
+   # dynamic templates to store un-analyzed values for faceting
+   # TODO: remove dynamic templates and use explicit facet mapping
+  :dynamic_templates => [{
+                             :auto_facet => {
+                                 :match => '*',
+                                 :match_mapping_type => '*',
+                                 :mapping => {
+                                     :type => 'multi_field',
+                                     :fields => {
+                                         '{name}' => {
+                                             :type => 'string',
+                                             :index => 'analyzed'
+                                         },
+                                         :raw => {
+                                             :type => 'string',
+                                             :index => 'not_analyzed'
+                                         }
+                                     }
+                                 }
+                             }
+                         }]
+=end
+      end
+
+      def put_mapping
+        # ensure the index exists
+        tire.index.create unless tire.index.exists?
+
+        # do a PUT mapping for this index
+        tire.index.mapping self.name.downcase, @mapping ||= self.define_mapping
+      end
+
+      def get_mapping
+        @mapping ||= self.define_mapping
+      end
+
+      # Convert a hashed instance of the class to a stripped-down version
+      #
+      # @option options [ Bool ]   :all_keys Include internal tracking keys.
+      # @option options [ Symbol ] :except   List of keys to recursively strip.
+      # @option options [ Symbol ] :ids      One of:  :omit    Strip all ID-type values
+      #                                               :resolve Turn into Hash eg. {:model => ID}
+      #
+      # @param [ Hash ] hash The hash to convert.
+      #
+      # @return [ Hash ] The converted hash.
+      #
+      def normalize(hash, opts={})
+        # set default keys to strip
+        except = opts[:except] || [:_id, :version]
+
+        # Remove keys not declared in index mapping
+        hash.delete_if { |key, value| ! self.get_mapping[:properties].keys.include? key.to_sym } unless 'Group' == self.name
+
+        # Only keep defined vocabs by default
+        hash.select! {|key| vocabs.keys.include? key.to_sym} unless opts[:all_keys]
+
+        hash = hash.recurse do |h|
+          h.symbolize_keys!
+
+          # Strip specified keys
+          h.except! *except
+
+          # Reject nil and empty values
+          h.reject! { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+
+          # Remove non-hash, non-value keys
+          h.reject! { |key, value| !value.kind_of? Enumerable } unless opts[:all_keys]
+
+          # Sort keys
+          Hash[h.sort]
+        end
+
+        # Modify Object ID references if specified
+        if opts[:ids]
+
+          hash.each do |name, vocab|
+            next unless vocab.is_a? Hash
+
+            hash[name] = vocab.recurse do |h|
+              h.each do |k, values|
+                next unless values.is_a? Array
+
+                h[k] = values.map! do |value|
+                  # traverse through ID-like values
+                  if value.is_a? Moped::BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
+                    case opts[:ids].to_sym
+                      when :omit then value = nil
+                      when :resolve
+                        if hash[:resource_ids] and hash[:resource_ids].include? value
+                          model = :resource
+                        elsif hash[:agent_ids] and hash[:agent_ids].include? value
+                          model = :agent
+                        elsif hash[:concept_ids] and hash[:concept_ids].include? value
+                          model = :concept
+                        else
+                          model = hash[:type] || self.name.underscore
+                        end
+                        value = {model.to_sym => value}
+                    end
+                  end
+
+                  value
+                end
+
+                values.compact!
+              end
+            end
+          end
+
+          hash = hash.recurse do |h|
+            # Reject nil and empty values
+            h.delete_if { |key, value| value.nil? or (value.kind_of? Enumerable and value.empty?) }
+          end
+
+        end
+
+        hash
+      end
+
     end
 
     def to_normalized_hash(opts={})
