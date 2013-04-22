@@ -32,6 +32,9 @@ class Search
 
     opts = opts.symbolize_keys.slice(:q, :filters, :facets, :page, :per_page, :explain)
 
+    # TODO: https://github.com/Marbletank/Ladder/issues/49
+    @facets = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]} if opts[:facets].nil?
+
     opts.each do |opt, value|
       self.send("#{opt}=", value)
     end
