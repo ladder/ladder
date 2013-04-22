@@ -1,6 +1,6 @@
-module Mapper
+module Mappers
 
-  class Marc < Mapper
+  class Marc < ::Mapper
 
     def self.content_types
       ['application/marc', 'application/marc+xml']

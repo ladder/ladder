@@ -1,6 +1,6 @@
-module Mapper
+module Mappers
 
-  class Mods < Mapper
+  class Mods < ::Mapper
 
     def self.content_types
       ['application/mods+xml']

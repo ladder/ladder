@@ -12,7 +12,7 @@ class Mongoid::GridFS::Fs::File
   def data
     data = ''
     each{|chunk| data << chunk}
-    Compressor::Compressor.decompress(data, compression)
+    Compressor.decompress(data, compression)
   end
 
   def model

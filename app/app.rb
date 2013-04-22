@@ -66,9 +66,9 @@ class Ladder < Padrino::Application
       klass.put_mapping
     end
 
-    # TODO
-    # FIXME
-    # TEMPORARY: create a default MODS mapping in the tenant DB
-    Mapper::Mods.default_mapping.save
+    # create default mappings in the DB for each mapper
+    Mapper.descendants.each do |mapper|
+      mapper.default_mapping.save if mapper.respond_to? :default_mapping
+    end
   end
 end

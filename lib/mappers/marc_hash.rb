@@ -1,6 +1,6 @@
-module Mapper
+module Mappers
 
-  class MarcHash < Mapper
+  class MarcHash < ::Mapper
 
     def self.content_types
       ['application/marc+json']
