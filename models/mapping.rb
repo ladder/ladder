@@ -7,10 +7,10 @@ class Mapping
   index({ created_at: 1 })
   index({ updated_at: 1 })
 
-  field :content_type, :type => Array
-
   field :type, :type => String
   validates_inclusion_of :type, in: %w[Agent Concept Resource]
+
+  field :content_type, :type => Array
 
   field :vocabs, :type => Hash
 

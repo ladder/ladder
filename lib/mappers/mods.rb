@@ -95,7 +95,7 @@ module Mappers
     def map_resources(resource, node, opts)
       relations = []
 
-      node.xpath(opts[:xpath]).each do |subnode|
+      node.xpath(opts[:path]).each do |subnode|
         # create/map related resource
         vocabs = map_vocabs(subnode)
 
@@ -155,7 +155,7 @@ module Mappers
 
       mapping = opts[:vocabs]
 
-      node.xpath(opts[:xpath]).each do |subnode|
+      node.xpath(opts[:path]).each do |subnode|
         mapped = {}
 
         mapped[:foaf] = map_xpath subnode, mapping[:foaf]
@@ -198,7 +198,7 @@ module Mappers
       concepts = []
       concept_ids = resource.concepts.map(&:id)
 
-      node.xpath(opts[:xpath]).each do |subnode|
+      node.xpath(opts[:path]).each do |subnode|
         # in MODS, each subject access point is usually composed of multiple
         # ordered sub-elements; so that's what we process for hierarchy
         # see: http://www.loc.gov/standards/mods/userguide/subject.html
@@ -266,17 +266,17 @@ module Mappers
       mapping.vocabs = {
           :dcterms => {
               # descriptive elements
-              :title              => 'titleInfo[not(@type = "alternative")]',
-              :alternative        => 'titleInfo[@type = "alternative"]',
+              :title              => 'titleInfo[not(@type = \'alternative\')]',
+              :alternative        => 'titleInfo[@type = \'alternative\']',
               :created            => 'originInfo/dateCreated',
               :issued             => 'originInfo/dateIssued',
-              :format             => 'physicalDescription/form[not(@authority = "marcsmd")]',
-              :medium             => 'physicalDescription/form[@authority = "marcsmd"]',
+              :format             => 'physicalDescription/form[not(@authority = \'marcsmd\')]',
+              :medium             => 'physicalDescription/form[@authority = \'marcsmd\']',
               :extent             => 'physicalDescription/extent',
               :language           => 'language/languageTerm',
 
               # dereferenceable identifiers
-              :identifier         => 'identifier[not(@type) or @type="local"]',
+              :identifier         => 'identifier[not(@type) or @type=\'local\']',
 
               # indexable textual content
               :abstract           => 'abstract',
@@ -284,19 +284,19 @@ module Mappers
           },
           :prism => {
               # dereferenceable identifiers
-              :doi                => 'identifier[@type = "doi" and not(@invalid)]',
-              :isbn               => 'identifier[@type = "isbn" and not(@invalid)]',
-              :issn               => 'identifier[@type = "issn" and not(@invalid)]',
+              :doi                => 'identifier[@type = \'doi\' and not(@invalid)]',
+              :isbn               => 'identifier[@type = \'isbn\' and not(@invalid)]',
+              :issn               => 'identifier[@type = \'issn\' and not(@invalid)]',
 
               :edition            => 'originInfo/edition',
-              :issueIdentifier    => 'identifier[@type = "issue-number" or @type = "issue number"]',
+              :issueIdentifier    => 'identifier[@type = \'issue-number\' or @type = \'issue number\']',
           },
           :bibo => {
               # dereferenceable identifiers
-              :lccn               => 'identifier[@type = "lccn" and not(@invalid)]',
-              :oclcnum            => 'identifier[@type = "oclc" and not(@invalid)]',
-              :upc                => 'identifier[@type = "upc" and not(@invalid)]',
-              :uri                => 'identifier[@type = "uri" and not(@invalid)]',
+              :lccn               => 'identifier[@type = \'lccn\' and not(@invalid)]',
+              :oclcnum            => 'identifier[@type = \'oclc\' and not(@invalid)]',
+              :upc                => 'identifier[@type = \'upc\' and not(@invalid)]',
+              :uri                => 'identifier[@type = \'uri\' and not(@invalid)]',
           },
           :mods => {
               :accessCondition    => 'accessCondition',
@@ -309,27 +309,27 @@ module Mappers
       }
 
       mapping.agents = [
-          {:xpath => 'name[@usage="primary"]',
+          {:path => 'name[@usage=\'primary\']',
            :relation => {:dcterms => :creator},
            :vocabs => {
                :foaf => {
                    :name     => 'namePart[not(@type)] | displayForm',
-                   :birthday => 'namePart[@type = "date"]',
-                   :title    => 'namePart[@type = "termsOfAddress"]',
+                   :birthday => 'namePart[@type = \'date\']',
+                   :title    => 'namePart[@type = \'termsOfAddress\']',
                }
            }
           },
-          {:xpath => 'name[not(@usage="primary")]',
+          {:path => 'name[not(@usage=\'primary\')]',
            :relation => {:dcterms => :contributor},
            :vocabs => {
                :foaf => {
                    :name     => 'namePart[not(@type)] | displayForm',
-                   :birthday => 'namePart[@type = "date"]',
-                   :title    => 'namePart[@type = "termsOfAddress"]',
+                   :birthday => 'namePart[@type = \'date\']',
+                   :title    => 'namePart[@type = \'termsOfAddress\']',
                }
            }
           },
-          {:xpath => 'originInfo/publisher',
+          {:path => 'originInfo/publisher',
            :relation => {:dcterms => :publisher},
            :vocabs  => {
                :foaf => {:name => '.'}}
@@ -337,7 +337,7 @@ module Mappers
       ]
 
       mapping.concepts = [
-          {:xpath => 'subject/geographicCode',
+          {:path => 'subject/geographicCode',
            :relation => {:dcterms => :spatial},
            :vocabs => {
                :skos => {
@@ -345,7 +345,7 @@ module Mappers
                    :hiddenLabel => 'preceding-sibling::*'
                }}
           },
-          {:xpath => 'subject[not(@authority="lcsh") and not(geographicCode)]',
+          {:path => 'subject[not(@authority=\'lcsh\') and not(geographicCode)]',
            :relation => {:dcterms => :subject},
            :vocabs => {
                :skos => {
@@ -354,7 +354,7 @@ module Mappers
                }
            }
           },
-          {:xpath => 'subject[@authority="lcsh"]',
+          {:path => 'subject[@authority=\'lcsh\']',
            :relation => {:dcterms => :LCSH},
            :vocabs => {
                :skos => {
@@ -363,7 +363,7 @@ module Mappers
                }
            }
           },
-          {:xpath => 'subject[@authority="rvm"]',
+          {:path => 'subject[@authority=\'rvm\']',
            :relation => {:dcterms => :RVM},
            :vocabs => {
                :skos => {
@@ -372,7 +372,7 @@ module Mappers
                }
            }
           },
-          {:xpath => 'classification[@authority="ddc"]',
+          {:path => 'classification[@authority=\'ddc\']',
            :relation => {:dcterms => :DDC},
            :vocabs => {
                :skos => {
@@ -381,7 +381,7 @@ module Mappers
                }
            }
           },
-          {:xpath => 'classification[@authority="lcc"]',
+          {:path => 'classification[@authority=\'lcc\']',
            :relation => {:dcterms => :LCC},
            :vocabs => {
                :skos => {
@@ -394,43 +394,40 @@ module Mappers
 
       mapping.resources = [
           # NB: limit to one relation to avoid a multi-parent situation
-          {:xpath => 'relatedItem[@type="host" or @type="series"][1]',
+          {:path => 'relatedItem[@type=\'host\' or @type=\'series\'][1]',
            :relation => {:dcterms => :isPartOf},
            :inverse => {:dcterms => :hasPart},
            :parent => true,
           },
-          {:xpath => 'relatedItem[@type="constituent"]',
+          {:path => 'relatedItem[@type=\'constituent\']',
            :relation => {:dcterms => :hasPart},
            :inverse => {:dcterms => :isPartOf},
           },
-          {:xpath => 'relatedItem[@type="otherVersion"]',
+          {:path => 'relatedItem[@type=\'otherVersion\']',
            :relation => {:dcterms => :hasVersion},
            :inverse => {:dcterms => :isVersionOf},
            :siblings => true,
           },
-          {:xpath => 'relatedItem[@type="otherFormat"]',
+          {:path => 'relatedItem[@type=\'otherFormat\']',
            :relation => {:dcterms => :hasFormat},
            :inverse => {:dcterms => :isFormatOf},
            :siblings => true,
           },
-          {:xpath => 'relatedItem[@type="isReferencedBy"]',
+          {:path => 'relatedItem[@type=\'isReferencedBy\']',
            :relation => {:dcterms => :isReferencedBy},
            :inverse => {:dcterms => :references},
            :siblings => true,
           },
-          {:xpath => 'relatedItem[@type="references"]',
+          {:path => 'relatedItem[@type=\'references\']',
            :relation => {:dcterms => :references},
            :inverse => {:dcterms => :isReferencedBy},
            :siblings => true,
           },
           # NB: these relationships are poorly defined
-          {:xpath => 'relatedItem[not(@type)]',
+          {:path => 'relatedItem[not(@type)]',
           },
           # TODO: find an appropriate relation type for these
-          {:xpath => 'relatedItem[@type="original"
-                     or @type="preceding"
-                     or @type="succeeding"
-                     or @type="reviewOf"]',
+          {:path => 'relatedItem[@type=\'original\' or @type=\'preceding\' or @type=\'succeeding\' or @type=\'reviewOf\']',
            :siblings => true,
           },
       ]
