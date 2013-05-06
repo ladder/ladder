@@ -4,6 +4,10 @@ Ladder.helpers do
 #  end
 
   def check_api_key
+    # allow passing the API key through HTTP basic auth as username
+    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+    params[:api_key] = @auth.username if @auth.provided?
+
     # ensure we have an API key provided
     halt 400, {:ok => false, :status => 400, :error => 'No API key provided'}.to_json unless params[:api_key]
 
