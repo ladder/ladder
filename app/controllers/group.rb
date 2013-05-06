@@ -16,12 +16,10 @@ Ladder.controllers :groups do
   end
 
   # Get a random Group representation
-  get :random, :map => '/groups/random', :provides => [:json, :xml, :rdf] do
-    @model = Group.random
+  get :random, :map => '/groups/random' do
+    @group = Group.random
 
-    halt 200, @model.to_rdfxml(url_for current_path) if :rdf == content_type or :xml == content_type
-
-    render 'model', :format => :json
+    render 'group', :format => :json
   end
 
   # Get an existing Group representation

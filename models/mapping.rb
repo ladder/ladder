@@ -1,6 +1,11 @@
 class Mapping
+  include Mongoid::Pagination
   include Mongoid::Document
+  include Mongoid::History::Trackable
+
   include Mongoid::Timestamps
+  index({ created_at: 1 })
+  index({ updated_at: 1 })
 
   field :content_type, :type => Array
 

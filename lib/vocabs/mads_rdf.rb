@@ -5,7 +5,7 @@
 
 module Vocab
 
-  class MADS < RDF::Vocabulary("http://www.loc.gov/mads/rdf/v1")
+  class MadsRdf < RDF::Vocabulary("http://www.loc.gov/mads/rdf/v1")
     property :adminMetadata
     property :affiliationEnd
     property :affiliationStart
