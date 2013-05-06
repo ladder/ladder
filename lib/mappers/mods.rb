@@ -52,7 +52,7 @@ module Mappers
 
     def map_mods(node, resource = Resource.new)
       # NB: #find_by will throw an exception if it doesn't match
-      @@mapping ||= Mapping.find_by(:content_type => 'application/mods+xml') rescue self.class.default_mapping
+      @mapping = Mapping.find_by(:content_type => 'application/mods+xml') rescue self.class.default_mapping
 
       # map MODS elements to embedded vocab
       vocabs = map_vocabs(node)
@@ -60,18 +60,18 @@ module Mappers
       resource.vocabs = vocabs
 
       # map encoded agents to related Agent models
-      @@mapping.agents.each do |mapping|
+      @mapping.agents.each do |mapping|
         map_agents(resource, node, mapping.symbolize_keys_recursive)
       end
 
       # map encoded concepts to related Concept models
-      @@mapping.concepts.each do |mapping|
+      @mapping.concepts.each do |mapping|
         map_concepts(resource, node, mapping.symbolize_keys_recursive)
       end
 
       # map related Resources as tree hierarchy
       # @see: http://www.loc.gov/standards/mods/userguide/relateditem.html
-      @@mapping.resources.each do |mapping|
+      @mapping.resources.each do |mapping|
         map_resources(resource, node, mapping.symbolize_keys_recursive)
       end
 
@@ -85,7 +85,7 @@ module Mappers
     def map_vocabs(node)
       vocabs = {}
 
-      @@mapping.vocabs.each do |name, mapping|
+      @mapping.vocabs.each do |name, mapping|
         vocabs[name] = map_xpath(node, mapping)
       end
 

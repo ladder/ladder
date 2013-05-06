@@ -12,9 +12,9 @@ class Mapping
 
   field :content_type, :type => Array
 
-  field :vocabs, :type => Hash
+  field :vocabs, :type => Hash, :default => {}
 
-  field :agents, :type => Array
-  field :concepts, :type => Array
-  field :resources, :type => Array
+  field :agents, :type => Array, :default => []
+  field :concepts, :type => Array, :default => []
+  field :resources, :type => Array, :default => []
 end

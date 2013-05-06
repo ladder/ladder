@@ -461,11 +461,12 @@ module Model
 
     def to_rdfxml(url)
       uri = URI.parse(url)
+      interned_uri = RDF::URI.intern(RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :path => uri.path))
 
       # get the RDF graph for each vocab
       graphs = []
       self.vocabs.each do |name, object|
-        graph = object.to_rdf(RDF::URI.intern(url))
+        graph = object.to_rdf(interned_uri)
 
         graph.statements.each do |statement|
           value = statement.object.object
@@ -474,16 +475,17 @@ module Model
           if value.is_a? Moped::BSON::ObjectId or value.to_s.match(/^[0-9a-f]{24}$/)
             # resolve IDs
             if defined? resource_ids and resource_ids.include? value
-              model = :resource
+              model = :resources
             elsif defined? agent_ids and agent_ids.include? value
-              model = :agent
+              model = :agents
             elsif defined? concept_ids and concept_ids.include? value
-              model = :concept
+              model = :concepts
             else
               model = self.class.name.underscore
             end
 
-            new_statement = [statement.subject, statement.predicate, RDF::URI.intern("#{uri.scheme}://#{uri.host}/#{model}/#{statement.object}")]
+#            new_statement = [statement.subject, statement.predicate, RDF::URI.intern("#{uri.scheme}://#{uri.host}/#{model}/#{statement.object}")]
+            new_statement = [statement.subject, statement.predicate, RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :path => "#{model}/#{statement.object}")]
             graph.delete(statement)
             graph << new_statement
 
@@ -501,19 +503,19 @@ module Model
 
       RDF::RDFXML::Writer.buffer do |writer|
         # FIXME: this is necessary to write a rdf:Description element
-        writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.intern(''))
+        writer << RDF::Statement.new(interned_uri, RDF.type, RDF::URI.intern(''))
 
         # TODO: merge these somehow and process as one
         self.class.rdf_types.each do |qname, properties|
           properties.each do |property|
-            writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
+            writer << RDF::Statement.new(interned_uri, RDF.type, RDF::URI.from_qname(qname) / property)
           end
         end
 
         unless rdf_types.nil?
           rdf_types.each do |qname, properties|
             properties.each do |property|
-              writer << RDF::Statement.new(RDF::URI.intern(url), RDF.type, RDF::URI.from_qname(qname) / property)
+              writer << RDF::Statement.new(interned_uri, RDF.type, RDF::URI.from_qname(qname) / property)
             end
           end
         end
