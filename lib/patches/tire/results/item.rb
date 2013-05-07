@@ -41,6 +41,8 @@ module Tire
       # Copied from Mongoid::Fields::Localized
       #
       def lookup(object)
+        return nil if object.nil?
+
         locale = ::I18n.locale
         if ::I18n.respond_to?(:fallbacks)
           object[::I18n.fallbacks[locale].find{ |loc| object[loc] }]

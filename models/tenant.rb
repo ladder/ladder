@@ -37,5 +37,4 @@ class Tenant
   def to_hash
     self.serializable_hash
   end
-
 end

@@ -21,4 +21,7 @@ class Mongoid::GridFS::Fs::File
     return {:concept => self.concept_id} if self.concept_id
   end
 
+  def to_hash
+    self.serializable_hash
+  end
 end
