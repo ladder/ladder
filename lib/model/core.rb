@@ -461,9 +461,9 @@ module Model
 
     def to_rdfxml(url)
       uri = URI.parse(url)
-      interned_uri = RDF::URI.intern(RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :path => uri.path))
+      interned_uri = RDF::URI.intern(RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :path => "#{self.class.name.underscore.pluralize}/#{self.id}"))
 
-      # get the RDF graph for each vocab
+      # build an RDF graph for each vocab
       graphs = []
       self.vocabs.each do |name, object|
         graph = object.to_rdf(interned_uri)
@@ -481,10 +481,9 @@ module Model
             elsif defined? concept_ids and concept_ids.include? value
               model = :concepts
             else
-              model = self.class.name.underscore
+              model = self.class.name.underscore.pluralize
             end
 
-#            new_statement = [statement.subject, statement.predicate, RDF::URI.intern("#{uri.scheme}://#{uri.host}/#{model}/#{statement.object}")]
             new_statement = [statement.subject, statement.predicate, RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :path => "#{model}/#{statement.object}")]
             graph.delete(statement)
             graph << new_statement
@@ -502,6 +501,8 @@ module Model
       end
 
       RDF::RDFXML::Writer.buffer do |writer|
+# FIXME: RDF DESCRIPTION STATEMENTS HAVE CHANGED
+=begin
         # FIXME: this is necessary to write a rdf:Description element
         writer << RDF::Statement.new(interned_uri, RDF.type, RDF::URI.intern(''))
 
@@ -519,7 +520,7 @@ module Model
             end
           end
         end
-
+=end
         graphs.each do |graph|
           writer << graph
         end
