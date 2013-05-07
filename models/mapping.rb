@@ -27,10 +27,15 @@ class Mapping
     defaults = Mapper.default_mappings
     defined = self.all.entries
 
-    # go through all defined mappings and overwrite defaults
+    # go through all defined mappings and overwrite defaults or append definiton
     defined.each do |mapping|
       index = defaults.find_index {|item| item.content_type == mapping.content_type}
-      defaults[index] = mapping if index
+
+      if index
+        defaults[index] = mapping
+      else
+        defaults << mapping
+      end
     end
 
     defaults
