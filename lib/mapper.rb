@@ -11,6 +11,15 @@ class Mapper
     nil
   end
 
+  # Abstract method
+  def self.default_mapping
+    nil
+  end
+
+  def self.default_mappings
+    descendants.map {|klass| klass.default_mapping}.compact
+  end
+
   def self.content_types
     descendants.map {|klass| klass.content_types}.flatten
   end

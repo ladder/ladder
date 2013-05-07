@@ -261,7 +261,7 @@ module Mappers
     end
 
     def self.default_mapping
-      mapping = Mapping.new(:type => 'Resource', :content_type => 'application/mods+xml')
+      mapping = Mapping.new(:type => 'Resource', :content_type => 'application/mods+xml', :default => true)
 
       mapping.vocabs = {
           :dcterms => {

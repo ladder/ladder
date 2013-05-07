@@ -7,9 +7,9 @@ Ladder.controllers :mappings do
     check_api_key
   end
 
-  # List all Mappings (paginated)
+  # List all Mappings
   get :index do
-    @mappings = Mapping.all.per_page.paginate(params)
+    @mappings = Mapping.defined
 
     render 'mappings', :format => :json
   end
