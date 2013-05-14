@@ -65,10 +65,5 @@ class Ladder < Padrino::Application
       klass.create_indexes
       klass.put_mapping
     end
-
-    # create default mappings in the DB for each mapper
-    Mapper.descendants.each do |mapper|
-      mapper.default_mapping.save if mapper.respond_to? :default_mapping
-    end
   end
 end
