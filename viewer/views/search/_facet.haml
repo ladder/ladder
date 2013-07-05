@@ -42,10 +42,10 @@
         %li.active.facet
           %a= display
       - else
-        %li= link_to display + " (#{f['count']})", current_path('page' => @page, 'fi' => @new_fi)
+        %li= link_to display + " (#{f['count']})", '/viewer' + current_path('page' => @page, 'fi' => @new_fi)
 
     - else
       %li.active
-        %a{:href => current_path('page' => @page, 'fi' => @filters.deep_merge({ns.to_s => {name => @filters[ns][name].reject { |x| f['term'] == x}}}))}
+        %a{:href => '/viewer' + current_path('page' => @page, 'fi' => @filters.deep_merge({ns.to_s => {name => @filters[ns][name].reject { |x| f['term'] == x}}}))}
           #{display}
           .pull-right &times;

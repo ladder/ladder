@@ -45,7 +45,7 @@ class Viewer < Padrino::Application
     render('errors/40x', :layout => :application)
   end
 
-  Mongoid::Sessions.default.options[:database] = :ladder_development
+#  Mongoid::Sessions.default.options[:database] = :ladder_development
 =begin
   set :admin_model, 'Account'
   set :login_page, "/admin/sessions/new"

@@ -1,5 +1,9 @@
 Viewer.controllers :search do
 
+  before do
+    check_api_key
+  end
+
   get :index, :cache => true do
     if params[:q].nil?
       render 'index'

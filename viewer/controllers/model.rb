@@ -1,6 +1,8 @@
 Viewer.controllers do
 
   before do
+    check_api_key
+
     # Extract locale from the session or querystring
     I18n.locale = params[:locale] || session[:locale]
     session[:locale] = I18n.locale if params[:locale]
