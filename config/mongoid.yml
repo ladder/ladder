@@ -1,18 +1,7 @@
-production:
-  sessions:
-    default:
-      uri: <%= ENV['MONGOLAB_URI'] || 'mongodb://localhost' %>
 development:
   sessions:
     default:
-      database: ladder_development
-      hosts:
-        - localhost:27017
-  options:
-test:
-  sessions:
-    default:
-      database: ladder_test
+      database: ladder
       hosts:
         - localhost:27017
 options:

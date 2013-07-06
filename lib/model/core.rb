@@ -3,7 +3,6 @@ module Model
   module Core
 
     def self.included(base)
-      base.extend ClassMethods
       base.class_eval do
         include Mongoid::Document
         include Mongoid::Pagination
@@ -44,6 +43,9 @@ module Model
         embeds_one :rdfs,     class_name: 'RDFS',     cascade_callbacks: true, autobuild: true
         embeds_one :dbpedia,  class_name: 'DBpedia',  cascade_callbacks: true, autobuild: true unless 'Group' == name
       end
+
+      # This goes at the end to allow overloading find_or_create_by
+      base.extend ClassMethods
     end
 
     module ClassMethods
