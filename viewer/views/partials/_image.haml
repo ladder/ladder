@@ -44,7 +44,7 @@
 
   - else 'icon-question-sign'
 
-- if url = image.dbpedia.thumbnail.first rescue nil
+- if url = ignore_nil { image[:dbpedia][:thumbnail].first }
   %img{:src => url, :onError => "imgFallback(this, '#{icon_class}', '#{style}');"}
 
 - else
