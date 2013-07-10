@@ -18,4 +18,9 @@ class String
     return (0 == match.begin(0) and self.size == match.end(0)) if match
     false
   end
+
+  def from_dot_notation
+    arr = self.split('.')
+    {arr.first.to_sym => arr.last.to_sym}
+  end
 end

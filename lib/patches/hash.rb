@@ -12,4 +12,8 @@ class Hash
       h.symbolize_keys
     end
   end
+
+  def to_dot_notation
+    self.flatten.join('.')
+  end
 end

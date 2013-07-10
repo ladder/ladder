@@ -5,6 +5,17 @@ class Tenant
   field :api_key, :type => String
   field :email, :type => String
   field :database, :type => String
+  field :properties, :type => Hash,
+        :default => {
+            :facets => {
+                :format    => ['dcterms.format'],
+                :language  => ['dcterms.language'],
+                :date      => ['dcterms.date', 'dcterms.issued', 'dcterms.created', 'dcterms.dateCopyrighted'],
+                :author    => ['dcterms.creator', 'dcterms.contributor'],
+                :publisher => ['dcterms.publisher'],
+                :subject   => ['dcterms.subject', 'dcterms.LCSH', 'dcterms.DDC', 'dcterms.LCC'],
+               }
+  }
 
   before_validation :generate_api_key
   before_validation :generate_database

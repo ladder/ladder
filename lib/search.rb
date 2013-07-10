@@ -1,5 +1,5 @@
 class Search
-  attr_accessor :q, :filters, :facets, :page, :per_page, :explain, :model
+  attr_accessor :q, :page, :per_page, :filters, :facets, :explain, :model
   attr_reader :search, :results, :index
 
   def self.index_name
@@ -30,11 +30,8 @@ class Search
     @filters = {}
     @facets = {}
 
-    opts = opts.symbolize_keys.slice(:q, :filters, :facets, :page, :per_page, :explain)
-
-    # TODO: https://github.com/Marbletank/Ladder/issues/49
-    @facets = {:dcterms => %w[format language issued creator contributor publisher subject LCSH DDC LCC]} if opts[:facets].nil?
-
+    # override defaults with supplied options
+    opts = opts.symbolize_keys.slice(:q, :page, :per_page, :filters, :facets, :explain)
     opts.each do |opt, value|
       self.send("#{opt}=", value)
     end
@@ -69,15 +66,23 @@ class Search
     # set fields; prefer matches in (localized) heading, but search everywhere
     @fields = locales.map {|locale| "heading.#{locale}"} + ['_all'] + ['_id']
 
-    # set facets
-    @facets.each do |ns, fields|
-      fields.each do |field|
-        facet_fields = []
+    # build multi-field, multi-locale facets
+    # TODO: facet pre-validation
+    #   - check well-formedness
+    #   - validate against faceted fields in index
+    @facets.each do |label, facets|
+      facet_fields = []
+
+      facets.each do |ns_field|
         locales.each do |locale|
-          facet_fields << "#{ns}.#{field}.#{locale}"
+          if ns_field.is_a? Hash then facet_fields << "#{ns_field.to_dot_notation}.#{locale}"
+          else facet_fields << "#{ns_field}.#{locale}"
+          end
         end
 
-        @search.facet("#{ns}.#{field}") {terms facet_fields, :size => 10}
+        @search.facet label do
+          terms facet_fields, :size => 10
+        end
       end
     end
 
@@ -140,6 +145,10 @@ class Search
             next
           end
 
+          # build multi-field, multi-locale filters
+          # TODO: filter pre-validation
+          #   - check well-formedness
+          #   - validate against faceted fields in index
           filter.each do |f, arr|
             arr.each do |v|
               # FIXME: refactor me with dynamic templates

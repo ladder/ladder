@@ -12,6 +12,10 @@ node :results do |search|
   end
 end
 
+node :locales do
+  @search.locales
+end
+
 node :facets do
   @search.results.facets
 end

@@ -7,16 +7,6 @@ Ladder.controllers :search do
     check_api_key
   end
 
-  get :index do
-    halt 400, {:ok => false, :status => 400, :error => 'No query provided'}.to_json unless params[:q]
-
-    search
-  end
-
-  get :index, :with => :q do
-    search
-  end
-
   get :resources, :with => :q do
     search({'filters' => { 'type' => {'type' => ['resource']}}}) # FIXME: allow symbols
   end
@@ -27,6 +17,20 @@ Ladder.controllers :search do
 
   get :agents, :with => :q do
     search({'filters' => { 'type' => {'type' => ['agent']}}}) # FIXME: allow symbols
+  end
+
+  get :facets do
+    @tenant.properties['facets'].to_json # FIXME: allow symbols
+  end
+
+  get :index do
+    halt 400, {:ok => false, :status => 400, :error => 'No query provided'}.to_json unless params[:q]
+
+    search
+  end
+
+  get :index, :with => :q do
+    search
   end
 
   # Delete entire ES index
