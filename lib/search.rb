@@ -16,11 +16,8 @@ class Search
   end
 
   def self.reindex(delete = false)
-    self.delete if delete
-
-    %w[Agent Concept Resource].each do |model|
-      model.constantize.delay.import
-    end
+    self.delete if delete # default to reindex without delete/remap
+    Ladder.index
   end
 
   def initialize(opts={})

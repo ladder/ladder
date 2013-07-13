@@ -27,8 +27,8 @@ Ladder.controllers do
 
     # switch Mongoid to tenant's database
     Mongoid::Config.override_database("ladder_#{tenant.database}")
-    Ladder.create
     Search.delete
+    Ladder.index tenant
 
     # TODO: send email in background
 
@@ -39,7 +39,7 @@ Ladder.controllers do
   delete :index do
     check_api_key
 
-    index_response = Ladder.destroy
+    index_response = Ladder.destroy @tenant
 
     status index_response.code
     body index_response.body

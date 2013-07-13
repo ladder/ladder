@@ -43,7 +43,7 @@ Ladder.controllers :search do
 
   # Reindex all models
   put :reindex do
-    Search.reindex
+    Search.reindex !! params[:delete] || true # FIXME: this should default to false
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)

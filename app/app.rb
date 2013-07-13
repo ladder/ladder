@@ -46,7 +46,7 @@ class Ladder < Padrino::Application
     halt 404
   end
 
-  def self.destroy
+  def self.destroy(tenant = nil)
     # Remove existing Mongo DB
     Mongoid::Sessions.default.with(:database => Search.index_name).collections.each {|collection| collection.drop}
 
@@ -54,16 +54,19 @@ class Ladder < Padrino::Application
     index_response = Search.delete
 
     # Send index/mapping
-    self.create
+    self.index tenant
 
     index_response
   end
 
-  def self.create
+  def self.index(tenant = nil)
+    # if a tenant is specified (always?), get facet mappings for index mapping
+
     %w[Agent Concept Resource].each do |model|
       klass = model.classify.constantize
       klass.create_indexes
       klass.put_mapping
+      klass.delay.import  # is this kosher here?
     end
   end
 end
