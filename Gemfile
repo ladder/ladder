@@ -10,6 +10,10 @@ group :development do
   gem 'ruby-prof'
 end
 
+# Deployment stuff
+gem 'knife-solo'
+gem 'berkshelf'
+
 # Padrino core framework
 gem 'padrino-cache' # will include padrino-helpers and padrino-core
 

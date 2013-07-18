@@ -1,3 +1,3 @@
 # ladder
 
-All your library data in a simple interface.
+Born in a library, raised on the Semantic Web.
