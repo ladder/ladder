@@ -114,7 +114,8 @@ Vagrant.configure("2") do |config|
     chef.add_recipe "java"
     chef.add_recipe "elasticsearch"
 
-#    chef.add_recipe "redis"
+    chef.add_recipe "redisio::install"
+    chef.add_recipe "redisio::enable"
 #    chef.add_recipe "rbenv"
 
   #   chef.cookbooks_path = "../my-recipes/cookbooks"
