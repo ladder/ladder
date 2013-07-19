@@ -1,7 +1,9 @@
 site :opscode
 
-cookbook 'mongodb'
-cookbook 'elasticsearch'
+cookbook 'mongodb-10gen'
+
+cookbook 'java'
+cookbook 'elasticsearch', git: 'https://github.com/elasticsearch/cookbook-elasticsearch.git'
 # cookbook 'redis'
 
 # Ruby stuff

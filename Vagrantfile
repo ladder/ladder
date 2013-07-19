@@ -105,8 +105,15 @@ Vagrant.configure("2") do |config|
   #
   config.vm.provision :chef_solo do |chef|
     # TODO: refactor these out into a default recipe
-    chef.add_recipe "mongodb"
+    
+    # Single-node MongoDB
+    chef.add_recipe "mongodb-10gen"
+    chef.add_recipe "mongodb-10gen::single"
+
+    # ElasticSearch
+    chef.add_recipe "java"
     chef.add_recipe "elasticsearch"
+
 #    chef.add_recipe "redis"
 #    chef.add_recipe "rbenv"
 
