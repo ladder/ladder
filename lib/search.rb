@@ -15,9 +15,19 @@ class Search
     index.response
   end
 
-  def self.reindex(delete = false)
-    self.delete if delete # default to reindex without delete/remap
-    Ladder.index
+  def self.index(opts = {})
+    opts = opts.symbolize_keys.slice(:facets, :delete)
+
+    self.delete if opts[:delete] # default to reindex without delete/remap
+
+    # TODO: include facets in mapping if provided
+
+    %w[Agent Concept Resource].each do |model|
+      klass = model.classify.constantize
+      klass.create_indexes
+      klass.put_mapping
+      klass.delay.import  # is this kosher here?
+    end
   end
 
   def initialize(opts={})

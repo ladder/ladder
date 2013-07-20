@@ -64,8 +64,8 @@ Ladder.controllers :concepts do
     search({}, @model)
   end
 
-  # Reindex all Concepts
-  put :reindex, :map => '/concepts/reindex' do
+  # (Re)index all Concepts
+  put :index, :map => '/concepts/index' do
     Concept.delay.import
 
     status 202 # processing started

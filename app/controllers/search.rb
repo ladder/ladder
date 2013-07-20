@@ -20,7 +20,7 @@ Ladder.controllers :search do
   end
 
   get :facets do
-    @tenant.properties['facets'].to_json # FIXME: allow symbols
+    @tenant.properties['facets'].to_json # FIXME: allow symbols/indifferent
   end
 
   get :index do
@@ -41,9 +41,9 @@ Ladder.controllers :search do
     body index_response.body
   end
 
-  # Reindex all models
-  put :reindex do
-    Search.reindex !! params[:delete] || true # FIXME: this should default to false
+  # (Re)index all models
+  put :index do
+    Search.index params
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)

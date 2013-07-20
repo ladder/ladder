@@ -31,6 +31,8 @@
 #end
 
 Padrino.configure_apps do
+#  enable :sessions
+
   # Set the POST upload limit to be large
   Rack::Utils.key_space_limit = 10485760
 end

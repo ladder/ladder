@@ -64,8 +64,8 @@ Ladder.controllers :agents do
     search({}, @model)
   end
 
-  # Reindex all Agents
-  put :reindex, :map => '/agents/reindex' do
+  # (Re)index all Agents
+  put :index, :map => '/agents/index' do
     Agent.delay.import
 
     status 202 # processing started

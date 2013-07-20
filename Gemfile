@@ -11,11 +11,11 @@ group :development do
 end
 
 # Deployment stuff
-gem 'knife-solo'
-gem 'berkshelf'
+#gem 'knife-solo'
+#gem 'berkshelf'
 
 # Padrino core framework
-gem 'padrino-cache' # will include padrino-helpers and padrino-core
+gem 'padrino-cache', :github => "padrino/padrino-framework" # will include padrino-helpers and padrino-core
 
 # MongoDB / ElasticSearch
 gem 'mongoid'
@@ -43,7 +43,7 @@ gem 'email_veracity'
 
 # RDF handling
 gem 'rdf-rdfxml'
-gem 'easel', :git => 'git://github.com/mtrudel/easel.git', :branch => 'i18n'
+gem 'easel', :github => 'mtrudel/easel', :branch => 'i18n'
 
 # File handling
 gem 'lz4-ruby' # NOT JRUBY COMPATIBLE
@@ -67,7 +67,7 @@ gem 'padrino-helpers'
 #gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
 gem 'haml'
 gem 'bcrypt-ruby', :require => 'bcrypt'         # for padrino-auth
-gem 'kaminari', :git => 'git://github.com/amatsuda/kaminari.git', :require => 'kaminari/sinatra'  # view paging
+gem 'kaminari', :github => 'amatsuda/kaminari', :require => 'kaminari/sinatra'  # view paging
 gem 'iso-639'       # english/french lists
 gem 'language_list' # multiple language lists
 gem 'ignore_nil'    # cleanly access chained property methods

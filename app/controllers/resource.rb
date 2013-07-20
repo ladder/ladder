@@ -64,8 +64,8 @@ Ladder.controllers :resources do
     search({}, @model)
   end
 
-  # Reindex all Resources
-  put :reindex, :map => '/resources/reindex' do
+  # (Re)index all Resources
+  put :index, :map => '/resources/index' do
     Resource.delay.import
 
     status 202 # processing started

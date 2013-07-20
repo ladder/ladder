@@ -45,28 +45,4 @@ class Ladder < Padrino::Application
   error Mongoid::Errors::DocumentNotFound do
     halt 404
   end
-
-  def self.destroy(tenant = nil)
-    # Remove existing Mongo DB
-    Mongoid::Sessions.default.with(:database => Search.index_name).collections.each {|collection| collection.drop}
-
-    # Remove existing ES index
-    index_response = Search.delete
-
-    # Send index/mapping
-    self.index tenant
-
-    index_response
-  end
-
-  def self.index(tenant = nil)
-    # if a tenant is specified (always?), get facet mappings for index mapping
-
-    %w[Agent Concept Resource].each do |model|
-      klass = model.classify.constantize
-      klass.create_indexes
-      klass.put_mapping
-      klass.delay.import  # is this kosher here?
-    end
-  end
 end
