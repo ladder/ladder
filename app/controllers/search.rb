@@ -43,7 +43,7 @@ Ladder.controllers :search do
 
   # (Re)index all models
   put :index do
-    Search.index params
+    Search.index @tenant.properties.merge params
 
     status 202 # processing started
     body({:ok => true, :status => 202}.to_json)

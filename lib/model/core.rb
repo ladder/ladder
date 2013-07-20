@@ -87,7 +87,7 @@ module Model
           # only query on an existing index
           return self.queryable unless tire.index.exists?
 
-          # NB: this will fail on empty indexes
+          # FIXME: this will fail on empty indexes
           # get the most recent timestamp
           s = self.search {
             query { all }

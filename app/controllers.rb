@@ -13,6 +13,7 @@ Ladder.controllers do
      :tagline => 'Born in a library, raised on the Semantic Web'}.to_json
   end
 
+  # Create a new tenant and initialize a ladder
   post :api_key do
     email = EmailVeracity::Address.new(params[:email])
 
@@ -25,23 +26,27 @@ Ladder.controllers do
 
     @tenant.save!
 
+    # TODO: send email in background
+    # TODO: move mongoid/ES stuff elsewhere?
+
     # Switch Mongoid to tenant's database
     Mongoid::Config.override_database("ladder_#{@tenant.database}")
+    [Agent, Concept, Resource].each(&:create_indexes)
 
     # Create ES index
     Search.index @tenant.properties.merge(:delete => true)
-
-    # TODO: send email in background
 
     status 201 # resource created
     body({:api_key => @tenant.api_key, :ok => true, :status => 201}.to_json)
   end
 
+  # Delete and re-initialize an entire ladder
   delete :index do
     check_api_key
 
-    # Remove existing Mongo DB
+    # Remove ALL existing Mongo collections
     Mongoid::Sessions.default.with(:database => Search.index_name).collections.each {|collection| collection.drop}
+    [Agent, Concept, Resource].each(&:create_indexes)
 
     # Re-create ES index
     Search.index @tenant.properties.merge(:delete => true)

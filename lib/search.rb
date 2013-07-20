@@ -22,11 +22,9 @@ class Search
 
     # TODO: include facets in mapping if provided
 
-    %w[Agent Concept Resource].each do |model|
-      klass = model.classify.constantize
-      klass.create_indexes
-      klass.put_mapping
-      klass.delay.import  # is this kosher here?
+    [Agent, Concept, Resource].each do |model|
+      model.put_mapping opts[:facets]
+      model.delay.import
     end
   end
 
