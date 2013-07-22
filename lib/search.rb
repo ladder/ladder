@@ -20,10 +20,8 @@ class Search
 
     self.delete if opts[:delete] # default to reindex without delete/remap
 
-    # TODO: include facets in mapping if provided
-
     [Agent, Concept, Resource].each do |model|
-      model.put_mapping opts[:facets]
+      model.put_mapping opts.except(:delete)  # pass through options; NB: maybe #slice?
       model.delay.import
     end
   end

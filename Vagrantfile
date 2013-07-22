@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   # NB: 32-bit guest is required on hosts that do not have VT-x
-  config.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -125,17 +125,17 @@ Vagrant.configure("2") do |config|
 #    chef.add_recipe "rbenv"
 
     # Single-node MongoDB
-    chef.add_recipe "mongodb-10gen"
-    chef.add_recipe "mongodb-10gen::single"
+#    chef.add_recipe "mongodb-10gen"
+#    chef.add_recipe "mongodb-10gen::single"
 
     # ElasticSearch
-    chef.add_recipe "java"
-    chef.add_recipe "elasticsearch"
+#    chef.add_recipe "java"
+#    chef.add_recipe "elasticsearch"
 
 #    chef.add_recipe "redisio::install"
 #    chef.add_recipe "redisio::enable"
 
-    chef.add_recipe "redis::source"
+#    chef.add_recipe "redis::source"
 
   #   chef.cookbooks_path = "../my-recipes/cookbooks"
   #   chef.roles_path = "../my-recipes/roles"

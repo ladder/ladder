@@ -106,8 +106,9 @@ module Model
         end
       end
 
-      def define_mapping
+      def define_mapping(opts={})
         # basic object mapping for vocabs
+
         # TODO: put explicit mapping here when removing dynamic templates
         vocabs = self.vocabs.each_with_object({}) do |(key,val), h|
           h[key] = {:type => 'object'}
@@ -133,7 +134,7 @@ module Model
         }.merge(vocabs).merge(dates).merge(ids).merge(relations)
 
         # memoize mapping as a class variable
-        @mapping = {:_source => { :compress => true },
+        @mapping = {#:_source => { :enabled => false },
                     :_timestamp => { :enabled => true, :store => 'yes' },
                     :index_analyzer => 'snowball',
                     :search_analyzer => 'snowball',
@@ -163,12 +164,12 @@ module Model
 =end
       end
 
-      def put_mapping
+      def put_mapping(opts={})
         # ensure the index exists
         tire.index.create unless tire.index.exists?
 
         # do a PUT mapping for this index
-        tire.index.mapping self.name.downcase, @mapping ||= self.define_mapping
+        tire.index.mapping self.name.downcase, self.define_mapping(opts)
       end
 
       def get_mapping
