@@ -107,11 +107,28 @@ module Model
       end
 
       def define_mapping(opts={})
-        # basic object mapping for vocabs
+        # facet mapping for vocabs
+        # TODO:fixme this is an ugly rescue
+        facet_vocabs = opts[:facets].values.flatten rescue []
 
-        # TODO: put explicit mapping here when removing dynamic templates
         vocabs = self.vocabs.each_with_object({}) do |(key,val), h|
-          h[key] = {:type => 'object'}
+          vocab_properties = {}
+
+          val.vocabularies.each do |vocab|
+            vocab_props = vocab.properties.each_with_object({}) do |(prop), ha|
+
+              if facet_vocabs.include? "#{key}.#{prop}"
+                ha[prop] = {:type => 'object',
+#                            :path => "facets"
+                }
+              end
+
+            end
+            vocab_properties.merge!(vocab_props)
+          end
+
+          h[key] = {:type => 'object', :properties => vocab_properties}
+#          h[key] = {:type => 'object'}
         end
 
         # Timestamp information
@@ -138,14 +155,14 @@ module Model
                     :_timestamp => { :enabled => true, :store => 'yes' },
                     :index_analyzer => 'snowball',
                     :search_analyzer => 'snowball',
-                    :properties => properties}
-=begin
+                    :properties => properties,
+
    # dynamic templates to store un-analyzed values for faceting
    # TODO: remove dynamic templates and use explicit facet mapping
   :dynamic_templates => [{
                              :auto_facet => {
-                                 :match => '*',
-                                 :match_mapping_type => '*',
+                                 :path_match => 'dcterms.subject.*',
+                                 :match_mapping_type => 'string',
                                  :mapping => {
                                      :type => 'multi_field',
                                      :fields => {
@@ -161,7 +178,7 @@ module Model
                                  }
                              }
                          }]
-=end
+}
       end
 
       def put_mapping(opts={})
