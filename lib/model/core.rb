@@ -111,6 +111,8 @@ module Model
         # TODO:fixme this is an ugly rescue
         facet_vocabs = opts[:facets].values.flatten rescue []
 
+        dynamic_templates = []
+
         vocabs = self.vocabs.each_with_object({}) do |(key,val), h|
           vocab_properties = {}
 
@@ -118,9 +120,26 @@ module Model
             vocab_props = vocab.properties.each_with_object({}) do |(prop), ha|
 
               if facet_vocabs.include? "#{key}.#{prop}"
-                ha[prop] = {:type => 'object',
-#                            :path => "facets"
-                }
+                ha[prop] = {:type => 'object'}
+
+                # add a dynamic template for this facet
+                dynamic_templates << {"#{key}.#{prop}".to_sym => {
+                    :path_match => "#{key}.#{prop}.*",
+                    :match_mapping_type => 'string',
+                    :mapping => {
+                        :type => 'multi_field',
+                        :fields => {
+                            '{name}' => {
+                                :type => 'string',
+                                :index => 'not_analyzed'
+                            },
+                            :analyzed => {
+                                :type => 'string',
+                                :index => 'analyzed'
+                            }
+                        }
+                    }
+                }}
               end
 
             end
@@ -156,29 +175,7 @@ module Model
                     :index_analyzer => 'snowball',
                     :search_analyzer => 'snowball',
                     :properties => properties,
-
-   # dynamic templates to store un-analyzed values for faceting
-   # TODO: remove dynamic templates and use explicit facet mapping
-  :dynamic_templates => [{
-                             :auto_facet => {
-                                 :path_match => 'dcterms.subject.*',
-                                 :match_mapping_type => 'string',
-                                 :mapping => {
-                                     :type => 'multi_field',
-                                     :fields => {
-                                         '{name}' => {
-                                             :type => 'string',
-                                             :index => 'analyzed'
-                                         },
-                                         :raw => {
-                                             :type => 'string',
-                                             :index => 'not_analyzed'
-                                         }
-                                     }
-                                 }
-                             }
-                         }]
-}
+                    :dynamic_templates => dynamic_templates}
       end
 
       def put_mapping(opts={})
