@@ -171,6 +171,7 @@ class Search
 
     @results = @search.results
 =begin
+    # get a list of IDs from facets and query ES for the headings to display
     unless @facets.empty?
       ids = @results.facets.map(&:last).map do |hash|
         hash['terms'].map do |term|
@@ -187,6 +188,12 @@ class Search
           search.fields ['heading', 'heading_ancestors']
         end
       end
+
+      ids.each do |id|
+        heading_model = @headings.results.find {|i| i.id == id}
+      end
+
+      # TODO: re-map heading_models into @results.facets
     end
 =end
   end

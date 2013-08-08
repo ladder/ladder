@@ -478,7 +478,7 @@ module Model
 
     def to_rdfxml(url)
       uri = URI.parse(url)
-      interned_uri = RDF::URI.intern(RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :path => "#{self.class.name.underscore.pluralize}/#{self.id}"))
+      interned_uri = RDF::URI.intern(RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :port => uri.port, :path => "#{self.class.name.underscore.pluralize}/#{self.id}"))
 
       # build an RDF graph for each vocab
       graphs = []
@@ -501,7 +501,7 @@ module Model
               model = self.class.name.underscore.pluralize
             end
 
-            new_statement = [statement.subject, statement.predicate, RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :path => "#{model}/#{statement.object}")]
+            new_statement = [statement.subject, statement.predicate, RDF::URI.new(:scheme => uri.scheme, :host => uri.host, :port => uri.port, :path => "#{model}/#{statement.object}")]
             graph.delete(statement)
             graph << new_statement
 
