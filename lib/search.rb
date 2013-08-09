@@ -170,9 +170,10 @@ class Search
     end
 
     @results = @search.results
-=begin
+
     # get a list of IDs from facets and query ES for the headings to display
     unless @facets.empty?
+
       ids = @results.facets.map(&:last).map do |hash|
         hash['terms'].map do |term|
           term['term'] if term['term'].to_s.match(/^[0-9a-f]{24}$/)
@@ -180,22 +181,30 @@ class Search
       end
 
       ids = ids.flatten.uniq.compact
+
       unless ids.empty?
         @headings = Tire.search index do |search|
           search.query { |q| q.ids ids }
           search.size ids.size
+
           # TODO: I think these need to be localized as above
           search.fields ['heading', 'heading_ancestors']
         end
       end
 
-      ids.each do |id|
-        heading_model = @headings.results.find {|i| i.id == id}
+      @results.facets.symbolize_keys_recursive.each do |facet|
+        facet.last[:terms].each do |term|
+
+          if ids.include? term['term']
+            # TODO: make ID resolution consistent everywhere
+            heading_model = @headings.results.find {|i| i.id == term['term']}
+            term['term'] = heading_model.heading
+          end
+        end
       end
 
-      # TODO: re-map heading_models into @results.facets
     end
-=end
+
   end
 
 end

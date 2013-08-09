@@ -108,7 +108,7 @@ module Model
 
       def define_mapping(opts={})
         # facet mapping for vocabs
-        # TODO:fixme this is an ugly rescue
+        # FIXME: this is an ugly rescue
         facet_vocabs = opts[:facets].values.flatten rescue []
 
         dynamic_templates = []
@@ -147,7 +147,6 @@ module Model
           end
 
           h[key] = {:type => 'object', :properties => vocab_properties}
-#          h[key] = {:type => 'object'}
         end
 
         # Timestamp information

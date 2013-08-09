@@ -25,6 +25,7 @@ Ladder.helpers do
 
   def search(opts = {}, model = nil)
     @search = Search.new(params.merge opts)
+    # FIXME: facets defaults to nil instead of {}
     @search.facets = @tenant.properties['facets'] unless params[:facets] # default to all defined facets
     @search.model = model if model
     @search.query
