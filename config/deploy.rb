@@ -13,6 +13,9 @@ set :deploy_via, :remote_cache
 set :user, 'deploy'
 set :deploy_to, "/home/deploy"
 
+default_run_options[:pty] = true
+set :use_sudo, true 
+
 set :default_environment, {
   'PATH' => "/opt/rbenv/shims/:$PATH"
 }
