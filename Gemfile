@@ -3,7 +3,6 @@ ruby '2.0.0'
 
 # Debugging stuff
 group :development do
-  gem 'capistrano'
   gem 'better_errors'
   gem 'binding_of_caller' # NOT JRUBY COMPATIBLE
   gem 'pry-padrino'

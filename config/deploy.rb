@@ -6,8 +6,8 @@ set :scm, :git
 set :branch, ENV['BRANCH'] || 'master'
 
 set :ssh_options, { :forward_agent => true }
-set :user, "deployer"  # The server's user for deploys
-set :scm_passphrase, "p@ssw0rd"  # The deploy user's password
+#set :user, "deployer"  # The server's user for deploys
+#set :scm_passphrase, "p@ssw0rd"  # The deploy user's password
 set :deploy_via, :remote_cache
 
 set :user, 'deploy'

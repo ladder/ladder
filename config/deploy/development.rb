@@ -3,9 +3,8 @@
 # 2222
 set :ssh_options, { :forward_agent => true,
                     :port => 2222,
-                    :keys => [File.join(ENV["HOME"], ".ssh", "ladder_rsa")]
+                    :keys => [File.join(ENV["HOME"], ".ssh", "github_rsa")]
 }
-
 
 role :web, "localhost"
 role :app, "localhost"
