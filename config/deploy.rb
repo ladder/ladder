@@ -22,3 +22,5 @@ require 'capistrano/ext/multistage'
 
 set :unicorn_workers, 4
 require 'capistrano-nginx-unicorn'
+
+require 'sidekiq/capistrano'
