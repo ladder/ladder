@@ -1,3 +1,4 @@
+require 'bundler/capistrano'
 set :application, "ladder"
 set :repository,  "git@github.com:mjsuhonos/ladder.git"
 
