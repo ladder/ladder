@@ -1,6 +1,9 @@
 source 'https://rubygems.org'
 ruby '2.0.0'
 
+# We run on Unicorn!
+gem 'unicorn'
+
 # Debugging stuff
 group :development do
   gem 'better_errors'
@@ -8,10 +11,13 @@ group :development do
   gem 'pry-padrino'
   gem 'wirble'
   gem 'ruby-prof'
+  gem 'capistrano'
+  gem 'capistrano-nginx-unicorn', require: false
 end
 
 # Padrino core framework
-gem 'padrino-cache', :github => "padrino/padrino-framework" # will include padrino-helpers and padrino-core
+# will include padrino-helpers and padrino-core
+gem 'padrino-cache', :github => "padrino/padrino-framework"
 
 # MongoDB / ElasticSearch
 gem 'mongoid'
