@@ -81,6 +81,12 @@ GEM
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     builder (3.0.4)
+    capistrano (2.15.5)
+      highline
+      net-scp (>= 1.0.0)
+      net-sftp (>= 2.0.0)
+      net-ssh (>= 2.0.14)
+      net-ssh-gateway (>= 1.1.0)
     celluloid (0.14.1)
       timers (>= 1.0.0)
     coderay (1.0.9)
@@ -99,6 +105,7 @@ GEM
       tilt
     hashdiff (0.0.6)
     hashr (0.0.22)
+    highline (1.6.19)
     hike (1.2.3)
     http_router (0.11.0)
       rack (>= 1.0.0)
@@ -140,6 +147,13 @@ GEM
       mongoid (>= 3.0, <= 4.0)
     moped (1.5.0)
     multi_json (1.7.8)
+    net-scp (1.1.2)
+      net-ssh (>= 2.6.5)
+    net-sftp (2.1.2)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.6.8)
+    net-ssh-gateway (1.2.0)
+      net-ssh (>= 2.6.5)
     nokogiri (1.6.0)
       mini_portile (~> 0.5.0)
     oj (2.1.4)
@@ -227,6 +241,7 @@ DEPENDENCIES
   bcrypt-ruby
   better_errors
   binding_of_caller
+  capistrano
   easel!
   email_veracity
   enhanced_marc

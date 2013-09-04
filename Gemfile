@@ -3,6 +3,7 @@ ruby '2.0.0'
 
 # Debugging stuff
 group :development do
+  gem 'capistrano'
   gem 'better_errors'
   gem 'binding_of_caller' # NOT JRUBY COMPATIBLE
   gem 'pry-padrino'
@@ -11,7 +12,8 @@ group :development do
 end
 
 # Padrino core framework
-gem 'padrino-cache', :github => "padrino/padrino-framework" # will include padrino-helpers and padrino-core
+# will include padrino-helpers and padrino-core
+gem 'padrino-cache', :github => "padrino/padrino-framework"
 
 # MongoDB / ElasticSearch
 gem 'mongoid'
