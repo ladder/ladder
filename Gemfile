@@ -9,7 +9,6 @@ group :development do
   gem 'pry-padrino'
   gem 'wirble'
   gem 'ruby-prof'
-  gem 'capistrano'
 end
 
 # Padrino core framework
