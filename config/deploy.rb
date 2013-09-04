@@ -3,7 +3,7 @@ set :application, "ladder"
 set :repository,  "git@github.com:mjsuhonos/ladder.git"
 
 set :scm, :git 
-set :branch, ENV['BRANCH'] | 'master'
+set :branch, ENV['BRANCH'] || 'master'
 
 set :ssh_options, { :forward_agent => true }
 set :user, "deployer"  # The server's user for deploys
