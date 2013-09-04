@@ -87,6 +87,8 @@ GEM
       net-sftp (>= 2.0.0)
       net-ssh (>= 2.0.14)
       net-ssh-gateway (>= 1.1.0)
+    capistrano-nginx-unicorn (0.0.6)
+      capistrano (>= 2.0)
     celluloid (0.14.1)
       timers (>= 1.0.0)
     coderay (1.0.9)
@@ -242,6 +244,7 @@ DEPENDENCIES
   better_errors
   binding_of_caller
   capistrano
+  capistrano-nginx-unicorn
   easel!
   email_veracity
   enhanced_marc

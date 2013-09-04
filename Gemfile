@@ -10,6 +10,7 @@ group :development do
   gem 'wirble'
   gem 'ruby-prof'
   gem 'capistrano'
+  gem 'capistrano-nginx-unicorn', require: false
 end
 
 # Padrino core framework

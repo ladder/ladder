@@ -3,7 +3,7 @@ set :application, "ladder"
 set :repository,  "git@github.com:mjsuhonos/ladder.git"
 
 set :scm, :git 
-set :branch ENV['BRANCH'] | 'master'
+set :branch, ENV['BRANCH'] | 'master'
 
 set :ssh_options, { :forward_agent => true }
 set :user, "deployer"  # The server's user for deploys
@@ -19,3 +19,6 @@ set :default_environment, {
 set :stages, %w(production development)
 set :default_stage, "development"
 require 'capistrano/ext/multistage'
+
+set :unicorn_workers, 4
+require 'capistrano-nginx-unicorn'
