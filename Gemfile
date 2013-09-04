@@ -1,6 +1,9 @@
 source 'https://rubygems.org'
 ruby '2.0.0'
 
+# We run on Unicorn!
+gem 'unicorn'
+
 # Debugging stuff
 group :development do
   gem 'better_errors'

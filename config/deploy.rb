@@ -17,13 +17,13 @@ default_run_options[:pty] = true
 set :use_sudo, true 
 
 set :default_environment, {
-  'PATH' => "/opt/rbenv/shims/:$PATH"
+  'PATH' => "/usr/local/rbenv/shims/:$PATH"
 }
 set :stages, %w(production development)
 set :default_stage, "development"
 require 'capistrano/ext/multistage'
 
-set :nginx_server_name, "ladder.deliberatedata.com
+set :nginx_server_name, "ladder.deliberatedata.com"
 set :unicorn_workers, 4
 require 'capistrano-nginx-unicorn'
 
