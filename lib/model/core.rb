@@ -56,7 +56,7 @@ module Model
 
         # use md5 fingerprint to query if a document already exists
         obj = self.new(attrs)
-        query = self.where(:md5 => obj.generate_md5).hint(:md5 => 1)
+        query = self.where(:md5 => obj.generate_md5).hint('$md5' => 1)
 
         result = query.first
         return result unless result.nil?
