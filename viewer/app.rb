@@ -1,6 +1,5 @@
 class Viewer < Padrino::Application
   register Padrino::Rendering
-#  register Padrino::Mailer
   register Padrino::Helpers
   register Kaminari::Helpers::SinatraHelpers
 
@@ -13,8 +12,8 @@ class Viewer < Padrino::Application
 
   configure :production do
     register Padrino::Cache
-#    register Padrino::Contrib::ExceptionNotifier
-#    register Padrino::Mailer
+    register Padrino::Contrib::ExceptionNotifier
+    register Padrino::Mailer
 
     enable :caching
     disable :raise_errors
@@ -37,6 +36,8 @@ class Viewer < Padrino::Application
 
   use Rack::Mongoid::Middleware::IdentityMap
 
+  Mongoid::History.tracker_class_name = :history_tracker
+
   error Mongoid::Errors::DocumentNotFound do
     halt 404
   end
@@ -44,20 +45,4 @@ class Viewer < Padrino::Application
   error 404 do
     render('errors/40x', :layout => :application)
   end
-
-#  Mongoid::Sessions.default.options[:database] = :ladder_development
-=begin
-  set :admin_model, 'Account'
-  set :login_page, "/admin/sessions/new"
-  enable :store_location
-  set :session_id, "my_shared_session_id"
-
-  access_control.roles_for :any do |role|
-    role.protect '/'
-  end
-
-  access_control.roles_for :admin do |role|
-    role.project_module :accounts, '/accounts'
-  end
-=end
 end
