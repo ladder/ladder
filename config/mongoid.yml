@@ -4,6 +4,12 @@ development:
       database: ladder
       hosts:
         - localhost:27017
+production:
+  sessions:
+    default:
+      database: ladder
+      hosts:
+        - localhost:27017
 options:
   scope_overwrite_exception: true
   skip_version_check: true
