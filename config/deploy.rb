@@ -20,6 +20,7 @@ set :default_environment, {
 set :stages, %w(production development)
 set :default_stage, "development"
 require 'capistrano/ext/multistage'
+set :rack_env, stage
 
 set :nginx_server_name, "ladder.deliberatedata.com"
 set :unicorn_workers, 4
