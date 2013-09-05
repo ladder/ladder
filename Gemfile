@@ -15,6 +15,11 @@ group :development do
   gem 'capistrano-nginx-unicorn', require: false
 end
 
+group :production do
+  gem 'padrino-mailer'
+  gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
+end  
+
 # Padrino core framework
 # will include padrino-helpers and padrino-core
 gem 'padrino-cache', :github => "padrino/padrino-framework"
@@ -65,8 +70,6 @@ gem 'gyoku'
 gem 'padrino'
 gem 'padrino-core'
 gem 'padrino-helpers'
-#gem 'padrino-mailer'
-#gem 'padrino-contrib', :require => 'padrino-contrib/exception_notifier'
 gem 'haml'
 gem 'bcrypt-ruby', :require => 'bcrypt'         # for padrino-auth
 gem 'kaminari', :github => 'amatsuda/kaminari', :require => 'kaminari/sinatra'  # view paging
