@@ -1,4 +1,4 @@
-#set :domain, 'deliberatedata.com'
+set :domain, 'deliberatedata.com'
 set :application, "ladder"
 
 set :scm, :git 
