@@ -46,7 +46,7 @@ Ladder.controllers :files do
   # Upload a data stream to save as a File; optionally queue immediately
   post :index do
     # ensure we have content to process
-    halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.body.length
+    halt 400, {:error => 'No content provided', :status => 400}.to_json if 0 == request.content_length
 
     # ensure it is something we CAN process
     halt 415, {:error => 'Unsupported content type', :status => 415, :valid => Mapper.content_types}.to_json unless Mapper.content_types.include? request.content_type
