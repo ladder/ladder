@@ -6,4 +6,4 @@ role :web, "gameimprovement.com"
 role :app, "gameimprovement.com"
 role :db,  "gameimprovement.com", :primary => true 
 set :server, "gameimprovement.com"
-set :rack_env, "production"
+set :unicorn_env, "production"

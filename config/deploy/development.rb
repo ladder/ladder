@@ -11,7 +11,7 @@ role :app, "localhost"
 role :db,  "localhost", :primary => true 
 set :server, "localhost"
 
-set :rack_env, "development"
+set :unicorn_env, "development"
 
 # We want to deploy the development gems with bundler in dev mode
 # The cap task defaults to --without development,test. We'll overwrite
