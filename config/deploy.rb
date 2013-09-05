@@ -28,6 +28,6 @@ require 'capistrano-nginx-unicorn'
 
 require 'sidekiq/capistrano'
 require 'bundler/capistrano'
-before deploy:restart, unicorn:setup
+before 'deploy:restart', 'unicorn:setup'
 
 
