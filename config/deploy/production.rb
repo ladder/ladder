@@ -1,9 +1,10 @@
 set :ssh_options, { :forward_agent => true,
-                    :keys => [File.join(ENV["HOME"], ".ssh", "deflectadmin_rsa")]
+                    :keys => [File.join(ENV["HOME"], ".ssh", "github_rsa")]
 }
 
-role :web, "gameimprovement.com"
-role :app, "gameimprovement.com"
-role :db,  "gameimprovement.com", :primary => true 
-set :server, "gameimprovement.com"
+role :web, "ladder.deliberatedata.com"
+role :app, "ladder.deliberatedata.com"
+role :db,  "ladder.deliberatedata.com", :primary => true
+set :server, "ladder.deliberatedata.com"
+
 set :unicorn_env, "production"

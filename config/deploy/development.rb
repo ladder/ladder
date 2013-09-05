@@ -12,7 +12,7 @@ role :db,  "localhost", :primary => true
 set :server, "localhost"
 
 set :unicorn_env, "development"
-set :rails_env, "development" # For sideqik rails centric-ness of their cap task
+set :rails_env, "development" # For Sidekiq Rails-centric-ness of their cap task
 
 # We want to deploy the development gems with bundler in dev mode
 # The cap task defaults to --without development,test. We'll overwrite

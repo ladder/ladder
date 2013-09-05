@@ -21,9 +21,8 @@ set :stages, %w(production development)
 set :default_stage, "development"
 require 'capistrano/ext/multistage'
 
-
 set :nginx_server_name, "ladder.deliberatedata.com"
-set :unicorn_workers, 4
+set :unicorn_workers, 2
 require 'capistrano-nginx-unicorn'
 
 require 'sidekiq/capistrano'
