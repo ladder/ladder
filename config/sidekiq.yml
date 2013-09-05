@@ -1,0 +1,11 @@
+# Sample configuration file for Sidekiq.
+# Options here can still be overridden by cmd line args.
+#   sidekiq -C config.yml
+---
+:require:  /home/deploy/current/config/boot.rb
+development:
+	:verbose: true
+  :concurrency: 10
+production:
+  :verbose: false
+  :concurrency: 50
