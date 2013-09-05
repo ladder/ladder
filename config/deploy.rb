@@ -1,4 +1,4 @@
-set :domain, 'deliberatedata.com'
+#set :domain, 'deliberatedata.com'
 set :application, "ladder"
 
 set :scm, :git 
@@ -28,3 +28,6 @@ require 'capistrano-nginx-unicorn'
 
 require 'sidekiq/capistrano'
 require 'bundler/capistrano'
+before deploy:restart, unicorn:setup
+
+
