@@ -15,7 +15,8 @@ class Viewer < Padrino::Application
     register Padrino::Contrib::ExceptionNotifier
     register Padrino::Mailer
 
-    enable :caching
+    # FIXME: search results will cache
+#    enable :caching
     disable :raise_errors
     disable :show_exceptions
 
