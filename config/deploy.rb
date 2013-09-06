@@ -25,8 +25,8 @@ set :nginx_server_name, "ladder.deliberatedata.com"
 set :unicorn_workers, 2
 require 'capistrano-nginx-unicorn'
 
+set :sidekiq_processes, 2
 require 'sidekiq/capistrano'
+
 require 'bundler/capistrano'
 before 'deploy:restart', 'unicorn:setup'
-
-
