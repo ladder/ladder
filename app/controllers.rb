@@ -9,7 +9,7 @@ Ladder.controllers do
     {:name => 'Ladder',
      :ok => true,
      :status => 200,
-     :version => '0.4.0',
+     :version => '0.5.0',
      :tagline => 'Born in a library, raised on the Semantic Web'}.to_json
   end
 
