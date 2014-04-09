@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Core application
-gem 'sinatra', '~> 1.4.5'
+gem 'padrino', '~> 0.12.1'
 
 # Linked Data gems
 gem 'rack-linkeddata', '~> 1.1.0'
