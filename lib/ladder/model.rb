@@ -20,13 +20,22 @@ module Ladder
                                              autobuild: true
       end
 
-      # Return a list of vocab QNames bound to this Model
+      # Return a list of vocab URIs bound to this Model
       def vocabs
-        embedded_relations.map do |vocab, meta|
-          vocab.to_sym
-        end
+        embedded_relations.map { |vocab, meta| RDF::URI.from_qname vocab }
       end
 
+    end
+
+    def to_rdf
+      self.class.vocabs.each do |uri|
+        vocab = RDF::Vocabulary.from_uri(uri)
+
+        vocab.predicates.each do |field|
+          # TODO: do some logic
+        end
+        
+      end
     end
 
   end

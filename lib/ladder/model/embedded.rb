@@ -7,17 +7,15 @@ module Ladder
 
       # Once the document is built, bind it to the vocab's properties
       after_build do |document|
-        uri = self.to_uri
-        vocab = RDF::Vocabulary.find {|vocab| vocab.to_uri == uri}
-        fields = (vocab.public_methods - RDF::Vocabulary.methods - [:properties])
+        vocab = RDF::Vocabulary.from_uri(self.to_uri)
 
-        fields.each do |f|
-          self.class.field f.to_sym, :type => Array, :localize => true
+        # Create a Mongoid field for each property
+        vocab.predicates.each do |field|
+          self.class.field field, :type => Array, :localize => true
         end
       end
-        
+
       def to_uri
-        # NB: this requires the RDF::URI patch
         RDF::URI.from_qname metadata[:name] unless metadata.nil?
       end
 
