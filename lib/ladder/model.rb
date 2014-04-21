@@ -27,15 +27,25 @@ module Ladder
 
     end
 
-    def to_rdf
-      self.class.vocabs.each do |uri|
-        vocab = RDF::Vocabulary.from_uri(uri)
+    # Return an RDF::Graph that can be serialized or whatnot
+    def to_rdf(uri)
+      uri = RDF::URI.intern(uri) unless uri.is_a? RDF::URI
+      graph = RDF::Graph.new
+
+      self.class.vocabs.each do |vocab_uri|
+        vocab = RDF::Vocabulary.from_uri(vocab_uri) # RDF::Vocabulary class
+        embedded = self.send vocab_uri.qname.first  # Ladder::Model::Embedded object
 
         vocab.predicates.each do |field|
-          # TODO: do some logic
+          next unless embedded[field]
+
+          embedded[field].each do |lang, val|
+            graph << [uri, RDF::URI(vocab_uri / field), RDF::Literal(val, language: lang)]
+          end
         end
-        
       end
+      
+      graph
     end
 
   end
