@@ -1,4 +1,12 @@
 L2::App.controllers  do
+
+#  register Sinatra::LinkedData
+  use Rack::LinkedData::ContentNegotiation, :standard_prefixes => true
+
+  get :index do
+    r = Resource.new ; r.dc.title = 'title' ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
+    r.to_rdf('http://test.uri')
+  end
   
   # get :index, :map => '/foo/bar' do
   #   session[:foo] = 'bar'
