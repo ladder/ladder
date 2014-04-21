@@ -24,7 +24,7 @@ gem 'mongoid', '~> 3.1.6'
 gem 'elasticsearch-model', '~> 0.1.0'
 
 # Optional JSON codec (faster performance)
-# gem 'oj'
+gem 'oj'
 
 # Project requirements
 #gem 'rake'

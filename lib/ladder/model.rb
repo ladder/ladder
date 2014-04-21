@@ -40,6 +40,7 @@ module Ladder
           next unless embedded[field]
 
           embedded[field].each do |lang, val|
+            # Create language-typed literals since fields are localized
             graph << [uri, RDF::URI(vocab_uri / field), RDF::Literal(val, language: lang)]
           end
         end

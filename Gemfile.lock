@@ -20,7 +20,7 @@ GEM
       elasticsearch-transport (= 1.0.1)
     elasticsearch-api (1.0.1)
       multi_json
-    elasticsearch-model (0.1.0)
+    elasticsearch-model (0.1.1)
       activesupport (> 3)
       elasticsearch (> 0.4)
       hashie
@@ -34,14 +34,14 @@ GEM
       multipart-post (>= 1.2, < 3)
     haml (4.0.5)
       tilt
-    hashie (2.1.0)
+    hashie (2.1.1)
     htmlentities (4.3.1)
     http_router (0.11.1)
       rack (>= 1.0.0)
       url_mount (~> 0.2.1)
     i18n (0.6.9)
     json (1.8.1)
-    json-ld (1.1.2)
+    json-ld (1.1.3)
       rdf (~> 1.1)
     linkeddata (1.1.1)
       equivalent-xml (>= 0.4.0)
@@ -78,6 +78,7 @@ GEM
     net-http-persistent (2.9.4)
     nokogiri (1.6.1)
       mini_portile (~> 0.5.0)
+    oj (2.8.0)
     origin (1.1.0)
     padrino (0.12.1)
       padrino-admin (= 0.12.1)
@@ -97,6 +98,7 @@ GEM
     padrino-core (0.12.1)
       activesupport (>= 3.1)
       http_router (~> 0.11.0)
+      padrino-support (= 0.12.1)
       rack-protection (>= 1.5.0)
       sinatra (~> 1.4.2)
       thor (~> 0.18.0)
@@ -196,6 +198,7 @@ DEPENDENCIES
   elasticsearch-model (~> 0.1.0)
   json-ld (~> 1.1.2)
   mongoid (~> 3.1.6)
+  oj
   padrino (~> 0.12.1)
   pry-padrino
   rack-linkeddata (~> 1.1.0)
