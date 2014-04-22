@@ -4,7 +4,11 @@ L2::App.controllers  do
   use Rack::LinkedData::ContentNegotiation, standard_prefixes: true
 
   get :index do
-    r = Resource.new ; r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
+    r = Resource.new
+    r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
+    r.dc.alternative = ['alternate title']
+    r.rdfs.comment = 'here is a comment' ; I18n.locale = :de ; r.rdfs.comment = 'deutsch' ; I18n.locale = :en
+    
     r.to_rdf('http://test.uri')
   end
   

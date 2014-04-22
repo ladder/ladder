@@ -61,6 +61,7 @@ module Ladder
     end
 
     # Return an RDF::Graph that can be serialized
+    # Takes a base URI 
     def to_rdf(uri)
       uri = RDF::URI.intern(uri) unless uri.is_a? RDF::URI
       graph = RDF::Graph.new
@@ -75,9 +76,9 @@ module Ladder
           # Create language-typed literals since fields are localized
           embedded[field].each do |lang, val|
             if val.kind_of? Enumerable
-              val.each {|value| graph << [uri, RDF::URI(vocab_uri / field), RDF::Literal(value, language: lang)] }
+              val.each {|value| graph << [uri / self.id, vocab_uri / field, RDF::Literal(value, language: lang)] }
             else
-              graph << [uri, RDF::URI(vocab_uri / field), RDF::Literal(val, language: lang)]
+              graph << [uri / self.id, vocab_uri / field, RDF::Literal(val, language: lang)]
             end
           end
         end
