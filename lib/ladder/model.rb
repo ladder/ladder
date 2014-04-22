@@ -40,16 +40,19 @@ module Ladder
           next unless vocab.predicates.include? field = predicate.qname.last # We have a valid Predicate
 
           embedded = model.send vocab.prefix # Ladder::Model::Embedded object
-          
-          if object.has_language? # track locale before setting
-            locale = I18n.locale
+
+          if object.has_language?
+            locale = I18n.locale # track locale before setting
             I18n.locale = object.language
-            embedded.send("#{field}=", object.to_s)
-            I18n.locale = locale
-          else
-            embedded.send("#{field}=", object.to_s)
           end
 
+          if embedded.send(field).kind_of? Enumerable
+            embedded.send(field) << object.to_s
+          else
+            embedded.send("#{field}=", Array(object.to_s))
+          end
+
+          I18n.locale = locale if locale # reset locale
         end
 
         model
@@ -69,9 +72,13 @@ module Ladder
         vocab.predicates.each do |field|
           next unless embedded[field]
 
+          # Create language-typed literals since fields are localized
           embedded[field].each do |lang, val|
-            # Create language-typed literals since fields are localized
-            graph << [uri, RDF::URI(vocab_uri / field), RDF::Literal(val, language: lang)]
+            if val.kind_of? Enumerable
+              val.each {|value| graph << [uri, RDF::URI(vocab_uri / field), RDF::Literal(value, language: lang)] }
+            else
+              graph << [uri, RDF::URI(vocab_uri / field), RDF::Literal(val, language: lang)]
+            end
           end
         end
       end

@@ -4,12 +4,12 @@ L2::App.controllers  do
   use Rack::LinkedData::ContentNegotiation, standard_prefixes: true
 
   get :index do
-    r = Resource.new ; r.dc.title = 'title' ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
+    r = Resource.new ; r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
     r.to_rdf('http://test.uri')
   end
   
   post :index do
-    body = '{"@context":{"dc":"http://purl.org/dc/terms/"},"@id":"http://test.uri","dc:title":[{"@value":"title","@language":"en"},{"@value":"francais","@language":"fr"}]}'
+    body = '{"@context":{"dc":"http://purl.org/dc/terms/"},"@id":"http://test.uri","dc:title":[{"@value":"title","@language":"en"},{"@value":"another title","@language":"en"},{"@value":"francais","@language":"fr"}]}'
 
     hash = JSON.parse body rescue return 400 # JSON is mal-formed
 
