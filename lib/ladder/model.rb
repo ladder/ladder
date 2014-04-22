@@ -25,9 +25,40 @@ module Ladder
         embedded_relations.map { |vocab, meta| RDF::URI.from_qname vocab }
       end
 
+      # Take an RDF::Graph and create a Model instance from it
+      def new_from_rdf(graph)
+        model = self.new
+
+        graph.each_triple do |subject, predicate, object|
+          # NB: we assume the subject is the model being built
+          # may consider handling subject URIs for eg. validation or implicit sameAs
+
+          next unless vocabs.include? vocab_uri = predicate.parent # We have a valid Vocabuary
+
+          vocab = RDF::Vocabulary.from_uri vocab_uri
+
+          next unless vocab.predicates.include? field = predicate.qname.last # We have a valid Predicate
+
+          prefix = RDF::Vocabulary.prefix_from_uri vocab.to_uri
+          embedded = model.send prefix # Ladder::Model::Embedded object
+          
+          if object.has_language? # track locale before setting
+            locale = I18n.locale
+            I18n.locale = object.language
+            embedded.send("#{field}=", object.to_s)
+            I18n.locale = locale
+          else
+            embedded.send("#{field}=", object.to_s)
+          end
+
+        end
+
+        model
+      end
+
     end
 
-    # Return an RDF::Graph that can be serialized or whatnot
+    # Return an RDF::Graph that can be serialized
     def to_rdf(uri)
       uri = RDF::URI.intern(uri) unless uri.is_a? RDF::URI
       graph = RDF::Graph.new
