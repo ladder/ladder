@@ -52,7 +52,7 @@ module Ladder
             embedded.send("#{field}=", Array(object.to_s))
           end
 
-          I18n.locale = locale if locale # reset locale
+          I18n.locale = locale if object.has_language? # reset locale
         end
 
         model
