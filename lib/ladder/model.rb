@@ -14,8 +14,8 @@ module Ladder
     module ClassMethods
 
       # Creates an embedded object bound to an RDF::Vocab class
-      def bind_to klass
-        embeds_one klass.to_uri.qname.first, class_name: 'Ladder::Model::Embedded',
+      def bind_to vocab
+        embeds_one vocab.prefix, class_name: 'Ladder::Model::Embedded',
                                              cascade_callbacks: true,
                                              autobuild: true
       end
@@ -39,8 +39,7 @@ module Ladder
 
           next unless vocab.predicates.include? field = predicate.qname.last # We have a valid Predicate
 
-          prefix = RDF::Vocabulary.prefix_from_uri vocab.to_uri
-          embedded = model.send prefix # Ladder::Model::Embedded object
+          embedded = model.send vocab.prefix # Ladder::Model::Embedded object
           
           if object.has_language? # track locale before setting
             locale = I18n.locale
@@ -65,7 +64,7 @@ module Ladder
 
       self.class.vocabs.each do |vocab_uri|
         vocab = RDF::Vocabulary.from_uri(vocab_uri) # RDF::Vocabulary class
-        embedded = self.send vocab_uri.qname.first  # Ladder::Model::Embedded object
+        embedded = self.send vocab.prefix  # Ladder::Model::Embedded object
 
         vocab.predicates.each do |field|
           next unless embedded[field]

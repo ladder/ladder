@@ -15,6 +15,10 @@ module RDF
       self.find {|vocab| vocab.to_uri == uri}
     end
     
+    def self.prefix
+      @@vocab_uris.key(self.to_uri)
+    end
+
     def self.prefix_from_uri(uri)
       @@vocab_uris.key(uri)
     end
