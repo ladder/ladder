@@ -14,7 +14,7 @@ gem 'padrino', '~> 0.12.1'
 # end
 
 # Linked Data gems
-gem 'rack-linkeddata', '~> 1.1.0'
+gem 'sinatra-linkeddata', '~> 1.1.0'
 gem 'json-ld', '~> 1.1.2', require: 'json/ld'
 
 # Persistence gems
