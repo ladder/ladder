@@ -1,6 +1,6 @@
 class Resource
   include Ladder::Model
 
-  bind_to RDF::RDFS
-  bind_to RDF::DC
+  use_vocab RDF::RDFS
+  use_vocab RDF::DC
 end

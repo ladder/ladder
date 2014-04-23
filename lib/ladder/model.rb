@@ -14,7 +14,7 @@ module Ladder
     module ClassMethods
 
       # Creates an embedded object bound to an RDF::Vocab class
-      def bind_to vocab
+      def use_vocab(vocab)
         embeds_one vocab.prefix, class_name: 'Ladder::Model::Embedded',
                                              cascade_callbacks: true,
                                              autobuild: true

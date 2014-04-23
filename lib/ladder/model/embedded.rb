@@ -14,8 +14,8 @@ module Ladder
         vocab = RDF::Vocabulary.from_uri(RDF::Vocabulary.uri_from_prefix metadata[:name])
 
         # Create a Mongoid field for each property
-        vocab.predicates.each do |field_name|
-          eigenclass.field field_name, :type => Array, :localize => true
+        vocab.predicates.each do |field|
+          eigenclass.field field, :type => Array, :localize => true
         end
       end
 
