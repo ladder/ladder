@@ -23,8 +23,9 @@ module RDF
       @@vocab_uris.key(uri)
     end
     
+    # Return an RDF::URI for a valid Vocabulary prefix
     def self.uri_from_prefix(prefix)
-      @@vocab_uris.fetch(prefix.to_sym) rescue nil
+      RDF::URI.intern @@vocab_uris.fetch(prefix.to_sym) rescue nil
     end
 
   end

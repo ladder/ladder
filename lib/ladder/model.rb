@@ -22,7 +22,7 @@ module Ladder
 
       # Return a list of vocab URIs bound to this Model
       def vocabs
-        embedded_relations.map { |vocab, meta| RDF::URI.from_qname vocab }
+        embedded_relations.map { |prefix, meta| RDF::Vocabulary.uri_from_prefix prefix }
       end
 
       # Take an RDF::Graph and create a Model instance from it

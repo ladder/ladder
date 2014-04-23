@@ -4,22 +4,6 @@ module RDF
 
   class URI
 
-    # Take a qname array pair and return a URI
-    def self.from_qname(qname)
-      return nil if qname.nil?
-
-      qname = [qname, nil] unless qname.is_a? Array and qname.size == 2
-      prefix = Vocabulary.uri_from_prefix(qname.flatten.first)
-
-      return nil if prefix.nil?
-
-      if qname.last.nil?
-        return self.intern(prefix)
-      else
-        return self.intern(self.new(prefix) / qname.last)
-      end
-    end
-
     def qname
       if self.to_s =~ %r([:/#]([^:/#]*)$)
         local_name = $1
