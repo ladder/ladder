@@ -6,15 +6,22 @@ module Ladder
       include Mongoid::Document
 
       # Once the document is built, bind it to the vocab's properties
-      after_build do |document|
-        vocab = RDF::Vocabulary.from_uri(RDF::URI.from_qname metadata[:name])
+      after_build :setup_vocabs
+      
+      private
+
+      def setup_vocabs
+        vocab = RDF::Vocabulary.from_uri(RDF::Vocabulary.uri_from_prefix metadata[:name])
 
         # Create a Mongoid field for each property
         vocab.predicates.each do |field_name|
-          self.class.field field_name, :type => Array, :localize => true
+          eigenclass.field field_name, :type => Array, :localize => true
         end
       end
 
+      def eigenclass
+        class << self ; self ; end
+      end
     end
 
   end
