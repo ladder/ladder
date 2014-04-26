@@ -72,6 +72,9 @@ GEM
       moped (~> 1.4)
       origin (~> 1.0)
       tzinfo (~> 0.3.29)
+    mongoid-grid_fs (2.1.0)
+      mime-types (>= 1.0, < 3.0)
+      mongoid (>= 3.0, < 5.0)
     moped (1.5.2)
     multi_json (1.9.2)
     multipart-post (2.0.0)
@@ -197,12 +200,14 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  better_errors
+  better_errors (~> 1.1.0)
   elasticsearch-model (~> 0.1.0)
   json-ld (~> 1.1.2)
+  mail (~> 2.5.4)
   mongoid (~> 3.1.6)
+  mongoid-grid_fs (~> 2.1.0)
   oj
   padrino (~> 0.12.1)
-  pry-padrino
+  pry-padrino (~> 0.1.2)
   sinatra-linkeddata (~> 1.1.0)
-  wirble
+  wirble (~> 0.1.3)
