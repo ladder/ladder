@@ -5,9 +5,12 @@ module Ladder
     def self.included(base)
       base.class_eval do
         include Mongoid::Document
+
+        # Associated files (eg. imported/mapped data objects) are stored in GridFS
+        has_many :files, class_name: 'Mongoid::GridFS::Fs::File'
       end
 
-      # This goes at the end to allow overloading Mongoid methods
+      # This goes at the end to allow overloading Mongoid methods in ClassMethods
       base.extend ClassMethods
     end
 
