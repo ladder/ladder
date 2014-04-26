@@ -12,6 +12,12 @@ Bundler.require(:default, RACK_ENV)
 #
 Padrino::Logger::Config[:development][:log_level]  = :devel
 Padrino::Logger::Config[:development][:log_static] = true
+
+if 'development' == RACK_ENV
+  Mongoid.logger = Padrino.logger
+  Moped.logger = Padrino.logger
+end
+
 #
 # ## Configure your I18n
 #
