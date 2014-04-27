@@ -4,6 +4,7 @@ L2::App.controllers  do
   use Rack::LinkedData::ContentNegotiation, standard_prefixes: true
 
   get :index do
+    Resource = Ladder::RDF.model name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS']
     r = Resource.new
     r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
     r.dc.alternative = ['alternate title']
@@ -21,6 +22,7 @@ L2::App.controllers  do
     
     return 422 unless graph.valid? # JSON is well-formed, but JSON-LD is not valid RDF
     
+    Resource = Ladder::RDF.model name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS']
     r = Resource.new_from_rdf(graph)
   end
   

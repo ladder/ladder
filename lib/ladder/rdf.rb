@@ -2,9 +2,9 @@ require_relative 'model'
 
 module Ladder
 
-  class Resource
+  class RDF
     include Ladder::Model
-    use_vocab RDF::RDFS
+    use_vocab ::RDF::RDFS
     
     # Create a Model class bound to specific vocabs
     # Required parameters:

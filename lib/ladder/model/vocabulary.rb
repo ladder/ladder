@@ -2,7 +2,7 @@ module Ladder
 
   module Model
     
-    class Embedded
+    class Vocabulary
       include Mongoid::Document
 
       # Once the document is built, bind it to the vocab's properties
@@ -11,7 +11,7 @@ module Ladder
       private
 
       def setup_vocabs
-        vocab = RDF::Vocabulary.from_uri(RDF::Vocabulary.uri_from_prefix metadata[:name])
+        vocab = ::RDF::Vocabulary.from_uri(::RDF::Vocabulary.uri_from_prefix metadata[:name])
 
         # Create a Mongoid field for each property
         vocab.predicates.each do |field|

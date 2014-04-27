@@ -21,14 +21,14 @@ module Ladder
         # Ensure we don't bind a vocab more than once
         return if vocabs.include? vocab.to_uri
         
-        embeds_one vocab.prefix, class_name: 'Ladder::Model::Embedded',
+        embeds_one vocab.prefix, class_name: 'Ladder::Model::Vocabulary',
                                              cascade_callbacks: true,
                                              autobuild: true
       end
 
       # Return a list of vocab URIs bound to this Model
       def vocabs
-        embedded_relations.map { |prefix, meta| RDF::Vocabulary.uri_from_prefix prefix }
+        embedded_relations.map { |prefix, meta| ::RDF::Vocabulary.uri_from_prefix prefix }
       end
 
       # Take an RDF::Graph and create a Model instance from it
@@ -41,11 +41,11 @@ module Ladder
 
           next unless vocabs.include? vocab_uri = predicate.parent # We have a valid Vocabuary
 
-          vocab = RDF::Vocabulary.from_uri vocab_uri
+          vocab = ::RDF::Vocabulary.from_uri vocab_uri
 
           next unless vocab.predicates.include? field = predicate.qname.last # We have a valid Predicate
 
-          embedded = model.send vocab.prefix # Ladder::Model::Embedded object
+          embedded = model.send vocab.prefix # Ladder::Model::Vocabulary object
 
           if object.has_language?
             locale = I18n.locale # track locale before setting
@@ -69,12 +69,12 @@ module Ladder
     # Return an RDF::Graph that can be serialized
     # Takes a base URI 
     def to_rdf(uri)
-      uri = RDF::URI.intern(uri) unless uri.is_a? RDF::URI
-      graph = RDF::Graph.new
+      uri = ::RDF::URI.intern(uri) unless uri.is_a? ::RDF::URI
+      graph = ::RDF::Graph.new
 
       self.class.vocabs.each do |vocab_uri|
-        vocab = RDF::Vocabulary.from_uri(vocab_uri) # RDF::Vocabulary class
-        embedded = self.send vocab.prefix  # Ladder::Model::Embedded object
+        vocab = ::RDF::Vocabulary.from_uri(vocab_uri) # RDF::Vocabulary class
+        embedded = self.send vocab.prefix  # Ladder::Model::Vocabulary object
 
         vocab.predicates.each do |field|
           next unless embedded[field]
@@ -82,9 +82,9 @@ module Ladder
           # Create language-typed literals since fields are localized
           embedded[field].each do |lang, val|
             if val.kind_of? Enumerable
-              val.each {|value| graph << [uri / self.id, vocab_uri / field, RDF::Literal(value, language: lang)] }
+              val.each {|value| graph << [uri / self.id, vocab_uri / field, ::RDF::Literal(value, language: lang)] }
             else
-              graph << [uri / self.id, vocab_uri / field, RDF::Literal(val, language: lang)]
+              graph << [uri / self.id, vocab_uri / field, ::RDF::Literal(val, language: lang)]
             end
           end
         end
