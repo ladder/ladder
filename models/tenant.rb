@@ -4,7 +4,13 @@ class Tenant
   field :api_key, type: String
   field :email, type: String
   field :database, type: String
-  field :properties, type: Hash, default: {}
+  field :properties, type: Hash, default: {
+    models: [
+      {name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS']},
+      {name: 'Concept',  vocabs: ['RDF::SKOS']},
+      {name: 'Agent',    vocabs: ['RDF::FOAF']},
+    ]
+  }
 
   after_initialize :generate_api_key
   after_initialize :set_database
