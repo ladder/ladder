@@ -1,4 +1,5 @@
 require 'rdf'
+require_relative 'vocab/modsrdf'
 
 module RDF
 

@@ -1,3 +1,5 @@
+require_relative 'model'
+
 module Ladder
 
   class Resource
