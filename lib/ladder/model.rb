@@ -18,6 +18,9 @@ module Ladder
 
       # Creates an embedded object bound to an RDF::Vocab class
       def use_vocab(vocab)
+        # Ensure we don't bind a vocab more than once
+        return if vocabs.include? vocab.to_uri
+        
         embeds_one vocab.prefix, class_name: 'Ladder::Model::Embedded',
                                              cascade_callbacks: true,
                                              autobuild: true
