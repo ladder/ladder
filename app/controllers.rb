@@ -3,17 +3,22 @@ L2::App.controllers  do
 #  register Sinatra::LinkedData
   use Rack::LinkedData::ContentNegotiation, standard_prefixes: true
 
+  # FIXME: TEMPORARY FOR DEBUGGING
   get :index do
-    Resource = Ladder::RDF.model name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS']
-    r = Resource.new
+    klass = Ladder::RDF.model name: 'TenantID_Resource', vocabs: ['RDF::DC', 'RDF::MODS']
+
+    r = klass.new
     r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
     r.dc.alternative = ['alternate title']
     r.rdfs.comment = 'here is a comment' ; I18n.locale = :de ; r.rdfs.comment = 'deutsch' ; I18n.locale = :en
     
-    r.to_rdf('http://test.uri')
+    r.to_rdf(uri)
   end
   
-  post :index do
+  # FIXME: TEMPORARY FOR DEBUGGING
+  post :index, :csrf_protection => false do
+    # case on request.content_type
+
     body = '{"@context":{"dc":"http://purl.org/dc/terms/"},"@id":"http://test.uri","dc:title":[{"@value":"title","@language":"en"},{"@value":"another title","@language":"en"},{"@value":"francais","@language":"fr"}]}'
 
     hash = JSON.parse body rescue return 400 # JSON is mal-formed
@@ -22,8 +27,10 @@ L2::App.controllers  do
     
     return 422 unless graph.valid? # JSON is well-formed, but JSON-LD is not valid RDF
     
-    Resource = Ladder::RDF.model name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS']
-    r = Resource.new_from_rdf(graph)
+    klass = Ladder::RDF.model name: 'TenantID_Resource', vocabs: ['RDF::DC', 'RDF::MODS']
+    r = klass.new_from_rdf(graph)
+    
+    return 200, r.to_rdf(uri)
   end
   
   # get :index, :map => '/foo/bar' do

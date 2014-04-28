@@ -5,6 +5,9 @@ module L2
 
     enable :sessions
 
+    # FIXME: TEMPORARY FOR DEBUGGING
+    set :allow_disabled_csrf, true
+
     ##
     # Caching support.
     #
