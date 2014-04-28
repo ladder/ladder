@@ -17,11 +17,10 @@ module Ladder
       return unless name = opts[:name] and vocabs = opts[:vocabs]
       return unless vocabs.is_a? Array
 
-      if Object.const_defined? name.capitalize
-        klass = name.constantize
-      else
-        klass = Object.const_set name.capitalize, Class.new(self)
-      end
+      # If this class is already a defined constant, return it
+      return klass = name.classify.constantize if Object.const_defined? name.classify
+
+      klass = Object.const_set name.classify, Class.new(self)
 
       vocabs.each do |vocab|
         # Only allow valid RDF::Vocabulary classes
