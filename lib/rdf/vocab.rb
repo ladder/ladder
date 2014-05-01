@@ -1,5 +1,6 @@
 require 'rdf'
 require_relative 'vocab/edm'
+require_relative 'vocab/mads'
 require_relative 'vocab/mods'
 
 module RDF
