@@ -15,7 +15,7 @@ module Ladder
 
         # Create a Mongoid field for each property
         vocab.predicates.each do |field|
-          eigenclass.field field, :type => Array, :localize => true
+          eigenclass.field field, type: Array, localize: true
         end
       end
 
