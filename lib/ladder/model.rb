@@ -6,9 +6,6 @@ module Ladder
       base.class_eval do
         include Mongoid::Document
         
-        # Array of rdf:type values for Classes
-        field :types, type: Array, default: []
-
         # Associated files (eg. imported/mapped data objects) are stored in GridFS
         has_many :files, class_name: 'Mongoid::GridFS::Fs::File'
       end

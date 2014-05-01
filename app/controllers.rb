@@ -5,7 +5,7 @@ L2::App.controllers  do
 
   # FIXME: TEMPORARY FOR DEBUGGING
   get :index do
-    klass = Ladder::RDF.model module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS']
+    klass = Ladder::RDF.model module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['RDF::DC.BibliographicResource', 'RDF::MODS.ModsResource']
 
     r = klass.new
     r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
@@ -27,7 +27,7 @@ L2::App.controllers  do
     
     return 422 unless graph.valid? # JSON is well-formed, but JSON-LD is not valid RDF
     
-    klass = Ladder::RDF.model module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS']
+    klass = Ladder::RDF.model module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['RDF::DC.BibliographicResource', 'RDF::MODS.ModsResource']
     r = klass.new_from_rdf(graph)
     
     return 200, r.to_rdf(uri)

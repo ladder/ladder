@@ -7,9 +7,9 @@ class Tenant
   field :properties, type: Hash, default: {
     # FIXME: TEMPORARY FOR DEBUGGING
     models: [
-      {name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['dc:BibliographicResource']},
-      {name: 'Concept',  vocabs: ['RDF::SKOS'], types: ['skos:Concept']},
-      {name: 'Agent',    vocabs: ['RDF::FOAF', 'RDF::VCARD'], types: ['foaf:Agent']},
+      { name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['RDF::DC.BibliographicResource', 'RDF::MODS.ModsResource'] },
+      { name: 'Concept',  vocabs: ['RDF::SKOS', 'RDF::MADS'], types: ['RDF::SKOS.Concept', 'RDF::MADS.Concept'] },
+      { name: 'Agent',    vocabs: ['RDF::FOAF', 'RDF::VCARD'], types: ['RDF::FOAF.Agent', 'RDF::VCARD.Agent'] },
     ]
   }
 
