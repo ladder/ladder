@@ -31,6 +31,13 @@ module RDF
       # NB: this only makes sense for defined subclasses, RDF::DC
       self.singleton_methods - RDF::Vocabulary.singleton_methods - [:properties]
     end
+    
+    def self.class_properties
+      props = predicates.map(&:to_s)
+      props.select! { |p| p == p.camelize }
+      props.reject! { |p| p == p.upcase }
+      props.map(&:to_sym)
+    end
 
   end
 

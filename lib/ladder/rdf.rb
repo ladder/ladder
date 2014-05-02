@@ -41,16 +41,17 @@ module Ladder
       end
       
       valid_types = types.map do |type|
-        vocab, property = type.split('.').take(2)
-        
+        vocab, property = type.split('.')
+
         next unless Object.const_defined? vocab
-        next unless vocab.constantize.respond_to? property
+        next unless vocab.constantize.class_properties.include? property.to_sym
+        # next unless vocab.constantize.respond_to? property
         
         type
       end
 
       # Array of rdf:type values for Classes
-        field :types, type: Array, default: valid_types.compact
+        field :types, type: Array, default: valid_types.uniq.compact
       klass
     end
 
