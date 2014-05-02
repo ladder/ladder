@@ -1,7 +1,9 @@
 require 'rdf'
+require_relative 'vocab/bibframe'
 require_relative 'vocab/edm'
 require_relative 'vocab/mads'
 require_relative 'vocab/mods'
+require_relative 'vocab/ore'
 
 module RDF
 
