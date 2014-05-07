@@ -10,6 +10,19 @@ class Tenant
       { name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['RDF::DC.BibliographicResource', 'RDF::MODS.ModsResource'] },
       { name: 'Concept',  vocabs: ['RDF::SKOS', 'RDF::MADS'], types: ['RDF::SKOS.Concept', 'RDF::MADS.Concept'] },
       { name: 'Agent',    vocabs: ['RDF::FOAF', 'RDF::VCARD'], types: ['RDF::FOAF.Agent', 'RDF::VCARD.Agent'] },
+    ],
+    mappings: [
+      { content_type: 'application/mods+xml', model: 'Resource', types: ['RDF::BIBO.Document', 'RDF::DC.BibliographicResource'],
+        properties: [
+          ['RDF::DC.title', 'titleInfo[not(@type = "alternative")]'],
+          ['RDF::MODS.note', 'note'],
+
+          # These map to embedded/related Mappings
+          ['RDF::DC.hasPart', 'relatedItem[@type="constituent"]'],
+          ['RDF::DC.publisher', 'originInfo/publisher'],
+          ['RDF::DC.subject', 'subject[not(@authority="lcsh") and not(geographicCode)]'],
+        ]
+      }
     ]
   }
 
