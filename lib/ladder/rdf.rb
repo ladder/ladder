@@ -5,6 +5,7 @@ module Ladder
   class RDF
     include Ladder::Model
     use_vocab ::RDF::RDFS
+    store_in collection: 'models'
     
     # Create a Model class bound to specific vocabs
     #
@@ -16,6 +17,7 @@ module Ladder
 
     def self.model(*args)
       opts = args.last || {}
+      opts.symbolize_keys!
 
       return unless name = opts[:name] and mod = opts[:module] and vocabs = opts[:vocabs] and types = opts[:types]
       return unless mod.is_a? String
