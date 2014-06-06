@@ -12,13 +12,19 @@ class Tenant
       { name: 'Agent',    vocabs: ['RDF::FOAF', 'RDF::VCARD'], types: ['RDF::FOAF.Agent', 'RDF::VCARD.Agent'] },
     ],
     mappings: [
-      { content_type: 'application/mods+xml', model: 'Resource', types: ['RDF::BIBO.Document', 'RDF::DC.BibliographicResource'],
+      { content_type: 'application/mods+xml', model: 'Resource',# types: ['RDF::BIBO.Document', 'RDF::DC.BibliographicResource'],
         properties: [
+          # These map to RDF property / XPath pairs
           ['RDF::DC.title', 'titleInfo[not(@type = "alternative")]'],
           ['RDF::MODS.note', 'note'],
-
+        ],
+        mappings: [
           # These map to embedded/related Mappings
-          ['RDF::DC.hasPart', 'relatedItem[@type="constituent"]'],
+          ['RDF::DC.hasPart', 'relatedItem[@type="constituent"]', {
+            model: 'Resource', properties: [
+              'RDF::DC.isPartOf', '' # FIXME: THIS HAS TO POINT AT THE ROOT MAPPING
+            ]
+          }],
           ['RDF::DC.publisher', 'originInfo/publisher'],
           ['RDF::DC.subject', 'subject[not(@authority="lcsh") and not(geographicCode)]'],
         ]
