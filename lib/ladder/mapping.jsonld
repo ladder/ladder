@@ -1,4 +1,5 @@
 {
+    "content_type": "application/mods+xml",
     "@context": {
         "ladder": "Ladder:",
         "bibo": "http://purl.org/ontology/bibo/",
@@ -10,7 +11,9 @@
         "skos": "http://www.w3.org/2004/02/skos/core#"
     },
 	"@id" : "_:root",
-    "ladder:contentType": "application/mods+xml",
+	"@types" : [
+		"bibo:Document"
+	],
 	"ladder:model" : "Resource",
     "bibo:doi": "identifier[@type = \"doi\" and not(@invalid)]",
     "bibo:edition": "originInfo/edition",
@@ -21,7 +24,6 @@
     "bibo:oclcnum": "identifier[@type = \"oclc\" and not(@invalid)]",
     "bibo:upc": "identifier[@type = \"upc\" and not(@invalid)]",
     "bibo:uri": "identifier[@type = \"uri\" and not(@invalid)]",
-    "contentType": "application/mods+xml",
     "dcterms:DDC": [ "subject[@authority=\"ddc\"]", {
 		"ladder:model" : "Concept",
         "skos:hiddenLabel": "preceding-sibling::*",
