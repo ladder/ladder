@@ -11,10 +11,10 @@
         "skos": "http://www.w3.org/2004/02/skos/core#"
     },
 	"@id" : "_:root",
-	"@types" : [
-		"bibo:Document"
+	"@type" : [
+		"bibo:Document",
+		"ladder:Resource"
 	],
-	"ladder:model" : "Resource",
     "bibo:doi": "identifier[@type = \"doi\" and not(@invalid)]",
     "bibo:edition": "originInfo/edition",
     "bibo:isbn": "identifier[@type = \"isbn\" and not(@invalid)]",
@@ -25,29 +25,29 @@
     "bibo:upc": "identifier[@type = \"upc\" and not(@invalid)]",
     "bibo:uri": "identifier[@type = \"uri\" and not(@invalid)]",
     "dcterms:DDC": [ "subject[@authority=\"ddc\"]", {
-		"ladder:model" : "Concept",
+		"@type" : [ "ladder:Concept" ],
         "skos:hiddenLabel": "preceding-sibling::*",
         "skos:prefLabel": "."
 	}],
     "dcterms:LCC": [ "subject[@authority=\"lcc\"]", {
-		"ladder:model" : "Concept",
+		"@type" : [ "ladder:Concept" ],
         "skos:hiddenLabel": "preceding-sibling::*",
         "skos:prefLabel": "."
 	}],
     "dcterms:LCSH": [ "subject[@authority=\"lcsh\"]", {
-		"ladder:model" : "Concept",
+		"@type" : [ "ladder:Concept" ],
         "skos:hiddenLabel": "preceding-sibling::*",
         "skos:prefLabel": "."
 	}],
     "dcterms:RVM": [ "subject[@authority=\"rvm\"]", {
-		"ladder:model" : "Concept",
+		"@type" : [ "ladder:Concept" ],
         "skos:hiddenLabel": "preceding-sibling::*",
         "skos:prefLabel": "."
 	}],
     "dcterms:abstract": "abstract",
     "dcterms:alternative": "titleInfo[@type = \"alternative\"]",
     "dcterms:contributor": [ "name[not(@usage=\"primary\")]", {
-		"ladder:model" : "Agent",
+		"@type" : [ "ladder:Agent" ],
         "foaf:birthday": "namePart[@type = \"date\"]",
         "foaf:name": "namePart[not(@type)] | displayForm",
         "foaf:publications": { "@id": "_:root" },
@@ -55,7 +55,7 @@
 	}],
     "dcterms:created": "originInfo/dateCreated",
     "dcterms:creator": [ "name[@usage=\"primary\"]", {
-		"ladder:model" : "Agent",
+		"@type" : [ "ladder:Agent" ],
         "foaf:birthday": "namePart[@type = \"date\"]",
         "foaf:name": "namePart[not(@type)] | displayForm",
         "foaf:publications": { "@id": "_:root" },
@@ -64,49 +64,49 @@
     "dcterms:extent": "physicalDescription/extent",
     "dcterms:format": "physicalDescription/form[not(@authority = \"marcsmd\")]",
 	"dcterms:hasFormat" : [ "relatedItem[@type=\"otherFormat\"]", {
-		"ladder:model" : "Resource",
+		"@type" : [ "ladder:Resource" ],
         "dcterms:isFormatOf": { "@id": "_:root" }
     } ],
 	"dcterms:hasPart" : [ "relatedItem[@type=\"constituent\"]", {
-		"ladder:model" : "Resource",
+		"@type" : [ "ladder:Resource" ],
         "dcterms:isPartOf": { "@id": "_:root" }
     } ],
 	"dcterms:hasVersion" : [ "relatedItem[@type=\"otherVersion\"]", {
-		"ladder:model" : "Resource",
+		"@type" : [ "ladder:Resource" ],
         "dcterms:isVersionOf": { "@id": "_:root" }
     } ],
     "dcterms:identifier": "identifier[not(@type) or @type=\"local\"]",
 	"dcterms:isPartOf" : [ "relatedItem[@type=\"host\" or @type=\"series\"][1]", {
-		"ladder:model" : "Resource",
+		"@type" : [ "ladder:Resource" ],
         "dcterms:hasPart": { "@id": "_:root" }
     } ],
 	"dcterms:isReferencedBy" : [ "relatedItem[@type=\"isReferencedBy\"]", {
-		"ladder:model" : "Resource",
+		"@type" : [ "ladder:Resource" ],
         "dcterms:references": { "@id": "_:root" }
     } ],
     "dcterms:issued": "originInfo/dateIssued",
     "dcterms:language": "language/languageTerm",
     "dcterms:medium": "physicalDescription/form[@authority = \"marcsmd\"]",
 	"dcterms:publisher" : [ "originInfo/publisher", {
-		"ladder:model" : "Agent",
+		"@type" : [ "ladder:Agent" ],
         "foaf:name": ".",
         "foaf:publications": { "@id": "_:root" }
     } ],
 	"dcterms:references" : [ "relatedItem[@type=\"references\"]", {
-		"ladder:model" : "Resource",
+		"@type" : [ "ladder:Resource" ],
         "dcterms:isReferencedBy": { "@id": "_:root" }
     } ],
 	"dcterms:relation" : [ "relatedItem[not(@type)]", {
-		"ladder:model" : "Resource",
+		"@type" : [ "ladder:Resource" ],
         "dcterms:relation": { "@id": "_:root" }
     } ],
 	"dcterms:spatial" : [ "subject/geographicCode", {
-		"ladder:model" : "Concept",
+		"@type" : [ "ladder:Concept" ],
         "skos:hiddenLabel": "preceding-sibling::*",
         "skos:prefLabel": "."
     } ],
 	"dcterms:subject" : [ "subject[not(@authority=\"lcsh\") and not(geographicCode)]", {
-		"ladder:model" : "Concept",
+		"@type" : [ "ladder:Concept" ],
         "skos:hiddenLabel": "preceding-sibling::*",
         "skos:prefLabel": "."
     } ],
