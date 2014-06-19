@@ -9,10 +9,10 @@ module Ladder
     # Create a Model class bound to specific vocabs
     #
     # Required parameters:
-    # :name (String)  -> the name of the model class to create
-    # :module (String) -> the name of a module to namespace classes within
+    # :name (String)         -> the name of the model class to create
+    # :module (String)       -> the name of a module to namespace classes within
     # :vocabs (Array:String) -> a list of RDF::Vocabulary classes to use
-    # :types (Array:String) -> a list of prefixed RDF classes to assign
+    # :types (Array:String)  -> a list of prefixed RDF classes to assign
 
     def self.model(*args)
       opts = args.last || {}

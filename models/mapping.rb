@@ -1,15 +1,9 @@
 class Mapping
   include Mongoid::Document
 
-  field :content_type, :type => String  # A registered MIME-type
-  field :model, :type => String         # A Ladder::Model class
+  field :content_type, type: String  # A registered MIME-type for this mapping
+  field :objects,      type: Hash    # A key-based list of objects in this mapping
 
-  field :properties, :type => Array     # A list of RDF::Vocabulary property / XPath pairs
-#  field :mappings, :type => Array     # A list of related Mapping objects
-
-  recursively_embeds_many store_as: 'mappings' # A list of related Mapping objects
-
-  # FIXME: TEMPORARY FOR DEBUGGING
   def self.test
     hash = JSON.parse File.read('lib/ladder/mapping.jsonld')
     graph = ::RDF::Graph.new << JSON::LD::API.toRdf(hash)
@@ -44,34 +38,16 @@ class Mapping
           end
         end
 
-        qname = RDF::URI(subject).qname || subject
+        qname = RDF::URI(subject).qname
 
-        p "#{qname} : #{value} #{target}"
+        next if qname.nil?# if qname is nil, we don't know this subject
+
+        p "['#{qname.join(':')}', '#{value}', '#{target}'],"
       end
       
-      p ""
     end
     
     nil
-=begin
-    # NB: assuming the JSON-LD parser puts the root Subject first
-    graph.each_subject do |subject|
-      graph.query([subject, nil, nil]) do |statement|
-        p statement.inspect
-      end
-    end
-
-graph.each_statement { |s| p s.inspect }
-
-    graph.each_triple do |subject, predicate, object|
-      # NB: we assume the subject is the model being built
-      # may consider handling subject URIs for eg. validation or implicit sameAs
-    end
-    # model = self.new
-    # graph.select {|s, p, o| RDF.type == p}
-    # types = graph.each_triple do |s, p, o|
-    # end
-=end
   end
 
 end
