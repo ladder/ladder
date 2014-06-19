@@ -16,7 +16,7 @@ class Mapping
     # consider iterating over graph.to_hash
     graph.to_hash.each do |object_node, predicates|
       p "OBJECT ID #{object_node}"
-      
+
       predicates.each do |subject, object|
         # NB: object will be 1- or 2- element array
         case object.count

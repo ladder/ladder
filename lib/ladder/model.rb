@@ -28,7 +28,7 @@ module Ladder
 
       # Return a list of vocab URIs bound to this Model
       def vocabs
-        embedded_relations.map { |prefix, meta| ::RDF::Vocabulary.uri_from_prefix prefix }
+        embedded_relations.map { |prefix, meta| ::RDF::Vocabulary.expand_pname prefix }
       end
 
       # Take an RDF::Graph and create a Model instance from it
@@ -38,12 +38,11 @@ module Ladder
         graph.each_triple do |subject, predicate, object|
           # NB: we assume the subject is the model being built
           # may consider handling subject URIs for eg. validation or implicit sameAs
-
           next unless vocabs.include? vocab_uri = predicate.parent # We have a valid Vocabuary
 
-          vocab = ::RDF::Vocabulary.from_uri vocab_uri
+          vocab = ::RDF::Vocabulary.find vocab_uri
 
-          next unless vocab.predicates.include? field = predicate.qname.last # We have a valid Predicate
+          next unless vocab.properties.include? predicate # We have a valid Predicate
 
           embedded = model.send vocab.prefix # Ladder::Model::Vocabulary object
 
@@ -51,6 +50,8 @@ module Ladder
             locale = I18n.locale # track locale before setting
             I18n.locale = object.language
           end
+
+          field = predicate.qname.last
 
           if embedded.send(field).kind_of? Enumerable
             embedded.send(field) << object.to_s
@@ -73,10 +74,12 @@ module Ladder
       graph = ::RDF::Graph.new
 
       self.class.vocabs.each do |vocab_uri|
-        vocab = ::RDF::Vocabulary.from_uri(vocab_uri) # RDF::Vocabulary class
+        vocab = ::RDF::Vocabulary.find vocab_uri # RDF::Vocabulary class
         embedded = self.send vocab.prefix  # Ladder::Model::Vocabulary object
 
-        vocab.predicates.each do |field|
+        vocab.properties.each do |property|
+          field = property.qname.last
+
           next unless embedded[field]
 
           # Create language-typed literals since fields are localized

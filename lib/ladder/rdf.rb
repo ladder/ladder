@@ -12,7 +12,7 @@ module Ladder
     # :name (String)         -> the name of the model class to create
     # :module (String)       -> the name of a module to namespace classes within
     # :vocabs (Array:String) -> a list of RDF::Vocabulary classes to use
-    # :types (Array:String)  -> a list of prefixed RDF classes to assign
+    # :types (Array:String)  -> a list of pname RDF classes to assign
 
     def self.model(*args)
       opts = args.last || {}
@@ -41,11 +41,13 @@ module Ladder
       end
       
       valid_types = types.map do |type|
-        vocab, property = type.split('.')
+        # NB: this will throw an error if the vocabulary or tem aren't defined
+        term = ::RDF::Vocabulary.expand_pname type
 
-        next unless Object.const_defined? vocab
-        next unless vocab.constantize.class_properties.include? property.to_sym
-        # next unless vocab.constantize.respond_to? property
+        next unless term.is_a? ::RDF::Vocabulary::Term
+
+        # use CamelCase convention to ensure this is a Class property
+        next unless term.qname.last.to_s.camelize == term.qname.last.to_s and term.qname.last.to_s.upcase != term.qname.last.to_s
         
         type
       end
