@@ -5,6 +5,9 @@ module Ladder
   class RDF
     include Ladder::Model
     use_vocab ::RDF::RDFS
+
+    # Associated files (eg. imported/mapped data objects) are stored in GridFS
+    has_many :files, class_name: 'Mongoid::GridFS::Fs::File'
     
     # Create a Model class bound to specific vocabs
     #
