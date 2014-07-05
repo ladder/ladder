@@ -12,7 +12,7 @@ L2::App.controllers  do
     r.dc.alternative = ['alternate title']
     r.rdfs.comment = 'here is a comment' ; I18n.locale = :de ; r.rdfs.comment = 'deutsch' ; I18n.locale = :en
     
-    r.to_rdf(uri)
+    r.to_rdf(uri) #.dump(:jsonld)
   end
   
   # FIXME: TEMPORARY FOR DEBUGGING
@@ -28,9 +28,11 @@ L2::App.controllers  do
     return 422 unless graph.valid? # JSON is well-formed, but JSON-LD is not valid RDF
     
     klass = Ladder::RDF.model module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['dc:BibliographicResource', 'mods:ModsResource']
+
+    # TODO: test when graph has multiple objects; should we limit to one?
     r = klass.new_from_rdf(graph)
     
-    return 200, r.to_rdf(uri)
+    return 200, r.to_rdf(uri) #.dump(:jsonld)
   end
   
   # get :index, :map => '/foo/bar' do

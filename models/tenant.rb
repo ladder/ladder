@@ -4,6 +4,8 @@ class Tenant
   field :email, type: String
   field :api_key, type: String
   field :database, type: String
+  
+  # TODO: should we use a properties hash or explicit :models, :mappings fields?
   field :properties, type: Hash, default: {
     # FIXME: TEMPORARY FOR DEBUGGING
     models: [
