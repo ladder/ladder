@@ -188,7 +188,7 @@ class Tenant
   def define_models
     self.properties.symbolize_keys!
     return unless self.properties[:models] and self.properties[:models].is_a? Array
-    
+
     self.properties[:models].map do |model|
       klass = Ladder::RDF.model model.merge module: "L#{self.id}"
       klass.create unless klass.exists?

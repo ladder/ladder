@@ -207,7 +207,6 @@ DEPENDENCIES
   better_errors (~> 1.1.0)
   elasticsearch-model (~> 0.1.0)
   json-ld (~> 1.1.2)
-  mail (~> 2.5.4)
   mongoid (~> 3.1.6)
   mongoid-grid_fs (~> 2.1.0)
   oj
