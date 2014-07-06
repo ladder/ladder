@@ -6,6 +6,8 @@ class MappingObject
   # NB: this uses dynamic fields for model vocabs
   # TODO: add validation here based on the model being mapped
 
+  validates_presence_of :_model
+
   embedded_in :mapping
 end
 
@@ -13,6 +15,9 @@ class Mapping
   include Mongoid::Document
 
   field :content_type, type: String  # A registered MIME-type for this mapping
+
+  validates_presence_of :content_type
+
   embeds_many :mapping_objects, store_as: 'objects'
 
   # FIXME: TEMPORARY
@@ -44,7 +49,7 @@ class Mapping
   
   def to_hash
     # Replace id references with object IDs
-    mapped_objects = objects.map do |object|
+    mapping_objects = objects.map do |object|
 
       # Only descend into dynamic fields (vocabs)
       object.attributes.except(*object.fields.keys).each do |prefix, fields|
@@ -66,18 +71,18 @@ class Mapping
       { "_#{object.id}".to_sym => object.as_document.except('_id').symbolize_keys }
     end
 
-    { content_type: content_type, objects: mapped_objects }
+    { content_type: content_type, objects: mapping_objects }
   end
 
   # Create a new Mapping instance from a Hash using the above syntax
-  def self.new_from_hash(mapping_hash)
-    mapped_objects = mapping_hash[:objects].map { |id, mapping| MappingObject.new mapping }
+  def self.new_from_hash(hash)
+    mapping_objects = hash[:objects].map { |id, mapping| MappingObject.new mapping }
     
     # Create lookup table to resolve id references to object IDs
-    table = Hash[mapping_hash[:objects].keys.zip mapped_objects.map(&:id)]
+    table = Hash[hash[:objects].keys.zip mapping_objects.map(&:id)]
     
     # Replace id references with object IDs
-    mapped_objects = mapped_objects.map do |object|
+    mapping_objects = mapping_objects.map do |object|
 
       # Only descend into dynamic fields (vocabs)
       object.attributes.except(*object.fields.keys).each do |prefix, fields|
@@ -100,9 +105,9 @@ class Mapping
       object
     end
 
-    mapping_hash[:objects] = mapped_objects
+    hash[:objects] = mapping_objects
 
-    self.new mapping_hash
+    self.new hash
   end
 
   # Take an RDF::Graph and create a Mapping instance from it
@@ -118,7 +123,7 @@ class Mapping
     return unless content_type.is_a? String
     return unless graph.is_a? ::RDF::Graph and graph.valid?
 
-    mapping_object = Hash.new
+    mapping_objects = Hash.new
 
     # consider iterating over graph.to_hash
     graph.to_hash.each do |object_node, predicates|
@@ -172,10 +177,10 @@ class Mapping
         object_hash[qname.first][qname.last] = [value, target].compact
       end
       
-      mapping_object[object_node.id.to_sym] = object_hash
+      mapping_objects[object_node.id.to_sym] = object_hash
     end
 
-    new_from_hash content_type: content_type, objects: mapping_object
+    new_from_hash content_type: content_type, objects: mapping_objects
   end
 
 end
