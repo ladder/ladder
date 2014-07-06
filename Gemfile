@@ -30,6 +30,6 @@ gem 'oj'
 
 # Project requirements
 #gem 'rake'
-gem 'mail', '~> 2.5.4'
+#gem 'mail', '~> 2.5.4'
 
 gem 'unicorn'
