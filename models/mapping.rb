@@ -43,12 +43,8 @@ class Mapping
   # }
   
   def to_hash
-    mapping_hash = {content_type: content_type}
-
-    mapped_objects = Hash.new
-    
     # Replace id references with object IDs
-    objects.each do |object|
+    mapped_objects = objects.map do |object|
 
       # Only descend into dynamic fields (vocabs)
       object.attributes.except(*object.fields.keys).each do |prefix, fields|
@@ -67,19 +63,15 @@ class Mapping
         end
       end
       
-      mapped_objects["_#{object.id}".to_sym] = object.as_document.except('_id').symbolize_keys
+      { "_#{object.id}".to_sym => object.as_document.except('_id').symbolize_keys }
     end
 
-    mapping_hash[:objects] = mapped_objects
-  
-    mapping_hash
+    { content_type: content_type, objects: mapped_objects }
   end
 
   # Create a new Mapping instance from a Hash using the above syntax
   def self.new_from_hash(mapping_hash)
-    mapped_objects = mapping_hash[:objects].map do |id, mapping|
-      MappingObject.new mapping
-    end
+    mapped_objects = mapping_hash[:objects].map { |id, mapping| MappingObject.new mapping }
     
     # Create lookup table to resolve id references to object IDs
     table = Hash[mapping_hash[:objects].keys.zip mapped_objects.map(&:id)]
