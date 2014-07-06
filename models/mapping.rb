@@ -23,6 +23,25 @@ class Mapping
     graph = ::RDF::Graph.new << JSON::LD::API.toRdf(hash)
   end
   
+  # Serialize a Mapping instance as a Hash using the following syntax:
+  #
+  # content_type: 'application/something',
+  # objects: {
+  #   id1: {
+  #     _model: 'Model_A',
+  #     _types: ['vocab:Class_A', 'vocab:Class_B'],
+  #     vocab: {
+  #       predicate_a: ['xpath', :id2],
+  #     }
+  #   },
+  #   id2: {
+  #     _model: 'Model_B',
+  #     vocab: {
+  #       predicate_b: ['xpath', :id1],
+  #     }
+  #   }
+  # }
+  
   def to_hash
     mapping_hash = {content_type: content_type}
 
@@ -56,22 +75,7 @@ class Mapping
     mapping_hash
   end
 
-  # Create a new Mapping instance from an object-hash syntax, eg.
-  #
-  # id1: {
-  #   _model: 'Model_A',
-  #   _types: ['vocab:Class_A', 'vocab:Class_B'],
-  #   vocab: {
-  #     predicate_a: ['xpath', :id2],
-  #   }
-  # },
-  # id2: {
-  #   _model: 'Model_B',
-  #   vocab: {
-  #     predicate_b: ['xpath', :id1],
-  #   }
-  # }
-
+  # Create a new Mapping instance from a Hash using the above syntax
   def self.new_from_hash(mapping_hash)
     mapped_objects = mapping_hash[:objects].map do |id, mapping|
       MappingObject.new mapping
