@@ -22,6 +22,39 @@ class Mapping
     hash = JSON.parse File.read('lib/ladder/mapping.jsonld')
     graph = ::RDF::Graph.new << JSON::LD::API.toRdf(hash)
   end
+  
+  def to_hash
+    mapping_hash = {content_type: content_type}
+
+    mapped_objects = Hash.new
+    
+    # Replace id references with object IDs
+    objects.each do |object|
+
+      # Only descend into dynamic fields (vocabs)
+      object.attributes.except(*object.fields.keys).each do |prefix, fields|
+        fields.each do |field, value|
+          # Ensure everything is an array so we can traverse it
+          value = Array value
+
+          value.each do |element|
+            if element.is_a? Moped::BSON::ObjectId
+              # Replace the Moped::BSON::ObjectId with a symbolic id reference
+              value[value.index(element)] = "_#{element}".to_sym
+              object.send(prefix)[field] = value
+            end
+          end
+
+        end
+      end
+      
+      mapped_objects["_#{object.id}".to_sym] = object.as_document.except('_id').symbolize_keys
+    end
+
+    mapping_hash[:objects] = mapped_objects
+  
+    mapping_hash
+  end
 
   # Create a new Mapping instance from an object-hash syntax, eg.
   #
