@@ -13,6 +13,7 @@
 	"@id" : "_:root",
 	"@type" : [
 		"bibo:Document",
+		"schema:CreativeWork",
 		"ladder:Resource"
 	],
     "bibo:doi": "identifier[@type = \"doi\" and not(@invalid)]",

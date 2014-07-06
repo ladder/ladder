@@ -17,6 +17,11 @@ class Mapping
 
   # FIXME: TEMPORARY
   # test_mapping = Mapping.new_from_hash Tenant.new.properties[:mappings].first
+  # test_mapping = Mapping.new_from_rdf content_type: 'application/mods+xml', graph: Mapping.test
+  def self.test
+    hash = JSON.parse File.read('lib/ladder/mapping.jsonld')
+    graph = ::RDF::Graph.new << JSON::LD::API.toRdf(hash)
+  end
 
   # Create a new Mapping instance from an object-hash syntax, eg.
   #
@@ -71,51 +76,77 @@ class Mapping
     self.new mapping_hash
   end
 
-=begin
-  def self.test
-    hash = JSON.parse File.read('lib/ladder/mapping.jsonld')
-    graph = ::RDF::Graph.new << JSON::LD::API.toRdf(hash)
-  end
-
   # Take an RDF::Graph and create a Mapping instance from it
-  def self.new_from_rdf(graph)
-    return unless graph.valid?
+  #
+  # Required parameters:
+  # :content_type (String) -> the name of a MIME-type to register against
+  # :graph (RDF::Graph)    -> a parsed RDF graph of the mapping (eg. from JSON-LD)
+
+  def self.new_from_rdf(*args)
+    opts = args.last || {}
+
+    return unless content_type = opts[:content_type] and graph = opts[:graph]
+    return unless content_type.is_a? String
+    return unless graph.is_a? ::RDF::Graph and graph.valid?
+
+    mapping_object = Hash.new
 
     # consider iterating over graph.to_hash
     graph.to_hash.each do |object_node, predicates|
-      p "OBJECT ID #{object_node}"
+      object_hash = Hash.new
 
       predicates.each do |subject, object|
+        # Special handling for :_model, :_types values
+        if "rdf:type" == subject.pname
+
+          object.each do |type|
+            next if type.pname == type.to_s # if it can't resolve a pname, we don't know this vocab
+            
+            if :ladder == type.qname.first
+              object_hash[:_model] = type.qname.last.to_s
+            else
+              object_hash[:_types] = Array.new if object_hash[:_types].nil?
+              object_hash[:_types] << type.pname
+            end
+
+          end
+
+          next
+        end
+        
         # NB: object will be 1- or 2- element array
         case object.count
 
         when 2
           if object.first.is_a? RDF::Literal
-            value = object.first
-            target = object.last
+            value = object.first.to_s # XPath
+            target = object.last.to_sym # id reference
           else
-            value = object.last
-            target = object.first
+            value = object.last.to_s # NB: Ladder Class
+            target = object.first.pname == object.first.to_s ? nil : object.first.pname
           end
 
         when 1
           if object.first.is_a? RDF::Literal
-            value = object.first
-          else
-            target = object.first
+            value = object.first.to_s # XPath
+          elsif object.first.is_a? RDF::Node
+            target = object.first.to_sym # id reference
           end
+
         end
 
         qname = RDF::URI(subject).qname
 
-        next if qname.nil?# if qname is nil, we don't know this subject
+        next if qname.nil? # if qname is nil, we don't know this subject
 
-        p "['#{qname.join(':')}', '#{value}', '#{target}'],"
+        object_hash[qname.first] = Hash.new if object_hash[qname.first].nil?
+        object_hash[qname.first][qname.last] = [value, target].compact
       end
       
+      mapping_object[object_node.id.to_sym] = object_hash
     end
-    
-    nil
+
+    new_from_hash content_type: content_type, objects: mapping_object
   end
-=end
+
 end
