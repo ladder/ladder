@@ -4,8 +4,10 @@ require_relative 'vocab/bibo'
 require_relative 'vocab/edm'
 require_relative 'vocab/ladder'
 require_relative 'vocab/mads'
+require_relative 'vocab/marcrel'
 require_relative 'vocab/mods'
 require_relative 'vocab/ore'
+require_relative 'vocab/premis'
 
 module RDF
 
