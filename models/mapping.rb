@@ -82,7 +82,7 @@ class Mapping
     table = Hash[hash[:objects].keys.zip mapping_objects.map(&:id)]
     
     # Replace id references with object IDs
-    mapping_objects = mapping_objects.map do |object|
+    hash[:objects] = mapping_objects.map do |object|
 
       # Only descend into dynamic fields (vocabs)
       object.attributes.except(*object.fields.keys).each do |prefix, fields|
@@ -105,8 +105,6 @@ class Mapping
       object
     end
 
-    hash[:objects] = mapping_objects
-
     self.new hash
   end
 
@@ -125,7 +123,6 @@ class Mapping
 
     mapping_objects = Hash.new
 
-    # consider iterating over graph.to_hash
     graph.to_hash.each do |object_node, predicates|
       object_hash = Hash.new
 
