@@ -3,7 +3,7 @@ require 'rdf'
 
 module RDF
 
-  class PREMIS < ::RDF::StrictVocabulary("http://www.loc.gov/premis/rdf/v1#")
+  class PREMIS < RDF::StrictVocabulary("http://www.loc.gov/premis/rdf/v1#")
 
     # Class definitions
     property :Agent, :comment =>

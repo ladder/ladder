@@ -1,7 +1,7 @@
 class MappingObject
-  include Ladder::Model
+  include Ladder::Resource # TODO: this looks like a Duck
 
-  field :_model, type: String  # The name of a defined Ladder::Model
+  field :_model, type: String  # The name of a defined Ladder::Resource
   field :_types, type: Array   # (optional) a list of additional pname RDF classes to assign
   # NB: this uses dynamic fields for model vocabs
   # TODO: add validation here based on the model being mapped
@@ -25,7 +25,7 @@ class Mapping
   # test_mapping = Mapping.new_from_rdf content_type: 'application/mods+xml', graph: Mapping.test
   def self.test
     hash = JSON.parse File.read('lib/ladder/mapping.jsonld')
-    graph = ::RDF::Graph.new << JSON::LD::API.toRdf(hash)
+    graph = RDF::Graph.new << JSON::LD::API.toRdf(hash)
   end
   
   # Serialize a Mapping instance as a Hash using the following syntax:
@@ -119,7 +119,7 @@ class Mapping
 
     return unless content_type = opts[:content_type] and graph = opts[:graph]
     return unless content_type.is_a? String
-    return unless graph.is_a? ::RDF::Graph and graph.valid?
+    return unless graph.is_a? RDF::Graph and graph.valid?
 
     mapping_objects = Hash.new
 

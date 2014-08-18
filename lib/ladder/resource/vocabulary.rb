@@ -1,6 +1,6 @@
 module Ladder
 
-  module Model
+  module Resource
     
     class Vocabulary
       include Mongoid::Document

@@ -3,7 +3,7 @@ require 'rdf'
 
 module RDF
 
-  class MARCREL < ::RDF::StrictVocabulary("http://id.loc.gov/vocabulary/relators/")
+  class MARCREL < RDF::StrictVocabulary("http://id.loc.gov/vocabulary/relators/")
 
     # Property definitions
     property :abr, :label => 'Abridger'

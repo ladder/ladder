@@ -190,7 +190,7 @@ class Tenant
     return unless self.properties[:models] and self.properties[:models].is_a? Array
 
     self.properties[:models].map do |model|
-      klass = Ladder::RDF.model model.merge module: "L#{self.id}"
+      klass = Ladder::Model.build model.merge module: "L#{self.id}"
       klass.create unless klass.exists?
       klass
     end
