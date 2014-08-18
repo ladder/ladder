@@ -5,7 +5,7 @@ L2::App.controllers  do
 
   # FIXME: TEMPORARY FOR DEBUGGING
   get :index do
-    klass = Ladder::Model.build module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['dc:BibliographicResource', 'mods:ModsResource']
+    klass = Ladder::Model.build module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['dc:BibliographicResource', 'mods:ModsResource'], aliases: {title: 'dc:title', author: 'dc:creator'}
 
     r = klass.new
     r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
