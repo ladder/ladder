@@ -10,6 +10,7 @@ module Ladder
     # :module (String)       -> the name of a module to namespace classes within
     # :vocabs (Array:String) -> a list of RDF::Vocabulary classes to use
     # :types (Array:String)  -> a list of pname RDF classes to assign from given vocabs
+    # :aliases (Hash)        -> (optional) a list of alias-pname key-value pairs
 
     def self.build(*args)
       opts = args.last || {}
@@ -45,6 +46,12 @@ module Ladder
       vocabs.each do |vocab|
         # Only allow valid RDF::Vocabulary classes
         klass.use_vocab vocab.constantize if Object.const_defined? vocab
+      end
+      
+      if opts[:aliases].is_a? Hash and ! opts[:aliases].empty?
+        opts[:aliases].each do |name, term|
+          klass.alias_field(name, RDF::Vocabulary.expand_pname(term))
+        end
       end
       
       valid_types = types.map do |type|

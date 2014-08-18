@@ -14,12 +14,12 @@ L2::App.controllers  do
     
     r.to_rdf(uri) #.dump(:jsonld)
   end
-  
+
   # FIXME: TEMPORARY FOR DEBUGGING
   post :index, :csrf_protection => false do
     # case on request.content_type
 
-    body = '{"@context":{"dc":"http://purl.org/dc/terms/"},"@id":"http://test.uri","dc:title":[{"@value":"title","@language":"en"},{"@value":"another title","@language":"en"},{"@value":"francais","@language":"fr"}]}'
+    body = '{"@context":{"dc":"http://purl.org/dc/terms/"},"dc:title":[{"@value":"title","@language":"en"},{"@value":"another title","@language":"en"},{"@value":"francais","@language":"fr"}]}'
 
     hash = JSON.parse body rescue return 400 # JSON is mal-formed
 
