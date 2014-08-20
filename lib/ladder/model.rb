@@ -3,7 +3,7 @@ require_relative 'resource'
 module Ladder
 
   module Model
-    # Create a Model class bound to specific vocabs
+    # Factory to create a Ladder::Resource class
     #
     # Required parameters:
     # :name (String)         -> the name of the model class to create
@@ -35,14 +35,13 @@ module Ladder
 
       klass.class_eval do
         include Ladder::Resource
-        use_vocab RDF::RDFS
         store_in collection: 'models'
 
         # Associated files (eg. imported/mapped data objects) are stored in GridFS
         has_many :files, class_name: 'Mongoid::GridFS::Fs::File'
       end
 
-      # Assign vocabs first so we know which RDF types are valid
+      # Assign vocabs first so we know which RDF types and aliases are valid
       vocabs.each do |vocab|
         # Only allow valid RDF::Vocabulary classes
         klass.use_vocab vocab.constantize if Object.const_defined? vocab
@@ -59,9 +58,7 @@ module Ladder
         term = RDF::Vocabulary.expand_pname type
 
         next unless term.is_a? RDF::Vocabulary::Term
-        
-        # check type against vocabs for this model
-        next unless klass.vocabs.include? term.vocab.to_uri
+        next unless klass.vocabs.include? term.vocab # check type against vocabs for this model
 
         # use CamelCase convention to ensure this is a Class property
         next unless term.qname.last.to_s.camelize == term.qname.last.to_s and term.qname.last.to_s.upcase != term.qname.last.to_s

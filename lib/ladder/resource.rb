@@ -15,7 +15,7 @@ module Ladder
 
       # Creates an embedded object bound to an RDF::Vocab class
       def use_vocab(vocab)
-        return if vocabs.include? vocab.to_uri  # Ensure we don't bind a vocab more than once
+        return if vocabs.include? vocab # Ensure we don't bind a vocab more than once
   
         embeds_one vocab.prefix, class_name: 'Ladder::Resource::Vocabulary',
                                              cascade_callbacks: true,
@@ -25,8 +25,8 @@ module Ladder
       
       # Creates getter/setter aliases for a (used) RDF::Vocabulary::Term
       def alias_field(name, term)
-        return unless term.is_a? RDF::Vocabulary::Term  # Ensure we are using a valid term
-        return unless vocabs.include? term.to_uri.parent  # Ensure we are using a bound vocab
+        return unless term.is_a? RDF::Vocabulary::Term   # Ensure we are using a valid term
+        return unless vocabs.include? term.vocab         # Ensure we are using a bound vocab
 
         vocab, field = term.qname
 
@@ -46,10 +46,9 @@ module Ladder
         graph.each_triple do |subject, predicate, object|
           # NB: we assume the subject is the model being built
           # may consider handling subject URIs for eg. validation or implicit sameAs
-          next unless vocabs.include? vocab_uri = predicate.parent # We have a valid Vocabuary
+          vocab = RDF::Vocabulary.find predicate
 
-          vocab = RDF::Vocabulary.find vocab_uri
-
+          next unless vocabs.include? vocab               # We have a valid Vocabuary
           next unless vocab.properties.include? predicate # We have a valid Predicate
 
           embedded = model.send vocab.prefix # Ladder::Resource::Vocabulary object
