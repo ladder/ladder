@@ -7,7 +7,7 @@ require 'rdf'
 
 module RDF
 
-  class MADS < RDF::StrictVocabulary("http://www.loc.gov/standards/mads/rdf/v1.rdf")
+  class MADS < RDF::StrictVocabulary("http://www.loc.gov/mads/rdf/v1#")
     # Class definitions
     property :Address, :label => 'Address', :comment => ""
     property :Affiliation, :label => 'Affiliation', :comment =>

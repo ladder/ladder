@@ -1,6 +1,6 @@
 module Ladder
 
-  module Model
+  module Resource
     
     class Vocabulary
       include Mongoid::Document
@@ -11,11 +11,11 @@ module Ladder
       private
 
       def setup_vocabs
-        vocab = ::RDF::Vocabulary.from_uri(::RDF::Vocabulary.uri_from_prefix metadata[:name])
+        vocab = ::RDF::Vocabulary.find(::RDF::Vocabulary.expand_pname(metadata[:name]))
 
         # Create a Mongoid field for each property
-        vocab.predicates.each do |field|
-          eigenclass.field field, type: Array, localize: true
+        vocab.properties.each do |property|
+          eigenclass.field property.qname.last, type: Array, localize: true
         end
       end
 

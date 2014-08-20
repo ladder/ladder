@@ -5,21 +5,25 @@ L2::App.controllers  do
 
   # FIXME: TEMPORARY FOR DEBUGGING
   get :index do
-    klass = Ladder::RDF.model module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['RDF::DC.BibliographicResource', 'RDF::MODS.ModsResource']
+    klass = Ladder::Model.build module: "L#{Tenant.new.id}",
+                                name: 'Book',
+                                vocabs: ['RDF::DC', 'RDF::MODS'],
+                                types: ['dc:BibliographicResource', 'mods:ModsResource'],
+                                aliases: {title: 'mods:title', author: 'dc:creator'}
 
     r = klass.new
     r.dc.title = ['title', 'another title'] ; I18n.locale = :fr ; r.dc.title = 'francais' ; I18n.locale = :en
     r.dc.alternative = ['alternate title']
     r.rdfs.comment = 'here is a comment' ; I18n.locale = :de ; r.rdfs.comment = 'deutsch' ; I18n.locale = :en
     
-    r.to_rdf(uri)
+    r.to_rdf(uri) #.dump(:jsonld)
   end
-  
+
   # FIXME: TEMPORARY FOR DEBUGGING
   post :index, :csrf_protection => false do
     # case on request.content_type
 
-    body = '{"@context":{"dc":"http://purl.org/dc/terms/"},"@id":"http://test.uri","dc:title":[{"@value":"title","@language":"en"},{"@value":"another title","@language":"en"},{"@value":"francais","@language":"fr"}]}'
+    body = '{"@context":{"dc":"http://purl.org/dc/terms/"},"dc:title":[{"@value":"title","@language":"en"},{"@value":"another title","@language":"en"},{"@value":"francais","@language":"fr"}]}'
 
     hash = JSON.parse body rescue return 400 # JSON is mal-formed
 
@@ -27,10 +31,16 @@ L2::App.controllers  do
     
     return 422 unless graph.valid? # JSON is well-formed, but JSON-LD is not valid RDF
     
-    klass = Ladder::RDF.model module: "L#{Tenant.new.id}", name: 'Resource', vocabs: ['RDF::DC', 'RDF::MODS'], types: ['RDF::DC.BibliographicResource', 'RDF::MODS.ModsResource']
+    klass = Ladder::Model.build module: "L#{Tenant.new.id}",
+                                name: 'Book',
+                                vocabs: ['RDF::DC', 'RDF::MODS'],
+                                types: ['dc:BibliographicResource', 'mods:ModsResource'],
+                                aliases: {title: 'mods:title', author: 'dc:creator'}
+
+    # TODO: test when graph has multiple objects; should we limit to one?
     r = klass.new_from_rdf(graph)
     
-    return 200, r.to_rdf(uri)
+    return 200, r.to_rdf(uri) #.dump(:jsonld)
   end
   
   # get :index, :map => '/foo/bar' do

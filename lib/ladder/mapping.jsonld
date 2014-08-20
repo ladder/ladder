@@ -1,0 +1,122 @@
+{
+    "content_type": "application/mods+xml",
+    "@context": {
+        "ladder": "Ladder:",
+        "bibo": "http://purl.org/ontology/bibo/",
+        "dcterms": "http://purl.org/dc/terms/",
+        "foaf": "http://xmlns.com/foaf/0.1/",
+        "mads": "http://www.loc.gov/mads/rdf/v1#",
+        "mods": "http://www.loc.gov/mods/modsrdf/v1#",
+        "schema": "http://schema.org/",
+        "skos": "http://www.w3.org/2004/02/skos/core#"
+    },
+	"@id" : "_:root",
+	"@type" : [
+		"bibo:Document",
+		"schema:CreativeWork",
+		"ladder:Resource"
+	],
+    "bibo:doi": "identifier[@type = \"doi\" and not(@invalid)]",
+    "bibo:edition": "originInfo/edition",
+    "bibo:isbn": "identifier[@type = \"isbn\" and not(@invalid)]",
+    "bibo:issn": "identifier[@type = \"issn\" and not(@invalid)]",
+    "bibo:issue": "identifier[@type = \"issue-number\" or @type = \"issue number\"]",
+    "bibo:lccn": "identifier[@type = \"lccn\" and not(@invalid)]",
+    "bibo:oclcnum": "identifier[@type = \"oclc\" and not(@invalid)]",
+    "bibo:upc": "identifier[@type = \"upc\" and not(@invalid)]",
+    "bibo:uri": "identifier[@type = \"uri\" and not(@invalid)]",
+    "dcterms:DDC": [ "subject[@authority=\"ddc\"]", {
+		"@type" : [ "ladder:Concept" ],
+        "skos:hiddenLabel": "preceding-sibling::*",
+        "skos:prefLabel": "."
+	}],
+    "dcterms:LCC": [ "subject[@authority=\"lcc\"]", {
+		"@type" : [ "ladder:Concept" ],
+        "skos:hiddenLabel": "preceding-sibling::*",
+        "skos:prefLabel": "."
+	}],
+    "dcterms:LCSH": [ "subject[@authority=\"lcsh\"]", {
+		"@type" : [ "ladder:Concept" ],
+        "skos:hiddenLabel": "preceding-sibling::*",
+        "skos:prefLabel": "."
+	}],
+    "dcterms:RVM": [ "subject[@authority=\"rvm\"]", {
+		"@type" : [ "ladder:Concept" ],
+        "skos:hiddenLabel": "preceding-sibling::*",
+        "skos:prefLabel": "."
+	}],
+    "dcterms:abstract": "abstract",
+    "dcterms:alternative": "titleInfo[@type = \"alternative\"]",
+    "dcterms:contributor": [ "name[not(@usage=\"primary\")]", {
+		"@type" : [ "ladder:Agent" ],
+        "foaf:birthday": "namePart[@type = \"date\"]",
+        "foaf:name": "namePart[not(@type)] | displayForm",
+        "foaf:publications": { "@id": "_:root" },
+        "foaf:title": "namePart[@type = \"termsOfAddress\"]"
+	}],
+    "dcterms:created": "originInfo/dateCreated",
+    "dcterms:creator": [ "name[@usage=\"primary\"]", {
+		"@type" : [ "ladder:Agent" ],
+        "foaf:birthday": "namePart[@type = \"date\"]",
+        "foaf:name": "namePart[not(@type)] | displayForm",
+        "foaf:publications": { "@id": "_:root" },
+        "foaf:title": "namePart[@type = \"termsOfAddress\"]"
+	}],
+    "dcterms:extent": "physicalDescription/extent",
+    "dcterms:format": "physicalDescription/form[not(@authority = \"marcsmd\")]",
+	"dcterms:hasFormat" : [ "relatedItem[@type=\"otherFormat\"]", {
+		"@type" : [ "ladder:Resource" ],
+        "dcterms:isFormatOf": { "@id": "_:root" }
+    } ],
+	"dcterms:hasPart" : [ "relatedItem[@type=\"constituent\"]", {
+		"@type" : [ "ladder:Resource" ],
+        "dcterms:isPartOf": { "@id": "_:root" }
+    } ],
+	"dcterms:hasVersion" : [ "relatedItem[@type=\"otherVersion\"]", {
+		"@type" : [ "ladder:Resource" ],
+        "dcterms:isVersionOf": { "@id": "_:root" }
+    } ],
+    "dcterms:identifier": "identifier[not(@type) or @type=\"local\"]",
+	"dcterms:isPartOf" : [ "relatedItem[@type=\"host\" or @type=\"series\"][1]", {
+		"@type" : [ "ladder:Resource" ],
+        "dcterms:hasPart": { "@id": "_:root" }
+    } ],
+	"dcterms:isReferencedBy" : [ "relatedItem[@type=\"isReferencedBy\"]", {
+		"@type" : [ "ladder:Resource" ],
+        "dcterms:references": { "@id": "_:root" }
+    } ],
+    "dcterms:issued": "originInfo/dateIssued",
+    "dcterms:language": "language/languageTerm",
+    "dcterms:medium": "physicalDescription/form[@authority = \"marcsmd\"]",
+	"dcterms:publisher" : [ "originInfo/publisher", {
+		"@type" : [ "ladder:Agent" ],
+        "foaf:name": ".",
+        "foaf:publications": { "@id": "_:root" }
+    } ],
+	"dcterms:references" : [ "relatedItem[@type=\"references\"]", {
+		"@type" : [ "ladder:Resource" ],
+        "dcterms:isReferencedBy": { "@id": "_:root" }
+    } ],
+	"dcterms:relation" : [ "relatedItem[not(@type)]", {
+		"@type" : [ "ladder:Resource" ],
+        "dcterms:relation": { "@id": "_:root" }
+    } ],
+	"dcterms:spatial" : [ "subject/geographicCode", {
+		"@type" : [ "ladder:Concept" ],
+        "skos:hiddenLabel": "preceding-sibling::*",
+        "skos:prefLabel": "."
+    } ],
+	"dcterms:subject" : [ "subject[not(@authority=\"lcsh\") and not(geographicCode)]", {
+		"@type" : [ "ladder:Concept" ],
+        "skos:hiddenLabel": "preceding-sibling::*",
+        "skos:prefLabel": "."
+    } ],
+    "dcterms:tableOfContents": "tableOfContents",
+    "dcterms:title": "titleInfo[not(@type = \"alternative\")]",
+    "mods:accessCondition": "accessCondition",
+    "mods:frequency": "originInfo/frequency",
+    "mods:genre": "genre",
+    "mods:issuance": "originInfo/issuance",
+    "mods:locationOfResource": "location",
+    "mods:note": "note"
+}

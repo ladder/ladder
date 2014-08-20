@@ -7,7 +7,7 @@ require 'rdf'
 
 module RDF
 
-  class MODS < RDF::StrictVocabulary("http://www.loc.gov/mods/rdf/v1/#")
+  class MODS < RDF::StrictVocabulary("http://www.loc.gov/mods/modsrdf/v1#")
     # Class definitions
     property :AdminMetadata, :label => 'Administrative Metadata', :comment =>
       %(Administrative metadata for the description)
