@@ -35,8 +35,12 @@ module RDF
     # Property definitions
     property :aggregatedCHO, :label => 'Aggregated Cultural Heritage Object', :comment =>
      %(This property associates an ORE aggregation with the Cultural Heritage Object(s) (CHO for short) it is about.)
+    property :begin, :label => 'Begin', :comment =>
+     %(If the specialisations of, for example, date of birth, cannot be used then this property provides a generic start date.)
     property :currentLocation, :label => 'Current Location', :comment =>
      %(The geographic location and/or name of the repository, building, site, or other entity whose boundaries presently include the resource.)
+    property :end, :label => 'End', :comment =>
+     %(An edm:Agent or an edm:TimeSpan may have 0 or 1 edm:end dates and each edm:end date may be the end date of many edm:Agent or edm:TimeSpan entities.)
     property :happenedAt, :label => 'Happened At', :comment =>
      %(This property associates an event with the place at which the event happened.)
     property :hasMet, :label => 'Has Met', :comment =>
