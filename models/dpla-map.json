@@ -1,0 +1,93 @@
+[
+	{"module":"DPLA",
+		"name":"Agent",
+		"vocabs":  ["RDF::EDM","RDF::SKOS"],
+		"types":   ["edm:Agent"],
+		"aliases": {"name":"skos:prefLabel"}
+	},
+	{"module":"DPLA",
+		"name":"Aggregation",
+		"vocabs":  ["RDF::EDM","RDF::ORE","RDF::DPLA"],
+		"types":   ["ore:Aggregation"],
+		"aliases": {
+			"aggregatedSourceResource":"edm:aggregatedCHO",
+			"dataProvider":"edm:dataProvider",
+			"originalRecord":"dpla:sourceRecord",
+			"hasView":"edm:hasView",
+			"intermediateProvider":"dpla:intermediateProvider",
+			"isShownAt":"edm:isShownAt",
+			"object":"edm:object",
+			"provider":"edm:provider",
+			"rightsStatement":"edm:rights"
+		}
+	},
+	{"module":"DPLA",
+		"name":"Collection",
+		"vocabs":  ["RDF::DC11", "RDF::ORE"],
+		"types":   ["ore:Aggregation"],
+		"aliases": {
+			"collectionTitle":"dc11:title",
+			"collectionDescription":"dc11:description"
+		}
+	},
+	{"module":"DPLA",
+		"name":"Place",
+		"vocabs":  ["RDF::GEO","RDF::SKOS","RDF::DPLA"],
+		"types":   ["dpla:Place"],
+		"aliases": {
+			"name":"skos:prefLabel",
+			"city":"dpla:city",
+			"state":"dpla:state",
+			"county":"dpla:county",
+			"region":"dpla:region",
+			"country":"dpla:country",
+			"coordinates":"geo:lat_long"
+		}
+	},
+	{"module":"DPLA",
+		"name":"SourceResource",
+		"vocabs":  ["RDF::DC","RDF::DC11","RDF::DPLA","RDF::EDM"],
+		"types":   ["dpla:SourceResource"],
+		"aliases": {
+			"collection":"dc:isPartOf",
+			"contributor":"dc11:contributor",
+			"creator":"dc11:creator",
+			"date":"dc11:date",
+			"description":"dc11:description",
+			"extent":"dc:extent",
+			"format":"dc11:format",
+			"identifier":"dc11:identifier",
+			"language":"dc11:language",
+			"place":"dc:spatial",
+			"publisher":"dc11:publisher",
+			"relation":"dc11:relation",
+			"rights":"dc11:rights",
+			"genre":"edm:hasType",
+			"stateLocatedIn":"edm:currentLocation",
+			"subject":"dc11:subject",
+			"temporalCoverage":"dc:temporal",
+			"title":"dc11:title",
+			"dctype":"dc11:type"
+		}
+	},
+	{"module":"DPLA",
+		"name":"TimeSpan",
+		"vocabs":  ["RDF::EDM","RDF::SKOS"],
+		"types":   ["edm:TimeSpan"],
+		"aliases": {
+			"originalSourceDate":"skos:prefLabel",
+			"begin":"edm:begin",
+			"end":"edm:end"
+		}
+	},
+	{"module":"DPLA",
+		"name":"WebResource",
+		"vocabs":  ["RDF::EDM","RDF::DC11"],
+		"types":   ["edm:TimeSpan"],
+		"aliases": {
+			"format":"dc11:format",
+			"rights":"dc11:rights",
+			"rightsStatement":"edm:rights"
+		}
+	}
+]
