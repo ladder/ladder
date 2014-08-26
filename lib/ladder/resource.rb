@@ -1,6 +1,8 @@
 module Ladder
 
   module Resource
+    # TODO: crib ActiveTriples' Configurable
+    # configure base_uri: "http://oregondigital.org/resource/", rdf_label: "A label", type: RDF::ORE.Aggregation
 
     def self.included(base)
       base.class_eval do
@@ -39,7 +41,7 @@ module Ladder
         embedded_relations.map { |prefix, meta| RDF::Vocabulary.expand_pname prefix }
       end
 
-      # Take an RDF::Graph and create a Model instance from it
+      # Take an RDF::Graph and create a Resource instance from it
       def new_from_rdf(graph)
         model = self.new
 

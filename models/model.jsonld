@@ -1,0 +1,19 @@
+{
+    "@context": {
+        "dc": "http://purl.org/dc/terms/",
+        "ladder": "Ladder:",
+        "mods": "http://www.loc.gov/mods/modsrdf/v1#"
+    },
+    "@type": [
+        "dc:BibliographicResource",
+        "mods:ModsResource"
+    ],
+    "ladder:aliases": {
+        "dc:creator": "author",
+        "mods:title": "title"
+    },
+    "ladder:vocabs" : { 
+		"@type" : [ "dc", "mods" ]
+	},
+    "ladder:model": "Book"
+}

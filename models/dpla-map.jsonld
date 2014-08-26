@@ -1,0 +1,140 @@
+[
+    {
+        "@context": {
+            "edm": "http://www.europeana.eu/schemas/edm/",
+            "ladder": "Ladder:",
+            "skos": "http://www.w3.org/2004/02/skos/core#"
+        },
+        "@type": [
+            "edm:Agent"
+        ],
+        "ladder:aliases": {
+            "skos:prefLabel": "name"
+        },
+        "ladder:model": "Agent"
+    },
+    {
+        "@context": {
+            "dpla": "http://dp.la/about/map/",
+            "edm": "http://www.europeana.eu/schemas/edm/",
+            "ladder": "Ladder:",
+            "ore": "http://www.openarchives.org/ore/terms/"
+        },
+        "@type": [
+            "ore:Aggregation"
+        ],
+        "ladder:aliases": {
+            "dpla:intermediateProvider": "intermediateProvider",
+            "dpla:sourceRecord": "originalRecord",
+            "edm:aggregatedCHO": "aggregatedSourceResource",
+            "edm:dataProvider": "dataProvider",
+            "edm:hasView": "hasView",
+            "edm:isShownAt": "isShownAt",
+            "edm:object": "object",
+            "edm:provider": "provider",
+            "edm:rights": "rightsStatement"
+        },
+        "ladder:model": "Aggregation"
+    },
+    {
+        "@context": {
+            "dc11": "http://purl.org/dc/elements/1.1/",
+            "ladder": "Ladder:",
+            "ore": "http://www.openarchives.org/ore/terms/"
+        },
+        "@type": [
+            "ore:Aggregation"
+        ],
+        "ladder:aliases": {
+            "dc11:description": "collectionDescription",
+            "dc11:title": "collectionTitle"
+        },
+        "ladder:model": "Collection"
+    },
+    {
+        "@context": {
+            "dpla": "http://dp.la/about/map/",
+            "geo": "http://www.w3.org/2003/01/geo/wgs84_pos#",
+            "ladder": "Ladder:",
+            "skos": "http://www.w3.org/2004/02/skos/core#"
+        },
+        "@type": [
+            "dpla:Place"
+        ],
+        "ladder:aliases": {
+            "dpla:city": "city",
+            "dpla:country": "country",
+            "dpla:county": "county",
+            "dpla:region": "region",
+            "dpla:state": "state",
+            "geo:lat_long": "coordinates",
+            "skos:prefLabel": "name"
+        },
+        "ladder:model": "Place"
+    },
+    {
+        "@context": {
+            "dc": "http://purl.org/dc/terms/",
+            "dc11": "http://purl.org/dc/elements/1.1/",
+            "edm": "http://www.europeana.eu/schemas/edm/",
+            "ladder": "Ladder:"
+        },
+        "@type": [
+            "dpla:SourceResource"
+        ],
+        "ladder:aliases": {
+            "dc11:contributor": "contributor",
+            "dc11:creator": "creator",
+            "dc11:date": "date",
+            "dc11:description": "description",
+            "dc11:format": "format",
+            "dc11:identifier": "identifier",
+            "dc11:language": "language",
+            "dc11:publisher": "publisher",
+            "dc11:relation": "relation",
+            "dc11:rights": "rights",
+            "dc11:subject": "subject",
+            "dc11:title": "title",
+            "dc11:type": "dctype",
+            "dc:extent": "extent",
+            "dc:isPartOf": "collection",
+            "dc:spatial": "place",
+            "dc:temporal": "temporalCoverage",
+            "edm:currentLocation": "stateLocatedIn",
+            "edm:hasType": "genre"
+        },
+        "ladder:model": "SourceResource"
+    },
+    {
+        "@context": {
+            "edm": "http://www.europeana.eu/schemas/edm/",
+            "ladder": "Ladder:",
+            "skos": "http://www.w3.org/2004/02/skos/core#"
+        },
+        "@type": [
+            "edm:TimeSpan"
+        ],
+        "ladder:aliases": {
+            "edm:begin": "begin",
+            "edm:end": "end",
+            "skos:prefLabel": "originalSourceDate"
+        },
+        "ladder:model": "TimeSpan"
+    },
+    {
+        "@context": {
+            "dc11": "http://purl.org/dc/elements/1.1/",
+            "edm": "http://www.europeana.eu/schemas/edm/",
+            "ladder": "Ladder:"
+        },
+        "@type": [
+            "edm:TimeSpan"
+        ],
+        "ladder:aliases": {
+            "dc11:format": "format",
+            "dc11:rights": "rights",
+            "edm:rights": "rightsStatement"
+        },
+        "ladder:model": "WebResource"
+    }
+]

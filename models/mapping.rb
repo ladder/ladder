@@ -24,7 +24,7 @@ class Mapping
   # test_mapping = Mapping.new_from_hash Tenant.new.properties[:mappings].first
   # test_mapping = Mapping.new_from_rdf content_type: 'application/mods+xml', graph: Mapping.test
   def self.test
-    hash = JSON.parse File.read('lib/ladder/mapping.jsonld')
+    hash = JSON.parse File.read('models/mapping.jsonld')
     graph = RDF::Graph.new << JSON::LD::API.toRdf(hash)
   end
   
