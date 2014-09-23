@@ -1,6 +1,6 @@
-# Ladder
+<img align="right" src="https://github.com/mjsuhonos/ladder/blob/master/logo.png" />
 
-![Ladder logo](https://github.com/mjsuhonos/ladder/blob/master/logo.png)
+# Ladder
 
 Ladder is a highly scalable Linked Data framework written in Ruby using well-known components for modelling (ActiveModel), persistence ([Mongoid](http://mongoid.org)/MongoDB), indexing ([ElasticSearch](http://www.elasticsearch.org)), asynchronicity ([Sidekiq](http://sidekiq.org)/Redis) and HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra).  It is designed around the following philosophical goals:
 
