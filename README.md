@@ -15,7 +15,7 @@ From mid-2014, Ladder is being re-architected as a series of Ruby gems that can 
 
 ### There's Nothing Here!
 
-The original [prototype](https://github.com/mjsuhonos/ladder/blob/master/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/blob/master/tree/l2) branch.  Core modules will be committed shortly once the gem structure (likely under the name ActiveLadder) is completed and the first gem is refactored out.
+The original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.  Core modules will be committed shortly once the gem structure (likely under the name ActiveLadder) is completed and the first gem is refactored out.
 
 ## Contributors
 
