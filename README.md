@@ -15,7 +15,7 @@ From mid-2014, Ladder is being re-architected as a series of Ruby modules that c
 
 ### There's Not Much Here!
 
-The original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.  Core modules are being refactored as modules in the "ladder" gem (see below).
+The original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.  Core functionality is being refactored as modules in the "ladder" gem (see below).
 
 ## Installation
 
@@ -41,7 +41,7 @@ TODO: Write usage instructions here
 
 Anyone and everyone is welcome to contribute.  Go crazy.
 
-1. Fork it ( https://github.com/[my-github-username]/ladder/fork )
+1. Fork it ( https://github.com/mjsuhonos/ladder/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
