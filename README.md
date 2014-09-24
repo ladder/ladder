@@ -17,13 +17,43 @@ From mid-2014, Ladder is being re-architected as a series of Ruby gems that can 
 
 The original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.  Core modules will be committed shortly once the gem structure (likely under the name ActiveLadder) is completed and the first gem is refactored out.
 
-## Contributors
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'ladder'
+```
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install ladder
+
+## Usage
+
+TODO: Write usage instructions here
+
+## Contributing
 
 Anyone and everyone is welcome to contribute.  Go crazy.
+
+1. Fork it ( https://github.com/[my-github-username]/ladder/fork )
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
 
 ### Authors
 
 MJ Suhonos [@mjsuhonos](http://twitter.com/mjsuhonos) / [@cyxohoc](http://twitter.com/cyxohoc) / mj@suhonos.ca
+
+## Acknowledgements
+
+Many thanks to Christopher Knight [@NomadicKnight](https://twitter.com/Nomadic_Knight) for ceding the "ladder" gem name.  Check out his startup, [Adventure Local](http://advlo.com) / [@advlo_](https://twitter.com/Advlo_).
 
 ## License
 
