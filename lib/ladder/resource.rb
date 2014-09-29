@@ -22,7 +22,8 @@ module Ladder::Resource
   end
 
   ##
-  # 
+  # Populate @resource with attribute/relation values
+  #
   # Uses Identifiable#update_resource
   def update_relations(args = {})
     relation_hash = args[:related] ? relations : embedded_relations
@@ -33,7 +34,13 @@ module Ladder::Resource
 
       values = objects.map do |obj|
         if obj.is_a?(ActiveTriples::Identifiable)
-          relation_hash.keys.include?(name) ? obj.update_relations : obj.rdf_subject
+          if relation_hash.keys.include?(name)
+            obj.update_relations
+            obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject)
+            obj
+          else
+            obj.rdf_subject
+          end
         else
           obj
         end
