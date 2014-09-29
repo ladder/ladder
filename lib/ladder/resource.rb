@@ -16,9 +16,30 @@ module Ladder::Resource
 
   ##
   # Convenience method to return JSON-LD representation
-  def as_jsonld
-    update_resource { update_relations }
+  def as_jsonld(args = {})
+    update_relations(args)
     resource.dump(:jsonld)
+  end
+
+  def update_relations(args = {})
+    relation_hash = args[:adjacent] ? relations : embedded_relations
+
+    resource_class.properties.each do |name, prop|
+      object = self.send(prop.term)
+      objects = object.is_a?(Enumerable) ? object : [object]
+
+      values = objects.map do |obj|
+        if obj.is_a?(ActiveTriples::Identifiable)
+          relation_hash.keys.include?(name) ? obj.update_relations : obj.rdf_subject
+        else
+          obj
+        end
+      end
+
+      resource.set_value(prop.predicate, values)      
+    end
+    
+    resource
   end
 
   ##
@@ -35,19 +56,6 @@ module Ladder::Resource
   end
 
   private
-    ##
-    # Updates ActiveTriples resource relation properties
-    #
-    # @see Mongoid::Relations
-    def update_relations
-      resource_class.properties.each do |name, prop|
-        if embedded_relations.keys.include? name
-          self.send(prop.term).to_a.each do |relation|
-            relation.resource.set_value(embedded_relations[name].inverse, self.rdf_subject)
-          end
-        end
-      end
-    end
 
     ##
     # Dynamic field accessors
@@ -61,6 +69,8 @@ module Ladder::Resource
       end
     end
     
+    ##
+    # Apply dynamic fields and properties to this instance
     def apply_context
       return unless self._context
 
