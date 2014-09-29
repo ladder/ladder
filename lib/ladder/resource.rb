@@ -21,10 +21,13 @@ module Ladder::Resource
     resource.dump(:jsonld)
   end
 
+  ##
+  # 
+  # Uses Identifiable#update_resource
   def update_relations(args = {})
-    relation_hash = args[:adjacent] ? relations : embedded_relations
+    relation_hash = args[:related] ? relations : embedded_relations
 
-    resource_class.properties.each do |name, prop|
+    update_resource do |name, prop|
       object = self.send(prop.term)
       objects = object.is_a?(Enumerable) ? object : [object]
 
@@ -38,7 +41,7 @@ module Ladder::Resource
 
       resource.set_value(prop.predicate, values)      
     end
-    
+
     resource
   end
 
