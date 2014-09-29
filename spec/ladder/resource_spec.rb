@@ -4,6 +4,7 @@ describe Ladder::Resource do
   before do
     class LadderExample
       include Ladder::Resource
+      configure :type => RDF::OWL.Thing, :base_uri => 'http://example.org/examples#'
     end
   end
   
@@ -18,6 +19,7 @@ describe Ladder::Resource do
     before do
       class MyResource
         include Ladder::Resource
+        configure :type => RDF::OWL.Thing, :base_uri => 'http://example.org/resources#'
 
         define :relation, predicate: RDF::DC.relation, class_name: 'LadderExample'
       end
