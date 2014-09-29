@@ -1,0 +1,6 @@
+development:
+  sessions:
+    default:
+      database: ladder
+      hosts:
+        - localhost:27017
