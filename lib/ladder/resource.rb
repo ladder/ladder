@@ -39,6 +39,7 @@ module Ladder::Resource
             obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject)
             obj
           else
+            resource.delete([obj.rdf_subject]) if resource.enum_subjects.include? obj.rdf_subject and ! args[:related]
             obj.rdf_subject
           end
         else
