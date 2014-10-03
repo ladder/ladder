@@ -74,7 +74,7 @@ steve.as_jsonld
  # }
 ```
 
-You'll notice the #define method takes the place of setting Mongoid fields and ActiveTriples properties.  Definitions with literal values are localized by default.  Definitions with a supplied :class_name argument will create a has-and-belongs-to-many (HABTM) relation:
+The `#define` method takes the place of setting Mongoid fields and ActiveTriples properties.  Definitions with literal values are localized by default.  Definitions with a supplied `:class_name` argument will create a has-and-belongs-to-many (HABTM) relation:
 
 ```ruby
 class Person
@@ -118,7 +118,7 @@ b.as_jsonld
  # }
 ```
 
-You'll notice that only the RDF graph for the Book object is serialized.  To include the entire graph for related objects, use the `related: true` argument:
+You'll notice that only the RDF graph for the Book object (on which it was called) is serialized.  To include the entire graph for related objects, use the `related: true` argument:
 
 ```ruby
 b.as_jsonld related: true
@@ -154,7 +154,7 @@ b.as_jsonld related: true
  # }
 ```
 
-If you want more control over how relations are defined (eg. in the case of embedded relations), you can just use regular Mongoid and ActiveTriples syntax:
+If you want more control over how relations are defined (eg. in the case of embedded or 1:n relations), you can just use regular Mongoid and ActiveTriples syntax:
 
 ```ruby
 class Person
@@ -223,14 +223,22 @@ steve.as_jsonld
  # }
 ```
 
-Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled. Bear in mind that although one-sided relationships can be explicitly defined using Mongoid syntax, in order to use Ladder's simplified `define` syntax, *both* sides of the HABTM relationship (and bi-directional RDF predicates) *must* be defined.
+Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled.
+
+Bear in mind that although one-sided relationships can be explicitly defined using Mongoid syntax, in order to use Ladder's simplified `define` syntax, *both* sides of the HABTM relationship (and bi-directional RDF predicates) *must* be defined.
 
 ### Configuring Resources
 
-If the LADDER_BASE_URI global constant is set, then base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
+If the LADDER_BASE_URI global constant is set, base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
 
 ```ruby
+LADDER_BASE_URI = 'http://example.org'
+
+Person.resource_class.base_uri
+=> #<RDF::URI:0x3fecf69da274 URI:http://example.org/people>
+
 Person.configure base_uri: 'http://some.other.uri/'
+
 Person.resource_class.base_uri
 => "http://some.other.uri/"
 ```
