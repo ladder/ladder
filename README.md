@@ -35,7 +35,209 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Ladder::Resource
+
+Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add the Ladder integration for your model, require 
+and include the main module in your class:
+
+```ruby
+require 'ladder'
+
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  define :name, predicate: RDF::FOAF.name
+  define :description, predicate: RDF::DC.description
+end
+
+steve = Person.new
+steve.name = 'Steve'
+steve.description = 'Funny-looking'
+steve.as_jsonld
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "foaf": "http://xmlns.com/foaf/0.1/"
+ #    },
+ #    "@id": "http://example.org/people/542f0c124169720ea0000000",
+ #    "@type": "foaf:Person",
+ #    "dc:description": {
+ #        "@language": "en",
+ #        "@value": "Funny-looking"
+ #   },
+ #   "foaf:name": {
+ #        "@language": "en",
+ #        "@value": "Steve"
+ #   }
+ # }
+```
+
+You'll notice the #define method takes the place of setting Mongoid fields and ActiveTriples properties.  Definitions with literal values are localized by default.  Definitions with a supplied :class_name argument will create a has-and-belongs-to-many (HABTM) relation:
+
+```ruby
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  define :name, predicate: RDF::FOAF.name
+  define :berks, predicate: RDF::FOAF.made, class_name: 'Book'
+end
+
+class Book
+  include Ladder::Resource
+
+  configure type: RDF::DC.BibliographicResource
+
+  define :title, predicate: RDF::DC.title
+  define :author, predicate: RDF::DC.creator, class_name: 'Person'
+end
+
+b = Book.new(title: 'Heart of Darkness')
+=> #<Book _id: 542f28d44169721941000000, title: {"en"=>"Heart of Darkness"}, author_ids: nil>
+
+b.author << Person.new(name: 'Joseph Conrad')
+=> [#<Person _id: 542f28dd4169721941010000, name: {"en"=>"Joseph Conrad"}, berk_ids: nil>]
+
+b.as_jsonld
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/"
+ #    },
+ #    "@id": "http://example.org/books/542f28d44169721941000000",
+ #    "@type": "dc:BibliographicResource",
+ #    "dc:creator": {
+ #        "@id": "http://example.org/people/542f28dd4169721941010000"
+ #    },
+ #    "dc:title": {
+ #        "@language": "en",
+ #        "@value": "Heart of Darkness"
+ #    }
+ # }
+```
+
+You'll notice that only the RDF graph for the Book object is serialized.  To include the entire graph for related objects, use the `related: true` argument:
+
+```ruby
+b.as_jsonld related: true
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "foaf": "http://xmlns.com/foaf/0.1/"
+ #    },
+ #    "@graph": [
+ #        {
+ #            "@id": "http://example.org/books/542f28d44169721941000000",
+ #            "@type": "dc:BibliographicResource",
+ #            "dc:creator": {
+ #                "@id": "http://example.org/people/542f28dd4169721941010000"
+ #            },
+ #            "dc:title": {
+ #                "@language": "en",
+ #                "@value": "Heart of Darkness"
+ #            }
+ #        },
+ #        {
+ #            "@id": "http://example.org/people/542f28dd4169721941010000",
+ #            "@type": "foaf:Person",
+ #            "foaf:made": {
+ #                "@id": "http://example.org/books/542f28d44169721941000000"
+ #            },
+ #            "foaf:name": {
+ #                "@language": "en",
+ #                "@value": "Joseph Conrad"
+ #            }
+ #        }
+ #    ]
+ # }
+```
+
+If you want more control over how relations are defined (eg. in the case of embedded relations), you can just use regular Mongoid and ActiveTriples syntax:
+
+```ruby
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  define :name, predicate: RDF::FOAF.name
+
+  embeds_one :address, class_name: 'Address'
+  property :address, predicate: RDF::FOAF.based_near
+end
+
+class Address
+  include Ladder::Resource
+
+  configure type: RDF::VCARD.Address
+
+  define :city, predicate: RDF::VCARD.locality
+  define :country, predicate: RDF::VCARD.send('country-name')
+  
+  embedded_in :resident, class_name: 'Person'
+  property :resident, predicate: RDF::VCARD.agent
+end
+
+steve = Person.new(name: 'Steve')
+=> #<Person _id: 542f341e41697219a2000000, name: {"en"=>"Steve"}>
+
+steve.address = Address.new(city: 'Toronto', country: 'Canada')
+=> #<Address _id: 542f342741697219a2010000, city: {"en"=>"Toronto"}, country: {"en"=>"Canada"}>
+
+steve.as_jsonld
+ # => {
+ #    "@context": {
+ #        "foaf": "http://xmlns.com/foaf/0.1/",
+ #        "vcard": "http://www.w3.org/2006/vcard/ns#"
+ #    },
+ #    "@graph": [
+ #        {
+ #            "@id": "http://example.org/addresses/542f342741697219a2010000",
+ #            "@type": "vcard:Address",
+ #            "vcard:agent": {
+ #                "@id": "http://example.org/people/542f341e41697219a2000000"
+ #            },
+ #            "vcard:country-name": {
+ #                "@language": "en",
+ #                "@value": "Canada"
+ #            },
+ #            "vcard:locality": {
+ #                "@language": "en",
+ #                "@value": "Toronto"
+ #            }
+ #        },
+ #        {
+ #            "@id": "http://example.org/people/542f341e41697219a2000000",
+ #            "@type": "foaf:Person",
+ #            "foaf:based_near": {
+ #                "@id": "http://example.org/addresses/542f342741697219a2010000"
+ #            },
+ #            "foaf:name": {
+ #                "@language": "en",
+ #                "@value": "Steve"
+ #            }
+ #        }
+ #    ]
+ # }
+```
+
+Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled. Bear in mind that although one-sided relationships can be explicitly defined using Mongoid syntax, in order to use Ladder's simplified `define` syntax, *both* sides of the HABTM relationship (and bi-directional RDF predicates) *must* be defined.
+
+### Configuring Resources
+
+If the LADDER_BASE_URI global constant is set, then base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
+
+```ruby
+Person.configure base_uri: 'http://some.other.uri/'
+Person.resource_class.base_uri
+=> "http://some.other.uri/"
+```
+
+### Dynamic Resources
+
+[TODO]
 
 ## Contributing
 
