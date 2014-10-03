@@ -43,11 +43,17 @@ module Ladder::Resource
             obj.rdf_subject
           end
         else
-          obj
+          if fields[name].localized?
+            read_attribute(name).map do |lang, val|
+              RDF::Literal.new(val, language: lang)
+            end
+          else
+            obj
+          end
         end
       end
 
-      resource.set_value(prop.predicate, values)      
+      resource.set_value(prop.predicate, values.flatten)      
     end
 
     resource
@@ -63,7 +69,7 @@ module Ladder::Resource
       if class_name = args.first[:class_name]
         has_and_belongs_to_many field_name, autosave: true, class_name: class_name
       else
-        field field_name
+        field field_name, localize: true
       end
 
       property(field_name, *args)
