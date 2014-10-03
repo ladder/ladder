@@ -30,6 +30,8 @@ module Ladder::Resource
 
     update_resource do |name, prop|
       object = self.send(prop.term)
+      next if object.nil?
+
       objects = object.is_a?(Enumerable) ? object : [object]
 
       values = objects.map do |obj|
@@ -44,9 +46,7 @@ module Ladder::Resource
           end
         else
           if fields[name].localized?
-            read_attribute(name).map do |lang, val|
-              RDF::Literal.new(val, language: lang)
-            end
+            read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
           else
             obj
           end
