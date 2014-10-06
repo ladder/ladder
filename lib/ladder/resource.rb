@@ -5,30 +5,29 @@ require 'json/ld'
 module Ladder::Resource
   extend ActiveSupport::Concern
 
+  include Mongoid::Document
+  include ActiveTriples::Identifiable
+
   autoload :Dynamic, 'ladder/resource/dynamic'
 
   included do
-    include Mongoid::Document
-    include ActiveTriples::Identifiable
-
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
   end
 
   ##
   # Convenience method to return JSON-LD representation
-  def as_jsonld(args = {})
-    update_relations(args)
-    resource.dump(:jsonld, :standard_prefixes => true)
+  def as_jsonld(opts = {})
+    update_resource(opts).dump(:jsonld, :standard_prefixes => true)
   end
 
   ##
-  # Populate @resource with attribute/relation values
+  # Overload ActiveTriples #update_resource
   #
-  # Uses Identifiable#update_resource
-  def update_relations(args = {})
-    relation_hash = args[:related] ? relations : embedded_relations
+  # @see ActiveTriples::Identifiable
+  def update_resource(opts = {})
+    relation_hash = opts[:related] ? relations : embedded_relations
 
-    update_resource do |name, prop|
+    super() do |name, prop|
       object = self.send(prop.term)
       next if object.nil?
 
@@ -37,11 +36,11 @@ module Ladder::Resource
       values = objects.map do |obj|
         if obj.is_a?(ActiveTriples::Identifiable)
           if relation_hash.keys.include? name 
-            obj.update_relations
+            obj.update_resource
             obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject)
             obj
           else
-            resource.delete [obj.rdf_subject] if resource.enum_subjects.include? obj.rdf_subject and ! args[:related]
+            resource.delete [obj.rdf_subject] if resource.enum_subjects.include? obj.rdf_subject and ! opts[:related]
             obj.rdf_subject
           end
         else
@@ -60,19 +59,22 @@ module Ladder::Resource
   end
 
   module ClassMethods
+    
     ##
-    # Default ActiveTriples #property integration
+    # Overload ActiveTriples #property
     #
-    # @see Mongoid::Document
-    def define(field_name, *args)
+    # @see ActiveTriples::Properties
+    def property(name, opts={})
+      if class_name = opts[:class_name]
+        mongoid_opts = opts.except(:predicate, :multivalue).merge(autosave: true)
+        opts.except! *mongoid_opts.keys
 
-      if class_name = args.first[:class_name]
-        has_and_belongs_to_many field_name, autosave: true, class_name: class_name
+        has_and_belongs_to_many(name, mongoid_opts) unless relations.keys.include? name.to_s
       else
-        field field_name, localize: true
+        field(name, localize: true)
       end
 
-      property(field_name, *args)
+      super
     end
   end
 
