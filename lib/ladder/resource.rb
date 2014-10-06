@@ -17,7 +17,7 @@ module Ladder::Resource
   ##
   # Convenience method to return JSON-LD representation
   def as_jsonld(opts = {})
-    update_resource(opts).dump(:jsonld, :standard_prefixes => true)
+    update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
   end
 
   ##

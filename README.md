@@ -231,7 +231,7 @@ Note in this case that both objects are included in the RDF graph, thanks to emb
 
 ### Configuring Resources
 
-If the LADDER_BASE_URI global constant is set, base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
+If the LADDER_BASE_URI global constant is set, base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples:
 
 ```ruby
 LADDER_BASE_URI = 'http://example.org'
