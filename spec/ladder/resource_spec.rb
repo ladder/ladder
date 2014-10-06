@@ -45,4 +45,10 @@ describe Ladder::Resource do
     end
   end
   
+  # Literal property
+  # HABTM property
+  # one-sided has_many
+  # explicit embeds_many
+  # explicit non-localized literal property
+  
 end
