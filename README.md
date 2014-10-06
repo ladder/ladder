@@ -78,7 +78,7 @@ steve.as_jsonld
  # }
 ```
 
-The `#property` method method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` argument will create a has-and-belongs-to-many (HABTM) relation:
+The `#property` method method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` will create a has-and-belongs-to-many (HABTM) relation:
 
 ```ruby
 class Person
@@ -122,7 +122,7 @@ b.as_jsonld
  # }
 ```
 
-You'll notice that only the RDF node for the Book object (on which it was called) is serialized.  To include the entire graph for related objects, use the `related: true` argument:
+You'll notice that only the RDF node for the Book object on which `#as_jsonld` was called is serialized.  To include the entire graph for related objects, use the `related: true` option:
 
 ```ruby
 b.as_jsonld related: true
