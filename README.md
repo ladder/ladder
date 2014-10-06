@@ -37,7 +37,7 @@ Or install it yourself as:
 
 ### Ladder::Resource
 
-Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add the Ladder integration for your model, require 
+Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require 
 and include the main module in your class:
 
 ```ruby
@@ -48,8 +48,8 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  define :name, predicate: RDF::FOAF.name
-  define :description, predicate: RDF::DC.description
+  property :name, predicate: RDF::FOAF.name
+  property :description, predicate: RDF::DC.description
 end
 
 steve = Person.new
@@ -74,7 +74,7 @@ steve.as_jsonld
  # }
 ```
 
-The `#define` method takes the place of setting Mongoid fields and ActiveTriples properties.  Definitions with literal values are localized by default.  Definitions with a supplied `:class_name` argument will create a has-and-belongs-to-many (HABTM) relation:
+The `#property` method method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` argument will create a has-and-belongs-to-many (HABTM) relation:
 
 ```ruby
 class Person
@@ -82,8 +82,8 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  define :name, predicate: RDF::FOAF.name
-  define :berks, predicate: RDF::FOAF.made, class_name: 'Book'
+  property :name, predicate: RDF::FOAF.name
+  property :books, predicate: RDF::FOAF.made, class_name: 'Book'
 end
 
 class Book
@@ -91,15 +91,15 @@ class Book
 
   configure type: RDF::DC.BibliographicResource
 
-  define :title, predicate: RDF::DC.title
-  define :author, predicate: RDF::DC.creator, class_name: 'Person'
+  property :title, predicate: RDF::DC.title
+  property :people, predicate: RDF::DC.creator, class_name: 'Person'
 end
 
 b = Book.new(title: 'Heart of Darkness')
-=> #<Book _id: 542f28d44169721941000000, title: {"en"=>"Heart of Darkness"}, author_ids: nil>
+=> #<Book _id: 542f28d44169721941000000, title: {"en"=>"Heart of Darkness"}, person_ids: nil>
 
-b.author << Person.new(name: 'Joseph Conrad')
-=> [#<Person _id: 542f28dd4169721941010000, name: {"en"=>"Joseph Conrad"}, berk_ids: nil>]
+b.people << Person.new(name: 'Joseph Conrad')
+=> [#<Person _id: 542f28dd4169721941010000, name: {"en"=>"Joseph Conrad"}, book_ids: [BSON::ObjectId('542f28d44169721941000000')]>]
 
 b.as_jsonld
  # => {
@@ -118,7 +118,7 @@ b.as_jsonld
  # }
 ```
 
-You'll notice that only the RDF graph for the Book object (on which it was called) is serialized.  To include the entire graph for related objects, use the `related: true` argument:
+You'll notice that only the RDF node for the Book object (on which it was called) is serialized.  To include the entire graph for related objects, use the `related: true` argument:
 
 ```ruby
 b.as_jsonld related: true
@@ -162,29 +162,29 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  define :name, predicate: RDF::FOAF.name
+  property :name, predicate: RDF::FOAF.name
 
-  embeds_one :address, class_name: 'Address'
+  embeds_one :address, class_name: 'Place'
   property :address, predicate: RDF::FOAF.based_near
 end
 
-class Address
+class Place
   include Ladder::Resource
 
   configure type: RDF::VCARD.Address
 
-  define :city, predicate: RDF::VCARD.locality
-  define :country, predicate: RDF::VCARD.send('country-name')
+  property :city, predicate: RDF::VCARD.locality
+  property :country, predicate: RDF::VCARD.send('country-name')
   
-  embedded_in :resident, class_name: 'Person'
+  embedded_in :resident, class_name: 'Person', inverse_of: :address
   property :resident, predicate: RDF::VCARD.agent
 end
 
 steve = Person.new(name: 'Steve')
-=> #<Person _id: 542f341e41697219a2000000, name: {"en"=>"Steve"}>
+=> #<Person _id: 542f341e41697219a2000000, name: {"en"=>"Steve"}, address: nil>
 
-steve.address = Address.new(city: 'Toronto', country: 'Canada')
-=> #<Address _id: 542f342741697219a2010000, city: {"en"=>"Toronto"}, country: {"en"=>"Canada"}>
+steve.address = Place.new(city: 'Toronto', country: 'Canada')
+=> #<Place _id: 542f342741697219a2010000, city: {"en"=>"Toronto"}, country: {"en"=>"Canada"}, resident: nil>
 
 steve.as_jsonld
  # => {
@@ -194,7 +194,7 @@ steve.as_jsonld
  #    },
  #    "@graph": [
  #        {
- #            "@id": "http://example.org/addresses/542f342741697219a2010000",
+ #            "@id": "http://example.org/places/542f342741697219a2010000",
  #            "@type": "vcard:Address",
  #            "vcard:agent": {
  #                "@id": "http://example.org/people/542f341e41697219a2000000"
@@ -212,7 +212,7 @@ steve.as_jsonld
  #            "@id": "http://example.org/people/542f341e41697219a2000000",
  #            "@type": "foaf:Person",
  #            "foaf:based_near": {
- #                "@id": "http://example.org/addresses/542f342741697219a2010000"
+ #                "@id": "http://example.org/places/542f342741697219a2010000"
  #            },
  #            "foaf:name": {
  #                "@language": "en",
@@ -224,8 +224,6 @@ steve.as_jsonld
 ```
 
 Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled.
-
-Bear in mind that although one-sided relationships can be explicitly defined using Mongoid syntax, in order to use Ladder's simplified `define` syntax, *both* sides of the HABTM relationship (and bi-directional RDF predicates) *must* be defined.
 
 ### Configuring Resources
 
@@ -259,7 +257,7 @@ Anyone and everyone is welcome to contribute.  Go crazy.
 
 ### Authors
 
-MJ Suhonos [@mjsuhonos](http://twitter.com/mjsuhonos) / [@cyxohoc](http://twitter.com/cyxohoc) / mj@suhonos.ca
+MJ Suhonos / mj@suhonos.ca
 
 ## Acknowledgements
 
