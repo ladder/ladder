@@ -55,6 +55,10 @@ end
 steve = Person.new
 steve.name = 'Steve'
 steve.description = 'Funny-looking'
+
+steve.as_document
+ => {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'), "name"=>{"en"=>"Steve"}, "description"=>{"en"=>"Funny-looking"}}
+
 steve.as_jsonld
  # => {
  #    "@context": {
