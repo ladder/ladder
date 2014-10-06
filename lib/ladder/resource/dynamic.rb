@@ -14,15 +14,15 @@ module Ladder::Resource::Dynamic
 
   ##
   # Dynamic field definition
-  def define(field_name, *args)
+  def property(field_name, *opts)
     # Store context information
     self._context ||= Hash.new(nil)
-    self._context[field_name] = args.first[:predicate].to_s
+    self._context[field_name] = opts.first[:predicate].to_s
 
     create_accessors field_name
 
     # Update resource properties
-    resource_class.property(field_name, *args)
+    resource_class.property(field_name, *opts)
   end
 
   private
