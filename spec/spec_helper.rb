@@ -11,5 +11,5 @@ RSpec.configure do |config|
   # config.raise_errors_for_deprecations!
 
   # Use the specified formatter
-  config.formatter = :progress
+  config.formatter = :documentation
 end

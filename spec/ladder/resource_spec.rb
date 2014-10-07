@@ -3,8 +3,8 @@ require 'mongoid'
 require 'pry'
 Mongoid.load!('mongoid.yml', :development)
 
-#Mongoid.logger.level = Logger::DEBUG
-#Moped.logger.level = Logger::DEBUG
+Mongoid.logger.level = Logger::DEBUG
+Moped.logger.level = Logger::DEBUG
 
 describe Ladder::Resource do
   before do
@@ -34,6 +34,7 @@ describe Ladder::Resource do
   end
 
   describe '#property' do
+
     context 'with localized literal' do
       before do
         subject.class.property :title, :predicate => RDF::DC.title
@@ -132,7 +133,7 @@ describe Ladder::Resource do
         expect(person.resource.query(:subject => person.rdf_subject)).to be_empty
       end
     end
-    
+
     context 'with embeds-many' do
       before do
         subject.class.embeds_many :people
@@ -151,9 +152,9 @@ describe Ladder::Resource do
       end
 
       it 'should set an inverse relation' do
-        expect(person.relations).to include 'things'
-        expect(person.relations['things'].relation).to eq (Mongoid::Relations::Embedded::In)
-        expect(person.things).to include subject
+        expect(person.relations).to include 'thing'
+        expect(person.relations['thing'].relation).to eq (Mongoid::Relations::Embedded::In)
+        expect(person.thing).to eq subject
       end
 
       it 'should set a valid predicate' do
@@ -172,31 +173,5 @@ describe Ladder::Resource do
     end
     
   end
-  
-  
-=begin
-  shared_context 'with data' do
-    before do
-      class MyResource
-        include Ladder::Resource
-        configure :type => RDF::OWL.Thing#, :base_uri => 'http://example.org/resources#'
 
-        define :relation, predicate: RDF::DC.relation, class_name: 'LadderExample'
-      end
-
-      klass.define :title, predicate: RDF::DC.title
-      klass.define :identifier, predicate: RDF::DC.identifier
-      klass.define :description, predicate: RDF::DC.description
-
-      subject.title = 'Moomin Valley in November'
-      subject.identifier = 'moomvember'
-      subject.description = 'The ninth and final book in the Moomin series by Finnish author Tove Jansson'
-    end
-    
-    after do
-      Object.send(:remove_const, 'MyResource')
-    end
-  end
-=end
-  
 end
