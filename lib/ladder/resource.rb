@@ -8,8 +8,6 @@ module Ladder::Resource
   include Mongoid::Document
   include ActiveTriples::Identifiable
 
-  autoload :Dynamic, 'ladder/resource/dynamic'
-
   included do
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
   end
