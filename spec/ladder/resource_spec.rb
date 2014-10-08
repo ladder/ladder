@@ -294,10 +294,16 @@ describe Ladder::Resource do
     end
   end
   
-  # TODO
   describe '#as_jsonld' do
+    include_context 'with data'
+    
     before do
-      # TODO
+      subject.update_resource
+    end
+    
+    it 'should output a valid jsonld representation of itself' do
+      g = RDF::Graph.new << JSON::LD::API.toRdf(JSON.parse subject.as_jsonld)
+      expect(subject.resource.to_hash == g.to_hash).to be true
     end
   end
 
