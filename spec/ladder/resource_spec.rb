@@ -247,11 +247,11 @@ describe Ladder::Resource do
       end
 
       it 'should not have related object relations' do
-        expect(person.resource.query(:subject => subject.rdf_subject)).to be_empty
-        expect(concept.resource.query(:subject => subject.rdf_subject)).to be_empty
+        expect(person.resource.statements).to be_empty
+        expect(concept.resource.statements).to be_empty
       end
     end
-    
+
     context 'with related' do
       include_context 'with data'
       
@@ -278,13 +278,19 @@ describe Ladder::Resource do
       end
 
       it 'should have related objects' do
-        # TODO
+        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.subject).each_statement do |s|
+          expect(s.object).to eq concept.rdf_subject
+        end
+        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.creator).each_statement do |s|
+          expect(s.object).to eq person.rdf_subject
+        end
       end
 
       it 'should have related object relations' do
-        # TODO
+        person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation).each_statement do |s|
+          expect(s.object).to eq subject.rdf_subject
+        end
       end
-
     end
   end
   

@@ -37,7 +37,7 @@ module Ladder::Resource
         if obj.is_a?(ActiveTriples::Identifiable)
           if relation_hash.keys.include? name 
             obj.update_resource
-            obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject)
+            obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject) if relation_hash[name].inverse
             obj
           else
             resource.delete [obj.rdf_subject] if resource.enum_subjects.include? obj.rdf_subject and ! opts[:related]
