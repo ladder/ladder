@@ -4,6 +4,7 @@ require 'pry'
 describe Ladder::Resource do
   before do
     Mongoid.load!('mongoid.yml', :development)
+    Mongoid.purge!
 
     Mongoid.logger.level = Logger::DEBUG
     Moped.logger.level = Logger::DEBUG
@@ -13,7 +14,7 @@ describe Ladder::Resource do
     class Thing
       include Ladder::Resource
     end
-    
+
     class Person
       include Ladder::Resource
     end
@@ -61,7 +62,6 @@ describe Ladder::Resource do
       subject.class.embeds_many :parts, cascade_callbacks: true
       subject.class.property :parts, :predicate => RDF::DC.hasPart, :class_name => 'Part'
       subject.parts << part
-
       subject.save
     end
 
