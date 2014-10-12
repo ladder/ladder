@@ -20,8 +20,10 @@ module Ladder::Searchable
       ns, name = property.predicate.qname
       qname_hash[ns] ||= Hash.new
 
-      if embedded_relations.keys.include? field_name
-        qname_hash[ns][name] = self.send(field_name).map(&:as_qname)
+      object = self.send(field_name)
+
+      if relations.keys.include? field_name
+        qname_hash[ns][name] = object.to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
       elsif fields.keys.include? field_name
         qname_hash[ns][name] = read_attribute(field_name)
       end
@@ -42,7 +44,7 @@ module Ladder::Searchable
       when :qname
         define_method(:as_indexed_json) { |opts = {}| as_qname }
       else
-        define_method(:as_indexed_json) { |opts = {}| as_document.as_json(except: ['id', '_id']) }
+        define_method(:as_indexed_json) { |opts = {}| as_json(except: ['id', '_id']) }
       end
     end
 
