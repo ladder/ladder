@@ -14,6 +14,7 @@ module Ladder::Resource
 
   ##
   # Convenience method to return JSON-LD representation
+  #
   def as_jsonld(opts = {})
     update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
   end
@@ -33,7 +34,7 @@ module Ladder::Resource
 
       values = objects.map do |obj|
         if obj.is_a?(ActiveTriples::Identifiable)
-          if relation_hash.keys.include? name 
+          if relation_hash.keys.include? name
             obj.update_resource
             obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject) if relation_hash[name].inverse
             obj
