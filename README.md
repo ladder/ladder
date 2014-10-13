@@ -78,7 +78,7 @@ steve.as_jsonld
  # }
 ```
 
-The `#property` method method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` will create a has-and-belongs-to-many (HABTM) relation:
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` will create a has-and-belongs-to-many (HABTM) relation:
 
 ```ruby
 class Person
@@ -265,7 +265,7 @@ kimchy.name = 'Shay'
 kimchy.description = 'Real genius'
 ```
 
-In order to enable searching, you use the `#index` method on the class:
+In order to enable searching, call the `#index` method on the class:
 
 ```ruby
 Person.index
