@@ -245,6 +245,100 @@ Person.resource_class.base_uri
 => "http://some.other.uri/"
 ```
 
+### Ladder::Searchable
+
+You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
+
+```ruby
+class Person
+  include Ladder::Resource
+  include Ladder::Searchable
+
+  configure type: RDF::FOAF.Person
+
+  property :name, predicate: RDF::FOAF.name
+  property :description, predicate: RDF::DC.description
+end
+
+kimchy = Person.new
+kimchy.name = 'Shay'
+kimchy.description = 'Real genius'
+```
+
+In order to enable searching, you use the `#index` method on the class:
+
+```ruby
+Person.index
+=> :as_indexed_json
+
+kimchy.as_indexed_json
+=> {"description"=>"Real genius", "name"=>"Shay"}
+
+kimchy.save
+=> true
+
+results = Person.search 'shay'
+ # => #<Elasticsearch::Model::Response::Response:0x007fa2ca82a9f0
+ # @klass=[PROXY] Person,
+ # @search=
+ # #<Elasticsearch::Model::Searching::SearchRequest:0x007fa2ca830a58
+ #  @definition={:index=>"people", :type=>"person", :q=>"Shay"},
+ #  @klass=[PROXY] Person,
+ #  @options={}>>
+ 
+results.count
+=> 1
+
+results.first._source
+=> {"description"=>"Real genius", "name"=>"Shay"}
+
+results.records.first == kimchy
+=> true
+```
+
+When indexing, you can control how your model is stored in the index by supplying the `as: :jsonld` or `as: :qname` options:
+
+```ruby
+Person.index as: :jsonld
+
+kimchy.as_indexed_json
+ # => {
+ #   "@context": {
+ #       "dc": "http://purl.org/dc/terms/",
+ #       "foaf": "http://xmlns.com/foaf/0.1/"
+ #   },
+ #   "@id": "http://example.org/people/543b457b41697231c5000000",
+ #   "@type": "foaf:Person",
+ #   "dc:description": {
+ #       "@language": "en",
+ #       "@value": "Real genius"
+ #   },
+ #   "foaf:name": {
+ #       "@language": "en",
+ #       "@value": "Shay"
+ #   }
+ # }
+
+Person.index as: :qname
+
+kimchy.as_indexed_json
+ # {
+ #   "dc": {
+ #       "description": {
+ #           "en": "Real genius"
+ #       }
+ #   },
+ #   "foaf": {
+ #       "name": {
+ #           "en": "Shay"
+ #       }
+ #   },
+ #   "rdf": {
+ #       "type": "foaf:Person"
+ #   }
+ # }
+```
+
 ### Dynamic Resources
 
 [TODO]
