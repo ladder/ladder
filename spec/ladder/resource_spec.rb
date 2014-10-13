@@ -4,10 +4,8 @@ require 'pry'
 describe Ladder::Resource do
   before do
     Mongoid.load!('mongoid.yml', :development)
+    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
     Mongoid.purge!
-
-    Mongoid.logger.level = Logger::DEBUG
-    Moped.logger.level = Logger::DEBUG
 
     LADDER_BASE_URI = 'http://example.org'
 
