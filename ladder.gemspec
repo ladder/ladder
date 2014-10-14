@@ -6,10 +6,11 @@ require 'ladder/version'
 Gem::Specification.new do |spec|
   spec.name          = "ladder"
   spec.version       = Ladder::VERSION
-  spec.authors       = ["MJ Suhonos"]
-  spec.email         = ["mj@suhonos.ca"]
+  spec.platform      = Gem::Platform::RUBY
+  spec.authors       = "MJ Suhonos"
+  spec.email         = "mj@suhonos.ca"
   spec.summary       = %q{Opinionated ActiveModel framework.}
-  spec.description   = %q{Opinionated ActiveModel framework.}
+  spec.description   = %q{Ladder is a metadata framework for RDF modelling, persistence, and full-text indexing.}
   spec.homepage      = "https://github.com/mjsuhonos/ladder"
   spec.license       = "APACHE2"
   spec.required_ruby_version     = '>= 1.9.3'
@@ -27,5 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry", "~> 0.10"
   spec.add_development_dependency "wirble", "~> 0.1"
   spec.add_development_dependency "rspec", "~> 3.1"
-#  spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "rake", "~> 10.3"
+  spec.add_development_dependency "yard", "~> 0.8"
 end
