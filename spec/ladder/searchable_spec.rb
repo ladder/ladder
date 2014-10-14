@@ -31,12 +31,16 @@ describe Ladder::Searchable do
   subject { Thing.new }
   let(:person) { Person.new }
 
-  describe '#index' do
+  shared_context 'with data' do
     before do
       subject.class.configure type: RDF::DC.BibliographicResource
       subject.class.property :title, :predicate => RDF::DC.title
       subject.title = 'Comet in Moominland'
     end
+  end
+
+  describe '#index' do
+    include_context 'with data'
 
     context 'with default' do
       before do
@@ -48,10 +52,6 @@ describe Ladder::Searchable do
       it 'should exist in the index' do
         results = subject.class.search('title:moomin*')
         expect(results.count).to eq 1
-      end
-
-      it 'should contain a valid serialization' do
-        results = subject.class.search('title:moomin*')
         expect(results.first._source.to_hash).to eq JSON.parse(subject.as_indexed_json.to_json)
       end
     end
@@ -66,11 +66,7 @@ describe Ladder::Searchable do
       it 'should exist in the index' do
         results = subject.class.search('dc.title.en:moomin*')
         expect(results.count).to eq 1
-      end
-
-      it 'should contain a valid serialization' do
-        results = subject.class.search('dc.title.en:moomin*')
-        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_indexed_json.to_json)
+        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_qname.to_json)
       end
     end
 
@@ -84,50 +80,98 @@ describe Ladder::Searchable do
       it 'should exist in the index' do
         results = subject.class.search('dc\:title.@value:moomin*')
         expect(results.count).to eq 1
+        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_jsonld)
+      end
+    end  
+  end
+
+  describe '#index with related' do
+    include_context 'with data'
+    
+    before do
+      # related object
+      person.class.configure type: RDF::FOAF.Person
+      person.class.property :name, :predicate => RDF::FOAF.name
+      person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
+      person.name = 'Tove Jansson'
+
+      # many-to-many relation
+      subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
+      subject.people << person
+    end
+
+    context 'with default' do
+      before do
+        person.class.index
+        subject.class.index
+        subject.save
+        Elasticsearch::Model.client.indices.flush
       end
 
-      it 'should contain a valid serialization' do
-        results = subject.class.search('dc\:title.@value:moomin*')
-        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_indexed_json)
+      it 'should contain an ID for the related object' do
+        results = subject.class.search('person_ids.$oid:' + person.id)
+        expect(results.count).to eq 1
+      end
+
+      it 'should include the related object in the index' do
+        results = person.class.search('name:tove')
+        expect(results.count).to eq 1
+        expect(results.first._source.to_hash).to eq JSON.parse(person.as_indexed_json.to_json)
+      end
+
+      it 'should contain an ID for the subject' do
+        results = person.class.search('thing_ids.$oid:' + subject.id)
+        expect(results.count).to eq 1
       end
     end
-    
-    context 'with as_jsonld including related' do
+
+    context 'with as qname' do
       before do
-        # related object
-        person.class.configure type: RDF::FOAF.Person
-        person.class.property :name, :predicate => RDF::FOAF.name
-        person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
+        person.class.index as: :qname
+        subject.class.index as: :qname
+        subject.save
+        Elasticsearch::Model.client.indices.flush
+      end
+
+      it 'should contain an ID for the related object' do
+        results = subject.class.search('dc.creator:' + person.id)
+        expect(results.count).to eq 1
+      end
+
+      it 'should include the related object in the index' do
+        results = person.class.search('foaf.name.en:tove')
+        expect(results.count).to eq 1
+        expect(results.first._source.to_hash).to eq JSON.parse(person.as_qname.to_json)
+      end
+
+      it 'should contain an ID for the subject' do
+        results = person.class.search('dc.relation:' + subject.id)
+        expect(results.count).to eq 1
+      end
+    end
+
+    context 'with as_jsonld' do
+      before do
         person.class.index as: :jsonld
-        person.name = 'Tove Jansson'
-
-        # many-to-many relation
-        subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
-        subject.people << person
-
         subject.class.index as: :jsonld
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
       
-      it 'should exist in the index' do
-        results = subject.class.search('dc\:title.@value:moomin*')
+      it 'should contain an ID for the related object' do
+        results = subject.class.search('dc\:creator.@id:' + person.id)
         expect(results.count).to eq 1
       end
 
-      it 'should contain a valid serialization' do
-        results = subject.class.search('dc\:title.@value:moomin*')
-        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_indexed_json)
-      end
-      
       it 'should include the related object in the index' do
         results = person.class.search('foaf\:name.@value:tove')
         expect(results.count).to eq 1
+        expect(results.first._source.to_hash).to eq JSON.parse(person.as_jsonld)
       end
 
-      it 'should contain a valid serialization of the related object' do
-        results = person.class.search('foaf\:name.@value:tove')
-        expect(results.first._source.to_hash).to eq JSON.parse(person.as_indexed_json)
+      it 'should contain an ID for the subject' do
+        results = person.class.search('dc\:relation.@id:' + subject.id)
+        expect(results.count).to eq 1
       end
     end
   end
