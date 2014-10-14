@@ -1,19 +1,18 @@
 require 'spec_helper'
-require 'mongoid'
 require 'pry'
-Mongoid.load!('mongoid.yml', :development)
-
-Mongoid.logger.level = Logger::DEBUG
-Moped.logger.level = Logger::DEBUG
 
 describe Ladder::Resource do
   before do
+    Mongoid.load!('mongoid.yml', :development)
+    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
+    Mongoid.purge!
+
     LADDER_BASE_URI = 'http://example.org'
 
     class Thing
       include Ladder::Resource
     end
-    
+
     class Person
       include Ladder::Resource
     end
@@ -51,16 +50,14 @@ describe Ladder::Resource do
       person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
       subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
       subject.people << person
-      subject.save
 
       # one-sided has-many
       subject.class.has_and_belongs_to_many :concepts, inverse_of: nil
       subject.class.property :concepts, :predicate => RDF::DC.subject, :class_name => 'Concept'
       subject.concepts << concept
-      subject.save
 
       # embedded many
-      subject.class.embeds_many :parts
+      subject.class.embeds_many :parts, cascade_callbacks: true
       subject.class.property :parts, :predicate => RDF::DC.hasPart, :class_name => 'Part'
       subject.parts << part
       subject.save
@@ -73,13 +70,13 @@ describe Ladder::Resource do
 
     it 'should have relations' do
       expect(subject.title).to eq 'Comet in Moominland'
-      expect(subject.people).to include person
-      expect(subject.concepts).to include concept
-      expect(subject.parts).to include part
+      expect(subject.people.to_a).to include person
+      expect(subject.concepts.to_a).to include concept
+      expect(subject.parts.to_a).to include part
     end
     
     it 'should have reverse relations' do
-      expect(person.things).to include subject
+      expect(person.things.to_a).to include subject
       expect(concept.relations).to be_empty
       expect(part.thing).to eq subject
     end
@@ -124,13 +121,13 @@ describe Ladder::Resource do
       it 'should have a relation' do
         expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-        expect(subject.people).to include person
+        expect(subject.people.to_a).to include person
       end
 
       it 'should have an inverse relation' do
         expect(person.relations).to include 'things'
         expect(person.relations['things'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-        expect(person.things).to include subject
+        expect(person.things.to_a).to include subject
       end
 
       it 'should have a valid predicate' do
@@ -150,15 +147,13 @@ describe Ladder::Resource do
       before do
         subject.class.has_and_belongs_to_many :people, inverse_of: nil
         subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
-
         subject.people << person
-        subject.save
       end
 
       it 'should have a relation' do
         expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-        expect(subject.people).to include person
+        expect(subject.people.to_a).to include person
       end
 
       it 'should not have an inverse relation' do
@@ -191,7 +186,7 @@ describe Ladder::Resource do
       it 'should have a relation' do
         expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Embedded::Many)
-        expect(subject.people).to include person
+        expect(subject.people.to_a).to include person
       end
 
       it 'should have an inverse relation' do
@@ -216,7 +211,7 @@ describe Ladder::Resource do
 
   describe '#update_resource' do
 
-    context 'without related' do
+    context 'without related: true' do
       include_context 'with data'
       
       before do
@@ -252,7 +247,7 @@ describe Ladder::Resource do
       end
     end
 
-    context 'with related' do
+    context 'with related: true' do
       include_context 'with data'
       
       before do
