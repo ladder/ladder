@@ -29,7 +29,7 @@ module Ladder::Searchable
       end
     end
 
-    qname_hash.to_json
+    qname_hash
   end
 
   module ClassMethods
@@ -40,7 +40,7 @@ module Ladder::Searchable
     def index(opts={})
       case opts[:as]
       when :jsonld
-        define_method(:as_indexed_json) { |opts = {}| as_jsonld opts.except(:as) }
+        define_method(:as_indexed_json) { |opts = {}| as_jsonld }
       when :qname
         define_method(:as_indexed_json) { |opts = {}| as_qname }
       else
