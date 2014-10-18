@@ -28,31 +28,21 @@ module Ladder::Resource
     relation_hash = opts[:related] ? relations : embedded_relations
 
     super() do |name, prop|
-      object = self.send(prop.term)
-      next if object.nil?
-
-      objects = object.is_a?(Enumerable) ? object : [object]
-
-      values = objects.map do |obj|
-        if obj.is_a?(ActiveTriples::Identifiable)
-          if relation_hash.keys.include? name
-            obj.update_resource
-            obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject) if relation_hash[name].inverse
-            obj
-          else
-            resource.delete [obj.rdf_subject] if resource.enum_subjects.include? obj.rdf_subject and ! opts[:related]
-            obj.rdf_subject
-          end
-        else
-          if fields[name].localized?
-            read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
-          else
-            obj
-          end
-        end
+      # this is a literal property
+      if field_def = fields[name]
+        value = field_def.localized? ? read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) } : self.send(prop.term)
+      end
+      
+      # this is a relation property
+      if relation_def = relation_hash[name]
+        objects = self.send(prop.term).to_a
+        value = (opts[:related] or embedded_relations == relation_hash) ? objects.map(&:update_resource) : objects.map(&:rdf_subject)
+        
+        # update inverse relation properties
+        objects.each {|object| object.resource.set_value(relation_def.inverse, self.rdf_subject)} if relation_def.inverse
       end
 
-      resource.set_value(prop.predicate, values.flatten)      
+      resource.set_value(prop.predicate, value)
     end
 
     resource

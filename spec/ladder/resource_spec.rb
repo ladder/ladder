@@ -56,10 +56,10 @@ describe Ladder::Resource do
       subject.class.property :concepts, :predicate => RDF::DC.subject, :class_name => 'Concept'
       subject.concepts << concept
 
-      # embedded many
-      subject.class.embeds_many :parts, cascade_callbacks: true
-      subject.class.property :parts, :predicate => RDF::DC.hasPart, :class_name => 'Part'
-      subject.parts << part
+      # embedded one
+      subject.class.embeds_one :part, cascade_callbacks: true
+      subject.class.property :part, :predicate => RDF::DC.hasPart, :class_name => 'Part'
+      subject.part = part
       subject.save
     end
 
@@ -72,7 +72,7 @@ describe Ladder::Resource do
       expect(subject.title).to eq 'Comet in Moominland'
       expect(subject.people.to_a).to include person
       expect(subject.concepts.to_a).to include concept
-      expect(subject.parts.to_a).to include part
+      expect(subject.part).to eq part
     end
     
     it 'should have reverse relations' do
@@ -206,7 +206,7 @@ describe Ladder::Resource do
         expect(t = person.class.properties['thing']).to be_a ActiveTriples::NodeConfig
         expect(t.predicate).to eq RDF::DC.relation
       end
-    end  
+    end
   end
 
   describe '#update_resource' do
@@ -225,14 +225,20 @@ describe Ladder::Resource do
       end
 
       it 'should have an embedded object' do
-        subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation).each_statement do |s|
-          expect(s.object).to eq subject.rdf_subject
+        query = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart)
+        expect(query.count).to eq 1
+        
+        query.each_statement do |s|
+          expect(s.object).to eq part.rdf_subject
         end
       end
 
       it 'should have an embedded object relation' do
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart).each_statement do |s|
-          expect(s.object).to eq part.rdf_subject
+        query = subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+
+        query.each_statement do |s|
+          expect(s.object).to eq subject.rdf_subject
         end
       end
 
@@ -245,6 +251,8 @@ describe Ladder::Resource do
         expect(person.resource.statements).to be_empty
         expect(concept.resource.statements).to be_empty
       end
+
+      # TODO: check related values
     end
 
     context 'with related: true' do
@@ -261,31 +269,49 @@ describe Ladder::Resource do
       end
 
       it 'should have an embedded object' do
-        subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation).each_statement do |s|
-          expect(s.object).to eq subject.rdf_subject
-        end
-      end
-
-      it 'should have an embedded object relation' do
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart).each_statement do |s|
+        query = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart)
+        expect(query.count).to eq 1
+        
+        query.each_statement do |s|
           expect(s.object).to eq part.rdf_subject
         end
       end
 
+      it 'should have an embedded object relation' do
+        query = subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+
+        query.each_statement do |s|
+          expect(s.object).to eq subject.rdf_subject
+        end
+      end
+
       it 'should have related objects' do
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.subject).each_statement do |s|
+        query_subject = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.subject)
+        expect(query_subject.count).to eq 1
+
+        query_subject.each_statement do |s|
           expect(s.object).to eq concept.rdf_subject
         end
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.creator).each_statement do |s|
+
+        query_creator = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.creator)
+        expect(query_creator.count).to eq 1
+
+        query_creator.each_statement do |s|
           expect(s.object).to eq person.rdf_subject
         end
       end
 
       it 'should have related object relations' do
-        person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation).each_statement do |s|
+        query = person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+
+        query.each_statement do |s|
           expect(s.object).to eq subject.rdf_subject
         end
       end
+
+      # TODO: check related values
     end
   end
   

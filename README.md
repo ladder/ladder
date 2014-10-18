@@ -35,6 +35,10 @@ Or install it yourself as:
 
 ## Usage
 
+* [Ladder::Resource](#ladderresource)
+  * [Configuring Resources](#configuring-resources)
+* [Ladder::Searchable](#laddersearchable)
+
 ### Ladder::Resource
 
 Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require 
@@ -341,9 +345,6 @@ kimchy.as_indexed_json
  # }
 ```
 
-### Dynamic Resources
-
-[TODO]
 
 ## Contributing
 
