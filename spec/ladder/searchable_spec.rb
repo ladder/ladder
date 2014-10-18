@@ -85,17 +85,17 @@ describe Ladder::Searchable do
     end  
   end
 
-  describe '#index with related' do
+  describe '#index related' do
     include_context 'with data'
     
     before do
       # related object
       person.class.configure type: RDF::FOAF.Person
       person.class.property :name, :predicate => RDF::FOAF.name
-      person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
       person.name = 'Tove Jansson'
 
       # many-to-many relation
+      person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
       subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
       subject.people << person
     end
@@ -173,6 +173,29 @@ describe Ladder::Searchable do
         results = person.class.search('dc\:relation.@id:' + subject.id)
         expect(results.count).to eq 1
       end
+    end
+    
+    context 'with as_jsonld related' do
+      before do
+        person.class.index as: :jsonld, related: true
+        subject.class.index as: :jsonld, related: true
+        person.save
+        subject.save
+        Elasticsearch::Model.client.indices.flush
+      end
+
+      it 'should contain a embedded related object' do
+        results = subject.class.search('dc\:creator.foaf\:name.@value:tove')
+        expect(results.count).to eq 1
+        expect(results.first._source.to_hash).to eq JSON.parse(person.as_framed_jsonld)
+      end
+
+      it 'should contain an embedded subject in the related object' do
+        results = person.class.search('dc\:relation.dc.title.@value:moomin*')
+        expect(results.count).to eq 1
+        expect(results.first._source.to_hash).to eq JSON.parse(person.as_framed_jsonld)
+      end
+
     end
   end
 
