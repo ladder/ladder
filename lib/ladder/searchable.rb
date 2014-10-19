@@ -40,7 +40,7 @@ module Ladder::Searchable
     #
     # NB: Will NOT embed related objects with same @type. Spec under discussion, see https://github.com/json-ld/json-ld.org/issues/110
     def as_framed_jsonld
-      json_hash = JSON.parse(as_jsonld related: true)
+      json_hash = as_jsonld related: true
       context = json_hash['@context']
       frame = {'@context' => context, '@type' => type.first.pname}
       JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)

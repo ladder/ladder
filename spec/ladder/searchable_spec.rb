@@ -80,7 +80,7 @@ describe Ladder::Searchable do
       it 'should exist in the index' do
         results = subject.class.search('dc\:title.@value:moomin*')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_jsonld)
+        expect(results.first._source.to_hash).to eq subject.as_jsonld
       end
     end  
   end
@@ -166,7 +166,7 @@ describe Ladder::Searchable do
       it 'should include the related object in the index' do
         results = person.class.search('foaf\:name.@value:tove')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash).to eq JSON.parse(person.as_jsonld)
+        expect(results.first._source.to_hash).to eq person.as_jsonld
       end
 
       it 'should contain an ID for the subject' do
@@ -179,7 +179,6 @@ describe Ladder::Searchable do
       before do
         person.class.index as: :jsonld, related: true
         subject.class.index as: :jsonld, related: true
-        person.save
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -187,13 +186,14 @@ describe Ladder::Searchable do
       it 'should contain a embedded related object' do
         results = subject.class.search('dc\:creator.foaf\:name.@value:tove')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash).to eq JSON.parse(person.as_framed_jsonld)
+        expect(results.first._source.to_hash['dc:creator']).to eq person.send(:as_framed_jsonld).except '@context'
       end
 
       it 'should contain an embedded subject in the related object' do
+        # FIXME: person isn't being serialized properly with relation: true
         results = person.class.search('dc\:relation.dc.title.@value:moomin*')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash).to eq JSON.parse(person.as_framed_jsonld)
+        expect(results.first._source.to_hash).to eq person.send :as_framed_jsonld
       end
 
     end
