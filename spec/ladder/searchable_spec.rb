@@ -186,14 +186,13 @@ describe Ladder::Searchable do
       it 'should contain a embedded related object' do
         results = subject.class.search('dc\:creator.foaf\:name.@value:tove')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash['dc:creator']).to eq person.send(:as_framed_jsonld).except '@context'
+        expect(results.first._source.to_hash['dc:creator']).to eq person.as_jsonld.except '@context'
       end
 
       it 'should contain an embedded subject in the related object' do
-        # FIXME: person isn't being serialized properly with relation: true
-        results = person.class.search('dc\:relation.dc.title.@value:moomin*')
+        results = person.class.search('dc\:relation.dc\:title.@value:moomin*')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash).to eq person.send :as_framed_jsonld
+        expect(results.first._source.to_hash['dc:relation']).to eq subject.as_jsonld.except '@context'
       end
 
     end
