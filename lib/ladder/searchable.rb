@@ -13,7 +13,7 @@ module Ladder::Searchable
   ##
   # Generate a qname-based JSON representation
   #
-  def as_qname
+  def as_qname(opts = {})
     qname_hash = type.empty? ? {} : {rdf: {type: type.first.pname }}
 
     resource_class.properties.each do |field_name, property|
@@ -23,7 +23,11 @@ module Ladder::Searchable
       object = self.send(field_name)
 
       if relations.keys.include? field_name
-        qname_hash[ns][name] = object.to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
+        if opts[:related]
+          qname_hash[ns][name] = object.to_a.map { |obj| obj.as_qname }
+        else
+          qname_hash[ns][name] = object.to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
+        end
       elsif fields.keys.include? field_name
         qname_hash[ns][name] = read_attribute(field_name)
       end
@@ -68,7 +72,11 @@ module Ladder::Searchable
           define_method(:as_indexed_json) { |opts = {}| as_jsonld }
         end
       when :qname
-        define_method(:as_indexed_json) { |opts = {}| as_qname }
+        if opts[:related]
+          define_method(:as_indexed_json) { |opts = {}| as_qname related: true }
+        else
+          define_method(:as_indexed_json) { |opts = {}| as_qname }
+        end
       else
         define_method(:as_indexed_json) { |opts = {}| as_json(except: ['id', '_id']) }
       end

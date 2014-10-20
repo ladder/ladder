@@ -150,6 +150,27 @@ describe Ladder::Searchable do
       end
     end
 
+    context 'with as_qname related' do
+      before do
+        person.class.index as: :qname, related: true
+        subject.class.index as: :qname, related: true
+        subject.save
+        Elasticsearch::Model.client.indices.flush
+      end
+
+      it 'should contain a embedded related object' do
+        results = subject.class.search('dc.creator.foaf.name.en:tove')
+        expect(results.count).to eq 1
+        expect(results.first._source['dc']['creator'].first).to eq Hashie::Mash.new person.as_qname
+      end
+
+      it 'should contain an embedded subject in the related object' do
+        results = person.class.search('dc.relation.dc.title.en:moomin*')
+        expect(results.count).to eq 1
+        expect(results.first._source['dc']['relation'].first).to eq Hashie::Mash.new subject.as_qname
+      end
+    end
+
     context 'with as_jsonld' do
       before do
         person.class.index as: :jsonld
@@ -174,7 +195,7 @@ describe Ladder::Searchable do
         expect(results.count).to eq 1
       end
     end
-    
+
     context 'with as_jsonld related' do
       before do
         person.class.index as: :jsonld, related: true
@@ -194,7 +215,6 @@ describe Ladder::Searchable do
         expect(results.count).to eq 1
         expect(results.first._source.to_hash['dc:relation']).to eq subject.as_jsonld.except '@context'
       end
-
     end
   end
 
