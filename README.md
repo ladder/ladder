@@ -328,16 +328,12 @@ Person.index as: :qname
 => :as_indexed_json
 
 kimchy.as_indexed_json
- # {
+ # => {
  #   "dc": {
- #       "description": {
- #           "en": "Real genius"
- #       }
+ #       "description": { "en": "Real genius" }
  #   },
  #   "foaf": {
- #       "name": {
- #           "en": "Shay"
- #       }
+ #       "name": { "en": "Shay" }
  #   },
  #   "rdf": {
  #       "type": "foaf:Person"
@@ -345,6 +341,154 @@ kimchy.as_indexed_json
  # }
 ```
 
+You can also index related objects as framed JSON-LD or hierarchical qname, by again using the `related: true` option:
+
+```ruby
+class Project
+  include Ladder::Resource
+  include Ladder::Searchable
+
+  configure type: RDF::DOAP.Project
+
+  property :name, predicate: RDF::DOAP.name
+  property :description, predicate: RDF::DC.description
+  property :developers, predicate: RDF::DOAP.developer, class_name: 'Person'
+end
+
+Person.property :projects, predicate: RDF::FOAF.made, class_name: 'Project'
+
+es = Project.new(name: 'ElasticSearch', description: 'You know, for search')
+es.developers << kimchy
+es.save
+
+Person.index as: :jsonld, related: true
+=> :as_indexed_json
+Project.index as: :jsonld, related: true
+=> :as_indexed_json
+
+kimchy.as_indexed_json
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "doap": "http://usefulinc.com/ns/doap#",
+ #        "foaf": "http://xmlns.com/foaf/0.1/"
+ #    },
+ #    "@id": "http://example.org/people/543b457b41697231c5000000",
+ #    "@type": "foaf:Person",
+ #    "dc:description": {
+ #        "@language": "en",
+ #        "@value": "Real genius"
+ #    },
+ #    "foaf:made": {
+ #        "@id": "http://example.org/projects/544562c24169728b4e010000",
+ #        "@type": "doap:Project",
+ #        "dc:description": {
+ #            "@language": "en",
+ #            "@value": "You know, for search"
+ #        },
+ #        "doap:developer": {
+ #            "@id": "http://example.org/people/543b457b41697231c5000000"
+ #        },
+ #        "doap:name": {
+ #            "@language": "en",
+ #            "@value": "ElasticSearch"
+ #        }
+ #    },
+ #    "foaf:name": {
+ #        "@language": "en",
+ #        "@value": "Shay"
+ #    }
+ # }
+
+es.as_indexed_json
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "doap": "http://usefulinc.com/ns/doap#",
+ #        "foaf": "http://xmlns.com/foaf/0.1/"
+ #    },
+ #    "@id": "http://example.org/projects/544562c24169728b4e010000",
+ #    "@type": "doap:Project",
+ #    "dc:description": {
+ #        "@language": "en",
+ #        "@value": "You know, for search"
+ #    },
+ #    "doap:developer": {
+ #        "@id": "http://example.org/people/543b457b41697231c5000000",
+ #        "@type": "foaf:Person",
+ #        "dc:description": {
+ #            "@language": "en",
+ #            "@value": "Real genius"
+ #        },
+ #        "foaf:made": {
+ #            "@id": "http://example.org/projects/544562c24169728b4e010000"
+ #        },
+ #        "foaf:name": {
+ #            "@language": "en",
+ #            "@value": "Shay"
+ #        }
+ #    },
+ #    "doap:name": {
+ #        "@language": "en",
+ #        "@value": "ElasticSearch"
+ #    }
+ # }
+
+Person.index as: :qname, related: true
+=> :as_indexed_json
+Project.index as: :qname, related: true
+=> :as_indexed_json
+
+kimchy.as_indexed_json
+ # => {
+ #    "dc": {
+ #        "description": { "en": "Real genius" }
+ #    },
+ #    "foaf": {
+ #        "made": {
+ #            "dc": {
+ #                "description": { "en": "You know, for search" }
+ #            },
+ #            "doap": {
+ #                "developer": [ "people:544562b14169728b4e000000" ],
+ #                "name": { "en": "ElasticSearch" }
+ #            },
+ #            "rdf": {
+ #                "type": "doap:Project"
+ #            }
+ #        },
+ #        "name": { "en": "Shay" }
+ #    },
+ #    "rdf": {
+ #        "type": "foaf:Person"
+ #    }
+ # }
+
+es.as_indexed_json
+ # => {
+ #    "dc": {
+ #        "description": { "en": "You know, for search" }
+ #    },
+ #    "doap": {
+ #        "developer": {
+ #            "dc": {
+ #                "description": { "en": "Real genius" }
+ #            },
+ #            "foaf": {
+ #                "made": [ "projects:544562c24169728b4e010000" ],
+ #                "name": { "en": "Shay" }
+ #            },
+ #            "rdf": {
+ #                "type": "foaf:Person"
+ #            }
+ #        },
+ #        "name": { "en": "ElasticSearch" }
+ #    },
+ #    "rdf": {
+ #        "type": "doap:Project"
+ #    }
+ # }
+```
 
 ## Contributing
 
