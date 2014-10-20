@@ -31,9 +31,9 @@ module Ladder::Searchable
 
     qname_hash
   end
-  
+
   private
-  
+
     ##
     # Return a framed, compacted JSON-LD representation
     # by embedding related objects from the graph
