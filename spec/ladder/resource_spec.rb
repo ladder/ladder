@@ -38,8 +38,6 @@ describe Ladder::Resource do
 
       class Part
         include Ladder::Resource
-        embedded_in :thing
-        property :thing, :predicate => RDF::DC.relation, :class_name => 'Thing'
       end
 
       # localized literal
@@ -57,6 +55,8 @@ describe Ladder::Resource do
       subject.concepts << concept
 
       # embedded one
+      part.class.embedded_in :thing
+      part.class.property :thing, :predicate => RDF::DC.relation, :class_name => 'Thing'
       subject.class.embeds_one :part, cascade_callbacks: true
       subject.class.property :part, :predicate => RDF::DC.hasPart, :class_name => 'Part'
       subject.part = part
@@ -236,6 +236,7 @@ describe Ladder::Resource do
       it 'should have an embedded object relation' do
         query = subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation)
         expect(query.count).to eq 1
+        expect(query.to_hash).to eq part.resource.statements.to_hash
 
         query.each_statement do |s|
           expect(s.object).to eq subject.rdf_subject
@@ -251,8 +252,6 @@ describe Ladder::Resource do
         expect(person.resource.statements).to be_empty
         expect(concept.resource.statements).to be_empty
       end
-
-      # TODO: check related values
     end
 
     context 'with related: true' do
@@ -280,6 +279,7 @@ describe Ladder::Resource do
       it 'should have an embedded object relation' do
         query = subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation)
         expect(query.count).to eq 1
+        expect(query.to_hash).to eq part.resource.statements.to_hash
 
         query.each_statement do |s|
           expect(s.object).to eq subject.rdf_subject
@@ -287,43 +287,74 @@ describe Ladder::Resource do
       end
 
       it 'should have related objects' do
-        query_subject = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.subject)
-        expect(query_subject.count).to eq 1
-
-        query_subject.each_statement do |s|
-          expect(s.object).to eq concept.rdf_subject
-        end
-
+        # many-to-many
         query_creator = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.creator)
         expect(query_creator.count).to eq 1
 
         query_creator.each_statement do |s|
           expect(s.object).to eq person.rdf_subject
         end
+
+        # one-sided has-many
+        query_subject = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.subject)
+        expect(query_subject.count).to eq 1
+
+        query_subject.each_statement do |s|
+          expect(s.object).to eq concept.rdf_subject
+        end
       end
 
       it 'should have related object relations' do
+        # many-to-many
         query = person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation)
         expect(query.count).to eq 1
+        expect(query.to_hash).to eq person.resource.statements.to_hash
 
         query.each_statement do |s|
           expect(s.object).to eq subject.rdf_subject
         end
+        
+        # one-sided has-many
+        expect(subject.resource.query(:subject => concept.rdf_subject)).to be_empty
+        expect(concept.resource.statements).to be_empty
+      end
+    end
+
+    context 'with related and then without related' do
+      include_context 'with data'
+      
+      before do
+        subject.update_resource(:related => true)
+        subject.update_resource
       end
 
-      # TODO: check related values
+      it 'should not have related objects' do
+        expect(subject.resource.query(:subject => person.rdf_subject)).to be_empty
+        expect(subject.resource.query(:subject => concept.rdf_subject)).to be_empty
+      end
+
+      it 'should have related object relations' do
+        # many-to-many
+        query = person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.to_hash).to eq person.resource.statements.to_hash
+
+        query.each_statement do |s|
+          expect(s.object).to eq subject.rdf_subject
+        end
+        
+        # one-sided has-many
+        expect(subject.resource.query(:subject => concept.rdf_subject)).to be_empty
+        expect(concept.resource.statements).to be_empty
+      end
     end
   end
   
   describe '#as_jsonld' do
     include_context 'with data'
     
-    before do
-      subject.update_resource
-    end
-    
     it 'should output a valid jsonld representation of itself' do
-      g = RDF::Graph.new << JSON::LD::API.toRdf(JSON.parse subject.as_jsonld)
+      g = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
       expect(subject.resource.to_hash == g.to_hash).to be true
     end
   end

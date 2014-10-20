@@ -32,15 +32,41 @@ module Ladder::Searchable
     qname_hash
   end
 
+  private
+
+    ##
+    # Return a framed, compacted JSON-LD representation
+    # by embedding related objects from the graph
+    #
+    # NB: Will NOT embed related objects with same @type. Spec under discussion, see https://github.com/json-ld/json-ld.org/issues/110
+    def as_framed_jsonld
+      json_hash = as_jsonld related: true
+      context = json_hash['@context']
+      frame = {'@context' => context, '@type' => type.first.pname}
+      JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
+    end
+    
+    ##
+    # Force autosave of related documents using Mongoid-defined methods
+    # Required for explicit autosave prior to after_update index callbacks
+    #
+    def autosave
+      methods.select{|i| i[/autosave_documents/] }.each{|m| send m}
+    end
+
   module ClassMethods
 
     ##
     # Specify type of serialization to use for indexing
     #
-    def index(opts={})
+    def index(opts = {})
       case opts[:as]
       when :jsonld
-        define_method(:as_indexed_json) { |opts = {}| as_jsonld }
+        if opts[:related]
+          define_method(:as_indexed_json) { |opts = {}| autosave; as_framed_jsonld }
+        else
+          define_method(:as_indexed_json) { |opts = {}| as_jsonld }
+        end
       when :qname
         define_method(:as_indexed_json) { |opts = {}| as_qname }
       else

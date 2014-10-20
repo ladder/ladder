@@ -13,10 +13,11 @@ module Ladder::Resource
   end
 
   ##
-  # Convenience method to return JSON-LD representation
+  # Return JSON-LD representation
   #
+  # @see ActiveTriples::Resource#dump
   def as_jsonld(opts = {})
-    update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
+    JSON.parse update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
   end
 
   ##
@@ -24,21 +25,32 @@ module Ladder::Resource
   #
   # @see ActiveTriples::Identifiable
   def update_resource(opts = {})
-    relation_hash = opts[:related] ? relations : embedded_relations
-
     super() do |name, prop|
       # this is a literal property
       if field_def = fields[name]
-        value = field_def.localized? ? read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) } : self.send(prop.term)
+        if field_def.localized?
+          value = read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
+        else
+          value = self.send(prop.term)
+        end
       end
       
       # this is a relation property
-      if relation_def = relation_hash[name]
+      if relation_def = relations[name]
         objects = self.send(prop.term).to_a
-        value = (opts[:related] or embedded_relations == relation_hash) ? objects.map(&:update_resource) : objects.map(&:rdf_subject)
-        
-        # update inverse relation properties
-        objects.each {|object| object.resource.set_value(relation_def.inverse, self.rdf_subject)} if relation_def.inverse
+
+        if opts[:related] or embedded_relations[name]
+          value = objects.map(&:update_resource)
+
+          # update inverse relation properties
+          objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse
+        else
+          value = objects.map(&:rdf_subject)
+          
+          # remove inverse relation properties
+          objects.each { |object| resource.delete [object.rdf_subject] }
+        end
+
       end
 
       resource.set_value(prop.predicate, value)
