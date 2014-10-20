@@ -45,6 +45,14 @@ module Ladder::Searchable
       frame = {'@context' => context, '@type' => type.first.pname}
       JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
     end
+    
+    ##
+    # Force autosave of related documents using Mongoid-defined methods
+    # Required for explicit autosave prior to after_update index callbacks
+    #
+    def autosave
+      methods.select{|i| i[/autosave_documents/] }.each{|m| send m}
+    end
 
   module ClassMethods
 
@@ -55,7 +63,7 @@ module Ladder::Searchable
       case opts[:as]
       when :jsonld
         if opts[:related]
-          define_method(:as_indexed_json) { |opts = {}| as_framed_jsonld }
+          define_method(:as_indexed_json) { |opts = {}| autosave; as_framed_jsonld }
         else
           define_method(:as_indexed_json) { |opts = {}| as_jsonld }
         end
