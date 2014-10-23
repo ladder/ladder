@@ -104,9 +104,12 @@ describe Ladder::Resource do
       end
       
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'title'
-        expect(t = subject.class.properties['title']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.title
+        expect(subject.class.properties['title'].predicate).to eq RDF::DC.title
+      end
+
+      it 'allows resetting of properties' do
+        subject.class.property :title, :predicate => RDF::DC.alternative
+        expect(subject.class.properties['title'].predicate).to eq RDF::DC.alternative
       end
     end
 
@@ -119,27 +122,21 @@ describe Ladder::Resource do
       end
 
       it 'should have a relation' do
-        expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
         expect(subject.people.to_a).to include person
       end
 
       it 'should have an inverse relation' do
-        expect(person.relations).to include 'things'
         expect(person.relations['things'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
         expect(person.things.to_a).to include subject
       end
 
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'people'
-        expect(t = subject.class.properties['people']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.creator
+        expect(subject.class.properties['people'].predicate).to eq RDF::DC.creator
       end
 
       it 'should have a valid inverse predicate' do
-        expect(person.class.properties).to include 'things'
-        expect(t = person.class.properties['things']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.relation
+        expect(person.class.properties['things'].predicate).to eq RDF::DC.relation
       end
     end
 
@@ -151,7 +148,6 @@ describe Ladder::Resource do
       end
 
       it 'should have a relation' do
-        expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
         expect(subject.people.to_a).to include person
       end
@@ -162,9 +158,7 @@ describe Ladder::Resource do
       end
 
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'people'
-        expect(t = subject.class.properties['people']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.creator
+        expect(subject.class.properties['people'].predicate).to eq RDF::DC.creator
       end
 
       it 'should not have an inverse predicate' do
@@ -184,27 +178,21 @@ describe Ladder::Resource do
       end
 
       it 'should have a relation' do
-        expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Embedded::Many)
         expect(subject.people.to_a).to include person
       end
 
       it 'should have an inverse relation' do
-        expect(person.relations).to include 'thing'
         expect(person.relations['thing'].relation).to eq (Mongoid::Relations::Embedded::In)
         expect(person.thing).to eq subject
       end
 
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'people'
-        expect(t = subject.class.properties['people']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.creator
+        expect(subject.class.properties['people'].predicate).to eq RDF::DC.creator
       end
 
       it 'should have a valid inverse predicate' do
-        expect(person.class.properties).to include 'thing'
-        expect(t = person.class.properties['thing']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.relation
+        expect(person.class.properties['thing'].predicate).to eq RDF::DC.relation
       end
     end
   end
