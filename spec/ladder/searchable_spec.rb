@@ -39,12 +39,12 @@ describe Ladder::Searchable do
     end
   end
 
-  describe '#index' do
+  describe '#search_index' do
     include_context 'with data'
 
     context 'with default' do
       before do
-        subject.class.index
+        subject.class.search_index
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -58,7 +58,7 @@ describe Ladder::Searchable do
 
     context 'with as qname' do
       before do
-        subject.class.index as: :qname
+        subject.class.search_index as: :qname
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -72,7 +72,7 @@ describe Ladder::Searchable do
 
     context 'with as jsonld' do
       before do
-        subject.class.index as: :jsonld
+        subject.class.search_index as: :jsonld
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -85,7 +85,7 @@ describe Ladder::Searchable do
     end  
   end
 
-  describe '#index related' do
+  describe '#search_index related' do
     include_context 'with data'
     
     before do
@@ -102,8 +102,8 @@ describe Ladder::Searchable do
 
     context 'with default' do
       before do
-        person.class.index
-        subject.class.index
+        person.class.search_index
+        subject.class.search_index
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -127,8 +127,8 @@ describe Ladder::Searchable do
 
     context 'with as qname' do
       before do
-        person.class.index as: :qname
-        subject.class.index as: :qname
+        person.class.search_index as: :qname
+        subject.class.search_index as: :qname
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -152,8 +152,8 @@ describe Ladder::Searchable do
 
     context 'with as_qname related' do
       before do
-        person.class.index as: :qname, related: true
-        subject.class.index as: :qname, related: true
+        person.class.search_index as: :qname, related: true
+        subject.class.search_index as: :qname, related: true
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -173,8 +173,8 @@ describe Ladder::Searchable do
 
     context 'with as_jsonld' do
       before do
-        person.class.index as: :jsonld
-        subject.class.index as: :jsonld
+        person.class.search_index as: :jsonld
+        subject.class.search_index as: :jsonld
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -198,8 +198,8 @@ describe Ladder::Searchable do
 
     context 'with as_jsonld related' do
       before do
-        person.class.index as: :jsonld, related: true
-        subject.class.index as: :jsonld, related: true
+        person.class.search_index as: :jsonld, related: true
+        subject.class.search_index as: :jsonld, related: true
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
