@@ -23,10 +23,11 @@ module Ladder::File
     @readable = args.shift unless args.first.is_a? Hash
 
     args << {} unless args.last.is_a?(Hash)
-    attrs = args.last
+    attrs = args.last.symbolize_keys
 
-    @readable = StringIO.new(attrs[:data].to_s || attrs['data'].to_s)
-    self.id = attrs[:id] || attrs[:_id] || attrs['id'] || attrs['_id'] || BSON::ObjectId.new
+    self.id = attrs[:id] || attrs[:_id] || BSON::ObjectId.new
+    @readable = attrs[:readable] || StringIO.new(attrs[:data].to_s)
+    @file = attrs[:file]
   end
 
   def save
@@ -44,7 +45,7 @@ module Ladder::File
 
       file = id ? grid.get(id) : grid.find(*args)
 
-      self.new({id: id})
+      self.new({id: id, file: file})
     end
 
   end
