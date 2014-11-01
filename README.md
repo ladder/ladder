@@ -269,10 +269,10 @@ kimchy.name = 'Shay'
 kimchy.description = 'Real genius'
 ```
 
-In order to enable indexing, call the `#index` method on the class:
+In order to enable indexing, call the `#search_index` method on the class:
 
 ```ruby
-Person.index
+Person.search_index
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -303,7 +303,7 @@ results.records.first == kimchy
 When indexing, you can control how your model is stored in the index by supplying the `as: :jsonld` or `as: :qname` options:
 
 ```ruby
-Person.index as: :jsonld
+Person.search_index as: :jsonld
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -324,7 +324,7 @@ kimchy.as_indexed_json
  #   }
  # }
 
-Person.index as: :qname
+Person.search_index as: :qname
 => :as_indexed_json
 
 kimchy.as_indexed_json
