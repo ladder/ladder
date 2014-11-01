@@ -91,8 +91,8 @@ describe Ladder::Searchable do
     before do
       # related object
       person.class.configure type: RDF::FOAF.Person
-      person.class.property :name, :predicate => RDF::FOAF.name
-      person.name = 'Tove Jansson'
+      person.class.property :foaf_name, :predicate => RDF::FOAF.name
+      person.foaf_name = 'Tove Jansson'
 
       # many-to-many relation
       person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
@@ -114,7 +114,7 @@ describe Ladder::Searchable do
       end
 
       it 'should include the related object in the index' do
-        results = person.class.search('name:tove')
+        results = person.class.search('foaf_name:tove')
         expect(results.count).to eq 1
         expect(results.first._source.to_hash).to eq JSON.parse(person.as_indexed_json.to_json)
       end
