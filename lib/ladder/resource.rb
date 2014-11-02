@@ -15,9 +15,11 @@ module Ladder::Resource
   end
 
   ##
-  # Convenience method to return JSON-LD representation
+  # Return JSON-LD representation
+  #
+  # @see ActiveTriples::Resource#dump
   def as_jsonld(opts = {})
-    update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
+    JSON.parse update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
   end
 
   ##
@@ -25,34 +27,35 @@ module Ladder::Resource
   #
   # @see ActiveTriples::Identifiable
   def update_resource(opts = {})
-    relation_hash = opts[:related] ? relations : embedded_relations
-
     super() do |name, prop|
-      object = self.send(prop.term)
-      next if object.nil?
-
-      objects = object.is_a?(Enumerable) ? object : [object]
-
-      values = objects.map do |obj|
-        if obj.is_a?(ActiveTriples::Identifiable)
-          if relation_hash.keys.include? name 
-            obj.update_resource
-            obj.resource.set_value(relation_hash[name].inverse, self.rdf_subject) if relation_hash[name].inverse
-            obj
-          else
-            resource.delete [obj.rdf_subject] if resource.enum_subjects.include? obj.rdf_subject and ! opts[:related]
-            obj.rdf_subject
-          end
+      # this is a literal property
+      if field_def = fields[name]
+        if field_def.localized?
+          value = read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
         else
-          if fields[name].localized?
-            read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
-          else
-            obj
-          end
+          value = self.send(prop.term)
         end
       end
+      
+      # this is a relation property
+      if relation_def = relations[name]
+        objects = self.send(prop.term).to_a
 
-      resource.set_value(prop.predicate, values.flatten)      
+        if opts[:related] or embedded_relations[name]
+          value = objects.map(&:update_resource)
+
+          # update inverse relation properties
+          objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse
+        else
+          value = objects.map(&:rdf_subject)
+          
+          # remove inverse relation properties
+          objects.each { |object| resource.delete [object.rdf_subject] }
+        end
+
+      end
+
+      resource.set_value(prop.predicate, value)
     end
 
     resource
@@ -66,7 +69,7 @@ module Ladder::Resource
     # @see ActiveTriples::Properties
     def property(name, opts={})
       if class_name = opts[:class_name]
-        mongoid_opts = opts.except(:predicate, :multivalue).merge(autosave: true)
+        mongoid_opts = {autosave: true, index: true}.merge(opts.except(:predicate, :multivalue))
         opts.except! *mongoid_opts.keys
 
         has_and_belongs_to_many(name, mongoid_opts) unless relations.keys.include? name.to_s

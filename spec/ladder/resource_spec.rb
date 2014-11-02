@@ -1,19 +1,18 @@
 require 'spec_helper'
-require 'mongoid'
 require 'pry'
-Mongoid.load!('mongoid.yml', :development)
-
-Mongoid.logger.level = Logger::DEBUG
-Moped.logger.level = Logger::DEBUG
 
 describe Ladder::Resource do
   before do
+    Mongoid.load!('mongoid.yml', :development)
+    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
+    Mongoid.purge!
+
     LADDER_BASE_URI = 'http://example.org'
 
     class Thing
       include Ladder::Resource
     end
-    
+
     class Person
       include Ladder::Resource
     end
@@ -39,8 +38,6 @@ describe Ladder::Resource do
 
       class Part
         include Ladder::Resource
-        embedded_in :thing
-        property :thing, :predicate => RDF::DC.relation, :class_name => 'Thing'
       end
 
       # localized literal
@@ -51,18 +48,18 @@ describe Ladder::Resource do
       person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
       subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
       subject.people << person
-      subject.save
 
       # one-sided has-many
       subject.class.has_and_belongs_to_many :concepts, inverse_of: nil
       subject.class.property :concepts, :predicate => RDF::DC.subject, :class_name => 'Concept'
       subject.concepts << concept
-      subject.save
 
-      # embedded many
-      subject.class.embeds_many :parts
-      subject.class.property :parts, :predicate => RDF::DC.hasPart, :class_name => 'Part'
-      subject.parts << part
+      # embedded one
+      part.class.embedded_in :thing
+      part.class.property :thing, :predicate => RDF::DC.relation, :class_name => 'Thing'
+      subject.class.embeds_one :part, cascade_callbacks: true
+      subject.class.property :part, :predicate => RDF::DC.hasPart, :class_name => 'Part'
+      subject.part = part
       subject.save
     end
 
@@ -73,13 +70,13 @@ describe Ladder::Resource do
 
     it 'should have relations' do
       expect(subject.title).to eq 'Comet in Moominland'
-      expect(subject.people).to include person
-      expect(subject.concepts).to include concept
-      expect(subject.parts).to include part
+      expect(subject.people.to_a).to include person
+      expect(subject.concepts.to_a).to include concept
+      expect(subject.part).to eq part
     end
     
     it 'should have reverse relations' do
-      expect(person.things).to include subject
+      expect(person.things.to_a).to include subject
       expect(concept.relations).to be_empty
       expect(part.thing).to eq subject
     end
@@ -107,9 +104,12 @@ describe Ladder::Resource do
       end
       
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'title'
-        expect(t = subject.class.properties['title']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.title
+        expect(subject.class.properties['title'].predicate).to eq RDF::DC.title
+      end
+
+      it 'allows resetting of properties' do
+        subject.class.property :title, :predicate => RDF::DC.alternative
+        expect(subject.class.properties['title'].predicate).to eq RDF::DC.alternative
       end
     end
 
@@ -122,27 +122,21 @@ describe Ladder::Resource do
       end
 
       it 'should have a relation' do
-        expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-        expect(subject.people).to include person
+        expect(subject.people.to_a).to include person
       end
 
       it 'should have an inverse relation' do
-        expect(person.relations).to include 'things'
         expect(person.relations['things'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-        expect(person.things).to include subject
+        expect(person.things.to_a).to include subject
       end
 
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'people'
-        expect(t = subject.class.properties['people']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.creator
+        expect(subject.class.properties['people'].predicate).to eq RDF::DC.creator
       end
 
       it 'should have a valid inverse predicate' do
-        expect(person.class.properties).to include 'things'
-        expect(t = person.class.properties['things']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.relation
+        expect(person.class.properties['things'].predicate).to eq RDF::DC.relation
       end
     end
 
@@ -150,15 +144,12 @@ describe Ladder::Resource do
       before do
         subject.class.has_and_belongs_to_many :people, inverse_of: nil
         subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
-
         subject.people << person
-        subject.save
       end
 
       it 'should have a relation' do
-        expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-        expect(subject.people).to include person
+        expect(subject.people.to_a).to include person
       end
 
       it 'should not have an inverse relation' do
@@ -167,9 +158,7 @@ describe Ladder::Resource do
       end
 
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'people'
-        expect(t = subject.class.properties['people']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.creator
+        expect(subject.class.properties['people'].predicate).to eq RDF::DC.creator
       end
 
       it 'should not have an inverse predicate' do
@@ -189,34 +178,28 @@ describe Ladder::Resource do
       end
 
       it 'should have a relation' do
-        expect(subject.relations).to include 'people'
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Embedded::Many)
-        expect(subject.people).to include person
+        expect(subject.people.to_a).to include person
       end
 
       it 'should have an inverse relation' do
-        expect(person.relations).to include 'thing'
         expect(person.relations['thing'].relation).to eq (Mongoid::Relations::Embedded::In)
         expect(person.thing).to eq subject
       end
 
       it 'should have a valid predicate' do
-        expect(subject.class.properties).to include 'people'
-        expect(t = subject.class.properties['people']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.creator
+        expect(subject.class.properties['people'].predicate).to eq RDF::DC.creator
       end
 
       it 'should have a valid inverse predicate' do
-        expect(person.class.properties).to include 'thing'
-        expect(t = person.class.properties['thing']).to be_a ActiveTriples::NodeConfig
-        expect(t.predicate).to eq RDF::DC.relation
+        expect(person.class.properties['thing'].predicate).to eq RDF::DC.relation
       end
-    end  
+    end
   end
 
   describe '#update_resource' do
 
-    context 'without related' do
+    context 'without related: true' do
       include_context 'with data'
       
       before do
@@ -230,14 +213,21 @@ describe Ladder::Resource do
       end
 
       it 'should have an embedded object' do
-        subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation).each_statement do |s|
-          expect(s.object).to eq subject.rdf_subject
+        query = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart)
+        expect(query.count).to eq 1
+        
+        query.each_statement do |s|
+          expect(s.object).to eq part.rdf_subject
         end
       end
 
       it 'should have an embedded object relation' do
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart).each_statement do |s|
-          expect(s.object).to eq part.rdf_subject
+        query = subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.to_hash).to eq part.resource.statements.to_hash
+
+        query.each_statement do |s|
+          expect(s.object).to eq subject.rdf_subject
         end
       end
 
@@ -252,7 +242,7 @@ describe Ladder::Resource do
       end
     end
 
-    context 'with related' do
+    context 'with related: true' do
       include_context 'with data'
       
       before do
@@ -266,30 +256,84 @@ describe Ladder::Resource do
       end
 
       it 'should have an embedded object' do
-        subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation).each_statement do |s|
-          expect(s.object).to eq subject.rdf_subject
-        end
-      end
-
-      it 'should have an embedded object relation' do
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart).each_statement do |s|
+        query = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.hasPart)
+        expect(query.count).to eq 1
+        
+        query.each_statement do |s|
           expect(s.object).to eq part.rdf_subject
         end
       end
 
-      it 'should have related objects' do
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.subject).each_statement do |s|
-          expect(s.object).to eq concept.rdf_subject
+      it 'should have an embedded object relation' do
+        query = subject.resource.query(:subject => part.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.to_hash).to eq part.resource.statements.to_hash
+
+        query.each_statement do |s|
+          expect(s.object).to eq subject.rdf_subject
         end
-        subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.creator).each_statement do |s|
+      end
+
+      it 'should have related objects' do
+        # many-to-many
+        query_creator = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.creator)
+        expect(query_creator.count).to eq 1
+
+        query_creator.each_statement do |s|
           expect(s.object).to eq person.rdf_subject
+        end
+
+        # one-sided has-many
+        query_subject = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.subject)
+        expect(query_subject.count).to eq 1
+
+        query_subject.each_statement do |s|
+          expect(s.object).to eq concept.rdf_subject
         end
       end
 
       it 'should have related object relations' do
-        person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation).each_statement do |s|
+        # many-to-many
+        query = person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.to_hash).to eq person.resource.statements.to_hash
+
+        query.each_statement do |s|
           expect(s.object).to eq subject.rdf_subject
         end
+        
+        # one-sided has-many
+        expect(subject.resource.query(:subject => concept.rdf_subject)).to be_empty
+        expect(concept.resource.statements).to be_empty
+      end
+    end
+
+    context 'with related and then without related' do
+      include_context 'with data'
+      
+      before do
+        subject.update_resource(:related => true)
+        subject.update_resource
+      end
+
+      it 'should not have related objects' do
+        expect(subject.resource.query(:subject => person.rdf_subject)).to be_empty
+        expect(subject.resource.query(:subject => concept.rdf_subject)).to be_empty
+      end
+
+      it 'should have related object relations' do
+        # many-to-many
+        query = person.resource.query(:subject => person.rdf_subject, :predicate => RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.to_hash).to eq person.resource.statements.to_hash
+
+        query.each_statement do |s|
+          expect(s.object).to eq subject.rdf_subject
+        end
+        
+        # one-sided has-many
+        expect(subject.resource.query(:subject => concept.rdf_subject)).to be_empty
+        expect(concept.resource.statements).to be_empty
       end
     end
   end
@@ -297,12 +341,8 @@ describe Ladder::Resource do
   describe '#as_jsonld' do
     include_context 'with data'
     
-    before do
-      subject.update_resource
-    end
-    
     it 'should output a valid jsonld representation of itself' do
-      g = RDF::Graph.new << JSON::LD::API.toRdf(JSON.parse subject.as_jsonld)
+      g = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
       expect(subject.resource.to_hash == g.to_hash).to be true
     end
   end
