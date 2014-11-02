@@ -67,7 +67,7 @@ module Ladder::Resource
     # @see ActiveTriples::Properties
     def property(name, opts={})
       if class_name = opts[:class_name]
-        mongoid_opts = opts.except(:predicate, :multivalue).merge(autosave: true)
+        mongoid_opts = {autosave: true, index: true}.merge(opts.except(:predicate, :multivalue))
         opts.except! *mongoid_opts.keys
 
         has_and_belongs_to_many(name, mongoid_opts) unless relations.keys.include? name.to_s
