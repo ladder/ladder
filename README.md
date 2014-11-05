@@ -361,9 +361,9 @@ es = Project.new(name: 'ElasticSearch', description: 'You know, for search')
 es.developers << kimchy
 es.save
 
-Person.index as: :jsonld, related: true
+Person.search_index as: :jsonld, related: true
 => :as_indexed_json
-Project.index as: :jsonld, related: true
+Project.search_index as: :jsonld, related: true
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -434,9 +434,9 @@ es.as_indexed_json
  #    }
  # }
 
-Person.index as: :qname, related: true
+Person.search_index as: :qname, related: true
 => :as_indexed_json
-Project.index as: :qname, related: true
+Project.search_index as: :qname, related: true
 => :as_indexed_json
 
 kimchy.as_indexed_json
