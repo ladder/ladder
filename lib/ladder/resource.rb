@@ -28,38 +28,42 @@ module Ladder::Resource
   # @see ActiveTriples::Identifiable
   def update_resource(opts = {})
     super() do |name, prop|
-      # this is a literal property
-      if field_def = fields[name]
-        if field_def.localized?
-          value = read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
-        else
-          value = self.send(name)
-        end
-      end
-
-      # this is a relation property
-      if relation_def = relations[name]
-        objects = self.send(prop.term).to_a
-
-        if opts[:related] or embedded_relations[name]
-          value = objects.map(&:update_resource)
-
-          # update inverse relation properties
-          objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse
-        else
-          value = objects.map(&:rdf_subject)
-          
-          # remove inverse relation properties
-          objects.each { |object| resource.delete [object.rdf_subject] }
-        end
-
-      end
+      value = update_from_field(name) if fields[name] # this is a literal property
+      value = update_from_relation(name, opts) if relations[name] # this is a relation property
+      # TODO: handle when value is neither (unset)
 
       resource.set_value(prop.predicate, value)
     end
 
     resource
   end
+
+  private
+
+    def update_from_field(name)
+      if fields[name].localized?
+        read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
+      else
+        self.send(name)
+      end
+    end
+    
+    def update_from_relation(name, opts = {})
+      objects = self.send(name).to_a
+
+      if opts[:related] or embedded_relations[name]
+        # update inverse relation properties
+        relation_def = relations[name]
+        objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse
+        objects.map(&:update_resource)
+      else
+        # remove inverse relation properties
+        objects.each { |object| resource.delete [object.rdf_subject] }
+        objects.map(&:rdf_subject)
+      end
+    end
+
+  public
 
   module ClassMethods
     
