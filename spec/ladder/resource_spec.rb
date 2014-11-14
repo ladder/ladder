@@ -40,6 +40,11 @@ describe Ladder::Resource do
         include Ladder::Resource
       end
 
+      # non-localized literal
+      subject.class.field :alt
+      subject.class.property :alt, :predicate => RDF::DC.alternative
+      subject.alt = 'Mumintrollet på kometjakt'
+
       # localized literal
       subject.class.property :title, :predicate => RDF::DC.title
       subject.title = 'Comet in Moominland'
@@ -89,6 +94,31 @@ describe Ladder::Resource do
   end
 
   describe '#property' do
+    context 'with non-localized literal' do
+      before do
+        subject.class.field :alt
+        subject.class.property :alt, :predicate => RDF::DC.alternative
+        subject.alt = 'Mumintrollet på kometjakt'
+      end
+
+      it 'should return non-localized value' do
+        expect(subject.alt).to eq 'Mumintrollet på kometjakt'
+      end
+      
+      it 'should not be a localized hash' do
+        expect(subject.attributes['alt']).to eq 'Mumintrollet på kometjakt'
+      end
+      
+      it 'should have a valid predicate' do
+        expect(subject.class.properties['alt'].predicate).to eq RDF::DC.alternative
+      end
+
+      it 'allows resetting of properties' do
+        subject.class.property :alt, :predicate => RDF::DC.title
+        expect(subject.class.properties['alt'].predicate).to eq RDF::DC.title
+      end
+    end
+    
     context 'with localized literal' do
       before do
         subject.class.property :title, :predicate => RDF::DC.title

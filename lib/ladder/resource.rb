@@ -33,10 +33,10 @@ module Ladder::Resource
         if field_def.localized?
           value = read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
         else
-          value = self.send(prop.term)
+          value = self.send(name)
         end
       end
-      
+
       # this is a relation property
       if relation_def = relations[name]
         objects = self.send(prop.term).to_a
@@ -74,7 +74,7 @@ module Ladder::Resource
 
         has_and_belongs_to_many(name, mongoid_opts) unless relations.keys.include? name.to_s
       else
-        field(name, localize: true)
+        field(name, localize: true) unless fields[name.to_s]
       end
 
       super
