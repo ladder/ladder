@@ -25,8 +25,8 @@ module Ladder::Resource::Dynamic
       super(opts)
 
       if self._context
-        self._context.each do |name, prop|
-          resource.set_value(RDF::Vocabulary.find_term(prop), self.send(name))
+        self._context.each do |field_name, uri|
+          resource.set_value(RDF::Vocabulary.find_term(uri), self.send(field_name))
         end
       end
 
