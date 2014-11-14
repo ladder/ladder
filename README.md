@@ -53,16 +53,16 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
   property :description, predicate: RDF::DC.description
 end
 
 steve = Person.new
-steve.name = 'Steve'
+steve.first_name = 'Steve'
 steve.description = 'Funny-looking'
 
 steve.as_document
- => {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'), "name"=>{"en"=>"Steve"}, "description"=>{"en"=>"Funny-looking"}}
+ => {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'), "first_name"=>{"en"=>"Steve"}, "description"=>{"en"=>"Funny-looking"}}
 
 steve.as_jsonld
  # => {
@@ -91,7 +91,7 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
   property :books, predicate: RDF::FOAF.made, class_name: 'Book'
 end
 
@@ -107,8 +107,8 @@ end
 b = Book.new(title: 'Heart of Darkness')
 => #<Book _id: 542f28d44169721941000000, title: {"en"=>"Heart of Darkness"}, person_ids: nil>
 
-b.people << Person.new(name: 'Joseph Conrad')
-=> [#<Person _id: 542f28dd4169721941010000, name: {"en"=>"Joseph Conrad"}, book_ids: [BSON::ObjectId('542f28d44169721941000000')]>]
+b.people << Person.new(first_name: 'Joseph Conrad')
+=> [#<Person _id: 542f28dd4169721941010000, first_name: {"en"=>"Joseph Conrad"}, book_ids: [BSON::ObjectId('542f28d44169721941000000')]>]
 
 b.as_jsonld
  # => {
@@ -171,7 +171,7 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
 
   embeds_one :address, class_name: 'Place'
   property :address, predicate: RDF::FOAF.based_near
@@ -189,8 +189,8 @@ class Place
   property :resident, predicate: RDF::VCARD.agent
 end
 
-steve = Person.new(name: 'Steve')
-=> #<Person _id: 542f341e41697219a2000000, name: {"en"=>"Steve"}, address: nil>
+steve = Person.new(first_name: 'Steve')
+=> #<Person _id: 542f341e41697219a2000000, first_name: {"en"=>"Steve"}, address: nil>
 
 steve.address = Place.new(city: 'Toronto', country: 'Canada')
 => #<Place _id: 542f342741697219a2010000, city: {"en"=>"Toronto"}, country: {"en"=>"Canada"}, resident: nil>
@@ -260,11 +260,11 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
 end
 
 steve = Person.new
-steve.name = 'Steve'
+steve.first_name = 'Steve'
 
 steve.description
 => NoMethodError: undefined method 'description' for #<Person:0x007fb54eb1d0b8>
@@ -300,12 +300,12 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
   property :description, predicate: RDF::DC.description
 end
 
 kimchy = Person.new
-kimchy.name = 'Shay'
+kimchy.first_name = 'Shay'
 kimchy.description = 'Real genius'
 ```
 
@@ -316,7 +316,7 @@ Person.search_index
 => :as_indexed_json
 
 kimchy.as_indexed_json
-=> {"description"=>"Real genius", "name"=>"Shay"}
+=> {"description"=>"Real genius", "first_name"=>"Shay"}
 
 kimchy.save
 => true
@@ -334,7 +334,7 @@ results.count
 => 1
 
 results.first._source
-=> {"description"=>"Real genius", "name"=>"Shay"}
+=> {"description"=>"Real genius", "first_name"=>"Shay"}
 
 results.records.first == kimchy
 => true
@@ -390,14 +390,14 @@ class Project
 
   configure type: RDF::DOAP.Project
 
-  property :name, predicate: RDF::DOAP.name
+  property :project_name, predicate: RDF::DOAP.name
   property :description, predicate: RDF::DC.description
   property :developers, predicate: RDF::DOAP.developer, class_name: 'Person'
 end
 
 Person.property :projects, predicate: RDF::FOAF.made, class_name: 'Project'
 
-es = Project.new(name: 'ElasticSearch', description: 'You know, for search')
+es = Project.new(project_name: 'ElasticSearch', description: 'You know, for search')
 es.developers << kimchy
 es.save
 
