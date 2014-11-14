@@ -288,7 +288,7 @@ steve.as_jsonld
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties properties *can not* be localized.  They can be any kind of literal, but they *can not* be a relation to a related object. They can, however, contain a reference to the related object's URI.
 
-### Searchable
+### Indexing for Search
 
 You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
 
