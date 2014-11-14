@@ -35,11 +35,12 @@ Or install it yourself as:
 
 ## Usage
 
-* [Ladder::Resource](#ladderresource)
+* [Resources](#resource)
   * [Configuring Resources](#configuring-resources)
-* [Ladder::Searchable](#laddersearchable)
+  * [Dynamic Resources](#dynamic-resources)
+* [Indexing for Search](#indexing-for-search)
 
-### Ladder::Resource
+### Resources
 
 Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require 
 and include the main module in your class:
@@ -249,7 +250,45 @@ Person.resource_class.base_uri
 => "http://some.other.uri/"
 ```
 
-### Ladder::Searchable
+### Dynamic Resources
+
+In line with ActiveTriples' [Open Model](https://github.com/ActiveTriples/ActiveTriples#open-model) design, you can define properties on any Resource instance similarly to how you would on the class:
+
+```ruby
+class Person
+  include Ladder::Resource::Dynamic
+
+  configure type: RDF::FOAF.Person
+
+  property :name, predicate: RDF::FOAF.name
+end
+
+steve = Person.new
+steve.name = 'Steve'
+
+steve.description
+=> NoMethodError: undefined method `description' for #<Person:0x007fb54eb1d0b8>
+
+steve.property :description, predicate: RDF::DC.description
+steve.description = 'Funny-looking'
+```
+
+Additionally, you can push RDF statements into a Resource instance like so:
+
+```ruby
+steve << RDF::Statement(steve, RDF::FOAF.depiction, RDF::URI('http://some.image/pic.jpg'))
+steve << RDF::Statement(steve, RDF::FOAF.age, 32)
+
+steve.as_document
+=> 
+
+steve.as_jsonld
+=> 
+```
+
+Note that due to the way Mongoid handles dynamic fields, dynamic properties properties *can not* be localized.  They can be any kind of literal, but they *can not* be a relation to a related object. They can, however, contain a reference to the related object's URI.
+
+### Searchable
 
 You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
 
