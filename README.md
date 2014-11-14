@@ -263,8 +263,7 @@ class Person
   property :first_name, predicate: RDF::FOAF.name
 end
 
-steve = Person.new
-steve.first_name = 'Steve'
+steve = Person.new(first_name: 'Steve')
 
 steve.description
 => NoMethodError: undefined method 'description' for #<Person:0x007fb54eb1d0b8>
@@ -281,10 +280,26 @@ steve << RDF::Statement(steve, RDF::FOAF.depiction, RDF::URI('http://some.image/
 steve << RDF::Statement(steve, RDF::FOAF.age, 32)
 
 steve.as_document
-=> # TODO
+=> {"_id"=>BSON::ObjectId('546669234169720397000000'),
+ "first_name"=>{"en"=>"Steve"},
+ "_context"=>{:description=>"http://purl.org/dc/terms/description"},
+ "description"=>"Funny-looking"}
 
 steve.as_jsonld
-=> # TODO
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "foaf": "http://xmlns.com/foaf/0.1/"
+ #    },
+ #    "@id": "http://example.org/people/546669234169720397000000",
+ #    "@type": "foaf:Person",
+ #    "dc:description": "Funny-looking",
+ #    "foaf:name": {
+ #        "@language": "en",
+ #        "@value": "Steve"
+ #  }
+}
+
 ```
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a relation to a related object. They can, however, contain a reference to the related object's URI.
