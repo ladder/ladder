@@ -287,7 +287,7 @@ steve.as_jsonld
 => # TODO
 ```
 
-Note that due to the way Mongoid handles dynamic fields, dynamic properties properties **can not** be localized.  They can be any kind of literal, but they **can not** be a relation to a related object. They can, however, contain a reference to the related object's URI.
+Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a relation to a related object. They can, however, contain a reference to the related object's URI.
 
 ### Indexing for Search
 
