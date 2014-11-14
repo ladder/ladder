@@ -234,7 +234,7 @@ steve.as_jsonld
 
 Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled.
 
-### Configuring Resources
+#### Configuring Resources
 
 If the LADDER_BASE_URI global constant is set, base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples:
 
@@ -250,7 +250,7 @@ Person.resource_class.base_uri
 => "http://some.other.uri/"
 ```
 
-### Dynamic Resources
+#### Dynamic Resources
 
 In line with ActiveTriples' [Open Model](https://github.com/ActiveTriples/ActiveTriples#open-model) design, you can define properties on any Resource instance similarly to how you would on the class:
 
@@ -267,7 +267,7 @@ steve = Person.new
 steve.name = 'Steve'
 
 steve.description
-=> NoMethodError: undefined method `description' for #<Person:0x007fb54eb1d0b8>
+=> NoMethodError: undefined method 'description' for #<Person:0x007fb54eb1d0b8>
 
 steve.property :description, predicate: RDF::DC.description
 steve.description = 'Funny-looking'
@@ -280,10 +280,10 @@ steve << RDF::Statement(steve, RDF::FOAF.depiction, RDF::URI('http://some.image/
 steve << RDF::Statement(steve, RDF::FOAF.age, 32)
 
 steve.as_document
-=> 
+=> # TODO
 
 steve.as_jsonld
-=> 
+=> # TODO
 ```
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties properties *can not* be localized.  They can be any kind of literal, but they *can not* be a relation to a related object. They can, however, contain a reference to the related object's URI.
