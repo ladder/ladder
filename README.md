@@ -275,9 +275,9 @@ steve.description = 'Funny-looking'
 Additionally, you can push RDF statements into a Resource instance like so:
 
 ```ruby
-steve << RDF::Statement(steve, RDF::FOAF.description, 'Tall, dark, and handsome')
-steve << RDF::Statement(steve, RDF::FOAF.depiction, RDF::URI('http://some.image/pic.jpg'))
-steve << RDF::Statement(steve, RDF::FOAF.age, 32)
+steve << RDF::Statement(nil, RDF::DC.description, 'Tall, dark, and handsome')
+steve << RDF::Statement(nil, RDF::FOAF.depiction, RDF::URI('http://some.image/pic.jpg'))
+steve << RDF::Statement(nil, RDF::FOAF.age, 32)
 
 steve.as_document
 => {"_id"=>BSON::ObjectId('546669234169720397000000'),

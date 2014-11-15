@@ -42,6 +42,7 @@ module Ladder::Resource
 
     def update_from_field(name)
       if fields[name].localized?
+        # FIXME: when attribute is empty / not an enumerable
         read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
       else
         self.send(name)

@@ -9,14 +9,6 @@ module Ladder::Resource::Dynamic
     after_find :apply_context
     
     ##
-    # Overload ActiveTriples #resource_class
-    #
-    # @see ActiveTriples::Identifiable
-    private def resource_class
-      @modified_resource_class ||= self.class.resource_class.clone
-    end
-    
-    ##
     # Overload Ladder #update_resource
     #
     # @see Ladder::Resource
@@ -32,6 +24,32 @@ module Ladder::Resource::Dynamic
 
       resource
     end
+    
+    def <<(data)
+      # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
+      data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+
+      # Define predicate on object unless it's defined on the class
+      if resource_class.properties.values.map(&:predicate).include? data.predicate
+        field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
+      else
+        field_name = data.to_hash[:predicate].qname.join('_').to_sym
+        property field_name, predicate: data.predicate
+      end
+              
+      # Set the value in Mongoid
+      self.send("#{field_name}=", data.object)
+    end
+
+    private
+    
+      ##
+      # Overload ActiveTriples #resource_class
+      #
+      # @see ActiveTriples::Identifiable
+      def resource_class
+        @modified_resource_class ||= self.class.resource_class.clone
+      end
 
   end
 
