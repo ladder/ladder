@@ -30,9 +30,8 @@ module Ladder::Resource
     super() do |name, prop|
       value = update_from_field(name) if fields[name] # this is a literal property
       value = update_from_relation(name, opts) if relations[name] # this is a relation property
-      # TODO: handle when value is neither (unset)
 
-      resource.set_value(prop.predicate, value)
+      resource.set_value(prop.predicate, value) if value
     end
 
     resource
@@ -42,8 +41,8 @@ module Ladder::Resource
 
     def update_from_field(name)
       if fields[name].localized?
-        # FIXME: when attribute is empty / not an enumerable
-        read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
+        localized_hash = read_attribute(name)
+        localized_hash.map { |lang, val| RDF::Literal.new(val, language: lang) } unless localized_hash.nil?
       else
         self.send(name)
       end
