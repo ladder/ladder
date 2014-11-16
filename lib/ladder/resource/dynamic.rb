@@ -18,7 +18,9 @@ module Ladder::Resource::Dynamic
 
       if self._context
         self._context.each do |field_name, uri|
-          resource.set_value(RDF::Vocabulary.find_term(uri), self.send(field_name))
+          value = self.send(field_name)
+          cast_uri = RDF::URI.new(value)
+          resource.set_value(RDF::Vocabulary.find_term(uri), cast_uri.valid? ? cast_uri : value)
         end
       end
 
@@ -36,9 +38,18 @@ module Ladder::Resource::Dynamic
         field_name = data.to_hash[:predicate].qname.join('_').to_sym
         property field_name, predicate: data.predicate
       end
-              
+
       # Set the value in Mongoid
-      self.send("#{field_name}=", data.object)
+      value = case data.object
+        when RDF::Literal
+          data.object.object
+        when RDF::URI
+          data.object.to_s
+        else
+          data.object
+      end
+
+      self.send("#{field_name}=", value)
     end
 
     private
