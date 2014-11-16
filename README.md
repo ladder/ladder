@@ -13,8 +13,6 @@ Ladder was loosely conceived over the course of several years prior to 2011.  In
 
 From mid-2014, Ladder is being re-architected as a series of Ruby modules that can be used individually and incorporated within existing Ruby frameworks (eg. [Project Hydra](http://projecthydra.org)), or used together as a comprehensive stack.  Ladder is intended to encourage the LAM community to think less dogmatically about our established (often monolithic and/or niche) toolsets and instead embrace a broader vision of using non-LAM specific technologies.
 
-### There's Not Much Here!
-
 The original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.  Core functionality is being refactored as modules in the "ladder" gem (see below).
 
 ## Installation
@@ -270,14 +268,6 @@ steve.description
 
 steve.property :description, predicate: RDF::DC.description
 steve.description = 'Funny-looking'
-```
-
-Additionally, you can push RDF statements into a Resource instance like so:
-
-```ruby
-steve << RDF::Statement(nil, RDF::DC.description, 'Tall, dark, and handsome')
-steve << RDF::Statement(nil, RDF::FOAF.depiction, RDF::URI('http://some.image/pic.jpg'))
-steve << RDF::Statement(nil, RDF::FOAF.age, 32)
 
 steve.as_document
 => {"_id"=>BSON::ObjectId('546669234169720397000000'),
@@ -298,8 +288,48 @@ steve.as_jsonld
  #        "@language": "en",
  #        "@value": "Steve"
  #  }
-}
+```
 
+Additionally, you can push RDF statements into a Resource instance like you would with ActiveTriples or RDF::Graph, noting that the subject is ignored:
+
+```ruby
+steve << RDF::Statement(nil, RDF::DC.description, 'Tall, dark, and handsome')
+steve << RDF::Statement(nil, RDF::FOAF.depiction, RDF::URI('http://some.image/pic.jpg'))
+steve << RDF::Statement(nil, RDF::FOAF.age, 32)
+
+steve.as_document
+=> {"_id"=>BSON::ObjectId('546669234169720397000000'),
+ "first_name"=>{"en"=>"Steve"},
+ "_context"=>
+  {:description=>"http://purl.org/dc/terms/description",
+   :foaf_depiction=>"http://xmlns.com/foaf/0.1/depiction",
+   :foaf_age=>"http://xmlns.com/foaf/0.1/age"},
+ "description"=>"Tall, dark, and handsome",
+ "foaf_depiction"=>"http://some.image/pic.jpg",
+ "foaf_age"=>32}
+
+steve.as_jsonld
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "foaf": "http://xmlns.com/foaf/0.1/",
+ #        "xsd": "http://www.w3.org/2001/XMLSchema#"
+ #    },
+ #    "@id": "http://example.org/people/546669234169720397000000",
+ #    "@type": "foaf:Person",
+ #    "dc:description": "Tall, dark, and handsome",
+ #    "foaf:age": {
+ #        "@type": "xsd:integer",
+ #        "@value": "32"
+ #    },
+ #    "foaf:depiction": {
+ #        "@id": "http://some.image/pic.jpg"
+ #    },
+ #    "foaf:name": {
+ #        "@language": "en",
+ #        "@value": "Steve"
+ #    }
+ #	}
 ```
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a relation to a related object. They can, however, contain a reference to the related object's URI.

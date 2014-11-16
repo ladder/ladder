@@ -23,6 +23,15 @@ module Ladder::Resource
   end
 
   ##
+  # Overload ActiveTriples #rdf_label
+  #
+  # @see ActiveTriples::Resource
+  def rdf_label
+    update_resource
+    resource.rdf_label
+  end
+
+  ##
   # Overload ActiveTriples #update_resource
   #
   # @see ActiveTriples::Identifiable
