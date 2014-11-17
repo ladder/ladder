@@ -13,7 +13,7 @@ Ladder was loosely conceived over the course of several years prior to 2011.  In
 
 From mid-2014, Ladder is being re-architected as a series of Ruby modules that can be used individually and incorporated within existing Ruby frameworks (eg. [Project Hydra](http://projecthydra.org)), or used together as a comprehensive stack.  Ladder is intended to encourage the LAM community to think less dogmatically about our established (often monolithic and/or niche) toolsets and instead embrace a broader vision of using non-LAM specific technologies.
 
-The original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.  Core functionality is being refactored as modules in the "ladder" gem (see below).
+For those interested in the historical code, the original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.
 
 ## Installation
 
@@ -290,7 +290,7 @@ steve.as_jsonld
  #  }
 ```
 
-Additionally, you can push RDF statements into a Resource instance like you would with ActiveTriples or RDF::Graph, noting that the subject is ignored:
+Additionally, you can push RDF statements into a Resource instance like you would with ActiveTriples or RDF::Graph, noting that the subject is ignored since it is implicit:
 
 ```ruby
 steve << RDF::Statement(nil, RDF::DC.description, 'Tall, dark, and handsome')
@@ -302,11 +302,11 @@ steve.as_document
  "first_name"=>{"en"=>"Steve"},
  "_context"=>
   {:description=>"http://purl.org/dc/terms/description",
-   :foaf_depiction=>"http://xmlns.com/foaf/0.1/depiction",
-   :foaf_age=>"http://xmlns.com/foaf/0.1/age"},
+   :depiction=>"http://xmlns.com/foaf/0.1/depiction",
+   :age=>"http://xmlns.com/foaf/0.1/age"},
  "description"=>"Tall, dark, and handsome",
- "foaf_depiction"=>"http://some.image/pic.jpg",
- "foaf_age"=>32}
+ "depiction"=>"http://some.image/pic.jpg",
+ "age"=>32}
 
 steve.as_jsonld
  # => {

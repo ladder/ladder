@@ -35,7 +35,14 @@ module Ladder::Resource::Dynamic
       if resource_class.properties.values.map(&:predicate).include? data.predicate
         field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
       else
-        field_name = data.to_hash[:predicate].qname.join('_').to_sym
+        qname = data.predicate.qname
+
+        if respond_to? qname.last or :name == qname.last
+          field_name = qname.join('_').to_sym
+        else
+          field_name = qname.last
+        end
+
         property field_name, predicate: data.predicate
       end
 
