@@ -8,6 +8,8 @@ module Ladder::Resource
   include Mongoid::Document
   include ActiveTriples::Identifiable
 
+  autoload :Dynamic, 'ladder/resource/dynamic'
+
   included do
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
   end
@@ -21,43 +23,57 @@ module Ladder::Resource
   end
 
   ##
+  # Overload ActiveTriples #rdf_label
+  #
+  # @see ActiveTriples::Resource
+  def rdf_label
+    update_resource
+    resource.rdf_label
+  end
+
+  ##
   # Overload ActiveTriples #update_resource
   #
   # @see ActiveTriples::Identifiable
   def update_resource(opts = {})
     super() do |name, prop|
-      # this is a literal property
-      if field_def = fields[name]
-        if field_def.localized?
-          value = read_attribute(name).map { |lang, val| RDF::Literal.new(val, language: lang) }
-        else
-          value = self.send(prop.term)
-        end
-      end
-      
-      # this is a relation property
-      if relation_def = relations[name]
-        objects = self.send(prop.term).to_a
+      value = update_from_field(name) if fields[name] # this is a literal property
+      value = update_from_relation(name, opts) if relations[name] # this is a relation property
 
-        if opts[:related] or embedded_relations[name]
-          value = objects.map(&:update_resource)
-
-          # update inverse relation properties
-          objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse
-        else
-          value = objects.map(&:rdf_subject)
-          
-          # remove inverse relation properties
-          objects.each { |object| resource.delete [object.rdf_subject] }
-        end
-
-      end
-
-      resource.set_value(prop.predicate, value)
+      cast_uri = RDF::URI.new(value)
+      resource.set_value(prop.predicate, cast_uri.valid? ? cast_uri : value) if value
     end
 
     resource
   end
+
+  private
+
+    def update_from_field(name)
+      if fields[name].localized?
+        localized_hash = read_attribute(name)
+        localized_hash.map { |lang, val| RDF::Literal.new(val, language: lang) } unless localized_hash.nil?
+      else
+        self.send(name)
+      end
+    end
+    
+    def update_from_relation(name, opts = {})
+      objects = self.send(name).to_a
+
+      if opts[:related] or embedded_relations[name]
+        # update inverse relation properties
+        relation_def = relations[name]
+        objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse
+        objects.map(&:update_resource)
+      else
+        # remove inverse relation properties
+        objects.each { |object| resource.delete [object.rdf_subject] }
+        objects.map(&:rdf_subject)
+      end
+    end
+
+  public
 
   module ClassMethods
     
@@ -72,7 +88,7 @@ module Ladder::Resource
 
         has_and_belongs_to_many(name, mongoid_opts) unless relations.keys.include? name.to_s
       else
-        field(name, localize: true)
+        field(name, localize: true) unless fields[name.to_s]
       end
 
       super

@@ -1,31 +1,28 @@
 require 'spec_helper'
 
-describe Ladder::Searchable do
+describe Ladder::Resource::Dynamic do
   before do
     Mongoid.load!('mongoid.yml', :development)
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
     Mongoid.purge!
 
-    Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
-    Elasticsearch::Model.client.indices.delete index: '_all'
-
     LADDER_BASE_URI = 'http://example.org'
 
     class Thing
-      include Ladder::Resource
-      include Ladder::Searchable
+      include Ladder::Resource::Dynamic
     end
 
     class Person
-      include Ladder::Resource
-      include Ladder::Searchable
+      include Ladder::Resource::Dynamic
     end
   end
-  
+
   it_behaves_like 'a Resource'
-  it_behaves_like 'a Searchable'
   
+  # TODO: Add specs
+
   after do
+    Object.send(:remove_const, :LADDER_BASE_URI) if Object
     Object.send(:remove_const, "Thing") if Object
     Object.send(:remove_const, "Person") if Object
   end
