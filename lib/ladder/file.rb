@@ -61,9 +61,9 @@ module Ladder::File
     def find(*args)
       id = args.shift unless args.first.is_a? Hash
 
-      file = id ? grid.get(id) : grid.find(*args)
+      file = id ? grid.find(id: id) : grid.find(*args)
 
-      self.new({id: id, file: file})
+      self.new({id: id, data: file.data})
     end
 
   end

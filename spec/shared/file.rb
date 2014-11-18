@@ -26,13 +26,18 @@ shared_examples 'a File' do
 
   describe '#find' do
     it 'should be retrievable' do
-      expect(subject.class.find(subject.id)).to eq subject
+      subject.save
+
+      expect(subject.class.find(subject.id).data).to eq subject.data
+      expect(subject.class.find(subject.id).data.force_encoding('UTF-8') ).to eq source
     end
   end
 
   describe '#==' do
     it 'should be comparable' do
-      # TODO
+      subject.save
+
+      expect(subject.class.find(subject.id)).to eq subject
     end
   end
 
