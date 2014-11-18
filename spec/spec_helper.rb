@@ -2,6 +2,9 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'ladder'
+require 'pry'
+
+Dir['./spec/shared/**/*.rb'].each { |f| require f }
 
 RSpec.configure do |config|
   config.color = true
