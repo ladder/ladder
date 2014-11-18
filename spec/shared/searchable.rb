@@ -1,34 +1,5 @@
-require 'spec_helper'
-require 'pry'
-
-describe Ladder::Searchable do
-  before do
-    Mongoid.load!('mongoid.yml', :development)
-    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
-    Mongoid.purge!
-
-    Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
-    Elasticsearch::Model.client.indices.delete index: '_all'
-
-    LADDER_BASE_URI = 'http://example.org'
-
-    class Thing
-      include Ladder::Resource
-      include Ladder::Searchable
-    end
-
-    class Person
-      include Ladder::Resource
-      include Ladder::Searchable
-    end
-  end
-  
-  after do
-    Object.send(:remove_const, "Thing") if Object
-    Object.send(:remove_const, "Person") if Object
-  end
-
-  subject { Thing.new }
+shared_examples 'a Searchable' do
+  let(:subject) { Thing.new }
   let(:person) { Person.new }
 
   shared_context 'with data' do
@@ -217,5 +188,4 @@ describe Ladder::Searchable do
       end
     end
   end
-
 end

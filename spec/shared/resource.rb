@@ -1,30 +1,5 @@
-require 'spec_helper'
-require 'pry'
-
-describe Ladder::Resource::Dynamic do
-  before do
-    Mongoid.load!('mongoid.yml', :development)
-    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
-    Mongoid.purge!
-
-    LADDER_BASE_URI = 'http://example.org'
-
-    class Thing
-      include Ladder::Resource::Dynamic
-    end
-
-    class Person
-      include Ladder::Resource::Dynamic
-    end
-  end
-  
-  after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
-    Object.send(:remove_const, "Person") if Object
-  end
-
-  subject { Thing.new }
+shared_examples 'a Resource' do
+  let(:subject) { Thing.new }
   let(:person) { Person.new }
 
   shared_context 'with data' do
@@ -33,11 +8,11 @@ describe Ladder::Resource::Dynamic do
     
     before do
       class Concept
-        include Ladder::Resource::Dynamic
+        include Ladder::Resource
       end
 
       class Part
-        include Ladder::Resource::Dynamic
+        include Ladder::Resource
       end
 
       # non-localized literal
@@ -376,5 +351,4 @@ describe Ladder::Resource::Dynamic do
       expect(subject.resource.to_hash == g.to_hash).to be true
     end
   end
-
 end
