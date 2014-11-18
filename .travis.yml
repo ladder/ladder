@@ -5,3 +5,8 @@ rvm:
 #  - jruby-19mode
 # uncomment this line if your project needs to run something other than `rake`:
 script: bundle exec rspec spec
+services:
+  - mongodb
+  - elasticsearch
+before_script:
+  - sleep 15
