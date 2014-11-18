@@ -18,6 +18,8 @@ describe Ladder::Resource::Dynamic do
   end
 
   it_behaves_like 'a Resource'
+  
+  # TODO: Add specs
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object

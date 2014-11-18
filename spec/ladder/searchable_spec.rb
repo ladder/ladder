@@ -22,8 +22,8 @@ describe Ladder::Searchable do
     end
   end
   
-  it_behaves_like 'a Searchable'
   it_behaves_like 'a Resource'
+  it_behaves_like 'a Searchable'
   
   after do
     Object.send(:remove_const, "Thing") if Object
