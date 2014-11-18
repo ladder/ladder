@@ -1,4 +1,6 @@
 ![Ladder logo](https://github.com/mjsuhonos/ladder/blob/master/logo.png)
+[![Gem Version](http://img.shields.io/gem/v/ladder.svg)](https://rubygems.org/gems/ladder) [![Build Status](https://travis-ci.org/mjsuhonos/ladder.svg)](https://travis-ci.org/mjsuhonos/ladder)
+
 # Ladder
 
 Ladder is a dynamic, scalable metadata framework written in Ruby using well-known components for Linked Data ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb), persistence ([Mongoid](http://mongoid.org)/MongoDB), indexing ([ElasticSearch](http://www.elasticsearch.org)), asynchronicity ([Sidekiq](http://sidekiq.org)/Redis) and HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra).  It is designed around the following philosophical goals:
