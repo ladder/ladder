@@ -63,7 +63,7 @@ module Ladder::Searchable
     ##
     # Specify type of serialization to use for indexing
     #
-    def search_index(opts = {})
+    def index_for_search(opts = {})
       case opts[:as]
       when :jsonld
         if opts[:related]
