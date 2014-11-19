@@ -37,8 +37,8 @@ module Ladder::Resource
   # @see ActiveTriples::Identifiable
   def update_resource(opts = {})
     super() do |name, prop|
-      value = update_from_field(name) if fields[name] # this is a literal property
-      value = update_from_relation(name, opts) if relations[name] # this is a relation property
+      value = update_from_field(name) if fields[name]
+      value = update_from_relation(name, opts) if relations[name]
 
       cast_uri = RDF::URI.new(value)
       resource.set_value(prop.predicate, cast_uri.valid? ? cast_uri : value) if value
