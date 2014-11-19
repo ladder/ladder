@@ -112,6 +112,25 @@ describe Ladder::Resource::Dynamic do
         expect(subject.dc11_title).to eq "Kometjakten"
       end
     end
+
+
+    context 'with a URI value' do
+      before do
+        subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
+        subject.update_resource
+      end
+      
+      it 'should store the URI as a string' do
+        expect(subject.identifier).to eq 'http://some.uri'
+      end
+      
+      it 'should cast a URI into the resource' do
+        query = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.identifier)
+        expect(query.count).to eq 1
+        expect(query.first_object).to be_a_kind_of RDF::URI
+      end
+    end
+
   end
   
   describe '#update_resource' do

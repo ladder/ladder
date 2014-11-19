@@ -65,10 +65,8 @@ module Ladder::Resource::Dynamic
     value = case data.object
       when RDF::Literal
         data.object.object
-      when RDF::URI
-        data.object.to_s
       else
-        data.object
+        data.object.to_s
     end
 
     self.send("#{field_name}=", value)
