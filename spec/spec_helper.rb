@@ -3,6 +3,8 @@ Bundler.setup
 
 require 'ladder'
 require 'pry'
+require 'simplecov'
+SimpleCov.start
 
 Dir['./spec/shared/**/*.rb'].each { |f| require f }
 
