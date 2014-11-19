@@ -1,4 +1,5 @@
 ![Ladder logo](https://github.com/mjsuhonos/ladder/blob/master/logo.png)
+
 [![Gem Version](http://img.shields.io/gem/v/ladder.svg)](https://rubygems.org/gems/ladder) [![Build Status](https://travis-ci.org/mjsuhonos/ladder.svg)](https://travis-ci.org/mjsuhonos/ladder)
 
 # Ladder
