@@ -105,7 +105,7 @@ shared_examples 'a Resource' do
       end
       
       it 'should return all locales' do
-        expect(subject.attributes['title']).to eq Hash({'en' => 'Comet in Moominland'})
+        expect(subject.attributes['title']).to eq Hash('en' => 'Comet in Moominland')
       end
       
       it 'should have a valid predicate' do
