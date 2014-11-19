@@ -342,7 +342,7 @@ shared_examples 'a Resource' do
   end
   
   describe '#rdf_label' do
-    include_context 'with relations'
+    include_context 'with data'
 
     it 'should return the default label' do
       expect(subject.rdf_label.to_a).to eq ['Comet in Moominland']

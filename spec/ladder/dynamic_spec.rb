@@ -149,15 +149,23 @@ describe Ladder::Resource::Dynamic do
       subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
 
       # conflicting field
-      subject << RDF::Statement(nil, RDF::DC11.title, "Kometjakten")
-      
+      subject << RDF::Statement(nil, RDF::DC.alternative, "Kometjakten")
+
+      # URI value
+      subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
+
       subject.update_resource
     end
     
     it 'should have updated values' do
-      # TODO
+      expect(subject.resource.statements.count).to eq 5
+      expect(subject.resource.query(:predicate => RDF::DC.description, :object => "Second in Tove Jansson's series of Moomin books").count).to eq 1
+      expect(subject.resource.query(:predicate => RDF::DC11.title, :object => "Kometjakten").count).to eq 1
+      expect(subject.resource.query(:predicate => RDF::DC.title, :object => RDF::Literal.new('Kometen kommer', :language => :en)).count).to eq 1
+      expect(subject.resource.query(:predicate => RDF::DC.alternative, :object => "Kometjakten").count).to eq 1
+      expect(subject.resource.query(:predicate => RDF::DC.identifier, :object => RDF::URI('http://some.uri')).count).to eq 1
     end
-  end    
+  end
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
