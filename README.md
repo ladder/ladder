@@ -1,4 +1,6 @@
 ![Ladder logo](https://github.com/mjsuhonos/ladder/blob/master/logo.png)
+[![Gem Version](http://img.shields.io/gem/v/ladder.svg)](https://rubygems.org/gems/ladder) [![Build Status](https://travis-ci.org/mjsuhonos/ladder.svg)](https://travis-ci.org/mjsuhonos/ladder)
+
 # Ladder
 
 Ladder is a dynamic, scalable metadata framework written in Ruby using well-known components for Linked Data ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb), persistence ([Mongoid](http://mongoid.org)/MongoDB), indexing ([ElasticSearch](http://www.elasticsearch.org)), asynchronicity ([Sidekiq](http://sidekiq.org)/Redis) and HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra).  It is designed around the following philosophical goals:
@@ -354,10 +356,10 @@ kimchy.first_name = 'Shay'
 kimchy.description = 'Real genius'
 ```
 
-In order to enable indexing, call the `#search_index` method on the class:
+In order to enable indexing, call the `#index_for_search` method on the class:
 
 ```ruby
-Person.search_index
+Person.index_for_search
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -388,7 +390,7 @@ results.records.first == kimchy
 When indexing, you can control how your model is stored in the index by supplying the `as: :jsonld` or `as: :qname` options:
 
 ```ruby
-Person.search_index as: :jsonld
+Person.index_for_search as: :jsonld
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -409,7 +411,7 @@ kimchy.as_indexed_json
  #   }
  # }
 
-Person.search_index as: :qname
+Person.index_for_search as: :qname
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -446,9 +448,9 @@ es = Project.new(project_name: 'ElasticSearch', description: 'You know, for sear
 es.developers << kimchy
 es.save
 
-Person.search_index as: :jsonld, related: true
+Person.index_for_search as: :jsonld, related: true
 => :as_indexed_json
-Project.search_index as: :jsonld, related: true
+Project.index_for_search as: :jsonld, related: true
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -519,9 +521,9 @@ es.as_indexed_json
  #    }
  # }
 
-Person.search_index as: :qname, related: true
+Person.index_for_search as: :qname, related: true
 => :as_indexed_json
-Project.search_index as: :qname, related: true
+Project.index_for_search as: :qname, related: true
 => :as_indexed_json
 
 kimchy.as_indexed_json

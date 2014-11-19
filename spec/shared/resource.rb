@@ -18,7 +18,7 @@ shared_examples 'a Resource' do
       # non-localized literal
       subject.class.field :alt
       subject.class.property :alt, :predicate => RDF::DC.alternative
-      subject.alt = 'Mumintrollet på kometjakt'
+      subject.alt = 'Mumintrollet pa kometjakt'
 
       # localized literal
       subject.class.property :title, :predicate => RDF::DC.title
@@ -73,15 +73,15 @@ shared_examples 'a Resource' do
       before do
         subject.class.field :alt
         subject.class.property :alt, :predicate => RDF::DC.alternative
-        subject.alt = 'Mumintrollet på kometjakt'
+        subject.alt = 'Mumintrollet pa kometjakt'
       end
 
       it 'should return non-localized value' do
-        expect(subject.alt).to eq 'Mumintrollet på kometjakt'
+        expect(subject.alt).to eq 'Mumintrollet pa kometjakt'
       end
       
       it 'should not be a localized hash' do
-        expect(subject.attributes['alt']).to eq 'Mumintrollet på kometjakt'
+        expect(subject.attributes['alt']).to eq 'Mumintrollet pa kometjakt'
       end
       
       it 'should have a valid predicate' do

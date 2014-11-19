@@ -10,12 +10,12 @@ shared_examples 'a Searchable' do
     end
   end
 
-  describe '#search_index' do
+  describe '#index_for_search' do
     include_context 'with data'
 
     context 'with default' do
       before do
-        subject.class.search_index
+        subject.class.index_for_search
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -29,7 +29,7 @@ shared_examples 'a Searchable' do
 
     context 'with as qname' do
       before do
-        subject.class.search_index as: :qname
+        subject.class.index_for_search as: :qname
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -43,7 +43,7 @@ shared_examples 'a Searchable' do
 
     context 'with as jsonld' do
       before do
-        subject.class.search_index as: :jsonld
+        subject.class.index_for_search as: :jsonld
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -56,7 +56,7 @@ shared_examples 'a Searchable' do
     end  
   end
 
-  describe '#search_index related' do
+  describe '#index_for_search related' do
     include_context 'with data'
     
     before do
@@ -73,8 +73,8 @@ shared_examples 'a Searchable' do
 
     context 'with default' do
       before do
-        person.class.search_index
-        subject.class.search_index
+        person.class.index_for_search
+        subject.class.index_for_search
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -98,8 +98,8 @@ shared_examples 'a Searchable' do
 
     context 'with as qname' do
       before do
-        person.class.search_index as: :qname
-        subject.class.search_index as: :qname
+        person.class.index_for_search as: :qname
+        subject.class.index_for_search as: :qname
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -123,8 +123,8 @@ shared_examples 'a Searchable' do
 
     context 'with as_qname related' do
       before do
-        person.class.search_index as: :qname, related: true
-        subject.class.search_index as: :qname, related: true
+        person.class.index_for_search as: :qname, related: true
+        subject.class.index_for_search as: :qname, related: true
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -144,8 +144,8 @@ shared_examples 'a Searchable' do
 
     context 'with as_jsonld' do
       before do
-        person.class.search_index as: :jsonld
-        subject.class.search_index as: :jsonld
+        person.class.index_for_search as: :jsonld
+        subject.class.index_for_search as: :jsonld
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
@@ -169,8 +169,8 @@ shared_examples 'a Searchable' do
 
     context 'with as_jsonld related' do
       before do
-        person.class.search_index as: :jsonld, related: true
-        subject.class.search_index as: :jsonld, related: true
+        person.class.index_for_search as: :jsonld, related: true
+        subject.class.index_for_search as: :jsonld, related: true
         subject.save
         Elasticsearch::Model.client.indices.flush
       end
