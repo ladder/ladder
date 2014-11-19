@@ -26,17 +26,6 @@ module Ladder::Resource::Dynamic
 
       resource
     end
-
-    private
-    
-      ##
-      # Overload ActiveTriples #resource_class
-      #
-      # @see ActiveTriples::Identifiable
-      def resource_class
-        @modified_resource_class ||= self.class.resource_class.clone
-      end
-
   end
 
   ##
@@ -116,4 +105,13 @@ module Ladder::Resource::Dynamic
       end
     end
 
+    private
+    
+      ##
+      # Overload ActiveTriples #resource_class
+      #
+      # @see ActiveTriples::Identifiable
+      def resource_class
+        @modified_resource_class ||= self.class.resource_class.clone
+      end
 end
