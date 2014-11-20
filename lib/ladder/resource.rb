@@ -32,16 +32,14 @@ module Ladder::Resource
   end
 
   ##
-  # Overload ActiveTriples #update_resource
-  #
-  # @see ActiveTriples::Identifiable
+  # Populate resource properties from ActiveModel
   def update_resource(opts = {})
-    super() do |name, prop|
+    resource_class.properties.each do |name, property|
       value = update_from_field(name) if fields[name]
       value = update_from_relation(name, opts) if relations[name]
 
       cast_uri = RDF::URI.new(value)
-      resource.set_value(prop.predicate, cast_uri.valid? ? cast_uri : value) if value
+      resource.set_value(property.predicate, cast_uri.valid? ? cast_uri : value) if value
     end
 
     resource
