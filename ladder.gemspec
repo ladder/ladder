@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "mongoid", "~> 4.0"
-  spec.add_dependency "active-triples", "~> 0.3"
+  spec.add_dependency "active-triples", "~> 0.4"
   spec.add_dependency "elasticsearch-model", "~> 0.1"
   
   spec.add_development_dependency "bundler", "~> 1.7"
