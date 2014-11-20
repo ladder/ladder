@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = "mj@suhonos.ca"
   spec.summary       = %q{Opinionated ActiveModel framework.}
   spec.description   = %q{Ladder is a metadata framework for RDF modelling, persistence, and full-text indexing.}
-  spec.homepage      = "https://github.com/mjsuhonos/ladder"
+  spec.homepage      = "https://github.com/ladder/ladder"
   spec.license       = "APACHE2"
   spec.required_ruby_version     = '>= 1.9.3'
 
