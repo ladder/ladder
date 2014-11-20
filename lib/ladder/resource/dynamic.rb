@@ -26,49 +26,6 @@ module Ladder::Resource::Dynamic
 
       resource
     end
-    
-    def <<(data)
-      # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
-      data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
-
-      # Define predicate on object unless it's defined on the class
-      if resource_class.properties.values.map(&:predicate).include? data.predicate
-        field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
-      else
-        qname = data.predicate.qname
-
-        if respond_to? qname.last or :name == qname.last
-          field_name = qname.join('_').to_sym
-        else
-          field_name = qname.last
-        end
-
-        property field_name, predicate: data.predicate
-      end
-
-      # Set the value in Mongoid
-      value = case data.object
-        when RDF::Literal
-          data.object.object
-        when RDF::URI
-          data.object.to_s
-        else
-          data.object
-      end
-
-      self.send("#{field_name}=", value)
-    end
-
-    private
-    
-      ##
-      # Overload ActiveTriples #resource_class
-      #
-      # @see ActiveTriples::Identifiable
-      def resource_class
-        @modified_resource_class ||= self.class.resource_class.clone
-      end
-
   end
 
   ##
@@ -76,9 +33,43 @@ module Ladder::Resource::Dynamic
   def property(field_name, *opts)
     # Store context information
     self._context ||= Hash.new(nil)
+
+    # Ensure new field name is unique
+    field_name = opts.first[:predicate].qname.join('_').to_sym if respond_to? field_name or :name == field_name
+
     self._context[field_name] = opts.first[:predicate].to_s
 
     apply_context
+  end
+
+  def <<(data)
+    # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
+    data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+
+    # Define predicate on object unless it's defined on the class
+    if resource_class.properties.values.map(&:predicate).include? data.predicate
+      field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
+    else
+      qname = data.predicate.qname
+
+      if respond_to? qname.last or :name == qname.last
+        field_name = qname.join('_').to_sym
+      else
+        field_name = qname.last
+      end
+
+      property field_name, predicate: data.predicate
+    end
+
+    # Set the value in Mongoid
+    value = case data.object
+      when RDF::Literal
+        data.object.object
+      else
+        data.object.to_s
+    end
+
+    self.send("#{field_name}=", value)
   end
 
   private
@@ -111,5 +102,20 @@ module Ladder::Resource::Dynamic
         end
       end
     end
+
+  public
+  
+  module ClassMethods
+    
+    private
+
+      ##
+      # Overload ActiveTriples #resource_class
+      #
+      # @see ActiveTriples::Identifiable
+      def resource_class
+        @modified_resource_class ||= self.class.resource_class.clone
+      end
+  end
 
 end

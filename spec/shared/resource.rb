@@ -3,8 +3,23 @@ shared_examples 'a Resource' do
   let(:person) { Person.new }
 
   shared_context 'with data' do
+    before do
+      # non-localized literal
+      subject.class.field :alt
+      subject.class.property :alt, :predicate => RDF::DC.alternative
+      subject.alt = 'Mumintrollet pa kometjakt'
+
+      # localized literal
+      subject.class.property :title, :predicate => RDF::DC.title
+      subject.title = 'Comet in Moominland'
+    end
+  end
+
+  shared_context 'with relations' do
     let(:concept) { Concept.new }
     let(:part)    { Part.new }
+
+    include_context 'with data'
     
     before do
       class Concept
@@ -14,15 +29,6 @@ shared_examples 'a Resource' do
       class Part
         include Ladder::Resource
       end
-
-      # non-localized literal
-      subject.class.field :alt
-      subject.class.property :alt, :predicate => RDF::DC.alternative
-      subject.alt = 'Mumintrollet på kometjakt'
-
-      # localized literal
-      subject.class.property :title, :predicate => RDF::DC.title
-      subject.title = 'Comet in Moominland'
 
       # many-to-many
       person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
@@ -70,18 +76,14 @@ shared_examples 'a Resource' do
 
   describe '#property' do
     context 'with non-localized literal' do
-      before do
-        subject.class.field :alt
-        subject.class.property :alt, :predicate => RDF::DC.alternative
-        subject.alt = 'Mumintrollet på kometjakt'
-      end
+      include_context 'with data'
 
       it 'should return non-localized value' do
-        expect(subject.alt).to eq 'Mumintrollet på kometjakt'
+        expect(subject.alt).to eq 'Mumintrollet pa kometjakt'
       end
       
       it 'should not be a localized hash' do
-        expect(subject.attributes['alt']).to eq 'Mumintrollet på kometjakt'
+        expect(subject.attributes['alt']).to eq 'Mumintrollet pa kometjakt'
       end
       
       it 'should have a valid predicate' do
@@ -95,17 +97,14 @@ shared_examples 'a Resource' do
     end
     
     context 'with localized literal' do
-      before do
-        subject.class.property :title, :predicate => RDF::DC.title
-        subject.title = 'Comet in Moominland'
-      end
+      include_context 'with data'
       
       it 'should return localized value' do
         expect(subject.title).to eq 'Comet in Moominland'
       end
       
       it 'should return all locales' do
-        expect(subject.attributes['title']).to eq Hash({'en' => 'Comet in Moominland'})
+        expect(subject.attributes['title']).to eq({'en' => 'Comet in Moominland'})
       end
       
       it 'should have a valid predicate' do
@@ -119,12 +118,7 @@ shared_examples 'a Resource' do
     end
 
     context 'with many-to-many' do
-      before do
-        subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
-        person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
-        subject.people << person
-        subject.save
-      end
+      include_context 'with relations'
 
       it 'should have a relation' do
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
@@ -146,28 +140,24 @@ shared_examples 'a Resource' do
     end
 
     context 'with one-sided has-many' do
-      before do
-        subject.class.has_and_belongs_to_many :people, inverse_of: nil
-        subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
-        subject.people << person
-      end
+      include_context 'with relations'
 
       it 'should have a relation' do
-        expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-        expect(subject.people.to_a).to include person
+        expect(subject.relations['concepts'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
+        expect(subject.concepts.to_a).to include concept
       end
 
       it 'should not have an inverse relation' do
-        expect(subject.relations['people'].inverse_of).to be nil
-        expect(person.relations).to be_empty
+        expect(subject.relations['concepts'].inverse_of).to be nil
+        expect(concept.relations).to be_empty
       end
 
       it 'should have a valid predicate' do
-        expect(subject.class.properties['people'].predicate).to eq RDF::DC.creator
+        expect(subject.class.properties['concepts'].predicate).to eq RDF::DC.subject
       end
 
       it 'should not have an inverse predicate' do
-        expect(person.class.properties).to be_empty
+        expect(concept.class.properties).to be_empty
       end
     end
 
@@ -203,9 +193,8 @@ shared_examples 'a Resource' do
   end
 
   describe '#update_resource' do
-
     context 'without related: true' do
-      include_context 'with data'
+      include_context 'with relations'
       
       before do
         subject.update_resource
@@ -248,7 +237,7 @@ shared_examples 'a Resource' do
     end
 
     context 'with related: true' do
-      include_context 'with data'
+      include_context 'with relations'
       
       before do
         subject.update_resource(:related => true)
@@ -314,7 +303,7 @@ shared_examples 'a Resource' do
     end
 
     context 'with related and then without related' do
-      include_context 'with data'
+      include_context 'with relations'
       
       before do
         subject.update_resource(:related => true)
@@ -344,11 +333,20 @@ shared_examples 'a Resource' do
   end
   
   describe '#as_jsonld' do
-    include_context 'with data'
+    include_context 'with relations'
     
     it 'should output a valid jsonld representation of itself' do
       g = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
       expect(subject.resource.to_hash == g.to_hash).to be true
     end
   end
+  
+  describe '#rdf_label' do
+    include_context 'with data'
+
+    it 'should return the default label' do
+      expect(subject.rdf_label.to_a).to eq ['Comet in Moominland']
+    end
+  end
+
 end
