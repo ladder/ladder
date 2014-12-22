@@ -36,9 +36,10 @@ Or install it yourself as:
 
 ## Usage
 
-* [Resources](#resource)
+* [Resources](#resources)
   * [Configuring Resources](#configuring-resources)
   * [Dynamic Resources](#dynamic-resources)
+* [Files](#files)
 * [Indexing for Search](#indexing-for-search)
 
 ### Resources
@@ -336,6 +337,20 @@ steve.as_jsonld
 ```
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain a reference to the related object's URI.
+
+### Files
+
+While Resources store metadata, Files store content.  They are bytestreams implemented using MongoDB's GridFS storage system.  However, Files are still identifiable by a unique URI, and contain technical metadata about the File's contents.
+
+```ruby
+class Record
+  include Ladder::File
+end
+
+xml = Record.new(data: '<test>some xml data</test>')
+json = Record.new(StringIO.new("{'test' : 'some json data'}"))
+
+```
 
 ### Indexing for Search
 

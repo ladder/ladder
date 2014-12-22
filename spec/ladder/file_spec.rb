@@ -14,16 +14,19 @@ describe Ladder::File do
   end
 
   context 'with data from file' do
-    let(:subject) { Datastream.new File.open('./spec/shared/moomin.jpg') }
-    let(:source) { File.read('./spec/shared/moomin.jpg') }
+    TEST_FILE = './spec/shared/moomin.pdf'
+
+    let(:subject) { Datastream.new open(TEST_FILE) }
+    let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
 
     it_behaves_like 'a File'
   end
 
   context 'with data from string' do
     data = "And so Moomintroll was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly to his velvet skin, but at the same time his nose caught a new smell. It was a more serious smell than any he had met before, and slightly frightening. But it made him wide awake and greatly interested."
+    
     let(:subject) { Datastream.new(data: data) }
-    let(:source) { data }
+    let(:source) { data } # UTF-8 (string)
 
     it_behaves_like 'a File'
   end

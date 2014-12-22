@@ -1,6 +1,7 @@
 require 'bson'
 require 'mongoid/grid_fs'
 require 'active_triples'
+require 'open-uri'
 
 module Ladder::File
   extend ActiveSupport::Concern
@@ -27,19 +28,32 @@ module Ladder::File
 
     self.id = attrs[:id] || attrs[:_id] || BSON::ObjectId.new
     @readable ||= attrs[:readable] || StringIO.new(attrs[:data].to_s)
-  end
 
+    # TODO: if @readable is a GridFS::File, set @file = @readable
+  end
+  
   ##
   # Make save behave like Mongoid::Document as much as possible
   def save
-    @file ? @file.save : !! @file = self.class.grid.put(@readable, {id: self.id})
+    @file ? @file.save : !! @file = self.class.grid.put(readable, {id: self.id})
   end
 
   ##
   # Output content of object from stored file or readable input
   def data(*opts)
-    @readable.rewind
-    @file ? @file.data(*opts) : @readable.read
+    @file ? @file.data(*opts) : readable.read
+  end
+
+  def length
+    @file ? @file.length : nil
+  end
+
+  def md5
+    @file ? @file.md5 : nil
+  end
+
+  def contentType
+    @file ? @file.contentType : nil
   end
 
   ##
@@ -47,6 +61,13 @@ module Ladder::File
   def ==(object)
     self.id == object.id
   end
+  
+  private
+  
+    def readable
+      @readable.rewind if @readable.respond_to?(:rewind)
+      @readable
+    end
 
   module ClassMethods
 
@@ -57,13 +78,13 @@ module Ladder::File
     end
     
     ##
-    # Make find behave like Mongoid::Document as much as possible
+    # Behave like Mongoid::Document as much as possible
     def find(*args)
       id = args.shift unless args.first.is_a? Hash
 
       file = id ? grid.find(id: id) : grid.find(*args)
 
-      self.new({id: id, data: file.data})
+      self.new({id: id, readable: file})
     end
 
   end

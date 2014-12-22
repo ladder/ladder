@@ -27,9 +27,10 @@ shared_examples 'a File' do
   describe '#find' do
     it 'should be retrievable' do
       subject.save
+      data = subject.class.find(subject.id).data
 
-      expect(subject.class.find(subject.id).data).to eq subject.data
-      expect(subject.class.find(subject.id).data.force_encoding('UTF-8') ).to eq source
+      expect(data).to eq subject.data
+      expect(data).to eq source.force_encoding(data.encoding)
     end
   end
 
