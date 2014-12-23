@@ -4,19 +4,25 @@
 
 # Ladder
 
-Ladder is a dynamic, scalable metadata framework written in Ruby using well-known components for Linked Data ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb), persistence ([Mongoid](http://mongoid.org)/MongoDB), indexing ([ElasticSearch](http://www.elasticsearch.org)), asynchronicity ([Sidekiq](http://sidekiq.org)/Redis) and HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra).  It is designed around the following philosophical goals:
+Ladder is a dynamic [Linked Data](http://en.wikipedia.org/wiki/Linked_data) framework for ActiveModel implemented as a series of Ruby modules that can be used individually and incorporated within existing frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.  It is designed around the following philosophical goals:
 
-- make it as modular as possible
 - use as much commodity tooling as possible
+- make it as modular as possible
 - make it as easy to use as possible
+
+Ladder is intended to encourage the [LAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about our established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+
+## Components
+
+- Persistence ([Mongoid](http://mongoid.org)/MongoDB)
+- Full-text indexing ([ElasticSearch](http://www.elasticsearch.org))
+- RDF ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb)
+- Asynchronous job execution ([Sidekiq](http://sidekiq.org)/Redis)
+- HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra)
 
 ## History
 
-Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.
-
-From mid-2014, Ladder is being re-architected as a series of Ruby modules that can be used individually and incorporated within existing Ruby frameworks (eg. [Project Hydra](http://projecthydra.org)), or used together as a comprehensive stack.  Ladder is intended to encourage the [LAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about our established (often monolithic and/or niche) toolsets and instead embrace a broader vision of adopting more widely-used technologies.
-
-For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
+Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
 
 ## Installation
 
@@ -343,12 +349,24 @@ Note that due to the way Mongoid handles dynamic fields, dynamic properties **ca
 While Resources store metadata, Files store content.  They are bytestreams implemented using MongoDB's GridFS storage system.  However, Files are still identifiable by a unique URI, and contain technical metadata about the File's contents.
 
 ```ruby
-class Record
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  property :first_name, predicate: RDF::FOAF.name
+
+  embeds_one :thumbnail, class_name: 'Image'
+  property :thumbnail,  predicate: RDF::FOAF.depiction
+end
+
+class Image
   include Ladder::File
 end
 
-xml = Record.new(data: '<test>some xml data</test>')
-json = Record.new(StringIO.new("{'test' : 'some json data'}"))
+steve = Person.new(first_name: 'Steve')
+steve.thumbnail = Image.new(open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+steve.save
 
 ```
 
