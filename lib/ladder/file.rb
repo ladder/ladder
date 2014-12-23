@@ -33,6 +33,8 @@ module Ladder::File
   ##
   # Make save behave like Mongoid::Document as much as possible
   def save
+    # TODO: this is gross, refactor #readable
+    return false if @file.nil? and readable.read.empty?
     @file ? @file.save : !! @file = self.class.grid.put(readable, {id: self.id})
   end
 
@@ -75,7 +77,6 @@ module Ladder::File
     # Behave like Mongoid::Document as much as possible
     def find(*args)
       id = args.shift unless args.first.is_a? Hash
-
       file = id ? grid.find(id: id) : grid.find(*args)
 
       self.new(file, {id: id})
