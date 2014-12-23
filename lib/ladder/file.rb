@@ -29,7 +29,7 @@ module Ladder::File
     self.id = attrs[:id] || attrs[:_id] || BSON::ObjectId.new
     @readable ||= attrs[:readable] || StringIO.new(attrs[:data].to_s)
 
-    # TODO: if @readable is a GridFS::File, set @file = @readable
+    @file = @readable if @readable.respond_to? :data
   end
   
   ##
@@ -43,25 +43,21 @@ module Ladder::File
   def data(*opts)
     @file ? @file.data(*opts) : readable.read
   end
-
-  def length
-    @file ? @file.length : nil
-  end
-
-  def md5
-    @file ? @file.md5 : nil
-  end
-
-  def contentType
-    @file ? @file.contentType : nil
+  
+  ##
+  # Allow setting data on existing object
+  def data=(string)
+    @readable = StringIO.new(string)
   end
 
   ##
   # Id-based object comparison
-  def ==(object)
-    self.id == object.id
+  def ==(o)
+    self.id == o.id
   end
-  
+
+  alias_method :eql?, :==
+
   private
   
     def readable
