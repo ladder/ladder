@@ -1,7 +1,6 @@
 require 'bson'
 require 'mongoid/grid_fs'
 require 'active_triples'
-require 'open-uri'
 
 module Ladder::File
   extend ActiveSupport::Concern
@@ -12,36 +11,36 @@ module Ladder::File
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
   end
 
-  attr_accessor :id
+  delegate :id, :parentize, :__metadata, :__metadata=, to: :@file
 
   ##
   # Make constructor as ActiveModel-like as possible
   #
-  # eg. Ladder::File.new(StringIO.new, id: 'some_id')
+  # eg. Ladder::File.new(StringIO.new)
   #     Ladder::File.new(data: '... binary data ...')
   #
   def initialize(*args)
-    @readable = args.shift unless args.first.is_a? Hash
-    opts = args.last.is_a?(Hash) ? args.pop : {}
+    if args.first.is_a? Hash
+      self.data = args.first[:data].to_s
+    else
+      @readable = args.first
+    end
 
-    self.id = opts[:id] || opts[:_id] || BSON::ObjectId.new
-
-    @readable ||= StringIO.new(opts[:data].to_s)
-    @file = @readable if @readable.respond_to? :data
+    @file = @readable.respond_to?(:data) ? @readable : self.class.grid::File.new
   end
   
   ##
   # Make save behave like Mongoid::Document as much as possible
   def save
-    # TODO: this is gross, refactor #readable
-    return false if @file.nil? and readable.read.empty?
-    @file ? @file.save : !! @file = self.class.grid.put(readable, {id: self.id})
+    # TODO: clean up logic here
+    return false if @readable.nil? or 0 == @readable.size
+    @file.persisted? ? @file.save : !! @file = self.class.grid.put(@readable)
   end
 
   ##
   # Output content of object from stored file or readable input
   def data(*opts)
-    @file ? @file.data(*opts) : readable.read
+    @file.persisted? ? @file.data(*opts) : @readable.read
   end
   
   ##
@@ -58,14 +57,9 @@ module Ladder::File
 
   alias_method :eql?, :==
 
-  private
-  
-    def readable
-      @readable.rewind if @readable.respond_to?(:rewind)
-      @readable
-    end
-
   module ClassMethods
+
+    delegate :all_of, :relations, :embedded?, to: :'grid::File'
 
     ##
     # Create a namespaced GridFS module for this class
@@ -77,9 +71,9 @@ module Ladder::File
     # Behave like Mongoid::Document as much as possible
     def find(*args)
       id = args.shift unless args.first.is_a? Hash
-      file = id ? grid.find(id: id) : grid.find(*args)
+      file = id ? grid.get(id) : grid.find(*args)
 
-      self.new(file, {id: id})
+      self.new(file)
     end
 
   end

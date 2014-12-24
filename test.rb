@@ -1,5 +1,6 @@
 require_relative 'lib/ladder'
 require 'mongoid'
+require 'open-uri'
 
 Mongoid.load!('mongoid.yml', :development)
 Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
@@ -23,10 +24,46 @@ class Image
 end
 
 steve = Person.new(first_name: 'Steve')
-#steve.thumbnail = Image.new(open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+i = Image.new(open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+#steve.thumbnail = i
 #steve.save
+
+#Ladder::File.create :Image
+i = Image.new
 
 #xml = Image.new(data: '<test>some xml data</test>')
 #json = Image.new(StringIO.new("{'test' : 'some json data'}"))
 
 binding.pry
+
+=begin
+  module ClassMethods
+
+    ##
+    # Create a namespaced GridFS module for this class
+    def grid
+     @grid ||= Mongoid::GridFs.build_namespace_for name
+    end
+
+  end
+
+  ##
+  # Factory creation method
+  def self.create(class_name, &block)
+    ns = Mongoid::GridFs.build_namespace_for class_name
+
+    klass = Class.new(ns::File) do
+      include ActiveTriples::Identifiable
+      include InstanceMethods
+      extend ClassMethods
+
+      configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
+      @grid = ns
+
+      class_eval(&block) if block_given?
+    end
+
+    Object.const_set(class_name, klass)
+  end
+
+=end
