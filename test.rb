@@ -14,16 +14,21 @@ class Person
   configure type: RDF::FOAF.Person
 
   property :first_name, predicate: RDF::FOAF.name
-  property :thumbnails,  predicate: RDF::FOAF.depiction, class_name: 'Image'
+
+  belongs_to :thumbnail, class_name: 'Image', :inverse_of => nil
+  property :thumbnail,  predicate: RDF::FOAF.depiction
 end
 
 class Image
   include Ladder::File
 end
 
-steve = Person.new(first_name: 'Steve')
+thumb = Image.new(file: open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+thumb.save
 
-i = Image.new(file: StringIO.new('testing'))
+steve = Person.new(first_name: 'Steve')
+steve.thumbnail = thumb
+steve.save
 
 # KNOWN ISSUE:
 # Ladder::File must call #save before the relation is built,

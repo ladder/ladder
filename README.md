@@ -354,9 +354,7 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :first_name, predicate: RDF::FOAF.name
-
-  has_one :thumbnail, class_name: 'Image'
+  belongs_to :thumbnail, class_name: 'Image', :inverse_of => nil
   property :thumbnail,  predicate: RDF::FOAF.depiction
 end
 
@@ -364,9 +362,13 @@ class Image
   include Ladder::File
 end
 
+thumb = Image.new(file: open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+thumb.save
+
 steve = Person.new(first_name: 'Steve')
-steve.thumbnail = Image.new(open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+steve.thumbnail = thumb
 steve.save
+
 
 ```
 
