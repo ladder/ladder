@@ -356,7 +356,7 @@ class Person
 
   property :first_name, predicate: RDF::FOAF.name
 
-  embeds_one :thumbnail, class_name: 'Image'
+  has_one :thumbnail, class_name: 'Image'
   property :thumbnail,  predicate: RDF::FOAF.depiction
 end
 

@@ -11,8 +11,23 @@ module Ladder::File
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
   end
 
-  delegate :id, :parentize, :__metadata, :__metadata=, to: :@file
+  delegate :_id, :id, to: :@file
+  delegate *Mongoid::Atomic.instance_methods, to: :@file
+  delegate *Mongoid::Changeable.instance_methods, to: :@file
+  delegate *Mongoid::Document.instance_methods, to: :@file
+  delegate *Mongoid::Relations.instance_methods, to: :@file
+  delegate *Mongoid::Stateful.instance_methods, to: :@file
+  delegate *Mongoid::Traversable.instance_methods, to: :@file
+  delegate *Mongoid::Validatable.instance_methods, to: :@file
+=begin
+  def compact
+    self
+  end
 
+  def map(&block)
+    yield self
+  end
+=end  
   ##
   # Make constructor as ActiveModel-like as possible
   #
@@ -49,17 +64,11 @@ module Ladder::File
     @readable = StringIO.new(string)
   end
 
-  ##
-  # Id-based object comparison
-  def ==(o)
-    self.id == o.id
-  end
-
-  alias_method :eql?, :==
-
   module ClassMethods
 
-    delegate :all_of, :relations, :embedded?, to: :'grid::File'
+    delegate :all, :all_of, :relations, :where, to: :'grid::File'
+    delegate *Mongoid::Relations::Reflections.instance_methods(false), to: :'grid::File'
+    delegate *Mongoid::Relations::Referenced::Many.methods(false), to: :'grid::File'
 
     ##
     # Create a namespaced GridFS module for this class

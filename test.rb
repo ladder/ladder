@@ -15,7 +15,7 @@ class Person
 
   property :first_name, predicate: RDF::FOAF.name
 
-  embeds_one :thumbnail, class_name: 'Image'
+  has_one :thumbnail, class_name: 'Image'
   property :thumbnail,  predicate: RDF::FOAF.depiction
 end
 
@@ -25,11 +25,16 @@ end
 
 steve = Person.new(first_name: 'Steve')
 i = Image.new(open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
-#steve.thumbnail = i
-#steve.save
+steve.thumbnail = i
+
+steve.save
+steve.save
+
+i.save
+i.save
 
 #Ladder::File.create :Image
-i = Image.new
+#i = Image.new
 
 #xml = Image.new(data: '<test>some xml data</test>')
 #json = Image.new(StringIO.new("{'test' : 'some json data'}"))
