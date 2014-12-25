@@ -12,7 +12,7 @@ module Ladder::File
     
     store_in :collection => "#{ grid.prefix }.files"
 
-    # TODO: use callbacks?
+    # TODO: use callbacks for #copy_id
   end
 
   attr_accessor :file
