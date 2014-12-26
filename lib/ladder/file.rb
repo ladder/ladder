@@ -14,8 +14,8 @@ module Ladder::File
   end
 
   attr_accessor :file
-  
-  delegate :length, :chunkSize, :uploadDate, :md5, :contentType, :filename, to: :@grid_file
+
+  delegate :length, :chunkSize, :uploadDate, :md5, :contentType, :filename, :data_uri, to: :@grid_file
 
   def initialize(*args)
     super

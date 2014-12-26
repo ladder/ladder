@@ -91,7 +91,7 @@ steve.as_jsonld
  # }
 ```
 
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` will create a has-and-belongs-to-many (HABTM) relation:
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `class_name:` will create a has-and-belongs-to-many (HABTM) relation:
 
 ```ruby
 class Person
@@ -355,20 +355,60 @@ class Person
   configure type: RDF::FOAF.Person
 
   property :first_name, predicate: RDF::FOAF.name
-
-  belongs_to :thumbnail, class_name: 'Image', :inverse_of => nil, autosave: true
-  property :thumbnail,  predicate: RDF::FOAF.depiction
+  property :thumbnails,  predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
 end
 
 class Image
   include Ladder::File
 end
+```
 
+Note that because Files must be the target of a one-way relation, the `inverse_of: nil` option is required.  Similar to Resources, using `#property` as above will create a one-sided has-many relation for a File.
+
+```ruby
 steve = Person.new(first_name: 'Steve')
-steve.thumbnail = Image.new(file: open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+thumb = Image.new(file: open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+steve.thumbnails << thumb
+
+steve.as_jsonld
+ # => {
+ #     "@context": {
+ #         "foaf": "http://xmlns.com/foaf/0.1/"
+ #     },
+ #     "@id": "http://example.org/people/549d83c64169720b32010000",
+ #     "@type": "foaf:Person",
+ #     "foaf:depiction": {
+ #         "@id": "http://example.org/images/549d83c24169720b32000000"
+ #     },
+ #     "foaf:name": {
+ #         "@language": "en",
+ #         "@value": "Steve"
+ #     }
+ # }
+
 steve.save
+ # ... File is stored to GridFS ...
+=> true
+```
 
+Files have all the attributes of a GridFS file, and the binary content is accessed using `#data` or as a [Data URI](http://en.wikipedia.org/wiki/Data_URI_scheme) using `#data_uri`.
 
+```ruby
+thumb.reload
+thumb.as_document
+=> {"_id"=>BSON::ObjectId('549d86184169720b6a000000'),
+ "length"=>59709,
+ "chunkSize"=>4194304,
+ "uploadDate"=>2014-12-26 16:00:29 UTC,
+ "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
+ "contentType"=>"application/octet-stream",
+ "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
+
+thumb.data
+=> # ... binary data ...
+
+thumb.data_uri
+=> "data:application/octet-stream;base64,IzxNb25nb2lkOjpHcmlkRnM6OkltYWdlOjpGaWxlOjB4MDA3ZjhmNmExMWEw\nNDg+"
 ```
 
 ### Indexing for Search
@@ -481,7 +521,6 @@ Person.property :projects, predicate: RDF::FOAF.made, class_name: 'Project'
 
 es = Project.new(project_name: 'ElasticSearch', description: 'You know, for search')
 es.developers << kimchy
-es.save
 
 Person.index_for_search as: :jsonld, related: true
 => :as_indexed_json
