@@ -363,7 +363,7 @@ class Image
 end
 ```
 
-Note that because Files must be the target of a one-way relation, the `inverse_of: nil` option is required.  Similar to Resources, using `#property` as above will create a one-sided has-many relation for a File.
+Note that because Files must be the target of a one-way relation, the `inverse_of: nil` option is required.  Similar to Resources, using `#property` as above will create a one-sided has-many relation for a File.  Also note that due to the way GridFS is designed, Files **can not** be embedded.
 
 ```ruby
 steve = Person.new(first_name: 'Steve')

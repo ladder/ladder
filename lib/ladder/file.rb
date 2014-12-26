@@ -41,6 +41,12 @@ module Ladder::File
       file.read
     end
   end
+  
+  ##
+  # Return an empty ActiveTriples resource for serializing related resources
+  def update_resource
+    resource
+  end
 
   module ClassMethods
 
