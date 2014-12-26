@@ -15,7 +15,7 @@ class Person
 
   property :first_name, predicate: RDF::FOAF.name
 
-  belongs_to :thumbnail, class_name: 'Image', :inverse_of => nil
+  belongs_to :thumbnail, class_name: 'Image', :inverse_of => nil, autosave: true
   property :thumbnail,  predicate: RDF::FOAF.depiction
 end
 
@@ -23,25 +23,8 @@ class Image
   include Ladder::File
 end
 
-thumb = Image.new(file: open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
-thumb.save
-
 steve = Person.new(first_name: 'Steve')
-steve.thumbnail = thumb
+steve.thumbnail = Image.new(file: open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
 steve.save
-
-# KNOWN ISSUE:
-# Ladder::File must call #save before the relation is built,
-# otherwise the ID asigned to the related object will be outdated
-#
-# eg. 
-#
-# GOOD: 
-# i.save
-# steve.thumbnails << i
-# 
-# BAD: 
-# steve.thumbnails << i
-# i.save
 
 binding.pry

@@ -11,8 +11,6 @@ module Ladder::File
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
     
     store_in :collection => "#{ grid.prefix }.files"
-
-    # TODO: use callbacks for #copy_id
   end
 
   attr_accessor :file
@@ -21,10 +19,8 @@ module Ladder::File
     super
 
     # If we are loading an existing GridFS file, populate values
-    if file.respond_to?(:data)
-      @grid_file = file
-      copy_id
-    end
+    @grid_file = file if file.respond_to?(:data)
+    self.id = @grid_file.id if @grid_file
   end
 
   ##
@@ -32,10 +28,7 @@ module Ladder::File
   def save
     return false if file.nil? or 0 == file.size
 
-    @grid_file ? @grid_file.save : @grid_file = self.class.grid.put(file)
-    copy_id
-
-    true
+    @grid_file ? @grid_file.save : !! @grid_file = self.class.grid.put(file, {id: self.id})
   end
 
   ##
@@ -48,13 +41,6 @@ module Ladder::File
       file.read
     end
   end
-  
-  private
-
-    # Synchronize object's id from retrieved GridFS file
-    def copy_id
-      self.id = @grid_file.id if @grid_file
-    end
 
   module ClassMethods
 
