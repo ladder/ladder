@@ -391,7 +391,7 @@ steve.save
 => true
 ```
 
-Files have all the attributes of a GridFS file, and the binary content is accessed using `#data` or as a [Data URI](http://en.wikipedia.org/wiki/Data_URI_scheme) using `#data_uri`.
+Files have all the attributes of a GridFS file, and the stored binary content is accessed using `#data`.
 
 ```ruby
 thumb.reload
@@ -406,9 +406,6 @@ thumb.as_document
 
 thumb.data
 => # ... binary data ...
-
-thumb.data_uri
-=> "data:application/octet-stream;base64,IzxNb25nb2lkOjpHcmlkRnM6OkltYWdlOjpGaWxlOjB4MDA3ZjhmNmExMWEw\nNDg+"
 ```
 
 ### Indexing for Search

@@ -11,19 +11,17 @@ module Ladder::File
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
     
     store_in :collection => "#{ grid.prefix }.files"
+    
+    after_initialize do
+      # If we are loading an existing GridFS file, populate values
+      @grid_file = file if file.respond_to?(:data)
+      self.id = @grid_file.id if @grid_file
+    end
   end
 
   attr_accessor :file
 
-  delegate :length, :chunkSize, :uploadDate, :md5, :contentType, :filename, :data_uri, to: :@grid_file
-
-  def initialize(*args)
-    super
-
-    # If we are loading an existing GridFS file, populate values
-    @grid_file = file if file.respond_to?(:data)
-    self.id = @grid_file.id if @grid_file
-  end
+  delegate :length, :chunkSize, :uploadDate, :md5, :contentType, :filename, to: :@grid_file
 
   ##
   # Make save behave like Mongoid::Document as much as possible
