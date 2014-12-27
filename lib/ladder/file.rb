@@ -21,14 +21,15 @@ module Ladder::File
 
   attr_accessor :file
 
-  delegate :length, :chunkSize, :uploadDate, :md5, :contentType, :filename, to: :@grid_file
+  delegate :length, :chunkSize, :uploadDate, :md5, :content_type, :contentType, :filename, to: :@grid_file
 
   ##
   # Make save behave like Mongoid::Document as much as possible
   def save
-    return false if file.nil? or 0 == file.size
+    raise Mongoid::Errors::InvalidValue.new(IO, NilClass) if file.nil?
 
-    @grid_file ? @grid_file.save : !! @grid_file = self.class.grid.put(file, {id: self.id})
+    attributes[:content_type] = file.content_type if file.respond_to? :content_type
+    @grid_file ? @grid_file.save : !! @grid_file = self.class.grid.put(file, attributes.symbolize_keys)
   end
 
   ##
