@@ -9,19 +9,18 @@ module Ladder::File
 
   included do
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
-    
+
     store_in :collection => "#{ grid.prefix }.files"
-    
-    after_initialize do
-      # If we are loading an existing GridFS file, populate values
-      @grid_file = file if file.is_a? self.class.grid::File
-      self.id = @grid_file.id if @grid_file
-    end
   end
 
   attr_accessor :file
 
-  delegate :length, :chunkSize, :uploadDate, :md5, :content_type, :contentType, :filename, to: :@grid_file
+  # Define accessor methods for attributes
+  define_method(:content_type) { read_attribute(:contentType) }
+
+  %i[length chunkSize uploadDate md5 contentType filename].each do |attr|
+    define_method(attr) { read_attribute(attr) }
+  end
 
   ##
   # Make save behave like Mongoid::Document as much as possible
@@ -35,6 +34,7 @@ module Ladder::File
   ##
   # Output content of object from stored file or readable input
   def data
+    @grid_file ||= self.class.grid.get(id) if persisted?
     return @grid_file.data if @grid_file
 
     file.rewind if file.respond_to? :rewind
@@ -48,20 +48,10 @@ module Ladder::File
   end
 
   module ClassMethods
-
     ##
     # Create a namespaced GridFS module for this class
     def grid
      @grid ||= Mongoid::GridFs.build_namespace_for name
-    end
-    
-    ##
-    # Behave like Mongoid::Document as much as possible
-    def find(*args)
-      id = args.shift unless args.first.is_a? Hash
-      file = id ? grid.get(id) : grid.find(*args)
-
-      self.new(file: file)
     end
 
   end
