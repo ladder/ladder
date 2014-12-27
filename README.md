@@ -404,6 +404,9 @@ thumb.as_document
  "contentType"=>"application/octet-stream",
  "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
 
+thumb.length
+=> 59709
+
 thumb.data
 => # ... binary data ...
 ```

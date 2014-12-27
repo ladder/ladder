@@ -14,7 +14,7 @@ module Ladder::File
     
     after_initialize do
       # If we are loading an existing GridFS file, populate values
-      @grid_file = file if file.respond_to?(:data)
+      @grid_file = file if file.is_a? self.class.grid::File
       self.id = @grid_file.id if @grid_file
     end
   end
@@ -33,13 +33,11 @@ module Ladder::File
 
   ##
   # Output content of object from stored file or readable input
-  def data(*opts)
-    if @grid_file
-      @grid_file.data(*opts)
-    else
-      file.rewind if file.respond_to? :rewind
-      file.read
-    end
+  def data
+    return @grid_file.data if @grid_file
+
+    file.rewind if file.respond_to? :rewind
+    file.read
   end
   
   ##
