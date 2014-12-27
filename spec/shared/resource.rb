@@ -61,7 +61,7 @@ shared_examples 'a Resource' do
       expect(subject.part).to eq part
     end
     
-    it 'should have reverse relations' do
+    it 'should have inverse relations' do
       expect(person.things.to_a).to include subject
       expect(concept.relations).to be_empty
       expect(part.thing).to eq subject
