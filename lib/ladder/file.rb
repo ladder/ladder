@@ -11,16 +11,16 @@ module Ladder::File
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
 
     store_in :collection => "#{ grid.prefix }.files"
+
+    # Define accessor methods for attributes
+    define_method(:content_type) { read_attribute(:contentType) }
+
+    grid::File.fields.keys.map(&:to_sym).each do |attr|
+      define_method(attr) { read_attribute(attr) }
+    end
   end
 
   attr_accessor :file
-
-  # Define accessor methods for attributes
-  define_method(:content_type) { read_attribute(:contentType) }
-
-  %i[length chunkSize uploadDate md5 contentType filename].each do |attr|
-    define_method(attr) { read_attribute(attr) }
-  end
 
   ##
   # Make save behave like Mongoid::Document as much as possible
