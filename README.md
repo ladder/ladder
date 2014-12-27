@@ -401,7 +401,7 @@ thumb.as_document
  "chunkSize"=>4194304,
  "uploadDate"=>2014-12-26 16:00:29 UTC,
  "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
- "contentType"=>"application/octet-stream",
+ "contentType"=>"image/jpeg",
  "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
 
 thumb.length
