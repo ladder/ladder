@@ -4,13 +4,13 @@
 
 # Ladder
 
-Ladder is a dynamic [Linked Data](http://en.wikipedia.org/wiki/Linked_data) framework for ActiveModel implemented as a series of Ruby modules that can be used individually and incorporated within existing frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.  It is designed around the following philosophical goals:
+Ladder is a dynamic [Linked Data](http://en.wikipedia.org/wiki/Linked_data) framework for ActiveModel implemented as a series of Ruby modules that can be used individually and incorporated within existing frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
-- use as much commodity tooling as possible
-- make it as modular as possible
-- make it as easy to use as possible
+## History
 
-Ladder is intended to encourage the [LAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about our established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+
+For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
 
 ## Components
 
@@ -19,10 +19,6 @@ Ladder is intended to encourage the [LAM](http://en.wikipedia.org/wiki/GLAM_(ind
 - RDF ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb)
 - Asynchronous job execution ([Sidekiq](http://sidekiq.org)/Redis)
 - HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra)
-
-## History
-
-Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
 
 ## Installation
 
@@ -346,7 +342,7 @@ Note that due to the way Mongoid handles dynamic fields, dynamic properties **ca
 
 ### Files
 
-While Resources store metadata, Files store content.  They are bytestreams implemented using MongoDB's GridFS storage system.  However, Files are still identifiable by a unique URI, and contain technical metadata about the File's contents.
+Files are bytestreams that store binary content using MongoDB's GridFS storage system.  They are still identifiable by a URI, and contain technical metadata about the File's contents.
 
 ```ruby
 class Person
@@ -363,11 +359,11 @@ class Image
 end
 ```
 
-Similar to Resources, using `#property` as above will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Also note that due to the way GridFS is designed, Files **can not** be embedded.
+Similar to Resources, using `#property` as above will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
 
 ```ruby
 steve = Person.new(first_name: 'Steve')
-thumb = Image.new(file: open('http://www.showbizsandbox.com/wp-content/uploads/2011/08/Steve-Jobs.jpg'))
+thumb = Image.new(file: open('http://some.image/pic.jpg'))
 steve.thumbnails << thumb
 
 steve.as_jsonld
