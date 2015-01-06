@@ -3,44 +3,25 @@ require 'mimemagic'
 shared_examples 'a File' do
 
   shared_context 'with relations' do
-    let(:concept) { Concept.new }
-    let(:part)    { Part.new }
+    let(:thing)    { Thing.new }
 
     before do
-      class Concept
+      class Thing
         include Ladder::Resource
       end
 
-      class Part
-        include Ladder::Resource
-      end
-
-      # TODO: build some relations of various types
       # implicit from #property
+      thing.class.property :files, :predicate => RDF::DC.relation, :class_name => subject.class.name, :inverse_of => nil
+      thing.files << subject
+      
+      # TODO: build some relations of various types
       # explicit using HABTM
       # explicit has-one
     end
 
     after do
-      Object.send(:remove_const, 'Concept')
-      Object.send(:remove_const, 'Part')
+      Object.send(:remove_const, 'Thing')
     end
-    
-    # TODO
-=begin
-    it 'should have relations' do
-      expect(subject.title).to eq 'Comet in Moominland'
-      expect(subject.people.to_a).to include person
-      expect(subject.concepts.to_a).to include concept
-      expect(subject.part).to eq part
-    end
-    
-    it 'should not have reverse relations' do
-      expect(person.things.to_a).to include subject
-      expect(concept.relations).to be_empty
-      expect(part.thing).to eq subject
-    end
-=end
   end
 
   describe 'LADDER_BASE_URI' do
@@ -98,31 +79,36 @@ shared_examples 'a File' do
     end
   end
 
+  describe '#update_resource' do
+    it 'should not have related objects' do
+      expect(subject.resource).to eq subject.update_resource
+    end
+
+    it 'should not have related object relations' do
+      expect(subject.resource.statements).to be_empty
+    end    
+  end
+
   context 'with one-sided has-many' do
     include_context 'with relations'
-    
-    # TODO
-=begin
+
     it 'should have a relation' do
-      expect(subject.relations['concepts'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
-      expect(subject.concepts.to_a).to include concept
+      expect(thing.relations['files'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
+      expect(thing.files.to_a).to include subject
     end
 
     it 'should not have an inverse relation' do
-      expect(subject.relations['concepts'].inverse_of).to be nil
-      expect(concept.relations).to be_empty
+      expect(thing.relations['files'].inverse_of).to be nil
+      expect(subject.relations).to be_empty
     end
 
     it 'should have a valid predicate' do
-      expect(subject.class.properties['concepts'].predicate).to eq RDF::DC.subject
+      expect(thing.class.properties['files'].predicate).to eq RDF::DC.relation
     end
 
     it 'should not have an inverse predicate' do
-      expect(concept.class.properties).to be_empty
+      expect(subject.class.properties).to be_empty
     end
-=end
   end
-  
-  # TODO: add blocks for other relation types
 
 end
