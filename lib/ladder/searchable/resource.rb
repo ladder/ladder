@@ -69,7 +69,7 @@ module Ladder::Searchable::Resource
           define_method(:as_indexed_json) { |opts = {}| as_qname }
         end
       else
-        define_method(:as_indexed_json) { |opts = {}| as_json(except: ['id', '_id']) }
+        define_method(:as_indexed_json) { |opts = {}| as_json(except: [:id, :_id]) }
       end
     end
 

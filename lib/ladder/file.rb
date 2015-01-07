@@ -25,10 +25,15 @@ module Ladder::File
   ##
   # Make save behave like Mongoid::Document as much as possible
   def save
+    # FIXME: this raises on a freshly-retrieved document; should either set @file or catch @grid_file
     raise Mongoid::Errors::InvalidValue.new(IO, NilClass) if file.nil?
 
-    attributes[:content_type] = file.content_type if file.respond_to? :content_type
-    @grid_file ? @grid_file.save : !! @grid_file = self.class.grid.put(file, attributes.symbolize_keys)
+    persisted? ? run_callbacks(:update) : run_callbacks(:create)
+
+    run_callbacks(:save) do
+      attributes[:content_type] = file.content_type if file.respond_to? :content_type
+      @grid_file ? @grid_file.save : !! @grid_file = self.class.grid.put(file, attributes.symbolize_keys)
+    end
   end
 
   ##

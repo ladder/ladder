@@ -1,17 +1,21 @@
 module Ladder::Searchable::File
   extend ActiveSupport::Concern
 
-  ##
-  # Generate a qname-based JSON representation
-  #
-  def as_qname(opts = {})
+  included do
+    # Index binary content using Elasticsearch mapper attachment plugin
+    # https://github.com/elasticsearch/elasticsearch-mapper-attachments
+    mapping do
+      indexes :base64, type: 'attachment'#, path: 'full', fields: { base64: { store: false } }
+    end
+
+    # Explicitly set mapping definition on index
+    self.__elasticsearch__.create_index!
   end
 
-  module ClassMethods
-    ##
-    # Specify type of serialization to use for indexing
-    #
-    def index_for_search(opts = {})
-    end
+  ##
+  # Return a Base64-encoded copy of data
+  def as_indexed_json(opts = {})
+    { base64: Base64.encode64(data) }
   end
+
 end
