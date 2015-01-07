@@ -663,6 +663,8 @@ MJ Suhonos / mj@suhonos.ca
 
 ## Acknowledgements
 
+My biggest thanks to all the wonderful people who have shown interest and support for Ladder over the years.
+
 Many thanks to Christopher Knight [@NomadicKnight](https://twitter.com/Nomadic_Knight) for ceding the "ladder" gem name.  Check out his startup, [Adventure Local](http://advlo.com) / [@advlo_](https://twitter.com/Advlo_).
 
 ## License
