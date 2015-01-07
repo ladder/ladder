@@ -36,7 +36,6 @@ module Ladder::Resource::Dynamic
 
     # Ensure new field name is unique
     field_name = opts.first[:predicate].qname.join('_').to_sym if respond_to? field_name or :name == field_name
-
     self._context[field_name] = opts.first[:predicate].to_s
 
     apply_context
@@ -62,11 +61,10 @@ module Ladder::Resource::Dynamic
     end
 
     # Set the value in Mongoid
-    value = case data.object
-      when RDF::Literal
-        data.object.object
-      else
-        data.object.to_s
+    value = if data.object.is_a? RDF::Literal
+      data.object.object
+    else
+      data.object.to_s
     end
 
     self.send("#{field_name}=", value)
@@ -77,13 +75,8 @@ module Ladder::Resource::Dynamic
     ##
     # Dynamic field accessors (Mongoid)
     def create_accessors(field_name)
-      define_singleton_method field_name do
-        read_attribute(field_name)
-      end
-
-      define_singleton_method "#{field_name}=" do |value|
-        write_attribute(field_name, value)
-      end
+      define_singleton_method(field_name) { read_attribute(field_name) }
+      define_singleton_method("#{field_name}=") { |value| write_attribute(field_name, value) } 
     end
     
     ##
@@ -108,7 +101,6 @@ module Ladder::Resource::Dynamic
   module ClassMethods
     
     private
-
       ##
       # Overload ActiveTriples #resource_class
       #

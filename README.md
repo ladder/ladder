@@ -4,19 +4,21 @@
 
 # Ladder
 
-Ladder is a dynamic, scalable metadata framework written in Ruby using well-known components for Linked Data ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb), persistence ([Mongoid](http://mongoid.org)/MongoDB), indexing ([ElasticSearch](http://www.elasticsearch.org)), asynchronicity ([Sidekiq](http://sidekiq.org)/Redis) and HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra).  It is designed around the following philosophical goals:
-
-- make it as modular as possible
-- use as much commodity tooling as possible
-- make it as easy to use as possible
+Ladder is a dynamic [Linked Data](http://en.wikipedia.org/wiki/Linked_data) framework for ActiveModel implemented as a series of Ruby modules that can be used individually and incorporated within existing frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
 ## History
 
-Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.
-
-From mid-2014, Ladder is being re-architected as a series of Ruby modules that can be used individually and incorporated within existing Ruby frameworks (eg. [Project Hydra](http://projecthydra.org)), or used together as a comprehensive stack.  Ladder is intended to encourage the [LAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about our established (often monolithic and/or niche) toolsets and instead embrace a broader vision of adopting more widely-used technologies.
+Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
 
 For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
+
+## Components
+
+- Persistence ([Mongoid](http://mongoid.org)/MongoDB)
+- Full-text indexing ([ElasticSearch](http://www.elasticsearch.org))
+- RDF ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb)
+- Asynchronous job execution ([Sidekiq](http://sidekiq.org)/Redis)
+- HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra)
 
 ## Installation
 
@@ -36,9 +38,10 @@ Or install it yourself as:
 
 ## Usage
 
-* [Resources](#resource)
+* [Resources](#resources)
   * [Configuring Resources](#configuring-resources)
   * [Dynamic Resources](#dynamic-resources)
+* [Files](#files)
 * [Indexing for Search](#indexing-for-search)
 
 ### Resources
@@ -84,7 +87,7 @@ steve.as_jsonld
  # }
 ```
 
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` will create a has-and-belongs-to-many (HABTM) relation:
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `class_name:` will create a has-and-belongs-to-many (HABTM) relation:
 
 ```ruby
 class Person
@@ -337,6 +340,73 @@ steve.as_jsonld
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain a reference to the related object's URI.
 
+### Files
+
+Files are bytestreams that store binary content using MongoDB's GridFS storage system.  They are still identifiable by a URI, and contain technical metadata about the File's contents.
+
+```ruby
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  property :first_name, predicate: RDF::FOAF.name
+  property :thumbnails,  predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
+end
+
+class Image
+  include Ladder::File
+end
+```
+
+Similar to Resources, using `#property` as above will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
+
+```ruby
+steve = Person.new(first_name: 'Steve')
+thumb = Image.new(file: open('http://some.image/pic.jpg'))
+steve.thumbnails << thumb
+
+steve.as_jsonld
+ # => {
+ #     "@context": {
+ #         "foaf": "http://xmlns.com/foaf/0.1/"
+ #     },
+ #     "@id": "http://example.org/people/549d83c64169720b32010000",
+ #     "@type": "foaf:Person",
+ #     "foaf:depiction": {
+ #         "@id": "http://example.org/images/549d83c24169720b32000000"
+ #     },
+ #     "foaf:name": {
+ #         "@language": "en",
+ #         "@value": "Steve"
+ #     }
+ # }
+
+steve.save
+ # ... File is stored to GridFS ...
+=> true
+```
+
+Files have all the attributes of a GridFS file, and the stored binary content is accessed using `#data`.
+
+```ruby
+thumb.reload
+thumb.as_document
+=> {"_id"=>BSON::ObjectId('549d86184169720b6a000000'),
+ "length"=>59709,
+ "chunkSize"=>4194304,
+ "uploadDate"=>2014-12-26 16:00:29 UTC,
+ "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
+ "contentType"=>"image/jpeg",
+ "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
+
+thumb.length
+=> 59709
+
+thumb.data
+=> # ... binary data ...
+```
+
 ### Indexing for Search
 
 You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
@@ -447,7 +517,6 @@ Person.property :projects, predicate: RDF::FOAF.made, class_name: 'Project'
 
 es = Project.new(project_name: 'ElasticSearch', description: 'You know, for search')
 es.developers << kimchy
-es.save
 
 Person.index_for_search as: :jsonld, related: true
 => :as_indexed_json
