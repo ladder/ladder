@@ -4,7 +4,7 @@
 
 # Ladder
 
-Ladder is a dynamic [Linked Data](http://en.wikipedia.org/wiki/Linked_data) framework for ActiveModel implemented as a series of Ruby modules that can be used individually and incorporated within existing frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
+Ladder is a dynamic framework for [Linked Data](http://en.wikipedia.org/wiki/Linked_data) modelling, persistence, and full-text indexing. It is implemented as a series of Ruby modules that can be used individually and incorporated within existing ActiveModel frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
 ## History
 
