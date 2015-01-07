@@ -4,8 +4,21 @@ module Ladder::Searchable::File
   included do
     # Index binary content using Elasticsearch mapper attachment plugin
     # https://github.com/elasticsearch/elasticsearch-mapper-attachments
-    mapping do
-      indexes :base64, type: 'attachment'#, path: 'full', fields: { base64: { store: false } }
+    mapping _source: { enabled: false } do
+      indexes :file, type: 'attachment', fields: {
+        file: { 
+          type: "string",
+          term_vector: "with_positions_offsets",
+          store: true
+         },
+        title: { store: true },
+        date: { store: true },
+        author: { store: true },
+        keywords: { store: true },
+        content_type: { store: true },
+        content_length: { store: true },
+        language: { store: true }
+      }
     end
 
     # Explicitly set mapping definition on index
@@ -15,7 +28,7 @@ module Ladder::Searchable::File
   ##
   # Return a Base64-encoded copy of data
   def as_indexed_json(opts = {})
-    { base64: Base64.encode64(data) }
+    { file: Base64.encode64(data) }
   end
 
 end
