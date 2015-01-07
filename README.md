@@ -1,21 +1,24 @@
-![Ladder logo](https://github.com/mjsuhonos/ladder/blob/master/logo.png)
+![Ladder logo](https://github.com/ladder/ladder/blob/master/logo.png)
+
+[![Gem Version](http://img.shields.io/gem/v/ladder.svg)](https://rubygems.org/gems/ladder) [![Build Status](https://travis-ci.org/ladder/ladder.svg)](https://travis-ci.org/ladder/ladder)
+
 # Ladder
 
-Ladder is a highly scalable metadata framework written in Ruby using well-known components for Linked Data ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb), persistence ([Mongoid](http://mongoid.org)/MongoDB), indexing ([ElasticSearch](http://www.elasticsearch.org)), asynchronicity ([Sidekiq](http://sidekiq.org)/Redis) and HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra).  It is designed around the following philosophical goals:
-
-- make it as modular (eg. the Ruby Way) as possible
-- use as much commodity (ie. non-LAM-specific) tooling as possible
-- make it as easy to use (ie. little programming required) as possible
+Ladder is a dynamic [Linked Data](http://en.wikipedia.org/wiki/Linked_data) framework for ActiveModel implemented as a series of Ruby modules that can be used individually and incorporated within existing frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
 ## History
 
-Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.
+Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
 
-From mid-2014, Ladder is being re-architected as a series of Ruby modules that can be used individually and incorporated within existing Ruby frameworks (eg. [Project Hydra](http://projecthydra.org)), or used together as a comprehensive stack.  Ladder is intended to encourage the LAM community to think less dogmatically about our established (often monolithic and/or niche) toolsets and instead embrace a broader vision of using non-LAM specific technologies.
+For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
 
-### There's Not Much Here!
+## Components
 
-The original [prototype](https://github.com/mjsuhonos/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/mjsuhonos/ladder/tree/l2) branch.  Core functionality is being refactored as modules in the "ladder" gem (see below).
+- Persistence ([Mongoid](http://mongoid.org)/MongoDB)
+- Full-text indexing ([ElasticSearch](http://www.elasticsearch.org))
+- RDF ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb)
+- Asynchronous job execution ([Sidekiq](http://sidekiq.org)/Redis)
+- HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra)
 
 ## Installation
 
@@ -35,11 +38,13 @@ Or install it yourself as:
 
 ## Usage
 
-* [Ladder::Resource](#ladderresource)
+* [Resources](#resources)
   * [Configuring Resources](#configuring-resources)
-* [Ladder::Searchable](#laddersearchable)
+  * [Dynamic Resources](#dynamic-resources)
+* [Files](#files)
+* [Indexing for Search](#indexing-for-search)
 
-### Ladder::Resource
+### Resources
 
 Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require 
 and include the main module in your class:
@@ -52,16 +57,16 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
   property :description, predicate: RDF::DC.description
 end
 
 steve = Person.new
-steve.name = 'Steve'
+steve.first_name = 'Steve'
 steve.description = 'Funny-looking'
 
 steve.as_document
- => {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'), "name"=>{"en"=>"Steve"}, "description"=>{"en"=>"Funny-looking"}}
+ => {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'), "first_name"=>{"en"=>"Steve"}, "description"=>{"en"=>"Funny-looking"}}
 
 steve.as_jsonld
  # => {
@@ -82,7 +87,7 @@ steve.as_jsonld
  # }
 ```
 
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `:class_name` will create a has-and-belongs-to-many (HABTM) relation:
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `class_name:` will create a has-and-belongs-to-many (HABTM) relation:
 
 ```ruby
 class Person
@@ -90,7 +95,7 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
   property :books, predicate: RDF::FOAF.made, class_name: 'Book'
 end
 
@@ -106,8 +111,8 @@ end
 b = Book.new(title: 'Heart of Darkness')
 => #<Book _id: 542f28d44169721941000000, title: {"en"=>"Heart of Darkness"}, person_ids: nil>
 
-b.people << Person.new(name: 'Joseph Conrad')
-=> [#<Person _id: 542f28dd4169721941010000, name: {"en"=>"Joseph Conrad"}, book_ids: [BSON::ObjectId('542f28d44169721941000000')]>]
+b.people << Person.new(first_name: 'Joseph Conrad')
+=> [#<Person _id: 542f28dd4169721941010000, first_name: {"en"=>"Joseph Conrad"}, book_ids: [BSON::ObjectId('542f28d44169721941000000')]>]
 
 b.as_jsonld
  # => {
@@ -170,7 +175,7 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
 
   embeds_one :address, class_name: 'Place'
   property :address, predicate: RDF::FOAF.based_near
@@ -188,8 +193,8 @@ class Place
   property :resident, predicate: RDF::VCARD.agent
 end
 
-steve = Person.new(name: 'Steve')
-=> #<Person _id: 542f341e41697219a2000000, name: {"en"=>"Steve"}, address: nil>
+steve = Person.new(first_name: 'Steve')
+=> #<Person _id: 542f341e41697219a2000000, first_name: {"en"=>"Steve"}, address: nil>
 
 steve.address = Place.new(city: 'Toronto', country: 'Canada')
 => #<Place _id: 542f342741697219a2010000, city: {"en"=>"Toronto"}, country: {"en"=>"Canada"}, resident: nil>
@@ -233,7 +238,7 @@ steve.as_jsonld
 
 Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled.
 
-### Configuring Resources
+#### Configuring Resources
 
 If the LADDER_BASE_URI global constant is set, base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples:
 
@@ -249,7 +254,160 @@ Person.resource_class.base_uri
 => "http://some.other.uri/"
 ```
 
-### Ladder::Searchable
+#### Dynamic Resources
+
+In line with ActiveTriples' [Open Model](https://github.com/ActiveTriples/ActiveTriples#open-model) design, you can define properties on any Resource instance similarly to how you would on the class:
+
+```ruby
+class Person
+  include Ladder::Resource::Dynamic
+
+  configure type: RDF::FOAF.Person
+
+  property :first_name, predicate: RDF::FOAF.name
+end
+
+steve = Person.new(first_name: 'Steve')
+
+steve.description
+=> NoMethodError: undefined method 'description' for #<Person:0x007fb54eb1d0b8>
+
+steve.property :description, predicate: RDF::DC.description
+steve.description = 'Funny-looking'
+
+steve.as_document
+=> {"_id"=>BSON::ObjectId('546669234169720397000000'),
+ "first_name"=>{"en"=>"Steve"},
+ "_context"=>{:description=>"http://purl.org/dc/terms/description"},
+ "description"=>"Funny-looking"}
+
+steve.as_jsonld
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "foaf": "http://xmlns.com/foaf/0.1/"
+ #    },
+ #    "@id": "http://example.org/people/546669234169720397000000",
+ #    "@type": "foaf:Person",
+ #    "dc:description": "Funny-looking",
+ #    "foaf:name": {
+ #        "@language": "en",
+ #        "@value": "Steve"
+ #  }
+```
+
+Additionally, you can push RDF statements into a Resource instance like you would with ActiveTriples or RDF::Graph, noting that the subject is ignored since it is implicit:
+
+```ruby
+steve << RDF::Statement(nil, RDF::DC.description, 'Tall, dark, and handsome')
+steve << RDF::Statement(nil, RDF::FOAF.depiction, RDF::URI('http://some.image/pic.jpg'))
+steve << RDF::Statement(nil, RDF::FOAF.age, 32)
+
+steve.as_document
+=> {"_id"=>BSON::ObjectId('546669234169720397000000'),
+ "first_name"=>{"en"=>"Steve"},
+ "_context"=>
+  {:description=>"http://purl.org/dc/terms/description",
+   :depiction=>"http://xmlns.com/foaf/0.1/depiction",
+   :age=>"http://xmlns.com/foaf/0.1/age"},
+ "description"=>"Tall, dark, and handsome",
+ "depiction"=>"http://some.image/pic.jpg",
+ "age"=>32}
+
+steve.as_jsonld
+ # => {
+ #    "@context": {
+ #        "dc": "http://purl.org/dc/terms/",
+ #        "foaf": "http://xmlns.com/foaf/0.1/",
+ #        "xsd": "http://www.w3.org/2001/XMLSchema#"
+ #    },
+ #    "@id": "http://example.org/people/546669234169720397000000",
+ #    "@type": "foaf:Person",
+ #    "dc:description": "Tall, dark, and handsome",
+ #    "foaf:age": {
+ #        "@type": "xsd:integer",
+ #        "@value": "32"
+ #    },
+ #    "foaf:depiction": {
+ #        "@id": "http://some.image/pic.jpg"
+ #    },
+ #    "foaf:name": {
+ #        "@language": "en",
+ #        "@value": "Steve"
+ #    }
+ #	}
+```
+
+Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain a reference to the related object's URI.
+
+### Files
+
+Files are bytestreams that store binary content using MongoDB's GridFS storage system.  They are still identifiable by a URI, and contain technical metadata about the File's contents.
+
+```ruby
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  property :first_name, predicate: RDF::FOAF.name
+  property :thumbnails,  predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
+end
+
+class Image
+  include Ladder::File
+end
+```
+
+Similar to Resources, using `#property` as above will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
+
+```ruby
+steve = Person.new(first_name: 'Steve')
+thumb = Image.new(file: open('http://some.image/pic.jpg'))
+steve.thumbnails << thumb
+
+steve.as_jsonld
+ # => {
+ #     "@context": {
+ #         "foaf": "http://xmlns.com/foaf/0.1/"
+ #     },
+ #     "@id": "http://example.org/people/549d83c64169720b32010000",
+ #     "@type": "foaf:Person",
+ #     "foaf:depiction": {
+ #         "@id": "http://example.org/images/549d83c24169720b32000000"
+ #     },
+ #     "foaf:name": {
+ #         "@language": "en",
+ #         "@value": "Steve"
+ #     }
+ # }
+
+steve.save
+ # ... File is stored to GridFS ...
+=> true
+```
+
+Files have all the attributes of a GridFS file, and the stored binary content is accessed using `#data`.
+
+```ruby
+thumb.reload
+thumb.as_document
+=> {"_id"=>BSON::ObjectId('549d86184169720b6a000000'),
+ "length"=>59709,
+ "chunkSize"=>4194304,
+ "uploadDate"=>2014-12-26 16:00:29 UTC,
+ "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
+ "contentType"=>"image/jpeg",
+ "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
+
+thumb.length
+=> 59709
+
+thumb.data
+=> # ... binary data ...
+```
+
+### Indexing for Search
 
 You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
 
@@ -260,23 +418,23 @@ class Person
 
   configure type: RDF::FOAF.Person
 
-  property :name, predicate: RDF::FOAF.name
+  property :first_name, predicate: RDF::FOAF.name
   property :description, predicate: RDF::DC.description
 end
 
 kimchy = Person.new
-kimchy.name = 'Shay'
+kimchy.first_name = 'Shay'
 kimchy.description = 'Real genius'
 ```
 
-In order to enable indexing, call the `#search_index` method on the class:
+In order to enable indexing, call the `#index_for_search` method on the class:
 
 ```ruby
-Person.search_index
+Person.index_for_search
 => :as_indexed_json
 
 kimchy.as_indexed_json
-=> {"description"=>"Real genius", "name"=>"Shay"}
+=> {"description"=>"Real genius", "first_name"=>"Shay"}
 
 kimchy.save
 => true
@@ -294,7 +452,7 @@ results.count
 => 1
 
 results.first._source
-=> {"description"=>"Real genius", "name"=>"Shay"}
+=> {"description"=>"Real genius", "first_name"=>"Shay"}
 
 results.records.first == kimchy
 => true
@@ -303,7 +461,7 @@ results.records.first == kimchy
 When indexing, you can control how your model is stored in the index by supplying the `as: :jsonld` or `as: :qname` options:
 
 ```ruby
-Person.search_index as: :jsonld
+Person.index_for_search as: :jsonld
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -324,7 +482,7 @@ kimchy.as_indexed_json
  #   }
  # }
 
-Person.search_index as: :qname
+Person.index_for_search as: :qname
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -350,20 +508,19 @@ class Project
 
   configure type: RDF::DOAP.Project
 
-  property :name, predicate: RDF::DOAP.name
+  property :project_name, predicate: RDF::DOAP.name
   property :description, predicate: RDF::DC.description
   property :developers, predicate: RDF::DOAP.developer, class_name: 'Person'
 end
 
 Person.property :projects, predicate: RDF::FOAF.made, class_name: 'Project'
 
-es = Project.new(name: 'ElasticSearch', description: 'You know, for search')
+es = Project.new(project_name: 'ElasticSearch', description: 'You know, for search')
 es.developers << kimchy
-es.save
 
-Person.search_index as: :jsonld, related: true
+Person.index_for_search as: :jsonld, related: true
 => :as_indexed_json
-Project.search_index as: :jsonld, related: true
+Project.index_for_search as: :jsonld, related: true
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -434,9 +591,9 @@ es.as_indexed_json
  #    }
  # }
 
-Person.search_index as: :qname, related: true
+Person.index_for_search as: :qname, related: true
 => :as_indexed_json
-Project.search_index as: :qname, related: true
+Project.index_for_search as: :qname, related: true
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -494,7 +651,7 @@ es.as_indexed_json
 
 Anyone and everyone is welcome to contribute.  Go crazy.
 
-1. Fork it ( https://github.com/mjsuhonos/ladder/fork )
+1. Fork it ( https://github.com/ladder/ladder/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
@@ -505,6 +662,8 @@ Anyone and everyone is welcome to contribute.  Go crazy.
 MJ Suhonos / mj@suhonos.ca
 
 ## Acknowledgements
+
+My biggest thanks to all the wonderful people who have shown interest and support for Ladder over the years.
 
 Many thanks to Christopher Knight [@NomadicKnight](https://twitter.com/Nomadic_Knight) for ceding the "ladder" gem name.  Check out his startup, [Adventure Local](http://advlo.com) / [@advlo_](https://twitter.com/Advlo_).
 

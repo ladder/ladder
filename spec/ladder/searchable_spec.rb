@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 describe Ladder::Searchable do
   before do
@@ -23,12 +22,9 @@ describe Ladder::Searchable do
     end
   end
   
-  after do
-    Object.send(:remove_const, "Thing") if Object
-    Object.send(:remove_const, "Person") if Object
-  end
+  it_behaves_like 'a Resource'
 
-  subject { Thing.new }
+  let(:subject) { Thing.new }
   let(:person) { Person.new }
 
   shared_context 'with data' do
@@ -217,5 +213,9 @@ describe Ladder::Searchable do
       end
     end
   end
-
+  
+  after do
+    Object.send(:remove_const, "Thing") if Object
+    Object.send(:remove_const, "Person") if Object
+  end
 end
