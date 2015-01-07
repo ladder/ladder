@@ -1,14 +1,5 @@
-require 'ladder/resource'
-require 'elasticsearch/model'
-require 'elasticsearch/model/callbacks'
-
-module Ladder::Searchable
+module Ladder::Searchable::Resource
   extend ActiveSupport::Concern
-
-  included do
-    include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks
-  end
 
   ##
   # Generate a qname-based JSON representation
