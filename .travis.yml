@@ -1,6 +1,6 @@
 language: ruby
 cache: bundler
-sudo: false
+#sudo: false
 rvm:
   - 1.9.3
   - 2.1.1
@@ -13,6 +13,6 @@ services:
   - mongodb
   - elasticsearch
 before_script:
-  - sleep 15
+#  - sleep 15
   - sudo /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/2.4.1
-  - sudo service elasticsearch restart
+#  - sudo service elasticsearch restart
