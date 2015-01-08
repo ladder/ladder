@@ -38,7 +38,7 @@ shared_examples 'a File' do
 
   describe '#data' do
     it 'should return a data stream' do
-      expect(subject.data).to eq source
+      expect(subject.data).to eq source.force_encoding(subject.data.encoding)
     end
   end
 
