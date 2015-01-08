@@ -41,14 +41,13 @@ Or install it yourself as:
 * [Resources](#resources)
   * [Configuring Resources](#configuring-resources)
   * [Dynamic Resources](#dynamic-resources)
-* [Files](#files)
 * [Indexing for Search](#indexing-for-search)
+* [Files](#files)
   * [Indexing Files](#indexing-files)
 
 ### Resources
 
-Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require 
-and include the main module in your class:
+Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require and include the main module in your class:
 
 ```ruby
 require 'ladder'
@@ -62,12 +61,13 @@ class Person
   property :description, predicate: RDF::DC.description
 end
 
-steve = Person.new
-steve.first_name = 'Steve'
-steve.description = 'Funny-looking'
-
+steve = Person.new(first_name: 'Steve', description: 'Funny-looking')
+=> #<Person _id: 542f0c124169720ea0000000, first_name: {"en"=>"Steve"}, description: {"en"=>"Funny-looking"}>
+	
 steve.as_document
- => {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'), "first_name"=>{"en"=>"Steve"}, "description"=>{"en"=>"Funny-looking"}}
+=> {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'),
+ "first_name"=>{"en"=>"Steve"},
+ "description"=>{"en"=>"Funny-looking"}}
 
 steve.as_jsonld
  # => {
@@ -250,8 +250,6 @@ Person.resource_class.base_uri
 => #<RDF::URI:0x3fecf69da274 URI:http://example.org/people>
 
 Person.configure base_uri: 'http://some.other.uri/'
-
-Person.resource_class.base_uri
 => "http://some.other.uri/"
 ```
 
@@ -275,7 +273,10 @@ steve.description
 => NoMethodError: undefined method 'description' for #<Person:0x007fb54eb1d0b8>
 
 steve.property :description, predicate: RDF::DC.description
+=> {:description=>"http://purl.org/dc/terms/description"}
+
 steve.description = 'Funny-looking'
+=> "Funny-looking"
 
 steve.as_document
 => {"_id"=>BSON::ObjectId('546669234169720397000000'),
@@ -342,78 +343,6 @@ steve.as_jsonld
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain a reference to the related object's URI.
 
-### Files
-
-Files are bytestreams that store binary content using MongoDB's GridFS storage system.  They are still identifiable by a URI, and contain technical metadata about the File's contents.
-
-```ruby
-class Person
-  include Ladder::Resource
-
-  configure type: RDF::FOAF.Person
-
-  property :first_name, predicate: RDF::FOAF.name
-  property :thumbnails,  predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
-end
-
-class Image
-  include Ladder::File
-end
-```
-
-Similar to Resources, using `#property` as above will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
-
-```ruby
-steve = Person.new(first_name: 'Steve')
-=> #<Person _id: 549d83c64169720b32010000, first_name: {"en"=>"Steve"}>
-
-thumb = Image.new(file: open('http://some.image/pic.jpg'))
-=> #<Image _id: 549d83c24169720b32000000>
-
-steve.thumbnails << thumb
-=> [#<Image _id: 549d83c24169720b32000000, >]
-
-steve.as_jsonld
- # => {
- #     "@context": {
- #         "foaf": "http://xmlns.com/foaf/0.1/"
- #     },
- #     "@id": "http://example.org/people/549d83c64169720b32010000",
- #     "@type": "foaf:Person",
- #     "foaf:depiction": {
- #         "@id": "http://example.org/images/549d83c24169720b32000000"
- #     },
- #     "foaf:name": {
- #         "@language": "en",
- #         "@value": "Steve"
- #     }
- # }
-
-steve.save
- # ... File is stored to GridFS ...
-=> true
-```
-
-Files have all the attributes of a GridFS file, and the stored binary content is accessed using `#data`.
-
-```ruby
-thumb.reload
-thumb.as_document
-=> {"_id"=>BSON::ObjectId('549d86184169720b6a000000'),
- "length"=>59709,
- "chunkSize"=>4194304,
- "uploadDate"=>2014-12-26 16:00:29 UTC,
- "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
- "contentType"=>"image/jpeg",
- "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
-
-thumb.length
-=> 59709
-
-thumb.data
-=> # ... binary data ...
-```
-
 ### Indexing for Search
 
 You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
@@ -429,15 +358,8 @@ class Person
   property :description, predicate: RDF::DC.description
 end
 
-kimchy = Person.new
-=> #<Person _id: 543b457b41697231c5000000>
-
-kimchy.first_name = 'Shay'
-=> "Shay"
-
-kimchy.description = 'Real genius'
-=> "Real genius"
-
+kimchy = Person.new(first_name: 'Shay', description: 'Real genius')
+=> #<Person _id: 543b457b41697231c5000000, first_name: {"en"=>"Shay"}, description: {"en"=>"Real genius"}>
 ```
 
 In order to enable indexing, call the `#index_for_search` method on the class:
@@ -529,10 +451,14 @@ end
 Person.property :projects, predicate: RDF::FOAF.made, class_name: 'Project'
 
 es = Project.new(project_name: 'ElasticSearch', description: 'You know, for search')
+=> #<Project _id: 544562c24169728b4e010000, project_name: {"en"=>"ElasticSearch"}, description: {"en"=>"You know, for search"}, developer_ids: nil>
+
 es.developers << kimchy
+=> [#<Person _id: 543b457b41697231c5000000, first_name: {"en"=>"Shay"}, description: {"en"=>"Real genius"}, project_ids: [BSON::ObjectId('544562c24169728b4e010000')]>]
 
 Person.index_for_search as: :jsonld, related: true
 => :as_indexed_json
+
 Project.index_for_search as: :jsonld, related: true
 => :as_indexed_json
 
@@ -606,6 +532,7 @@ es.as_indexed_json
 
 Person.index_for_search as: :qname, related: true
 => :as_indexed_json
+
 Project.index_for_search as: :qname, related: true
 => :as_indexed_json
 
@@ -660,9 +587,83 @@ es.as_indexed_json
  # }
 ```
 
+### Files
+
+Files are bytestreams that store binary content using MongoDB's GridFS storage system.  They are still identifiable by a URI, and contain technical metadata about the File's contents.
+
+```ruby
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  property :first_name, predicate: RDF::FOAF.name
+  property :thumbnails,  predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
+end
+
+class Image
+  include Ladder::File
+end
+```
+
+Similar to Resources, using `#property` as above will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
+
+```ruby
+steve = Person.new(first_name: 'Steve')
+=> #<Person _id: 549d83c64169720b32010000, first_name: {"en"=>"Steve"}>
+
+thumb = Image.new(file: open('http://some.image/pic.jpg'))
+=> #<Image _id: 549d83c24169720b32000000>
+
+steve.thumbnails << thumb
+=> [#<Image _id: 549d83c24169720b32000000, >]
+
+steve.as_jsonld
+ # => {
+ #     "@context": {
+ #         "foaf": "http://xmlns.com/foaf/0.1/"
+ #     },
+ #     "@id": "http://example.org/people/549d83c64169720b32010000",
+ #     "@type": "foaf:Person",
+ #     "foaf:depiction": {
+ #         "@id": "http://example.org/images/549d83c24169720b32000000"
+ #     },
+ #     "foaf:name": {
+ #         "@language": "en",
+ #         "@value": "Steve"
+ #     }
+ # }
+
+steve.save
+ # ... File is stored to GridFS ...
+=> true
+```
+
+Files have all the attributes of a GridFS file, and the stored binary content is accessed using `#data`.
+
+```ruby
+thumb.reload
+=> #<Image _id: 549d86184169720b6a000000, >
+
+thumb.as_document
+=> {"_id"=>BSON::ObjectId('549d86184169720b6a000000'),
+ "length"=>59709,
+ "chunkSize"=>4194304,
+ "uploadDate"=>2014-12-26 16:00:29 UTC,
+ "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
+ "contentType"=>"image/jpeg",
+ "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
+
+thumb.length
+=> 59709
+
+thumb.data
+=> # ... binary data ...
+```
+
 #### Indexing Files
 
-Files that contain textual content (eg. HTML, PDF, ePub, DOC, etc) can be automatically indexed when they are saved, again just by mixing in the Ladder::Searchable module (there is no need to call `#index_for_search` on the class).  Note that this requires the [Mapper Attachments Plugin for Elasticsearch](https://github.com/elasticsearch/elasticsearch-mapper-attachments) to be installed.
+Files that contain textual content (eg. HTML, PDF, ePub, DOC, etc) can be automatically indexed when they are persisted, again just by mixing in the Ladder::Searchable module (there is no need to call `#index_for_search` on the class).  Note that this requires the [Mapper Attachments Plugin for Elasticsearch](https://github.com/elasticsearch/elasticsearch-mapper-attachments) to be installed.
 
 ```ruby
 class OCR
@@ -692,17 +693,18 @@ results.records.first == pdf
 => true
 
 results.records.first.as_document
- # => {"_id"=>BSON::ObjectId('54add77a4169721c23000000'),
- # "length"=>12941,
- # "chunkSize"=>4194304,
- # "uploadDate"=>2015-01-08 01:03:54 UTC,
- # "md5"=>"831a47b953d6e11d17cee7de9abd73c4",
- # "contentType"=>"application/pdf",
- # "filename"=>"54add77a4169721c23000000/ocr.pdf"}
+=> {"_id"=>BSON::ObjectId('54add77a4169721c23000000'),
+ "length"=>12941,
+ "chunkSize"=>4194304,
+ "uploadDate"=>2015-01-08 01:03:54 UTC,
+ "md5"=>"831a47b953d6e11d17cee7de9abd73c4",
+ "contentType"=>"application/pdf",
+ "filename"=>"54add77a4169721c23000000/ocr.pdf"}
 
 results.records.first.data
 => # ... binary data ...
 ```
+
 This can be useful if you want to retrieve a File by searching for the textual content that it contains.  Note the use of `#records` to access the Ladder::File instances directly ([see here for more information](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model#search-results-as-database-records)).  However, if you want to get information about the file characteristics (including the extracted textual content), you can use a modified search query:
 
 ```ruby
@@ -749,7 +751,7 @@ results.first.highlight.file.count
 
 results.first.highlight.file
 => [" <em>his</em> ears in the first snowdrift of <em>his</em> experience. It felt unpleasantly prickly \nto <em>his</em> velvet skin",
- ", but at the same time <em>his</em> nose caught a new smell. It was a more \nserious smell than any he had met"]
+    ", but at the same time <em>his</em> nose caught a new smell. It was a more \nserious smell than any he had met"]
 ```
 
 More information about performing highlighting queries is available in the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-highlighting.html).
