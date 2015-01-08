@@ -14,5 +14,5 @@ services:
   - elasticsearch
 before_script:
   - sleep 15
-  - /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/2.4.1
+  - sudo /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/2.4.1
   - sudo service elasticsearch restart
