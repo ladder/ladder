@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Ladder::Searchable do
+describe Ladder::Searchable::Resource do
   before do
     Mongoid.load!('mongoid.yml', :development)
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG

@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = "MJ Suhonos"
   spec.email         = "mj@suhonos.ca"
-  spec.summary       = %q{Opinionated ActiveModel framework.}
-  spec.description   = %q{Ladder is a dynamic framework for Linked Data modelling, persistence, and full-text indexing.}
+  spec.summary       = %q{ActiveModel Linked Data framework.}
+  spec.description   = %q{Dynamic framework for Linked Data modelling, persistence, and full-text indexing.}
   spec.homepage      = "https://github.com/ladder/ladder"
   spec.license       = "APACHE2"
   spec.required_ruby_version     = '>= 1.9.3'
