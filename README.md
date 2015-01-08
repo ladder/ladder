@@ -43,6 +43,7 @@ Or install it yourself as:
   * [Dynamic Resources](#dynamic-resources)
 * [Files](#files)
 * [Indexing for Search](#indexing-for-search)
+  * [Indexing Files](#indexing-files)
 
 ### Resources
 
@@ -268,6 +269,7 @@ class Person
 end
 
 steve = Person.new(first_name: 'Steve')
+=> #<Person _id: 546669234169720397000000, first_name: {"en"=>"Steve"}>
 
 steve.description
 => NoMethodError: undefined method 'description' for #<Person:0x007fb54eb1d0b8>
@@ -363,8 +365,13 @@ Similar to Resources, using `#property` as above will create a has-many relation
 
 ```ruby
 steve = Person.new(first_name: 'Steve')
+=> #<Person _id: 549d83c64169720b32010000, first_name: {"en"=>"Steve"}>
+
 thumb = Image.new(file: open('http://some.image/pic.jpg'))
+=> #<Image _id: 549d83c24169720b32000000>
+
 steve.thumbnails << thumb
+=>
 
 steve.as_jsonld
  # => {
@@ -423,8 +430,14 @@ class Person
 end
 
 kimchy = Person.new
+=> #<Person _id: 543b457b41697231c5000000>
+
 kimchy.first_name = 'Shay'
+=> "Shay"
+
 kimchy.description = 'Real genius'
+=> "Real genius"
+
 ```
 
 In order to enable indexing, call the `#index_for_search` method on the class:
@@ -646,6 +659,74 @@ es.as_indexed_json
  #    }
  # }
 ```
+
+#### Indexing Files
+
+Files that contain textual content (eg. HTML, PDF, DOC, etc) can be automatically indexed when they are saved, again by mixing in the Ladder::Searchable module. Note, however, that there is no need to call the `#index_for_search` method on the class.
+
+```ruby
+class OCR
+  include Ladder::File
+  include Ladder::Searchable
+end
+
+pdf = OCR.new(file: open('http://some.location/ocr.pdf'))
+pdf.save
+
+results = OCR.search 'Gravesend'
+ # => #<Elasticsearch::Model::Response::Response:0x007fa2ca82a9f0
+ # @klass=[PROXY] OCR,
+ # @search=
+ # #<Elasticsearch::Model::Searching::SearchRequest:0x007fa2ca830a58
+ #  @definition={:index=>"ocrs", :type=>"ocr", :q=>"Gravesend"},
+ #  @klass=[PROXY] OCR,
+ #  @options={}>>
+ 
+results.count
+=> 1
+
+results.records.first == pdf
+=> true
+```
+
+TODO: LOREM IPSUM
+
+```ruby
+results = OCR.search query:     { query_string:  { query: 'Gravesend' } },
+                     highlight: { fields: { file: {} } }
+ # => #<Elasticsearch::Model::Response::Response:0x007fc36cadaa20
+ # @klass=[PROXY] OCR,
+ # @search=
+ # #<Elasticsearch::Model::Searching::SearchRequest:0x007fc36cadab10
+ #  @definition={:index=>"ocrs", :type=>"ocr", :body=>{:query=>{:query_string=>"Gravesend"},
+ #  :highlight=>{:fields=>{:file=>{}}}}},
+ #  @klass=[PROXY] OCR,
+ #  @options={}>>
+ 
+results.count
+=> 1
+
+results.records.first == pdf
+=> true
+
+results.first.highlight.file
+=> ["in vanishing flatness. The air was \ndark above <em>Gravesend</em>, and farther back still seemed condensed into"]
+
+results.records.first.as_document
+ # => {"_id"=>BSON::ObjectId('54add77a4169721c23000000'),
+ # "length"=>12941,
+ # "chunkSize"=>4194304,
+ # "uploadDate"=>2015-01-08 01:03:54 UTC,
+ # "md5"=>"831a47b953d6e11d17cee7de9abd73c4",
+ # "contentType"=>"application/pdf",
+ # "filename"=>"54add77a4169721c23000000/ocr.pdf"}
+
+results.records.first.data
+=> # ... binary data ...
+```
+
+
+
 
 ## Contributing
 
