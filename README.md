@@ -371,7 +371,7 @@ thumb = Image.new(file: open('http://some.image/pic.jpg'))
 => #<Image _id: 549d83c24169720b32000000>
 
 steve.thumbnails << thumb
-=>
+=> [#<Image _id: 549d83c24169720b32000000, >]
 
 steve.as_jsonld
  # => {
@@ -662,7 +662,7 @@ es.as_indexed_json
 
 #### Indexing Files
 
-Files that contain textual content (eg. HTML, PDF, DOC, etc) can be automatically indexed when they are saved, again by mixing in the Ladder::Searchable module. Note, however, that there is no need to call the `#index_for_search` method on the class.
+Files that contain textual content (eg. HTML, PDF, ePub, DOC, etc) can be automatically indexed when they are saved, again just by mixing in the Ladder::Searchable module (there is no need to call `#index_for_search` on the class).  Note that this requires the [Mapper Attachments Plugin for Elasticsearch](https://github.com/elasticsearch/elasticsearch-mapper-attachments) to be installed.
 
 ```ruby
 class OCR
@@ -702,20 +702,40 @@ results.records.first.as_document
 
 results.records.first.data
 => # ... binary data ...
-
 ```
-
-TODO: LOREM IPSUM
-- file characteristics via file.fields
-- introduce contextual highlighting
+This can be useful if you want to retrieve a File by searching for the textual content that it contains.  Note the use of `#records` to access the Ladder::File instances directly ([see here for more information](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model#search-results-as-database-records)).  However, if you want to get information about the file characteristics (including the extracted textual content), you can use a modified search query:
 
 ```ruby
-results = OCR.search query:     { query_string: { query: 'Moomintroll' } },
-                     highlight: { fields: 		{ file: {} } }
+results = OCR.search 'Moomintroll', fields: '*'
  # => #<Elasticsearch::Model::Response::Response:0x007fc36cadaa20
  # @klass=[PROXY] OCR,
  # @search=
  # #<Elasticsearch::Model::Searching::SearchRequest:0x007fc36cadab10
+ #  @definition={:index=>"ocrs", :type=>"ocr", :body=>{:query=>{:query_string=>{:query=>"Moomintroll"}}, :fields=>"*"}},
+ #  @klass=[PROXY] OCR,
+ #  @options={}>>
+ 
+results.count
+=> 1
+
+results.first.fields
+ # => {
+ # "file.content_type"=>["application/pdf"],
+ # "file.keywords"=>[""],
+ # "file"=>
+ # ["\nAnd so Moomintroll was helplessly thrown out into a strange and dangerous world and \ndropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly \nto his velvet skin, but at the same time his nose caught a new smell. It was a more \nserious smell than any he had met before, and slightly frightening. But it made him wide \nawake and greatly interested.\n\n\n"],
+ # "file.date"=>["2014-12-19T15:32:58Z"],
+ # "file.title"=>["Untitled"]}
+```
+
+In this case, the `#fields` Hash contains all of the technical metadata obtained by Elasticsearch during indexing. Note that this is **not the same** as the metadata stored by GridFS (with the possible exception of content type). Finally, we can also provide contextual highlighting for search results by using a slightly more complex search query:
+
+```ruby
+results = OCR.search query: { query_string: { query: 'his' } }, highlight: { fields: { file: {} } }
+ # => #<Elasticsearch::Model::Response::Response:0x007fd653dc8b48
+ # @klass=[PROXY] OCR,
+ # @search=
+ # #<Elasticsearch::Model::Searching::SearchRequest:0x007fd653dc8b48
  #  @definition={:index=>"ocrs", :type=>"ocr", :body=>{:query=>{:query_string=>"Moomintroll"},
  #  :highlight=>{:fields=>{:file=>{}}}}},
  #  @klass=[PROXY] OCR,
@@ -724,15 +744,15 @@ results = OCR.search query:     { query_string: { query: 'Moomintroll' } },
 results.count
 => 1
 
+results.first.highlight.file.count
+=> 2
+
 results.first.highlight.file
-=> ["And so <em>Moomintroll</em> was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the"]
-
-results.records.first == pdf
-=> true
-
+=> [" <em>his</em> ears in the first snowdrift of <em>his</em> experience. It felt unpleasantly prickly \nto <em>his</em> velvet skin",
+ ", but at the same time <em>his</em> nose caught a new smell. It was a more \nserious smell than any he had met"]
 ```
 
-TODO: LOREM IPSUM
+More information about performing highlighting queries is available in the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-highlighting.html).
 
 ## Contributing
 

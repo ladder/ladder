@@ -6,11 +6,7 @@ module Ladder::Searchable::File
     # https://github.com/elasticsearch/elasticsearch-mapper-attachments
     mapping _source: { enabled: false } do
       indexes :file, type: 'attachment', fields: {
-        file: { 
-          type: "string",
-          term_vector: "with_positions_offsets",
-          store: true
-         },
+        file: { store: true },
         title: { store: true },
         date: { store: true },
         author: { store: true },
