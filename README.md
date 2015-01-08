@@ -598,7 +598,7 @@ class Person
   configure type: RDF::FOAF.Person
 
   property :first_name, predicate: RDF::FOAF.name
-  property :thumbnails,  predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
+  property :thumbnails, predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
 end
 
 class Image
@@ -721,13 +721,13 @@ results.count
 => 1
 
 results.first.fields
- # => {
- # "file.content_type"=>["application/pdf"],
- # "file.keywords"=>[""],
- # "file"=>
- # ["\nAnd so Moomintroll was helplessly thrown out into a strange and dangerous world and \ndropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly \nto his velvet skin, but at the same time his nose caught a new smell. It was a more \nserious smell than any he had met before, and slightly frightening. But it made him wide \nawake and greatly interested.\n\n\n"],
- # "file.date"=>["2014-12-19T15:32:58Z"],
- # "file.title"=>["Untitled"]}
+=> {
+ "file.content_type"=>["application/pdf"],
+ "file.keywords"=>[""],
+ "file"=>
+  ["\nAnd so Moomintroll was helplessly thrown out into a strange and dangerous world and \ndropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly \nto his velvet skin, but at the same time his nose caught a new smell. It was a more \nserious smell than any he had met before, and slightly frightening. But it made him wide \nawake and greatly interested.\n\n\n"],
+ "file.date"=>["2014-12-19T15:32:58Z"],
+ "file.title"=>["Untitled"]}
 ```
 
 In this case, the `#fields` Hash contains all of the technical metadata obtained by Elasticsearch during indexing. Note that this is **not the same** as the metadata stored by GridFS (with the possible exception of content type). Finally, we can also provide contextual highlighting for search results by using a slightly more complex search query:
