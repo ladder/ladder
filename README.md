@@ -671,14 +671,17 @@ class OCR
 end
 
 pdf = OCR.new(file: open('http://some.location/ocr.pdf'))
-pdf.save
+=> #<OCR _id: 54add77a4169721c23000000>
 
-results = OCR.search 'Gravesend'
+pdf.save
+=> true
+
+results = OCR.search 'Moomintroll'
  # => #<Elasticsearch::Model::Response::Response:0x007fa2ca82a9f0
  # @klass=[PROXY] OCR,
  # @search=
  # #<Elasticsearch::Model::Searching::SearchRequest:0x007fa2ca830a58
- #  @definition={:index=>"ocrs", :type=>"ocr", :q=>"Gravesend"},
+ #  @definition={:index=>"ocrs", :type=>"ocr", :q=>"Moomintroll"},
  #  @klass=[PROXY] OCR,
  #  @options={}>>
  
@@ -687,30 +690,6 @@ results.count
 
 results.records.first == pdf
 => true
-```
-
-TODO: LOREM IPSUM
-
-```ruby
-results = OCR.search query:     { query_string:  { query: 'Gravesend' } },
-                     highlight: { fields: { file: {} } }
- # => #<Elasticsearch::Model::Response::Response:0x007fc36cadaa20
- # @klass=[PROXY] OCR,
- # @search=
- # #<Elasticsearch::Model::Searching::SearchRequest:0x007fc36cadab10
- #  @definition={:index=>"ocrs", :type=>"ocr", :body=>{:query=>{:query_string=>"Gravesend"},
- #  :highlight=>{:fields=>{:file=>{}}}}},
- #  @klass=[PROXY] OCR,
- #  @options={}>>
- 
-results.count
-=> 1
-
-results.records.first == pdf
-=> true
-
-results.first.highlight.file
-=> ["in vanishing flatness. The air was \ndark above <em>Gravesend</em>, and farther back still seemed condensed into"]
 
 results.records.first.as_document
  # => {"_id"=>BSON::ObjectId('54add77a4169721c23000000'),
@@ -723,10 +702,37 @@ results.records.first.as_document
 
 results.records.first.data
 => # ... binary data ...
+
 ```
 
+TODO: LOREM IPSUM
+- file characteristics via file.fields
+- introduce contextual highlighting
 
+```ruby
+results = OCR.search query:     { query_string: { query: 'Moomintroll' } },
+                     highlight: { fields: 		{ file: {} } }
+ # => #<Elasticsearch::Model::Response::Response:0x007fc36cadaa20
+ # @klass=[PROXY] OCR,
+ # @search=
+ # #<Elasticsearch::Model::Searching::SearchRequest:0x007fc36cadab10
+ #  @definition={:index=>"ocrs", :type=>"ocr", :body=>{:query=>{:query_string=>"Moomintroll"},
+ #  :highlight=>{:fields=>{:file=>{}}}}},
+ #  @klass=[PROXY] OCR,
+ #  @options={}>>
+ 
+results.count
+=> 1
 
+results.first.highlight.file
+=> ["And so <em>Moomintroll</em> was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the"]
+
+results.records.first == pdf
+=> true
+
+```
+
+TODO: LOREM IPSUM
 
 ## Contributing
 
