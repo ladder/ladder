@@ -26,6 +26,10 @@ module Ladder::Searchable::Resource
 
     qname_hash
   end
+  
+  def as_indexed_json(opts = {})
+    respond_to?(:serialized_json) ? serialized_json : as_json(except: [:id, :_id])
+  end
 
   private
 
@@ -35,18 +39,14 @@ module Ladder::Searchable::Resource
     #
     # NB: Will NOT embed related objects with same @type. Spec under discussion, see https://github.com/json-ld/json-ld.org/issues/110
     def as_framed_jsonld
+      # FIXME: Force autosave of related documents using Mongoid-defined methods
+      # Required for explicit autosave prior to after_update index callbacks
+      methods.select{|i| i[/autosave_documents/] }.each{|m| send m}
       json_hash = as_jsonld related: true
+
       context = json_hash['@context']
       frame = {'@context' => context, '@type' => type.first.pname}
       JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
-    end
-    
-    ##
-    # Force autosave of related documents using Mongoid-defined methods
-    # Required for explicit autosave prior to after_update index callbacks
-    #
-    def autosave
-      methods.select{|i| i[/autosave_documents/] }.each{|m| send m}
     end
 
   module ClassMethods
@@ -54,23 +54,10 @@ module Ladder::Searchable::Resource
     ##
     # Specify type of serialization to use for indexing
     #
-    def index_for_search(opts = {})
-      case opts[:as]
-      when :jsonld
-        if opts[:related]
-          define_method(:as_indexed_json) { |opts = {}| autosave; as_framed_jsonld }
-        else
-          define_method(:as_indexed_json) { |opts = {}| as_jsonld }
-        end
-      when :qname
-        if opts[:related]
-          define_method(:as_indexed_json) { |opts = {}| as_qname related: true }
-        else
-          define_method(:as_indexed_json) { |opts = {}| as_qname }
-        end
-      else
-        define_method(:as_indexed_json) { |opts = {}| as_json(except: [:id, :_id]) }
-      end
+    def index_for_search(opts = {}, &block)
+      raise Mongoid::Errors::InvalidValue.new(Block, NilClass) unless block_given?
+
+      define_method(:serialized_json, block)
     end
 
   end

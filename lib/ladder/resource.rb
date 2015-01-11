@@ -27,8 +27,7 @@ module Ladder::Resource
   #
   # @see ActiveTriples::Resource
   def rdf_label
-    update_resource
-    resource.rdf_label
+    update_resource.rdf_label
   end
 
   ##
