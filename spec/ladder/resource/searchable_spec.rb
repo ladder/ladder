@@ -22,8 +22,6 @@ describe Ladder::Searchable::Resource do
     end
   end
   
-  it_behaves_like 'a Resource'
-
   let(:subject) { Thing.new }
   let(:person) { Person.new }
 
