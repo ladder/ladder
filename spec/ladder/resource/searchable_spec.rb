@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'ladder/resource'
+require 'ladder/searchable'
 
 describe Ladder::Searchable::Resource do
   before do
@@ -9,7 +11,7 @@ describe Ladder::Searchable::Resource do
     Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
     Elasticsearch::Model.client.indices.delete index: '_all'
 
-    LADDER_BASE_URI = 'http://example.org'
+    LADDER_BASE_URI ||= 'http://example.org'
 
     class Thing
       include Ladder::Resource

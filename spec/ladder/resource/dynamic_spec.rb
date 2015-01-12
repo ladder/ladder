@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'ladder/resource'
+require 'ladder/resource/dynamic'
 
 describe Ladder::Resource::Dynamic do
   before do
@@ -6,7 +8,7 @@ describe Ladder::Resource::Dynamic do
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
     Mongoid.purge!
 
-    LADDER_BASE_URI = 'http://example.org'
+    LADDER_BASE_URI ||= 'http://example.org'
 
     class Thing
       include Ladder::Resource::Dynamic

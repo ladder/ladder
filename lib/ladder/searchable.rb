@@ -1,12 +1,12 @@
-require 'ladder/resource'
+require 'active_support/concern'
 require 'elasticsearch/model'
 require 'elasticsearch/model/callbacks'
 
 module Ladder::Searchable
-  extend ActiveSupport::Concern
-
   autoload :Resource, 'ladder/searchable/resource'
   autoload :File,     'ladder/searchable/file'
+
+  extend ActiveSupport::Concern
 
   included do
     include Elasticsearch::Model

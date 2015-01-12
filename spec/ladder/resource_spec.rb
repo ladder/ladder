@@ -6,7 +6,7 @@ describe Ladder::Resource do
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
     Mongoid.purge!
 
-    LADDER_BASE_URI = 'http://example.org'
+    LADDER_BASE_URI ||= 'http://example.org'
 
     class Thing
       include Ladder::Resource
