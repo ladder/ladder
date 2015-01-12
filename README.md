@@ -6,11 +6,11 @@
 
 Ladder is a dynamic framework for [Linked Data](http://en.wikipedia.org/wiki/Linked_data) modelling, persistence, and full-text indexing. It is implemented as a series of Ruby modules that can be used individually and incorporated within existing ActiveModel frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
+Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+
 ## History
 
-Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
-
-For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
+Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
 
 ## Components
 
@@ -342,7 +342,7 @@ steve.as_jsonld
  #	}
 ```
 
-Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain a reference to the related object's URI.
+Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain the related object's URI.
 
 ### Files
 
@@ -422,7 +422,7 @@ thumb.data
 
 #### Indexing Resources
 
-You can index Resources for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
+You can index Resources for keyword searching by mixing in the Ladder::Searchable module:
 
 ```ruby
 class Person
@@ -656,7 +656,7 @@ es.as_indexed_json
 
 #### Indexing Files
 
-Files that contain textual content (eg. HTML, PDF, ePub, DOC, etc) can be indexed when they are stored, again by mixing in the Ladder::Searchable module.  Note that this requires the [Mapper Attachments Plugin for Elasticsearch](https://github.com/elasticsearch/elasticsearch-mapper-attachments) to be installed.
+Files that contain textual content (eg. HTML, PDF, ePub, DOC, etc) can be indexed when they are stored, again by mixing in the Ladder::Searchable module.  This can be useful if you want to retrieve a File by searching for the textual content that it contains.  Note that this requires the [Mapper Attachments Plugin for Elasticsearch](https://github.com/elasticsearch/elasticsearch-mapper-attachments) to be installed.
 
 ```ruby
 class OCR
@@ -698,7 +698,7 @@ results.records.first.data
 => # ... binary data ...
 ```
 
-This can be useful if you want to retrieve a File by searching for the textual content that it contains.  Note the use of `#records` to access the Ladder::File instances directly ([see here for more information](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model#search-results-as-database-records)).  However, if you want to get information about the file characteristics (including the extracted textual content), you can use a modified search query:
+Note the use of `#records` to access the Ladder::File instances directly ([see here for more information](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model#search-results-as-database-records)).  However, if you want to get information about the file characteristics (including the extracted textual content), you can use a modified search query:
 
 ```ruby
 results = OCR.search 'Moomintroll', fields: '*'
@@ -747,7 +747,7 @@ results.first.highlight.file
     ", but at the same time <em>his</em> nose caught a new smell. It was a more \nserious smell than any he had met"]
 ```
 
-More information about performing highlighting queries is available in the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-highlighting.html).
+More information about highlighting queries is available in the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-highlighting.html).
 
 ## Contributing
 
