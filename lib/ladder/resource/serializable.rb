@@ -1,5 +1,4 @@
 module Ladder::Resource::Serializable
-
   ##
   # Return JSON-LD representation
   #

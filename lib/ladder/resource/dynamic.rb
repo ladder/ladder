@@ -50,23 +50,13 @@ module Ladder::Resource::Dynamic
       field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
     else
       qname = data.predicate.qname
-
-      if respond_to? qname.last or :name == qname.last
-        field_name = qname.join('_').to_sym
-      else
-        field_name = qname.last
-      end
+      field_name = (respond_to? qname.last or :name == qname.last) ? qname.join('_').to_sym : qname.last
 
       property field_name, predicate: data.predicate
     end
 
     # Set the value in Mongoid
-    value = if data.object.is_a? RDF::Literal
-      data.object.object
-    else
-      data.object.to_s
-    end
-
+    value = data.object.is_a?(RDF::Literal) ? data.object.object : data.object.to_s
     self.send("#{field_name}=", value)
   end
 
