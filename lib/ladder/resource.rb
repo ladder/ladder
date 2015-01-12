@@ -3,33 +3,20 @@ require 'active_triples'
 require 'json/ld'
 
 module Ladder::Resource
+  require 'ladder/resource/serializable'
+  autoload :Dynamic, 'ladder/resource/dynamic'
+
   extend ActiveSupport::Concern
 
   include Mongoid::Document
   include ActiveTriples::Identifiable
-
-  autoload :Dynamic, 'ladder/resource/dynamic'
+  include Ladder::Resource::Serializable
 
   included do
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
   end
 
-  ##
-  # Return JSON-LD representation
-  #
-  # @see ActiveTriples::Resource#dump
-  def as_jsonld(opts = {})
-    JSON.parse update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
-  end
-
-  ##
-  # Overload ActiveTriples #rdf_label
-  #
-  # @see ActiveTriples::Resource
-  def rdf_label
-    update_resource
-    resource.rdf_label
-  end
+  delegate :rdf_label, to: :update_resource
 
   ##
   # Populate resource properties from ActiveModel

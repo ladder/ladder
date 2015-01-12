@@ -6,11 +6,11 @@
 
 Ladder is a dynamic framework for [Linked Data](http://en.wikipedia.org/wiki/Linked_data) modelling, persistence, and full-text indexing. It is implemented as a series of Ruby modules that can be used individually and incorporated within existing ActiveModel frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
+Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+
 ## History
 
-Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
-
-For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
+Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
 
 ## Components
 
@@ -41,8 +41,9 @@ Or install it yourself as:
 * [Resources](#resources)
   * [Configuring Resources](#configuring-resources)
   * [Dynamic Resources](#dynamic-resources)
-* [Indexing for Search](#indexing-for-search)
 * [Files](#files)
+* [Indexing](#indexing)
+  * [Indexing Resources](#indexing-resources)
   * [Indexing Files](#indexing-files)
 
 ### Resources
@@ -341,11 +342,87 @@ steve.as_jsonld
  #	}
 ```
 
-Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain a reference to the related object's URI.
+Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain the related object's URI.
 
-### Indexing for Search
+### Files
 
-You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
+Files are bytestreams that store binary content using MongoDB's GridFS storage system.  They are still identifiable by a URI, and contain technical metadata about the File's contents.
+
+```ruby
+class Person
+  include Ladder::Resource
+
+  configure type: RDF::FOAF.Person
+
+  property :first_name, predicate: RDF::FOAF.name
+  property :thumbnails, predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
+end
+
+class Image
+  include Ladder::File
+end
+```
+
+Similar to Resources, using `#property` will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
+
+```ruby
+steve = Person.new(first_name: 'Steve')
+=> #<Person _id: 549d83c64169720b32010000, first_name: {"en"=>"Steve"}>
+
+thumb = Image.new(file: open('http://some.image/pic.jpg'))
+=> #<Image _id: 549d83c24169720b32000000>
+
+steve.thumbnails << thumb
+=> [#<Image _id: 549d83c24169720b32000000, >]
+
+steve.as_jsonld
+ # => {
+ #     "@context": {
+ #         "foaf": "http://xmlns.com/foaf/0.1/"
+ #     },
+ #     "@id": "http://example.org/people/549d83c64169720b32010000",
+ #     "@type": "foaf:Person",
+ #     "foaf:depiction": {
+ #         "@id": "http://example.org/images/549d83c24169720b32000000"
+ #     },
+ #     "foaf:name": {
+ #         "@language": "en",
+ #         "@value": "Steve"
+ #     }
+ # }
+
+steve.save
+ # ... File is stored to GridFS ...
+=> true
+```
+
+Files have all the attributes of a GridFS file, and the stored binary content is accessed using `#data`.
+
+```ruby
+thumb.reload
+=> #<Image _id: 549d86184169720b6a000000, >
+
+thumb.as_document
+=> {"_id"=>BSON::ObjectId('549d86184169720b6a000000'),
+ "length"=>59709,
+ "chunkSize"=>4194304,
+ "uploadDate"=>2014-12-26 16:00:29 UTC,
+ "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
+ "contentType"=>"image/jpeg",
+ "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
+
+thumb.length
+=> 59709
+
+thumb.data
+=> # ... binary data ...
+```
+
+### Indexing
+
+#### Indexing Resources
+
+You can index Resources for keyword searching by mixing in the Ladder::Searchable module:
 
 ```ruby
 class Person
@@ -360,16 +437,6 @@ end
 
 kimchy = Person.new(first_name: 'Shay', description: 'Real genius')
 => #<Person _id: 543b457b41697231c5000000, first_name: {"en"=>"Shay"}, description: {"en"=>"Real genius"}>
-```
-
-In order to enable indexing, call the `#index_for_search` method on the class:
-
-```ruby
-Person.index_for_search
-=> :as_indexed_json
-
-kimchy.as_indexed_json
-=> {"description"=>"Real genius", "first_name"=>"Shay"}
 
 kimchy.save
 => true
@@ -393,10 +460,10 @@ results.records.first == kimchy
 => true
 ```
 
-When indexing, you can control how your model is stored in the index by supplying the `as: :jsonld` or `as: :qname` options:
+When indexing, you can control how your model is stored in the index by calling `#index_for_search` and supplying a block that returns a serializable hash:
 
 ```ruby
-Person.index_for_search as: :jsonld
+Person.index_for_search { as_jsonld }
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -417,7 +484,7 @@ kimchy.as_indexed_json
  #   }
  # }
 
-Person.index_for_search as: :qname
+Person.index_for_search { as_qname }
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -434,7 +501,7 @@ kimchy.as_indexed_json
  # }
 ```
 
-You can also index related objects as framed JSON-LD or hierarchical qname, by again using the `related: true` option:
+You can also index related objects as framed JSON-LD using `#as_framed_jsonld` or by using the `related: true` option with `#as_qname`:
 
 ```ruby
 class Project
@@ -456,10 +523,10 @@ es = Project.new(project_name: 'ElasticSearch', description: 'You know, for sear
 es.developers << kimchy
 => [#<Person _id: 543b457b41697231c5000000, first_name: {"en"=>"Shay"}, description: {"en"=>"Real genius"}, project_ids: [BSON::ObjectId('544562c24169728b4e010000')]>]
 
-Person.index_for_search as: :jsonld, related: true
+Person.index_for_search { as_framed_jsonld }
 => :as_indexed_json
 
-Project.index_for_search as: :jsonld, related: true
+Project.index_for_search { as_framed_jsonld }
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -530,10 +597,10 @@ es.as_indexed_json
  #    }
  # }
 
-Person.index_for_search as: :qname, related: true
+Person.index_for_search { as_qname related: true }
 => :as_indexed_json
 
-Project.index_for_search as: :qname, related: true
+Project.index_for_search { as_qname related: true }
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -587,83 +654,9 @@ es.as_indexed_json
  # }
 ```
 
-### Files
-
-Files are bytestreams that store binary content using MongoDB's GridFS storage system.  They are still identifiable by a URI, and contain technical metadata about the File's contents.
-
-```ruby
-class Person
-  include Ladder::Resource
-
-  configure type: RDF::FOAF.Person
-
-  property :first_name, predicate: RDF::FOAF.name
-  property :thumbnails, predicate: RDF::FOAF.depiction, class_name: 'Image', inverse_of: nil
-end
-
-class Image
-  include Ladder::File
-end
-```
-
-Similar to Resources, using `#property` as above will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
-
-```ruby
-steve = Person.new(first_name: 'Steve')
-=> #<Person _id: 549d83c64169720b32010000, first_name: {"en"=>"Steve"}>
-
-thumb = Image.new(file: open('http://some.image/pic.jpg'))
-=> #<Image _id: 549d83c24169720b32000000>
-
-steve.thumbnails << thumb
-=> [#<Image _id: 549d83c24169720b32000000, >]
-
-steve.as_jsonld
- # => {
- #     "@context": {
- #         "foaf": "http://xmlns.com/foaf/0.1/"
- #     },
- #     "@id": "http://example.org/people/549d83c64169720b32010000",
- #     "@type": "foaf:Person",
- #     "foaf:depiction": {
- #         "@id": "http://example.org/images/549d83c24169720b32000000"
- #     },
- #     "foaf:name": {
- #         "@language": "en",
- #         "@value": "Steve"
- #     }
- # }
-
-steve.save
- # ... File is stored to GridFS ...
-=> true
-```
-
-Files have all the attributes of a GridFS file, and the stored binary content is accessed using `#data`.
-
-```ruby
-thumb.reload
-=> #<Image _id: 549d86184169720b6a000000, >
-
-thumb.as_document
-=> {"_id"=>BSON::ObjectId('549d86184169720b6a000000'),
- "length"=>59709,
- "chunkSize"=>4194304,
- "uploadDate"=>2014-12-26 16:00:29 UTC,
- "md5"=>"0d4a486e2cd71c51b7a92cfe96f29324",
- "contentType"=>"image/jpeg",
- "filename"=>"549d86184169720b6a000000/open-uri20141226-2922-u66ap6"}
-
-thumb.length
-=> 59709
-
-thumb.data
-=> # ... binary data ...
-```
-
 #### Indexing Files
 
-Files that contain textual content (eg. HTML, PDF, ePub, DOC, etc) can be automatically indexed when they are persisted, again just by mixing in the Ladder::Searchable module (there is no need to call `#index_for_search` on the class).  Note that this requires the [Mapper Attachments Plugin for Elasticsearch](https://github.com/elasticsearch/elasticsearch-mapper-attachments) to be installed.
+Files that contain textual content (eg. HTML, PDF, ePub, DOC, etc) can be indexed when they are stored, again by mixing in the Ladder::Searchable module.  This can be useful if you want to retrieve a File by searching for the textual content that it contains.  Note that this requires the [Mapper Attachments Plugin for Elasticsearch](https://github.com/elasticsearch/elasticsearch-mapper-attachments) to be installed.
 
 ```ruby
 class OCR
@@ -705,7 +698,7 @@ results.records.first.data
 => # ... binary data ...
 ```
 
-This can be useful if you want to retrieve a File by searching for the textual content that it contains.  Note the use of `#records` to access the Ladder::File instances directly ([see here for more information](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model#search-results-as-database-records)).  However, if you want to get information about the file characteristics (including the extracted textual content), you can use a modified search query:
+Note the use of `#records` to access the Ladder::File instances directly ([see here for more information](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model#search-results-as-database-records)).  However, if you want to get information about the file characteristics (including the extracted textual content), you can use a modified search query:
 
 ```ruby
 results = OCR.search 'Moomintroll', fields: '*'
@@ -754,7 +747,7 @@ results.first.highlight.file
     ", but at the same time <em>his</em> nose caught a new smell. It was a more \nserious smell than any he had met"]
 ```
 
-More information about performing highlighting queries is available in the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-highlighting.html).
+More information about highlighting queries is available in the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-highlighting.html).
 
 ## Contributing
 

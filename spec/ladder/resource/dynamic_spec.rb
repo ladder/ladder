@@ -17,8 +17,6 @@ describe Ladder::Resource::Dynamic do
     end
   end
 
-  it_behaves_like 'a Resource'
-
   shared_context 'with data' do
     let(:subject) { Thing.new }
 
