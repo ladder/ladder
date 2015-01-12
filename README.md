@@ -41,7 +41,7 @@ Or install it yourself as:
 * [Resources](#resources)
   * [Configuring Resources](#configuring-resources)
   * [Dynamic Resources](#dynamic-resources)
-* [Indexing for Search](#indexing-for-search)
+  * [Indexing Resources](#indexing-resources)
 * [Files](#files)
   * [Indexing Files](#indexing-files)
 
@@ -343,7 +343,7 @@ steve.as_jsonld
 
 Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain a reference to the related object's URI.
 
-### Indexing for Search
+#### Indexing Resources
 
 You can also index your model classes for keyword searching through ElasticSearch by mixing in the Ladder::Searchable module:
 
@@ -360,16 +360,6 @@ end
 
 kimchy = Person.new(first_name: 'Shay', description: 'Real genius')
 => #<Person _id: 543b457b41697231c5000000, first_name: {"en"=>"Shay"}, description: {"en"=>"Real genius"}>
-```
-
-In order to enable indexing, call the `#index_for_search` method on the class:
-
-```ruby
-Person.index_for_search
-=> :as_indexed_json
-
-kimchy.as_indexed_json
-=> {"description"=>"Real genius", "first_name"=>"Shay"}
 
 kimchy.save
 => true
@@ -393,10 +383,10 @@ results.records.first == kimchy
 => true
 ```
 
-When indexing, you can control how your model is stored in the index by supplying the `as: :jsonld` or `as: :qname` options:
+When indexing, you can control how your model is stored in the index by calling `index_for_search` and supplying a block that returns a serializable hash:
 
 ```ruby
-Person.index_for_search as: :jsonld
+Person.index_for_search { as_jsonld }
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -417,7 +407,7 @@ kimchy.as_indexed_json
  #   }
  # }
 
-Person.index_for_search as: :qname
+Person.index_for_search { as_qname }
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -434,7 +424,7 @@ kimchy.as_indexed_json
  # }
 ```
 
-You can also index related objects as framed JSON-LD or hierarchical qname, by again using the `related: true` option:
+You can also index related objects as framed JSON-LD using `as_framed_jsonld` or hierarchical qname, by again using the `related: true` option:
 
 ```ruby
 class Project
@@ -456,10 +446,10 @@ es = Project.new(project_name: 'ElasticSearch', description: 'You know, for sear
 es.developers << kimchy
 => [#<Person _id: 543b457b41697231c5000000, first_name: {"en"=>"Shay"}, description: {"en"=>"Real genius"}, project_ids: [BSON::ObjectId('544562c24169728b4e010000')]>]
 
-Person.index_for_search as: :jsonld, related: true
+Person.index_for_search { as_framed_jsonld }
 => :as_indexed_json
 
-Project.index_for_search as: :jsonld, related: true
+Project.index_for_search { as_framed_jsonld }
 => :as_indexed_json
 
 kimchy.as_indexed_json
@@ -530,10 +520,10 @@ es.as_indexed_json
  #    }
  # }
 
-Person.index_for_search as: :qname, related: true
+Person.index_for_search { as_qname, related: true }
 => :as_indexed_json
 
-Project.index_for_search as: :qname, related: true
+Project.index_for_search { as_qname, related: true }
 => :as_indexed_json
 
 kimchy.as_indexed_json
