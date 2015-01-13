@@ -1,10 +1,9 @@
 require 'mongoid'
 require 'active_triples'
-require 'json/ld'
 
 module Ladder::Resource
-  require 'ladder/resource/serializable'
   autoload :Dynamic, 'ladder/resource/dynamic'
+  autoload :Serializable, 'ladder/resource/serializable'
 
   extend ActiveSupport::Concern
 

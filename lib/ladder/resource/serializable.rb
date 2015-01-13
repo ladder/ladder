@@ -1,3 +1,5 @@
+require 'json/ld'
+
 module Ladder::Resource::Serializable
   ##
   # Return JSON-LD representation

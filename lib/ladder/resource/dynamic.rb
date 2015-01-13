@@ -13,7 +13,7 @@ module Ladder::Resource::Dynamic
     #
     # @see Ladder::Resource
     def update_resource(opts = {})
-      # FIXME: for some reason super has to go first or AT clobbers properties
+      # NB: super has to go first or AT clobbers properties
       super(opts)
 
       if self._context

@@ -1,4 +1,4 @@
-require 'ladder/resource'
+require 'active_support/concern'
 require 'elasticsearch/model'
 require 'elasticsearch/model/callbacks'
 

@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'ladder/file'
+require 'ladder/searchable'
 
 describe Ladder::Searchable::File do
   before do
@@ -9,7 +11,7 @@ describe Ladder::Searchable::File do
     Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
     Elasticsearch::Model.client.indices.delete index: '_all'
 
-    LADDER_BASE_URI = 'http://example.org'
+    LADDER_BASE_URI ||= 'http://example.org'
 
     class Datastream
       include Ladder::File
@@ -37,7 +39,7 @@ describe Ladder::Searchable::File do
   end
 
   context 'with data from file' do
-    TEST_FILE = './spec/shared/moomin.pdf'
+    TEST_FILE ||= './spec/shared/moomin.pdf'
 
     let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)

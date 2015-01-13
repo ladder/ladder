@@ -6,7 +6,7 @@ describe Ladder::File do
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
     Mongoid.purge!
 
-    LADDER_BASE_URI = 'http://example.org'
+    LADDER_BASE_URI ||= 'http://example.org'
 
     class Datastream
       include Ladder::File
@@ -14,7 +14,7 @@ describe Ladder::File do
   end
 
   context 'with data from file' do
-    TEST_FILE = './spec/shared/moomin.pdf'
+    TEST_FILE ||= './spec/shared/moomin.pdf'
 
     let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
