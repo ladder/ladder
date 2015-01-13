@@ -1,5 +1,4 @@
 require 'active_job'
-require 'sidekiq'
 
 module Ladder::Searchable::Background
   extend ActiveSupport::Concern
@@ -10,7 +9,7 @@ module Ladder::Searchable::Background
 
     GlobalID.app = 'Ladder'
 
-    after_save    { enqueue :index }
+    after_create  { enqueue :index }
     after_update  { enqueue :update }
     after_destroy { enqueue :delete }
   end
@@ -25,17 +24,14 @@ module Ladder::Searchable::Background
   class Indexer < ActiveJob::Base
     queue_as :elasticsearch
 
-    Logger = Sidekiq.logger.level == Logger::DEBUG ? Sidekiq.logger : nil
-    Client = Elasticsearch::Client.new host: 'localhost:9200', logger: Logger
-
-    def perform(operation, resource)
+    def perform(operation, model)
       case operation
         when 'index'
-          resource.__elasticsearch__.index_document
+          model.__elasticsearch__.index_document
         when 'update'
-          resource.__elasticsearch__.update_document
+          model.__elasticsearch__.update_document
         when 'delete'
-          resource.__elasticsearch__.delete_document
+          model.__elasticsearch__.delete_document
         else raise ArgumentError, "Unknown operation '#{operation}'"
       end
     end

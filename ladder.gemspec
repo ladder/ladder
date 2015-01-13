@@ -25,7 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "active-triples", "~> 0.4"
   spec.add_dependency "elasticsearch-model", "~> 0.1"
   spec.add_dependency "activejob", "~> 4.2"
-  spec.add_dependency "sidekiq", "~> 3.3"
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "pry", "~> 0.10"
