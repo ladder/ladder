@@ -8,17 +8,16 @@ Ladder is a dynamic framework for [Linked Data](http://en.wikipedia.org/wiki/Lin
 
 Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
 
+### Components
+
+- [Mongoid](http://mongoid.org) for persistence
+- [ElasticSearch](http://www.elasticsearch.org) for full-text indexing
+- [ActiveTriples](https://github.com/no-reply/ActiveTriples) for linked data
+- [ActiveJob](https://github.com/rails/rails/tree/master/activejob)for background job execution
+
 ## History
 
 Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
-
-## Components
-
-- Persistence ([Mongoid](http://mongoid.org)/MongoDB)
-- Full-text indexing ([ElasticSearch](http://www.elasticsearch.org))
-- RDF ([ActiveTriples](https://github.com/no-reply/ActiveTriples)/RDF.rb)
-- Asynchronous job execution ([Sidekiq](http://sidekiq.org)/Redis)
-- HTTP interaction ([Padrino](http://www.padrinorb.com)/Sinatra)
 
 ## Installation
 
