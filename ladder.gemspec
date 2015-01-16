@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "mongoid-grid_fs", "~> 2.1"
   spec.add_dependency "active-triples", "~> 0.4"
   spec.add_dependency "elasticsearch-model", "~> 0.1"
-  spec.add_dependency "mimemagic", "~> 0.2"
+  spec.add_dependency "activejob", "~> 4.2"
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "pry", "~> 0.10"
@@ -33,4 +33,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.4"
   spec.add_development_dependency "yard", "~> 0.8"
   spec.add_development_dependency "simplecov", "~> 0.9"
+  spec.add_development_dependency "mimemagic", "~> 0.2"
 end

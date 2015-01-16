@@ -2,6 +2,10 @@ module Ladder::Searchable::Resource
   extend ActiveSupport::Concern
   
   def as_indexed_json(opts = {})
+    # FIXME: Force autosave of related documents using Mongoid-defined methods
+    # Required for explicit autosave prior to after_update index callbacks
+#    methods.select{|i| i[/autosave_documents/] }.each{|m| send m} if opts[:related]
+
     respond_to?(:serialized_json) ? serialized_json : as_json(except: [:id, :_id])
   end
 

@@ -39,13 +39,11 @@ module Ladder::Resource::Serializable
   # Return a framed, compacted JSON-LD representation
   # by embedding related objects from the graph
   #
-  # NB: Will NOT embed related objects with same @type. Spec under discussion, see https://github.com/json-ld/json-ld.org/issues/110
+  # NB: Will NOT embed related objects with same @type.
+  # Spec under discussion, see https://github.com/json-ld/json-ld.org/issues/110
   def as_framed_jsonld
-    # Force autosave of related documents using Mongoid-defined methods
-    # Required for explicit autosave prior to after_update index callbacks
-    methods.select{|i| i[/autosave_documents/] }.each{|m| send m}
-
     json_hash = as_jsonld related: true
+
     context = json_hash['@context']
     frame = {'@context' => context, '@type' => type.first.pname}
     JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
