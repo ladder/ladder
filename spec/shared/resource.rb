@@ -51,14 +51,60 @@ shared_examples 'a Resource' do
       subject.update_resource
     end
 
-    it 'should have a literal object' do
+    it 'should have a non-localized literal object' do
       subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.title).each_statement do |s|
         expect(s.object.to_s).to eq 'Comet in Moominland'
       end
     end
+    
+    it 'should have a localized literal object' do
+      subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.alternative).each_statement do |s|
+        expect(s.object.to_s).to eq 'Mumintrollet pa kometjakt'
+      end
+    end    
 
     it 'should not have related objects' do
       expect(subject.resource.query(object: subject)).to be_empty
+    end
+  end
+
+  describe '#<<' do
+    context 'with defined field' do
+      before do
+        subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
+      end
+    
+      it 'should update existing values' do
+        expect(subject.title).to eq 'Kometen kommer'
+      end
+    end
+
+    context 'with undefined field' do
+      before do
+        subject << RDF::Statement(nil, RDF::DC.description, "Second in Tove Jansson's series of Moomin books")
+      end
+
+      it 'should ignore undefined properties' do
+        expect(subject.fields['description']).to be_nil
+        expect(subject.resource.query(predicate: RDF::DC.description)).to be_empty
+      end
+    end
+
+    context 'with a URI value' do
+      before do
+        subject.class.property :identifier, predicate: RDF::DC.identifier
+        subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
+      end
+    
+      it 'should store the URI as a string' do
+        expect(subject.identifier).to eq 'http://some.uri'
+      end
+
+      it 'should cast a URI into the resource' do
+        subject.update_resource
+        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.identifier)
+        expect(query.first_object).to be_a_kind_of RDF::URI
+      end
     end
   end
 

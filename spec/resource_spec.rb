@@ -13,6 +13,23 @@ describe Ladder::Resource do
     end
   end
 
+  context 'with data' do
+    let(:subject) { Thing.new }
+
+    before do
+      # non-localized literal
+      subject.class.field :alt
+      subject.class.property :alt, predicate: RDF::DC.alternative
+      subject.alt = 'Mumintrollet pa kometjakt'
+
+      # localized literal
+      subject.class.property :title, predicate: RDF::DC.title
+      subject.title = 'Comet in Moominland'
+    end
+
+    it_behaves_like 'a Resource'
+  end
+
   shared_context 'with relations' do
     let(:person)  { Person.new }
     let(:concept) { Concept.new }
@@ -259,23 +276,6 @@ describe Ladder::Resource do
         # TODO
       end
     end
-  end
-
-  context 'with data' do
-    let(:subject) { Thing.new }
-
-    before do
-      # non-localized literal
-      subject.class.field :alt
-      subject.class.property :alt, predicate: RDF::DC.alternative
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.class.property :title, predicate: RDF::DC.title
-      subject.title = 'Comet in Moominland'
-    end
-
-    it_behaves_like 'a Resource'
   end
   
   context 'with relations' do
