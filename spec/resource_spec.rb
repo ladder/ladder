@@ -13,10 +13,15 @@ describe Ladder::Resource do
     end
   end
 
-  context 'with data' do
-    let(:subject) { Thing.new }
+  after do
+    Object.send(:remove_const, :LADDER_BASE_URI) if Object
+    Object.send(:remove_const, "Thing") if Object
+  end
 
+  shared_context 'with data' do
     before do
+      subject.class.configure type: RDF::DC.BibliographicResource
+
       # non-localized literal
       subject.class.field :alt
       subject.class.property :alt, predicate: RDF::DC.alternative
@@ -26,8 +31,47 @@ describe Ladder::Resource do
       subject.class.property :title, predicate: RDF::DC.title
       subject.title = 'Comet in Moominland'
     end
+  end
 
-    it_behaves_like 'a Resource'
+  shared_context 'serializable' do
+
+    describe '#as_jsonld' do
+      it 'should output a valid jsonld representation of itself' do
+        graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
+        expect(subject.resource.to_hash).to eq graph.to_hash
+      end
+    end
+  
+    describe '#as_qname' do
+      it 'should output a valid qname representation of itself' do
+        # TODO
+      end
+    end
+
+    context 'with related' do
+
+      describe '#as_jsonld related: true' do
+        it 'should output a valid jsonld representation of itself and related' do
+          # TODO
+        end
+      end
+
+      describe '#as_qname related: true' do
+        it 'should output a valid qname representation of itself and related' do
+          # TODO
+        end
+      end
+
+      describe '#as_framed_jsonld' do
+        before do
+          # TODO: ensure subject, person, concept, part all have RDF types set
+        end
+
+        it 'should output a valid framed jsonld representation of itself and related' do
+          # TODO
+        end
+      end
+    end
   end
 
   shared_context 'with relations' do
@@ -156,7 +200,7 @@ describe Ladder::Resource do
       end
     end
     
-    context '#update_resource with related' do
+    context '#update_resource' do
       before do
         subject.update_resource(related: true)
       end
@@ -250,7 +294,7 @@ describe Ladder::Resource do
     context '#update_resource with related and then without related' do
       before do
         subject.update_resource(related: true)
-        subject.update_resource
+        subject.update_resource # implicit false
       end
 
       it 'should not have related objects' do
@@ -277,27 +321,22 @@ describe Ladder::Resource do
       end
     end
   end
-  
-  context 'with relations' do
+
+  context 'with data' do
     let(:subject) { Thing.new }
 
-    before do
-      # non-localized literal
-      subject.class.field :alt
-      subject.class.property :alt, predicate: RDF::DC.alternative
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.class.property :title, predicate: RDF::DC.title
-      subject.title = 'Comet in Moominland'
-    end
-
-    include_context 'with relations'
+    include_context 'with data'
+    include_context 'serializable'
     it_behaves_like 'a Resource'
   end
 
-  after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
+  context 'with relations' do
+    let(:subject) { Thing.new }
+
+    include_context 'with data'
+    include_context 'with relations'
+    include_context 'serializable'
+    it_behaves_like 'a Resource'
   end
+
 end

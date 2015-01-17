@@ -17,6 +17,10 @@ describe Ladder::Searchable::File do
     end
   end
 
+  after do
+    Object.send(:remove_const, "Datastream") if Object
+  end
+
   shared_context 'searchable' do
     before do
       subject.save
@@ -60,7 +64,4 @@ describe Ladder::Searchable::File do
     it_behaves_like 'a File'
   end
 
-  after do
-    Object.send(:remove_const, "Datastream") if Object
-  end
 end

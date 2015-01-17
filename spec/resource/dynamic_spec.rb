@@ -13,6 +13,11 @@ describe Ladder::Resource::Dynamic do
     end
   end
 
+  after do
+    Object.send(:remove_const, :LADDER_BASE_URI) if Object
+    Object.send(:remove_const, "Thing") if Object
+  end
+
   shared_context 'dynamic' do
 
     describe '#property' do
@@ -159,8 +164,4 @@ describe Ladder::Resource::Dynamic do
     it_behaves_like 'a Resource'
   end
 
-  after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
-  end
 end

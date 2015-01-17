@@ -13,6 +13,11 @@ describe Ladder::File do
     end
   end
 
+  after do
+    Object.send(:remove_const, :LADDER_BASE_URI) if Object
+    Object.send(:remove_const, "Datastream") if Object
+  end
+
   shared_context 'with relations' do
     let(:thing)    { Thing.new }
 
@@ -81,8 +86,4 @@ describe Ladder::File do
     it_behaves_like 'a File'
   end
 
-  after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Datastream") if Object
-  end
 end
