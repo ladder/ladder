@@ -24,8 +24,7 @@ module Ladder::Resource
       value = update_from_field(name) if fields[name]
       value = update_from_relation(name, opts) if relations[name]
 
-      cast_uri = RDF::URI.new(value)
-      resource.set_value(property.predicate, cast_uri.valid? ? cast_uri : value) if value
+      resource.set_value(property.predicate, value) #if value
     end
 
     resource
@@ -52,7 +51,13 @@ module Ladder::Resource
     def update_from_field(name)
       if fields[name].localized?
         localized_hash = read_attribute(name)
-        localized_hash.map { |lang, val| RDF::Literal.new(val, language: lang) } unless localized_hash.nil?
+
+        unless localized_hash.nil?
+          localized_hash.map do |lang, value|
+            cast_uri = RDF::URI.new(value)
+            cast_uri.valid? ? cast_uri : RDF::Literal.new(value, language: lang)
+          end
+        end
       else
         self.send(name)
       end

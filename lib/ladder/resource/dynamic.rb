@@ -50,6 +50,7 @@ module Ladder::Resource::Dynamic
     end
 
   module InstanceMethods
+
     ##
     # Overload Ladder #update_resource
     #
@@ -77,12 +78,12 @@ module Ladder::Resource::Dynamic
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
 
-      # 
       unless resource_class.properties.values.map(&:predicate).include? data.predicate
+        # Generate a dynamic field name
         qname = data.predicate.qname
         field_name = (respond_to? qname.last or :name == qname.last) ? qname.join('_').to_sym : qname.last
 
-        # Define predicate on class
+        # Define property on class
         property field_name, predicate: data.predicate
       end
     
