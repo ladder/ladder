@@ -332,15 +332,6 @@ shared_examples 'a Resource' do
     end
   end
   
-  describe '#as_jsonld' do
-    include_context 'with relations'
-    
-    it 'should output a valid jsonld representation of itself' do
-      g = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
-      expect(subject.resource.to_hash == g.to_hash).to be true
-    end
-  end
-  
   describe '#rdf_label' do
     include_context 'with data'
 

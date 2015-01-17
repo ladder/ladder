@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'ladder/resource'
 require 'ladder/resource/dynamic'
 
 describe Ladder::Resource::Dynamic do
@@ -112,7 +111,6 @@ describe Ladder::Resource::Dynamic do
         expect(subject.dc11_title).to eq "Kometjakten"
       end
     end
-
 
     context 'with a URI value' do
       before do

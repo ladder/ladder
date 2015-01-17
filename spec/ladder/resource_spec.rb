@@ -18,6 +18,7 @@ describe Ladder::Resource do
   end
 
   it_behaves_like 'a Resource'
+#  it_behaves_like 'a Serializable Resource'
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object

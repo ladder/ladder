@@ -31,6 +31,22 @@ module Ladder::Resource
     resource
   end
 
+  ##
+  # Push RDF statement into resource
+  def <<(data)
+    # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
+    data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+
+    # Only push statement if the statement's predicate is defined on the class
+    if resource_class.properties.values.map(&:predicate).include? data.predicate
+      field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
+
+      # Set the value in Mongoid
+      value = data.object.is_a?(RDF::Literal) ? data.object.object : data.object.to_s
+      self.send("#{field_name}=", value)
+    end
+  end
+
   private
 
     def update_from_field(name)
