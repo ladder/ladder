@@ -1,15 +1,38 @@
 require 'spec_helper'
 
-describe Ladder::File do
+describe Ladder::Searchable::File do
   before do
     Mongoid.load!('mongoid.yml', :development)
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
     Mongoid.purge!
 
+    Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
+    Elasticsearch::Model.client.indices.delete index: '_all'
+
     LADDER_BASE_URI ||= 'http://example.org'
 
     class Datastream
       include Ladder::File
+      include Ladder::Searchable
+    end
+  end
+
+  shared_context 'searchable' do
+    before do
+      subject.save
+      Elasticsearch::Model.client.indices.flush
+    end
+
+    it 'should exist in the index' do
+      results = subject.class.search('Moomin*')
+      expect(results.count).to eq 1
+      expect(results.first.id).to eq subject.id.to_s
+    end
+
+    it 'should contain full-text content' do
+      results = subject.class.search 'Moomin*', fields: '*'
+      expect(results.count).to eq 1
+      expect(results.first.fields.file.first).to include 'Moomin'
     end
   end
 
@@ -19,6 +42,7 @@ describe Ladder::File do
     let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
 
+    include_context 'searchable'
     it_behaves_like 'a File'
   end
 
@@ -32,11 +56,11 @@ describe Ladder::File do
       subject.file = StringIO.new(source)
     end
 
+    include_context 'searchable'
     it_behaves_like 'a File'
   end
 
   after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
     Object.send(:remove_const, "Datastream") if Object
   end
 end

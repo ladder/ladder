@@ -24,11 +24,11 @@ describe Ladder::Resource::Dynamic do
     before do
       # non-localized literal
       subject.class.field :alt
-      subject.class.property :alt, :predicate => RDF::DC.alternative
+      subject.class.property :alt, predicate: RDF::DC.alternative
       subject.alt = 'Mumintrollet pa kometjakt'
 
       # localized literal
-      subject.class.property :title, :predicate => RDF::DC.title
+      subject.class.property :title, predicate: RDF::DC.title
       subject.title = 'Comet in Moominland'
     end
   end
@@ -38,12 +38,12 @@ describe Ladder::Resource::Dynamic do
 
     context 'with undefined property' do
       before do
-        subject.property :description, :predicate => RDF::DC.description
+        subject.property :description, predicate: RDF::DC.description
         subject.description = "Second in Tove Jansson's series of Moomin books"
       end
 
       it 'should create a context' do
-        expect(subject._context).to eq({:description => RDF::DC.description.to_uri.to_s})
+        expect(subject._context).to eq({description: RDF::DC.description.to_uri.to_s})
       end
       
       it 'should build an accessor' do
@@ -53,12 +53,12 @@ describe Ladder::Resource::Dynamic do
 
     context 'with conflicting property' do
       before do
-        subject.property :title, :predicate => RDF::DC11.title
+        subject.property :title, predicate: RDF::DC11.title
         subject.dc11_title = "Kometjakten"
       end
 
       it 'should create a context' do
-        expect(subject._context).to eq({:dc11_title => RDF::DC11.title.to_uri.to_s})
+        expect(subject._context).to eq({dc11_title: RDF::DC11.title.to_uri.to_s})
       end
       
       it 'should build an accessor' do
@@ -90,7 +90,7 @@ describe Ladder::Resource::Dynamic do
       end
 
       it 'should create a context' do
-        expect(subject._context).to eq({:description => RDF::DC.description.to_uri.to_s})
+        expect(subject._context).to eq({description: RDF::DC.description.to_uri.to_s})
       end
       
       it 'should build an accessor' do
@@ -104,7 +104,7 @@ describe Ladder::Resource::Dynamic do
       end
 
       it 'should create a context' do
-        expect(subject._context).to eq({:dc11_title => RDF::DC11.title.to_uri.to_s})
+        expect(subject._context).to eq({dc11_title: RDF::DC11.title.to_uri.to_s})
       end
       
       it 'should build an accessor' do
@@ -123,7 +123,7 @@ describe Ladder::Resource::Dynamic do
       end
       
       it 'should cast a URI into the resource' do
-        query = subject.resource.query(:subject => subject.rdf_subject, :predicate => RDF::DC.identifier)
+        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.identifier)
         expect(query.count).to eq 1
         expect(query.first_object).to be_a_kind_of RDF::URI
       end
@@ -136,11 +136,11 @@ describe Ladder::Resource::Dynamic do
 
     before do
       # undefined property
-      subject.property :description, :predicate => RDF::DC.description
+      subject.property :description, predicate: RDF::DC.description
       subject.description = "Second in Tove Jansson's series of Moomin books"
 
       # conflicting property
-      subject.property :title, :predicate => RDF::DC11.title
+      subject.property :title, predicate: RDF::DC11.title
       subject.dc11_title = "Kometjakten"
 
       # defined field
@@ -157,11 +157,11 @@ describe Ladder::Resource::Dynamic do
     
     it 'should have updated values' do
       expect(subject.resource.statements.count).to eq 5
-      expect(subject.resource.query(:predicate => RDF::DC.description, :object => "Second in Tove Jansson's series of Moomin books").count).to eq 1
-      expect(subject.resource.query(:predicate => RDF::DC11.title, :object => "Kometjakten").count).to eq 1
-      expect(subject.resource.query(:predicate => RDF::DC.title, :object => RDF::Literal.new('Kometen kommer', :language => :en)).count).to eq 1
-      expect(subject.resource.query(:predicate => RDF::DC.alternative, :object => "Kometjakten").count).to eq 1
-      expect(subject.resource.query(:predicate => RDF::DC.identifier, :object => RDF::URI('http://some.uri')).count).to eq 1
+      expect(subject.resource.query(predicate: RDF::DC.description, object: "Second in Tove Jansson's series of Moomin books").count).to eq 1
+      expect(subject.resource.query(predicate: RDF::DC11.title, object: "Kometjakten").count).to eq 1
+      expect(subject.resource.query(predicate: RDF::DC.title, object: RDF::Literal.new('Kometen kommer', language: :en)).count).to eq 1
+      expect(subject.resource.query(predicate: RDF::DC.alternative, object: "Kometjakten").count).to eq 1
+      expect(subject.resource.query(predicate: RDF::DC.identifier, object: RDF::URI('http://some.uri')).count).to eq 1
     end
   end
 

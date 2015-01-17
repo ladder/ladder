@@ -30,7 +30,7 @@ describe Ladder::Searchable::Resource do
   shared_context 'with data' do
     before do
       subject.class.configure type: RDF::DC.BibliographicResource
-      subject.class.property :title, :predicate => RDF::DC.title
+      subject.class.property :title, predicate: RDF::DC.title
       subject.title = 'Comet in Moominland'
     end
   end
@@ -86,12 +86,12 @@ describe Ladder::Searchable::Resource do
     before do
       # related object
       person.class.configure type: RDF::FOAF.Person
-      person.class.property :foaf_name, :predicate => RDF::FOAF.name
+      person.class.property :foaf_name, predicate: RDF::FOAF.name
       person.foaf_name = 'Tove Jansson'
 
       # many-to-many relation
-      person.class.property :things, :predicate => RDF::DC.relation, :class_name => 'Thing'
-      subject.class.property :people, :predicate => RDF::DC.creator, :class_name => 'Person'
+      person.class.property :things, predicate: RDF::DC.relation, class_name: 'Thing'
+      subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
       subject.people << person
     end
 
