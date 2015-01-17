@@ -1,4 +1,20 @@
+shared_context 'with data' do
+  before do
+    subject.class.configure type: RDF::DC.BibliographicResource
+
+    # non-localized literal
+    subject.class.field :alt
+    subject.class.property :alt, predicate: RDF::DC.alternative
+    subject.alt = 'Mumintrollet pa kometjakt'
+
+    # localized literal
+    subject.class.property :title, predicate: RDF::DC.title
+    subject.title = 'Comet in Moominland'
+  end
+end
+
 shared_examples 'a Resource' do
+  include_context 'with data'
 
   describe 'LADDER_BASE_URI' do
     it 'should automatically have a base URI' do

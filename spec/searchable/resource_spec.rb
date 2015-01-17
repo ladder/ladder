@@ -22,21 +22,6 @@ describe Ladder::Searchable::Resource do
     Object.send(:remove_const, "Thing") if Object
   end
 
-  shared_context 'with data' do
-    before do
-      subject.class.configure type: RDF::DC.BibliographicResource
-
-      # non-localized literal
-      subject.class.field :alt
-      subject.class.property :alt, predicate: RDF::DC.alternative
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.class.property :title, predicate: RDF::DC.title
-      subject.title = 'Comet in Moominland'
-    end
-  end
-
   shared_context 'searchable' do
     describe '#index_for_search' do
 
@@ -253,7 +238,6 @@ describe Ladder::Searchable::Resource do
   context 'with data' do
     let(:subject) { Thing.new }
 
-    include_context 'with data'
     include_context 'searchable'
     it_behaves_like 'a Resource'
   end
@@ -261,7 +245,6 @@ describe Ladder::Searchable::Resource do
   context 'with relations' do
     let(:subject) { Thing.new }
 
-    include_context 'with data'
     include_context 'with relations'
     include_context 'searchable'
     it_behaves_like 'a Resource'

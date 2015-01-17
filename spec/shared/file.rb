@@ -24,9 +24,7 @@ shared_examples 'a File' do
     it 'should persist' do
       expect(subject.save).to be true
     end
-  end
 
-  describe '#find' do
     it 'should be retrievable' do
       subject.save
       found = subject.class.find(subject.id)
@@ -35,6 +33,10 @@ shared_examples 'a File' do
       expect(found.data).to eq subject.data
       expect(found.data).to eq source.force_encoding(found.data.encoding)
     end
+  end
+
+  describe '#grid' do
+    # TODO
   end
 
   describe '#attributes' do
