@@ -114,4 +114,22 @@ shared_examples 'a Resource' do
     end
   end
 
+  context 'a serializable' do
+
+    describe '#as_jsonld' do
+      it 'should output a valid jsonld representation of itself' do
+        # TODO: this isn't a valid test
+        graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
+        expect(subject.resource.to_hash).to eq graph.to_hash
+      end
+    end
+
+    describe '#as_qname' do
+      it 'should output a valid qname representation of itself' do
+        # TODO
+      end
+    end
+
+  end
+
 end

@@ -163,7 +163,7 @@ describe Ladder::Resource do
       end
     end
     
-    context '#update_resource' do
+    context '#update_resource with related' do
       before do
         subject.update_resource(related: true)
       end
@@ -283,6 +283,41 @@ describe Ladder::Resource do
         # TODO
       end
     end
+
+    context 'serializable' do
+
+      describe '#as_jsonld related: true' do
+        it 'should output a valid jsonld representation of itself and related' do
+          if subject.relations.empty?
+            expect(subject.as_jsonld(related: true)).to eq subject.as_jsonld
+          else
+            graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
+          end
+        end
+      end
+
+      describe '#as_qname related: true' do
+        it 'should output a valid qname representation of itself and related' do
+          if subject.relations.empty?
+            expect(subject.as_qname(related: true)).to eq subject.as_qname
+          else
+            # TODO
+          end
+        end
+      end
+
+      describe '#as_framed_jsonld' do
+        it 'should output a valid framed jsonld representation of itself and related' do
+          if subject.relations.empty?
+            expect(subject.as_framed_jsonld).to eq subject.as_jsonld
+          else
+            expect(subject.as_framed_jsonld['dc:creator']).to eq person.as_framed_jsonld.except '@context'
+  #          expect(person.as_framed_jsonld['dc:relation']).to eq subject.as_framed_jsonld.except '@context'
+          end
+        end
+      end
+    end
+
   end
 
   context 'with data' do

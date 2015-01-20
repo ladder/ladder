@@ -18,8 +18,22 @@ describe Ladder::Resource::Dynamic do
     Object.send(:remove_const, "Thing") if Object
   end
 
-  shared_context 'dynamic' do
+  context 'with data' do
+    let(:subject) { Thing.new }
 
+    before do
+      # non-localized literal
+      subject.class.field :alt
+      subject.class.property :alt, predicate: RDF::DC.alternative
+      subject.alt = 'Mumintrollet pa kometjakt'
+
+      # localized literal
+      subject.class.property :title, predicate: RDF::DC.title
+      subject.title = 'Comet in Moominland'
+    end
+
+    it_behaves_like 'a Resource'
+    
     describe '#property' do
       context 'with undefined property' do
         before do
@@ -143,25 +157,6 @@ describe Ladder::Resource::Dynamic do
         end
       end
     end
-
-  end
-
-  context 'with data' do
-    let(:subject) { Thing.new }
-
-    before do
-      # non-localized literal
-      subject.class.field :alt
-      subject.class.property :alt, predicate: RDF::DC.alternative
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.class.property :title, predicate: RDF::DC.title
-      subject.title = 'Comet in Moominland'
-    end
-
-    include_context 'dynamic'
-    it_behaves_like 'a Resource'
   end
 
 end
