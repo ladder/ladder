@@ -18,6 +18,21 @@ describe Ladder::Resource do
     Object.send(:remove_const, "Thing") if Object
   end
 
+  shared_context 'with data' do
+    before do
+      subject.class.configure type: RDF::DC.BibliographicResource
+
+      # non-localized literal
+      subject.class.field :alt
+      subject.class.property :alt, predicate: RDF::DC.alternative
+      subject.alt = 'Mumintrollet pa kometjakt'
+
+      # localized literal
+      subject.class.property :title, predicate: RDF::DC.title
+      subject.title = 'Comet in Moominland'
+    end
+  end
+
   shared_context 'with relations' do
     let(:person)  { Person.new }
     let(:concept) { Concept.new }
@@ -35,6 +50,10 @@ describe Ladder::Resource do
       class Part
         include Ladder::Resource
       end
+
+      person.class.configure type: RDF::DC.AgentClass
+      concept.class.configure type: RDF::SKOS.Concept
+      part.class.configure type: RDF::DC.PhysicalResource
 
       # many-to-many
       person.class.property :things, predicate: RDF::DC.relation, class_name: 'Thing'
@@ -77,7 +96,7 @@ describe Ladder::Resource do
       expect(subject.concepts.to_a).to include concept
       expect(subject.part).to eq part
     end
-    
+
     it 'should have inverse relations' do
       expect(person.things.to_a).to include subject
       expect(concept.relations).to be_empty
@@ -269,6 +288,7 @@ describe Ladder::Resource do
   context 'with data' do
     let(:subject) { Thing.new }
 
+    include_context 'with data'
     it_behaves_like 'a Serializable'
     it_behaves_like 'a Resource'
   end
@@ -276,6 +296,7 @@ describe Ladder::Resource do
   context 'with relations' do
     let(:subject) { Thing.new }
 
+    include_context 'with data'
     include_context 'with relations'
     it_behaves_like 'a Serializable'
     it_behaves_like 'a Resource'

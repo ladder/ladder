@@ -1,19 +1,4 @@
-shared_context 'with relations' do
-  before do
-    # related object
-    person.class.configure type: RDF::FOAF.Person
-    person.class.property :foaf_name, predicate: RDF::FOAF.name
-    person.foaf_name = 'Tove Jansson'
-
-    # many-to-many relation
-    person.class.property :things, predicate: RDF::DC.relation, class_name: 'Thing'
-    subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
-    subject.people << person
-  end
-end
-
 shared_examples 'a Searchable' do
-  include_context 'with relations'
 
   describe '#index_for_search' do
 
@@ -154,7 +139,7 @@ shared_examples 'a Searchable' do
           expect(results.count).to eq 1
         end
       end
-=begin
+
       context 'with as_jsonld related' do
         before do
           person.class.index_for_search { as_jsonld related: true }
@@ -166,16 +151,14 @@ shared_examples 'a Searchable' do
         it 'should contain a embedded related object' do
           results = subject.class.search('@graph.foaf\:name.@value:tove')
           expect(results.count).to eq 1
-          expect(results.first._source.to_hash['dc:creator']).to eq person.as_jsonld.except '@context'
         end
 
         it 'should contain an embedded subject in the related object' do
           results = person.class.search('dc\:relation.dc\:title.@value:moomin*')
           expect(results.count).to eq 1
-          expect(results.first._source.to_hash['dc:relation']).to eq subject.as_jsonld.except '@context'
         end
       end
-=end
+
       context 'with as_framed_jsonld' do
         before do
           person.class.index_for_search { as_framed_jsonld }
@@ -187,13 +170,11 @@ shared_examples 'a Searchable' do
         it 'should contain a embedded related object' do
           results = subject.class.search('dc\:creator.foaf\:name.@value:tove')
           expect(results.count).to eq 1
-          expect(results.first._source.to_hash['dc:creator']).to eq person.as_jsonld.except '@context'
         end
 
         it 'should contain an embedded subject in the related object' do
           results = person.class.search('dc\:relation.dc\:title.@value:moomin*')
           expect(results.count).to eq 1
-          expect(results.first._source.to_hash['dc:relation']).to eq subject.as_jsonld.except '@context'
         end
       end
   end
