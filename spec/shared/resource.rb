@@ -61,7 +61,7 @@ shared_examples 'a Resource' do
       subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.alternative).each_statement do |s|
         expect(s.object.to_s).to eq 'Mumintrollet pa kometjakt'
       end
-    end    
+    end
 
     it 'should not have related objects' do
       expect(subject.resource.query(object: subject)).to be_empty
@@ -118,9 +118,8 @@ shared_examples 'a Resource' do
 
     describe '#as_jsonld' do
       it 'should output a valid jsonld representation of itself' do
-        # TODO: this isn't a valid test
         graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
-        expect(subject.resource.to_hash).to eq graph.to_hash
+        expect(subject.update_resource.to_hash).to eq graph.to_hash
       end
     end
 

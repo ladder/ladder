@@ -72,17 +72,6 @@ describe Ladder::Resource do
       subject.class.property :part, predicate: RDF::DC.hasPart, class_name: 'Part'
       subject.part = part
       subject.save
-      
-      # embedded many
-=begin
-      subject.class.embeds_many :people
-      subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
-
-      person.class.embedded_in :thing
-      person.class.property :thing, predicate: RDF::DC.relation, class_name: 'Thing'
-
-      subject.people << person
-=end
     end
 
     after do
@@ -169,88 +158,52 @@ describe Ladder::Resource do
       end
 
       it 'should have a literal object' do
-        subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.title).each_statement do |s|
-          expect(s.object.to_s).to eq 'Comet in Moominland'
-        end
+        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.title)
+        expect(query.first_object.to_s).to eq 'Comet in Moominland'
       end
 
-=begin
       it 'should have an embedded object' do
         query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.hasPart)
         expect(query.count).to eq 1
-        
-        query.each_statement do |s|
-          expect(s.object).to eq part.rdf_subject
-        end
+        expect(query.first_object).to eq part.rdf_subject
       end
 
       it 'should have an embedded object relation' do
         query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
         expect(query.count).to eq 1
-        expect(query.to_hash).to eq part.resource.statements.to_hash
-
-        query.each_statement do |s|
-          expect(s.object).to eq subject.rdf_subject
-        end
+        expect(query.first_object).to eq subject.rdf_subject
       end
-
-    it 'should have an embedded object' do
-      query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.hasPart)
-      expect(query.count).to eq 1
-      
-      query.each_statement do |s|
-        expect(s.object).to eq part.rdf_subject
-      end
-    end
-
-    it 'should have an embedded object relation' do
-      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
-      expect(query.count).to eq 1
-      expect(query.to_hash).to eq part.resource.statements.to_hash
-
-      query.each_statement do |s|
-        expect(s.object).to eq subject.rdf_subject
-      end
-    end
-=end
 
       it 'should have related objects' do
         # many-to-many
         query_creator = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.creator)
         expect(query_creator.count).to eq 1
-
-        query_creator.each_statement do |s|
-          expect(s.object).to eq person.rdf_subject
-        end
+        expect(query_creator.first_object).to eq person.rdf_subject
 
         # one-sided has-many
         query_subject = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.subject)
         expect(query_subject.count).to eq 1
-
-        query_subject.each_statement do |s|
-          expect(s.object).to eq concept.rdf_subject
-        end
+        expect(query_subject.first_object).to eq concept.rdf_subject
 
         # embedded-one
-        # TODO
+        query_part = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.hasPart)
+        expect(query_part.count).to eq 1
+        expect(query_part.first_object).to eq part.rdf_subject
       end
 
       it 'should have related object relations' do
         # many-to-many
         query = person.resource.query(subject: person.rdf_subject, predicate: RDF::DC.relation)
         expect(query.count).to eq 1
-        expect(query.to_hash).to eq person.resource.statements.to_hash
-
-        query.each_statement do |s|
-          expect(s.object).to eq subject.rdf_subject
-        end
+        expect(query.first_object).to eq subject.rdf_subject
         
         # one-sided has-many
-        expect(subject.resource.query(subject: concept.rdf_subject)).to be_empty
-        expect(concept.resource.statements).to be_empty
+        expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
         # embedded-one
-        # TODO
+        query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.first_object).to eq subject.rdf_subject
       end
     end
 
@@ -264,23 +217,26 @@ describe Ladder::Resource do
         expect(subject.resource.query(subject: person.rdf_subject)).to be_empty
         expect(subject.resource.query(subject: concept.rdf_subject)).to be_empty
       end
+      
+      it 'should have embedded object relations' do
+        query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.first_object).to eq subject.rdf_subject
+      end
 
       it 'should have related object relations' do
         # many-to-many
         query = person.resource.query(subject: person.rdf_subject, predicate: RDF::DC.relation)
         expect(query.count).to eq 1
-        expect(query.to_hash).to eq person.resource.statements.to_hash
-
-        query.each_statement do |s|
-          expect(s.object).to eq subject.rdf_subject
-        end
+        expect(query.first_object).to eq subject.rdf_subject
         
         # one-sided has-many
-        expect(subject.resource.query(subject: concept.rdf_subject)).to be_empty
-        expect(concept.resource.statements).to be_empty
+        expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
         # embedded-one
-        # TODO
+        query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+        expect(query.count).to eq 1
+        expect(query.first_object).to eq subject.rdf_subject
       end
     end
 
@@ -292,6 +248,7 @@ describe Ladder::Resource do
             expect(subject.as_jsonld(related: true)).to eq subject.as_jsonld
           else
             graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
+            expect(subject.update_resource(related: true).to_hash).to eq graph.to_hash
           end
         end
       end
@@ -311,8 +268,10 @@ describe Ladder::Resource do
           if subject.relations.empty?
             expect(subject.as_framed_jsonld).to eq subject.as_jsonld
           else
-            expect(subject.as_framed_jsonld['dc:creator']).to eq person.as_framed_jsonld.except '@context'
-  #          expect(person.as_framed_jsonld['dc:relation']).to eq subject.as_framed_jsonld.except '@context'
+            framed_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_framed_jsonld)
+            related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
+            
+            expect(framed_graph.to_hash).to eq related_graph.to_hash
           end
         end
       end
@@ -324,7 +283,7 @@ describe Ladder::Resource do
     let(:subject) { Thing.new }
 
     include_context 'with data'
-    it_behaves_like 'a Serializable'
+
     it_behaves_like 'a Resource'
   end
 
@@ -333,7 +292,7 @@ describe Ladder::Resource do
 
     include_context 'with data'
     include_context 'with relations'
-    it_behaves_like 'a Serializable'
+
     it_behaves_like 'a Resource'
   end
 

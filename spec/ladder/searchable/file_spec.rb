@@ -46,8 +46,9 @@ describe Ladder::Searchable::File do
     let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
 
-    include_context 'searchable'
     it_behaves_like 'a File'
+
+    include_context 'searchable'
   end
 
   context 'with data from string after creation' do
@@ -60,8 +61,9 @@ describe Ladder::Searchable::File do
       subject.file = StringIO.new(source)
     end
 
-    include_context 'searchable'
     it_behaves_like 'a File'
+
+    include_context 'searchable'
   end
 
 end
