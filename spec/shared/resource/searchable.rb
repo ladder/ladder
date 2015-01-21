@@ -60,6 +60,7 @@ shared_examples 'a Searchable with related' do
         it 'should contain an ID for the related object' do
           results = subject.class.search('person_ids.$oid:' + person.id)
           expect(results.count).to eq 1
+          expect(results.first._source.to_hash).to eq JSON.parse(subject.as_indexed_json.to_json)
         end
 
         it 'should include the related object in the index' do
@@ -85,6 +86,7 @@ shared_examples 'a Searchable with related' do
         it 'should contain an ID for the related object' do
           results = subject.class.search('dc.creator:' + person.id)
           expect(results.count).to eq 1
+          expect(results.first._source.to_hash).to eq JSON.parse(subject.as_qname.to_json)
         end
 
         it 'should include the related object in the index' do
@@ -110,13 +112,13 @@ shared_examples 'a Searchable with related' do
         it 'should contain a embedded related object' do
           results = subject.class.search('dc.creator.foaf.name.en:tove')
           expect(results.count).to eq 1
-          expect(results.first._source['dc']['creator'].first).to eq Hashie::Mash.new person.as_qname
+          expect(results.first._source.to_hash).to eq JSON.parse(subject.as_qname(related: true).to_json)
         end
 
         it 'should contain an embedded subject in the related object' do
           results = person.class.search('dc.relation.dc.title.en:moomin*')
           expect(results.count).to eq 1
-          expect(results.first._source['dc']['relation'].first).to eq Hashie::Mash.new subject.as_qname
+          expect(results.first._source.to_hash).to eq JSON.parse(person.as_qname(related: true).to_json)
         end
       end
 
@@ -127,10 +129,11 @@ shared_examples 'a Searchable with related' do
           subject.save
           Elasticsearch::Model.client.indices.flush
         end
-  
+
         it 'should contain an ID for the related object' do
           results = subject.class.search('dc\:creator.@id:' + person.id)
           expect(results.count).to eq 1
+          expect(results.first._source.to_hash).to eq subject.as_jsonld
         end
 
         it 'should include the related object in the index' do
@@ -156,11 +159,13 @@ shared_examples 'a Searchable with related' do
         it 'should contain a embedded related object' do
           results = subject.class.search('@graph.foaf\:name.@value:tove')
           expect(results.count).to eq 1
+          expect(results.first._source.to_hash).to eq JSON.parse(subject.as_jsonld(related: true).to_json)
         end
 
         it 'should contain an embedded subject in the related object' do
-          results = person.class.search('dc\:relation.dc\:title.@value:moomin*')
+          results = person.class.search('@graph.dc\:title.@value:moomin*')
           expect(results.count).to eq 1
+          expect(results.first._source.to_hash).to eq JSON.parse(person.as_jsonld(related: true).to_json)
         end
       end
 
@@ -175,11 +180,13 @@ shared_examples 'a Searchable with related' do
         it 'should contain a embedded related object' do
           results = subject.class.search('dc\:creator.foaf\:name.@value:tove')
           expect(results.count).to eq 1
+          expect(results.first._source.to_hash).to eq JSON.parse(subject.as_framed_jsonld.to_json)
         end
 
         it 'should contain an embedded subject in the related object' do
           results = person.class.search('dc\:relation.dc\:title.@value:moomin*')
           expect(results.count).to eq 1
+          expect(results.first._source.to_hash).to eq JSON.parse(person.as_framed_jsonld.to_json)
         end
       end
 

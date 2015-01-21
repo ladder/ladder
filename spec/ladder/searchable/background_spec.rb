@@ -56,7 +56,6 @@ describe Ladder::Searchable::Background do
 
     include_context 'with data'
 
-    it_behaves_like 'a Resource'
     it_behaves_like 'a Searchable'
   end
 
@@ -78,7 +77,6 @@ describe Ladder::Searchable::Background do
     include_context 'with data'
     include_context 'with relations'
 
-    it_behaves_like 'a Resource'
     it_behaves_like 'a Searchable with related'
   end
 
