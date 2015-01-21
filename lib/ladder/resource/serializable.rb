@@ -45,7 +45,9 @@ module Ladder::Resource::Serializable
     json_hash = as_jsonld related: true
 
     context = json_hash['@context']
-    frame = {'@context' => context, '@type' => type.first.pname}
+    frame = {'@context' => context}
+    frame['@type'] = type.first.pname unless type.empty?
+
     JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
   end
   

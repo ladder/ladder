@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'ladder/file'
-require 'ladder/searchable'
 
 describe Ladder::Searchable::File do
   before do
@@ -19,6 +17,10 @@ describe Ladder::Searchable::File do
     end
   end
 
+  after do
+    Object.send(:remove_const, "Datastream") if Object
+  end
+
   shared_context 'searchable' do
     before do
       subject.save
@@ -30,7 +32,7 @@ describe Ladder::Searchable::File do
       expect(results.count).to eq 1
       expect(results.first.id).to eq subject.id.to_s
     end
-    
+
     it 'should contain full-text content' do
       results = subject.class.search 'Moomin*', fields: '*'
       expect(results.count).to eq 1
@@ -43,6 +45,8 @@ describe Ladder::Searchable::File do
 
     let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
+
+    it_behaves_like 'a File'
 
     include_context 'searchable'
   end
@@ -57,10 +61,9 @@ describe Ladder::Searchable::File do
       subject.file = StringIO.new(source)
     end
 
+    it_behaves_like 'a File'
+
     include_context 'searchable'
   end
 
-  after do
-    Object.send(:remove_const, "Datastream") if Object
-  end
 end

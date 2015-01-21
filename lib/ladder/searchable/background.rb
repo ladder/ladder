@@ -13,9 +13,9 @@ module Ladder::Searchable::Background
     after_update  { enqueue :update }
     after_destroy { enqueue :delete }
   end
-  
+
   private
-  
+
     def enqueue(operation)
       Indexer.queue_as self.class.name.underscore.pluralize
       Indexer.perform_later(operation.to_s, self)

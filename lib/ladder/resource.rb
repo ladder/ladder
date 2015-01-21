@@ -24,11 +24,26 @@ module Ladder::Resource
       value = update_from_field(name) if fields[name]
       value = update_from_relation(name, opts) if relations[name]
 
-      cast_uri = RDF::URI.new(value)
-      resource.set_value(property.predicate, cast_uri.valid? ? cast_uri : value) if value
+      resource.set_value(property.predicate, value) #if value
     end
 
     resource
+  end
+
+  ##
+  # Push RDF statement into resource
+  def <<(data)
+    # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
+    data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+
+    # Only push statement if the statement's predicate is defined on the class
+    if resource_class.properties.values.map(&:predicate).include? data.predicate
+      field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
+
+      # Set the value in Mongoid
+      value = data.object.is_a?(RDF::Literal) ? data.object.object : data.object.to_s
+      self.send("#{field_name}=", value)
+    end
   end
 
   private
@@ -36,7 +51,13 @@ module Ladder::Resource
     def update_from_field(name)
       if fields[name].localized?
         localized_hash = read_attribute(name)
-        localized_hash.map { |lang, val| RDF::Literal.new(val, language: lang) } unless localized_hash.nil?
+
+        unless localized_hash.nil?
+          localized_hash.map do |lang, value|
+            cast_uri = RDF::URI.new(value)
+            cast_uri.valid? ? cast_uri : RDF::Literal.new(value, language: lang)
+          end
+        end
       else
         self.send(name)
       end

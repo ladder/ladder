@@ -13,12 +13,62 @@ describe Ladder::File do
     end
   end
 
+  after do
+    Object.send(:remove_const, :LADDER_BASE_URI) if Object
+    Object.send(:remove_const, "Datastream") if Object
+  end
+
+  shared_context 'with relations' do
+    let(:thing)    { Thing.new }
+
+    before do
+      class Thing
+        include Ladder::Resource
+      end
+
+      # implicit from #property
+      thing.class.property :files, predicate: RDF::DC.relation, class_name: subject.class.name, inverse_of: nil
+      thing.files << subject
+      thing.save
+
+      # TODO: build some relations of various types
+      # explicit using HABTM
+      # explicit has-one
+    end
+
+    after do
+      Object.send(:remove_const, 'Thing') if Object
+    end
+
+    context 'with one-sided has-many' do
+      it 'should have a relation' do
+        expect(thing.relations['files'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
+        expect(thing.files.to_a).to include subject
+      end
+
+      it 'should not have an inverse relation' do
+        expect(thing.relations['files'].inverse_of).to be nil
+        expect(subject.relations).to be_empty
+      end
+
+      it 'should have a valid predicate' do
+        expect(thing.class.properties['files'].predicate).to eq RDF::DC.relation
+      end
+
+      it 'should not have an inverse predicate' do
+        expect(subject.class.properties).to be_empty
+      end
+    end
+
+  end
+
   context 'with data from file' do
     TEST_FILE ||= './spec/shared/moomin.pdf'
 
     let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
 
+    include_context 'with relations'
     it_behaves_like 'a File'
   end
 
@@ -32,11 +82,8 @@ describe Ladder::File do
       subject.file = StringIO.new(source)
     end
 
+    include_context 'with relations'
     it_behaves_like 'a File'
   end
 
-  after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Datastream") if Object
-  end
 end
