@@ -67,6 +67,9 @@ module Ladder::Resource
       objects = self.send(name).to_a
 
       if opts[:related] or embedded_relations[name]
+        # Force autosave of related documents
+        run_callbacks(:save)
+
         # update inverse relation properties
         relation_def = relations[name]
         objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse
