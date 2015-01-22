@@ -17,8 +17,10 @@ module Ladder::Searchable::Background
   private
 
     def enqueue(operation)
-      Indexer.queue_as self.class.name.underscore.pluralize
-      Indexer.perform_later(operation.to_s, self)
+      # Ensure objects are persisted before queueing for indexing
+      run_callbacks(:save)
+      
+      Indexer.set(queue: self.class.name.underscore.pluralize).perform_later(operation.to_s, self)
     end
 
   class Indexer < ActiveJob::Base

@@ -6,6 +6,9 @@ module Ladder::Resource::Serializable
   #
   # @see ActiveTriples::Resource#dump
   def as_jsonld(opts = {})
+    # Force autosave of related documents using Mongoid-defined methods
+    run_callbacks(:save) if opts[:related]
+
     JSON.parse update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
   end
 
