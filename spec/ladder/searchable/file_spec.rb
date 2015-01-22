@@ -21,25 +21,6 @@ describe Ladder::Searchable::File do
     Object.send(:remove_const, "Datastream") if Object
   end
 
-  shared_context 'searchable' do
-    before do
-      subject.save
-      Elasticsearch::Model.client.indices.flush
-    end
-
-    it 'should exist in the index' do
-      results = subject.class.search('Moomin*')
-      expect(results.count).to eq 1
-      expect(results.first.id).to eq subject.id.to_s
-    end
-
-    it 'should contain full-text content' do
-      results = subject.class.search 'Moomin*', fields: '*'
-      expect(results.count).to eq 1
-      expect(results.first.fields.file.first).to include 'Moomin'
-    end
-  end
-
   context 'with data from file' do
     TEST_FILE ||= './spec/shared/moomin.pdf'
 
@@ -47,8 +28,7 @@ describe Ladder::Searchable::File do
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
 
     it_behaves_like 'a File'
-
-    include_context 'searchable'
+    it_behaves_like 'a Searchable File'
   end
 
   context 'with data from string after creation' do
@@ -62,8 +42,7 @@ describe Ladder::Searchable::File do
     end
 
     it_behaves_like 'a File'
-
-    include_context 'searchable'
+    it_behaves_like 'a Searchable File'
   end
 
 end

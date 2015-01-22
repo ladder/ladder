@@ -21,14 +21,12 @@ shared_examples 'a File' do
   end
 
   describe '#save' do
-    it 'should persist' do
-      expect(subject.save).to be true
+    before do
+      subject.save
     end
 
     it 'should be retrievable' do
-      subject.save
       found = subject.class.find(subject.id)
-
       expect(found).to eq subject
       expect(found.data).to eq subject.data
       expect(found.data).to eq source.force_encoding(found.data.encoding)
