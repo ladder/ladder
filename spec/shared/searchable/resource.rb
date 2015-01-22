@@ -44,7 +44,35 @@ shared_examples 'a Searchable' do
     end  
 
   end
-  
+
+  describe '#save with update' do
+    before do
+      subject.save
+      subject.title = 'Kometen kommer'
+      subject.save
+      Elasticsearch::Model.client.indices.flush
+    end
+
+    it 'should have updated values' do
+      results = subject.class.search('title:kometen*')
+      expect(results.count).to eq 1
+      expect(results.first._source.to_hash).to eq JSON.parse(subject.as_indexed_json.to_json)
+    end
+  end
+
+  describe '#destroy' do
+    before do
+      subject.save
+      subject.destroy
+      Elasticsearch::Model.client.indices.flush
+    end
+
+    it 'should not exist in the index' do
+      results = subject.class.search('*')
+      expect(results).to be_empty
+    end
+  end
+
 end
 
 shared_examples 'a Searchable with related' do

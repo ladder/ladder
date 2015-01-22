@@ -67,8 +67,8 @@ module Ladder::Resource
       objects = self.send(name).to_a
 
       if opts[:related] or embedded_relations[name]
-        # Force autosave of related documents
-        run_callbacks(:save)
+        # Force autosave of related documents to ensure correct serialization
+        methods.select{|i| i[/autosave_documents/] }.each{|m| send m}
 
         # update inverse relation properties
         relation_def = relations[name]

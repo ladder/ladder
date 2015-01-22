@@ -9,17 +9,17 @@ module Ladder::Searchable::Background
 
     GlobalID.app = 'Ladder'
 
-    after_create  { enqueue :index }
-    after_update  { enqueue :update }
-    after_destroy { enqueue :delete }
+    after_create   { enqueue :index }
+    after_update   { enqueue :update }
+    before_destroy { enqueue :delete }
   end
 
   private
 
     def enqueue(operation)
-      # Ensure objects are persisted before queueing for indexing
-      run_callbacks(:save)
-      
+      # Force autosave of related documents before queueing for indexing or updating
+      methods.select{|i| i[/autosave_documents/] }.each{|m| send m} unless :delete == operation
+
       Indexer.set(queue: self.class.name.underscore.pluralize).perform_later(operation.to_s, self)
     end
 
