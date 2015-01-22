@@ -34,7 +34,7 @@ module Ladder::Searchable::Background
           model.__elasticsearch__.update_document
         when 'delete'
           model.__elasticsearch__.delete_document
-        else raise ArgumentError, "Unknown operation '#{operation}'"
+#        else raise ArgumentError, "Unknown operation '#{operation}'"
       end
     end
 

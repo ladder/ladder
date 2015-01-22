@@ -13,7 +13,7 @@ Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(in
 - [Mongoid](http://mongoid.org) for persistence
 - [ElasticSearch](http://www.elasticsearch.org) for full-text indexing
 - [ActiveTriples](https://github.com/no-reply/ActiveTriples) for linked data
-- [ActiveJob](https://github.com/rails/rails/tree/master/activejob)for background job execution
+- [ActiveJob](https://github.com/rails/rails/tree/master/activejob) for background job execution
 
 ## History
 
@@ -44,6 +44,7 @@ Or install it yourself as:
 * [Indexing](#indexing)
   * [Indexing Resources](#indexing-resources)
   * [Indexing Files](#indexing-files)
+  * [Background Indexing](#background-indexing)
 
 ### Resources
 
@@ -747,6 +748,36 @@ results.first.highlight.file
 ```
 
 More information about highlighting queries is available in the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-highlighting.html).
+
+#### Background Indexing
+
+In large-scale production environments, sending an HTTP request to Elasticsearch during the database transaction isn't optimal (especially for large Files), so Ladder uses ActiveJob to queue and process indexing operations in the background.  All that's required is to use the Ladder::Searchable::Background module in your model:
+
+```ruby
+class OCR
+  include Ladder::File
+  include Ladder::Searchable::Background
+end
+
+ # ...
+ 
+class Person
+  include Ladder::Resource
+  include Ladder::Searchable::Background
+
+  configure type: RDF::FOAF.Person
+end
+
+ # ...
+```
+
+You'll also have to set the queue adapter in your application, depending on which queueing backend you're using:
+
+```ruby
+ActiveJob::Base.queue_adapter = :sidekiq
+```
+
+For more information on available queueing adapters and their features, see the [ActiveJob documentation](http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters.html).
 
 ## Contributing
 
