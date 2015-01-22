@@ -751,7 +751,7 @@ More information about highlighting queries is available in the [Elasticsearch d
 
 #### Background Indexing
 
-In large-scale production environments, sending an HTTP request to Elasticsearch during the database transaction isn't optimal (especially for large Files), so Ladder uses ActiveJob to queue and process indexing operations in the background.  All that's required is to use the Ladder::Searchable::Background module in your model:
+In large-scale production environments, sending an HTTP request to Elasticsearch during the database transaction isn't optimal (especially for large Files), so Ladder uses ActiveJob to queue and process indexing operations in the background.  Just use the Ladder::Searchable::Background module in your model:
 
 ```ruby
 class OCR
@@ -771,7 +771,7 @@ end
  # ...
 ```
 
-You'll also have to set the queue adapter in your application, depending on which queueing backend you're using:
+You'll also have to set the queue adapter in your application, depending on which backend you're using:
 
 ```ruby
 ActiveJob::Base.queue_adapter = :sidekiq
