@@ -9,12 +9,16 @@ describe Ladder::Searchable::File do
     Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
     Elasticsearch::Model.client.indices.delete index: '_all'
 
-    LADDER_BASE_URI = 'http://example.org'
+    LADDER_BASE_URI ||= 'http://example.org'
 
     class Datastream
       include Ladder::File
       include Ladder::Searchable
     end
+  end
+
+  after do
+    Object.send(:remove_const, "Datastream") if Object
   end
 
   shared_context 'searchable' do
@@ -28,7 +32,7 @@ describe Ladder::Searchable::File do
       expect(results.count).to eq 1
       expect(results.first.id).to eq subject.id.to_s
     end
-    
+
     it 'should contain full-text content' do
       results = subject.class.search 'Moomin*', fields: '*'
       expect(results.count).to eq 1
@@ -37,10 +41,12 @@ describe Ladder::Searchable::File do
   end
 
   context 'with data from file' do
-    TEST_FILE = './spec/shared/moomin.pdf'
+    TEST_FILE ||= './spec/shared/moomin.pdf'
 
     let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
+
+    it_behaves_like 'a File'
 
     include_context 'searchable'
   end
@@ -55,10 +61,9 @@ describe Ladder::Searchable::File do
       subject.file = StringIO.new(source)
     end
 
+    it_behaves_like 'a File'
+
     include_context 'searchable'
   end
 
-  after do
-    Object.send(:remove_const, "Datastream") if Object
-  end
 end

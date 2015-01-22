@@ -2,6 +2,7 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'ladder'
+require 'mongoid'
 require 'pry'
 require 'simplecov'
 SimpleCov.start

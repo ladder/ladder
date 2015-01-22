@@ -1,16 +1,17 @@
-require 'ladder/resource'
+require 'active_support/concern'
 require 'elasticsearch/model'
 require 'elasticsearch/model/callbacks'
 
 module Ladder::Searchable
   extend ActiveSupport::Concern
 
-  autoload :Resource, 'ladder/searchable/resource'
-  autoload :File,     'ladder/searchable/file'
+  autoload :Background, 'ladder/searchable/background'
+  autoload :File,       'ladder/searchable/file'
+  autoload :Resource,   'ladder/searchable/resource'
 
   included do
     include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks
+    include Elasticsearch::Model::Callbacks unless self.ancestors.include? Ladder::Searchable::Background
 
     include Ladder::Searchable::Resource if self.ancestors.include? Ladder::Resource
     include Ladder::Searchable::File     if self.ancestors.include? Ladder::File

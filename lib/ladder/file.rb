@@ -10,7 +10,7 @@ module Ladder::File
   included do
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
 
-    store_in :collection => "#{ grid.prefix }.files"
+    store_in collection: "#{ grid.prefix }.files"
 
     # Define accessor methods for attributes
     define_method(:content_type) { read_attribute(:contentType) }
@@ -58,7 +58,6 @@ module Ladder::File
     def grid
      @grid ||= Mongoid::GridFs.build_namespace_for name
     end
-
   end
 
 end
