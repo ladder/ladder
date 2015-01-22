@@ -157,6 +157,21 @@ describe Ladder::Resource::Dynamic do
         end
       end
     end
+    
+    describe '#resource_class' do
+      before do
+        subject.property :description, predicate: RDF::DC.description
+      end
+
+      it 'should have modified properties on the instance' do
+        expect(subject.resource.class.properties.keys).to include 'description'
+      end
+      
+      it 'should not modify the global class properties' do
+        expect(subject.class.resource_class.properties.keys).to_not include 'description'
+        expect(subject.class.resource_class.properties).to eq subject.class.new.class.resource_class.properties
+      end
+    end
   end
 
 end

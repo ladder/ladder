@@ -4,6 +4,7 @@ module Ladder::Resource::Dynamic
   included do
     include Ladder::Resource
     include InstanceMethods
+    include ClassMethods
 
     field :_context, type: Hash
 
