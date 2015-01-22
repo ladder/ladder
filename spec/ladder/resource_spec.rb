@@ -153,6 +153,7 @@ describe Ladder::Resource do
     end
     
     context '#update_resource with related' do
+      # TODO add tests for autosaved relations
       before do
         subject.update_resource(related: true)
       end
@@ -208,6 +209,7 @@ describe Ladder::Resource do
     end
 
     context '#update_resource with related and then without related' do
+      # TODO add tests for autosaved relations
       before do
         subject.update_resource(related: true)
         subject.update_resource # implicit false
@@ -241,38 +243,29 @@ describe Ladder::Resource do
     end
 
     context 'serializable' do
+      # TODO: contexts with relations and without
+#      expect(subject.as_jsonld(related: true)).to eq subject.as_jsonld
+#      expect(subject.as_qname(related: true)).to eq subject.as_qname
+#      expect(subject.as_framed_jsonld).to eq subject.as_jsonld
 
       describe '#as_jsonld related: true' do
         it 'should output a valid jsonld representation of itself and related' do
-          if subject.relations.empty?
-            expect(subject.as_jsonld(related: true)).to eq subject.as_jsonld
-          else
-            graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
-            expect(subject.update_resource(related: true).to_hash).to eq graph.to_hash
-          end
+          graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
+          expect(subject.update_resource(related: true).to_hash).to eq graph.to_hash
         end
       end
 
       describe '#as_qname related: true' do
         it 'should output a valid qname representation of itself and related' do
-          if subject.relations.empty?
-            expect(subject.as_qname(related: true)).to eq subject.as_qname
-          else
-            # TODO
-          end
+          # TODO
         end
       end
 
       describe '#as_framed_jsonld' do
         it 'should output a valid framed jsonld representation of itself and related' do
-          if subject.relations.empty?
-            expect(subject.as_framed_jsonld).to eq subject.as_jsonld
-          else
-            framed_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_framed_jsonld)
-            related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
-            
-            expect(framed_graph.to_hash).to eq related_graph.to_hash
-          end
+          framed_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_framed_jsonld)
+          related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)          
+          expect(framed_graph.to_hash).to eq related_graph.to_hash
         end
       end
     end
