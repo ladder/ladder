@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{Dynamic framework for Linked Data modelling, persistence, and full-text indexing.}
   spec.homepage      = "https://github.com/ladder/ladder"
   spec.license       = "APACHE2"
-  spec.required_ruby_version     = '>= 1.9.3'
+  spec.required_ruby_version = '>= 2.0.0'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -30,7 +30,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "mimemagic", "~> 0.2"
   spec.add_development_dependency "pry", "~> 0.10"
   spec.add_development_dependency "rspec", "~> 3.1"
-  spec.add_development_dependency "rake", "~> 10.4"
   spec.add_development_dependency "simplecov", "~> 0.9"
   spec.add_development_dependency "wirble", "~> 0.1"
   spec.add_development_dependency "yard", "~> 0.8"
