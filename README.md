@@ -1,6 +1,6 @@
 ![Ladder logo](https://github.com/ladder/ladder/blob/master/logo.png)
 
-[![Gem Version](http://img.shields.io/gem/v/ladder.svg)](https://rubygems.org/gems/ladder)  [![Inline docs](http://inch-ci.org/github/ladder/ladder.svg?branch=master)](http://inch-ci.org/github/ladder/ladder)  [![Build Status](https://travis-ci.org/ladder/ladder.svg)](https://travis-ci.org/ladder/ladder)
+[![Gem Version](http://img.shields.io/gem/v/ladder.svg?style=flat)](https://rubygems.org/gems/ladder)  [![Inline docs](http://inch-ci.org/github/ladder/ladder.svg?branch=master)](http://inch-ci.org/github/ladder/ladder)  [![Build Status](https://travis-ci.org/ladder/ladder.svg)](https://travis-ci.org/ladder/ladder)
 
 # Ladder
 
