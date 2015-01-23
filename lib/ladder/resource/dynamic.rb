@@ -4,7 +4,6 @@ module Ladder::Resource::Dynamic
   included do
     include Ladder::Resource
     include InstanceMethods
-    include ClassMethods
 
     field :_context, type: Hash
 
@@ -90,10 +89,7 @@ module Ladder::Resource::Dynamic
     
       super(data)
     end
-  end
-  
-  module ClassMethods
-    
+
     private
       ##
       # Overload ActiveTriples #resource_class
@@ -102,6 +98,7 @@ module Ladder::Resource::Dynamic
       def resource_class
         @modified_resource_class ||= self.class.resource_class.clone
       end
+
   end
 
 end
