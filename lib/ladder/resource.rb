@@ -41,8 +41,7 @@ module Ladder::Resource
       field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first
 
       # Set the value in Mongoid
-      value = data.object.is_a?(RDF::Literal) ? data.object.object : data.object.to_s
-      self.send("#{field_name}=", value)
+      self.send("#{field_name}=", data.object.to_s)
     end
   end
 
@@ -101,6 +100,7 @@ module Ladder::Resource
 
       super
     end
+
   end
 
 end
