@@ -38,7 +38,7 @@ module Ladder::Resource
 
     # Only push statement if the statement's predicate is defined on the class
     if resource_class.properties.values.map(&:predicate).include? data.predicate
-      field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
+      field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first
 
       # Set the value in Mongoid
       value = data.object.is_a?(RDF::Literal) ? data.object.object : data.object.to_s

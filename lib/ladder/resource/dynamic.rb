@@ -107,7 +107,7 @@ module Ladder::Resource::Dynamic
         qname = data.predicate.qname
         field_name = (respond_to? qname.last or :name == qname.last) ? qname.join('_').to_sym : qname.last
 
-        # Define property on class
+        # Define property on object
         property field_name, predicate: data.predicate
       end
 
