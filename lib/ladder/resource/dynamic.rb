@@ -98,8 +98,7 @@ module Ladder::Resource::Dynamic
         self._types << data.object.to_s
 
         apply_types
-
-        return super(data)
+        return
       end
 
       # If we have an undefined predicate, then dynamically defne it
