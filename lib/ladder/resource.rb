@@ -1,50 +1,49 @@
 require 'mongoid'
 require 'active_triples'
-require 'json/ld'
 
 module Ladder::Resource
+  autoload :Dynamic, 'ladder/resource/dynamic'
+  autoload :Serializable, 'ladder/resource/serializable'
+
   extend ActiveSupport::Concern
 
   include Mongoid::Document
   include ActiveTriples::Identifiable
-
-  autoload :Dynamic, 'ladder/resource/dynamic'
+  include Ladder::Resource::Serializable
 
   included do
     configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
   end
 
-  ##
-  # Return JSON-LD representation
-  #
-  # @see ActiveTriples::Resource#dump
-  def as_jsonld(opts = {})
-    JSON.parse update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
-  end
+  delegate :rdf_label, to: :update_resource
 
   ##
-  # Overload ActiveTriples #rdf_label
-  #
-  # @see ActiveTriples::Resource
-  def rdf_label
-    update_resource
-    resource.rdf_label
-  end
-
-  ##
-  # Overload ActiveTriples #update_resource
-  #
-  # @see ActiveTriples::Identifiable
+  # Populate resource properties from ActiveModel
   def update_resource(opts = {})
-    super() do |name, prop|
-      value = update_from_field(name) if fields[name] # this is a literal property
-      value = update_from_relation(name, opts) if relations[name] # this is a relation property
+    resource_class.properties.each do |name, property|
+      value = update_from_field(name) if fields[name]
+      value = update_from_relation(name, opts) if relations[name]
 
-      cast_uri = RDF::URI.new(value)
-      resource.set_value(prop.predicate, cast_uri.valid? ? cast_uri : value) if value
+      resource.set_value(property.predicate, value) #if value
     end
 
     resource
+  end
+
+  ##
+  # Push RDF statement into resource
+  def <<(data)
+    # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
+    data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+
+    # Only push statement if the statement's predicate is defined on the class
+    if resource_class.properties.values.map(&:predicate).include? data.predicate
+      field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first.to_sym
+
+      # Set the value in Mongoid
+      value = data.object.is_a?(RDF::Literal) ? data.object.object : data.object.to_s
+      self.send("#{field_name}=", value)
+    end
   end
 
   private
@@ -52,7 +51,13 @@ module Ladder::Resource
     def update_from_field(name)
       if fields[name].localized?
         localized_hash = read_attribute(name)
-        localized_hash.map { |lang, val| RDF::Literal.new(val, language: lang) } unless localized_hash.nil?
+
+        unless localized_hash.nil?
+          localized_hash.map do |lang, value|
+            cast_uri = RDF::URI.new(value)
+            cast_uri.valid? ? cast_uri : RDF::Literal.new(value, language: lang)
+          end
+        end
       else
         self.send(name)
       end
@@ -62,6 +67,9 @@ module Ladder::Resource
       objects = self.send(name).to_a
 
       if opts[:related] or embedded_relations[name]
+        # Force autosave of related documents to ensure correct serialization
+        methods.select{|i| i[/autosave_documents/] }.each{|m| send m}
+
         # update inverse relation properties
         relation_def = relations[name]
         objects.each { |object| object.resource.set_value(relation_def.inverse, self.rdf_subject) } if relation_def.inverse

@@ -1,0 +1,17 @@
+language: ruby
+cache: bundler
+#sudo: false
+rvm:
+  - 2.0.0
+  - 2.2.0
+script: bundle exec rspec spec
+branches:
+  only:
+    - master
+services:
+  - mongodb
+  - elasticsearch
+before_script:
+  - sudo /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/2.4.1
+  - sudo service elasticsearch restart
+  - sleep 15
