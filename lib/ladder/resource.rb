@@ -101,6 +101,16 @@ module Ladder::Resource
       super
     end
 
+    def new_from_graph(graph)
+      # Get the first object in the graph with the same RDF type as this class
+      return unless subject = graph.query([nil, RDF.type, resource_class.type]).first_subject
+
+      new_object = self.new
+      graph.query([subject]).each_statement { |statement| new_object << statement }
+
+      new_object
+    end
+
   end
 
 end
