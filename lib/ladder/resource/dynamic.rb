@@ -6,8 +6,10 @@ module Ladder::Resource::Dynamic
     include InstanceMethods
 
     field :_context, type: Hash
+    field :_types,   type: Array
 
     after_find :apply_context
+    after_find :apply_types
   end
 
   ##
@@ -48,6 +50,18 @@ module Ladder::Resource::Dynamic
         end
       end
     end
+    
+    ##
+    # Apply dynamic types to this instance
+    def apply_types
+      return unless self._types
+
+      self._types.each do |rdf_type|
+        unless resource.type.include? uri = RDF::Vocabulary.find_term(rdf_type)
+          resource << RDF::Statement.new(rdf_subject, RDF.type, uri)
+        end
+      end
+    end
 
   module InstanceMethods
 
@@ -78,6 +92,17 @@ module Ladder::Resource::Dynamic
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
 
+      if RDF.type == data.predicate
+        # Store type information
+        self._types ||= Array.new
+        self._types << data.object.to_s
+
+        apply_types
+
+        return super(data)
+      end
+
+      # If we have an undefined predicate, then dynamically defne it
       unless resource_class.properties.values.map(&:predicate).include? data.predicate
         # Generate a dynamic field name
         qname = data.predicate.qname
@@ -86,7 +111,7 @@ module Ladder::Resource::Dynamic
         # Define property on class
         property field_name, predicate: data.predicate
       end
-    
+
       super(data)
     end
 

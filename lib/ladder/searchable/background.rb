@@ -28,16 +28,10 @@ module Ladder::Searchable::Background
 
     def perform(operation, model)
       case operation
-        when 'index'
-          model.__elasticsearch__.index_document
-        when 'update'
-          model.__elasticsearch__.update_document
-        when 'delete'
-          model.__elasticsearch__.delete_document
-#        else raise ArgumentError, "Unknown operation '#{operation}'"
+        when 'index' then model.__elasticsearch__.index_document
+        when 'update' then model.__elasticsearch__.update_document
+        when 'delete' then model.__elasticsearch__.delete_document
       end
     end
-
   end
-
 end

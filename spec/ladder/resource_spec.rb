@@ -10,6 +10,8 @@ describe Ladder::Resource do
 
     class Thing
       include Ladder::Resource
+
+      configure type: RDF::DC.BibliographicResource
     end
   end
 

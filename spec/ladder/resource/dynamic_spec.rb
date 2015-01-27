@@ -10,6 +10,8 @@ describe Ladder::Resource::Dynamic do
 
     class Thing
       include Ladder::Resource::Dynamic
+
+      configure type: RDF::DC.BibliographicResource
     end
   end
 
@@ -85,16 +87,25 @@ describe Ladder::Resource::Dynamic do
         # URI value
         subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
 
+        # RDF type
+        subject << RDF::Statement(nil, RDF.type, RDF::DC.PhysicalResource)
+
         subject.update_resource
       end
     
       it 'should have updated values' do
-        expect(subject.resource.statements.count).to eq 5
+        expect(subject.resource.statements.count).to eq 7
         expect(subject.resource.query(predicate: RDF::DC.description, object: "Second in Tove Jansson's series of Moomin books").count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC11.title, object: "Kometjakten").count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC.title, object: RDF::Literal.new('Kometen kommer', language: :en)).count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC.alternative, object: "Kometjakten").count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC.identifier, object: RDF::URI('http://some.uri')).count).to eq 1
+      end
+
+      it 'should contain both class and dynamic types' do
+        expect(subject.type.count).to eq 2
+        expect(subject.type).to include RDF::DC.BibliographicResource
+        expect(subject.type).to include RDF::DC.PhysicalResource
       end
     end
 

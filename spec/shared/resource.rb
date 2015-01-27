@@ -89,6 +89,17 @@ shared_examples 'a Resource' do
         expect(subject.resource.query(predicate: RDF::DC.description)).to be_empty
       end
     end
+    
+    context 'with a RDF type' do
+      before do
+        subject << RDF::Statement(nil, RDF.type, RDF::DC.PhysicalResource)
+      end
+
+      it 'should only contain types defined on the class' do
+#        expect(subject.type.count).to eq 1
+        expect(subject.type).to include RDF::DC.BibliographicResource
+      end
+    end
 
     context 'with a URI value' do
       before do
