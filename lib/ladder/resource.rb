@@ -40,8 +40,22 @@ module Ladder::Resource
     if resource_class.properties.values.map(&:predicate).include? data.predicate
       field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first
 
-      # Set the value in Mongoid
-      self.send("#{field_name}=", data.object.to_s)
+      # If the object is a URI for a model object, retrieve the object
+      if rel = relations[field_name] and data.object.is_a? RDF::URI
+        # FIXME: this fails on embedded objects because they can't be found with #find
+#binding.pry if 'part' == field_name
+        return unless object_id    = data.object.to_s.match(/[0-9a-fA-F]{24}/)
+        return unless object_model = rel.class_name.constantize.find(object_id.to_s) rescue nil
+
+        # TODO: clean this logic up if possible
+        if rel.relation.ancestors.include? Mongoid::Relations::Many
+          self.send("#{field_name}").send("<<", object_model)
+        else
+          self.send("#{field_name}=", object_model)
+        end
+      else
+        self.send("#{field_name}=", data.object.to_s)
+      end
     end
   end
 
@@ -103,10 +117,13 @@ module Ladder::Resource
 
     def new_from_graph(graph)
       # Get the first object in the graph with the same RDF type as this class
-      return unless subject = graph.query([nil, RDF.type, resource_class.type]).first_subject
+      return unless subject_uri = graph.query([nil, RDF.type, resource_class.type]).first_subject
 
       new_object = self.new
-      graph.query([subject]).each_statement { |statement| new_object << statement }
+      graph.query([subject_uri]).each_statement do |statement|
+#binding.pry if statement.object.is_a? RDF::URI
+        new_object << statement
+      end
 
       new_object
     end
