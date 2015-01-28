@@ -42,10 +42,17 @@ module Ladder::Resource
 
       # If the object is a URI for a model object, retrieve the object
       if rel = relations[field_name] and data.object.is_a? RDF::URI
-        # FIXME: this fails on embedded objects because they can't be found with #find
-#binding.pry if 'part' == field_name
         return unless object_id    = data.object.to_s.match(/[0-9a-fA-F]{24}/)
-        return unless object_model = rel.class_name.constantize.find(object_id.to_s) rescue nil
+
+        # If this is an embedded object, we have to retrieve the parent
+        # FIXME: this seems unlikely and/or hacky
+        if embedded_relations[field_name]
+          object_model = rel.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) rescue nil
+        else
+          object_model = rel.class_name.constantize.find(object_id.to_s) rescue nil
+        end
+
+        return unless object_model
 
         # TODO: clean this logic up if possible
         if rel.relation.ancestors.include? Mongoid::Relations::Many
