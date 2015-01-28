@@ -142,4 +142,21 @@ shared_examples 'a Resource' do
 
   end
 
+  describe '#new_from_graph' do
+    before do
+      subject.update_resource(related: true)
+    end
+
+    let(:new_subject)  { subject.class.new_from_graph subject.resource }
+    
+    it 'should create a new object of the same class' do
+      expect(new_subject.class).to eq subject.class
+    end
+    
+    it 'should populate the same properties' do
+      expect(new_subject.as_framed_jsonld.except('@id')).to eq subject.as_framed_jsonld.except('@id')
+    end
+    
+  end
+
 end

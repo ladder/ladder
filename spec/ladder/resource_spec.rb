@@ -63,7 +63,7 @@ describe Ladder::Resource do
       subject.people << person
 
       # one-sided has-many
-      subject.class.has_and_belongs_to_many :concepts, inverse_of: nil
+      subject.class.has_and_belongs_to_many :concepts, inverse_of: nil, autosave: true
       subject.class.property :concepts, predicate: RDF::DC.subject, class_name: 'Concept'
       subject.concepts << concept
 
@@ -94,7 +94,7 @@ describe Ladder::Resource do
       expect(part.thing).to eq subject
     end
 
-    context 'with many-to-many' do
+    describe 'with many-to-many' do
       it 'should have a relation' do
         expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
         expect(subject.people.to_a).to include person
@@ -114,7 +114,7 @@ describe Ladder::Resource do
       end
     end
 
-    context 'with one-sided has-many' do
+    describe 'with one-sided has-many' do
       it 'should have a relation' do
         expect(subject.relations['concepts'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
         expect(subject.concepts.to_a).to include concept
@@ -134,7 +134,7 @@ describe Ladder::Resource do
       end
     end
 
-    context 'with embedded-one' do
+    describe 'with embedded-one' do
       it 'should have a relation' do
         expect(subject.relations['part'].relation).to eq (Mongoid::Relations::Embedded::One)
         expect(subject.part).to eq part
@@ -154,7 +154,7 @@ describe Ladder::Resource do
       end
     end
     
-    context '#update_resource with related' do
+    describe '#update_resource with related' do
       # TODO add tests for autosaved relations
       before do
         subject.update_resource(related: true)
@@ -210,7 +210,7 @@ describe Ladder::Resource do
       end
     end
 
-    context '#update_resource with related and then without related' do
+    describe '#update_resource with related and then without related' do
       # TODO add tests for autosaved relations
       before do
         subject.update_resource(related: true)
