@@ -46,7 +46,7 @@ module Ladder::Resource::Dynamic
           create_accessors field_name
 
           # Update resource properties
-          resource_class.property(field_name, predicate: term)
+          resource_class.property(field_name.to_sym, predicate: term)
         end
       end
     end

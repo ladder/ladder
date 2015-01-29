@@ -296,21 +296,22 @@ describe Ladder::Resource do
     TEST_FILE ||= './spec/shared/modsrdf.jsonld'
 
     let(:subject) { Thing.new }
+    let(:source) { open(TEST_FILE).read }
 
     before do
       class Genre
-        include Ladder::Resource
+        include Ladder::Resource::Dynamic
         configure type: RDF::LC::MADS.GenreForm
       end
 
       subject.class.configure type: RDF::LC::MODS.ModsResource
       subject.class.property :genre, predicate: RDF::LC::MODS.genre, class_name: 'Genre'
-
-      nfg = subject.class.new_from_graph RDF::Graph.load TEST_FILE
     end
     
     it 'should do something' do
       # TODO
+      nfg = subject.class.new_from_graph RDF::Graph.load TEST_FILE
+      binding.pry
     end
 
   end

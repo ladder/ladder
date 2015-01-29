@@ -44,6 +44,8 @@ module Ladder::Resource
       rel = relations[field_name]
 
       case data.object
+        
+        # Convert an RDF graph into model instances
       when RDF::Graph
         klass = rel.class_name.constantize
         value = klass.new_from_graph data.object
