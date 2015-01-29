@@ -10,7 +10,6 @@ describe Ladder::Resource do
 
     class Thing
       include Ladder::Resource
-
       configure type: RDF::DC.BibliographicResource
     end
   end
@@ -289,6 +288,31 @@ describe Ladder::Resource do
     include_context 'with relations'
 
     it_behaves_like 'a Resource'
+  end
+  
+  context 'from JSON-LD' do
+    require 'modsrdf'
+
+    TEST_FILE ||= './spec/shared/modsrdf.jsonld'
+
+    let(:subject) { Thing.new }
+
+    before do
+      class Genre
+        include Ladder::Resource
+        configure type: RDF::LC::MADS.GenreForm
+      end
+
+      subject.class.configure type: RDF::LC::MODS.ModsResource
+      subject.class.property :genre, predicate: RDF::LC::MODS.genre, class_name: 'Genre'
+
+      nfg = subject.class.new_from_graph RDF::Graph.load TEST_FILE
+    end
+    
+    it 'should do something' do
+      # TODO
+    end
+
   end
 
 end
