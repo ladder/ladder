@@ -42,7 +42,7 @@ module Ladder::Resource
 
       # If the object is a URI for a model object, retrieve the object
       if rel = relations[field_name] and data.object.is_a? RDF::URI
-        return unless object_id    = data.object.to_s.match(/[0-9a-fA-F]{24}/)
+        return unless object_id = data.object.to_s.match(/[0-9a-fA-F]{24}/)
 
         # If this is an embedded object, we have to retrieve the parent
         # FIXME: this seems unlikely and/or hacky
@@ -63,6 +63,7 @@ module Ladder::Resource
       else
         self.send("#{field_name}=", data.object.to_s)
       end
+
     end
   end
 
@@ -127,8 +128,25 @@ module Ladder::Resource
       return unless subject_uri = graph.query([nil, RDF.type, resource_class.type]).first_subject
 
       new_object = self.new
+
       graph.query([subject_uri]).each_statement do |statement|
-#binding.pry if statement.object.is_a? RDF::URI
+
+        # If the object is a BNode, recursively build the subgraph
+        if statement.object.is_a? RDF::Node
+          # Determine the model class based on the defined relation for the predicate
+          field_name = resource_class.properties.select { |name, term| term.predicate == statement.predicate }.keys.first
+          next unless field_name
+
+          klass = relations[field_name][:class_name].constantize
+          subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
+          
+          nfg = klass.new_from_graph subgraph
+          nfg.save
+
+          # Replace the BNode reference with the URI for the new object
+          statement.object = nfg.resource.rdf_subject
+        end
+
         new_object << statement
       end
 
