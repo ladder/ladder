@@ -49,14 +49,6 @@ module Ladder::Resource
         value = klass.new_from_graph data.object
         return unless value
 
-        # TODO: clean this logic up if possible
-        if rel.relation.ancestors.include? Mongoid::Relations::Many
-#          self.send("#{field_name}").send("<<", value)
-          self.send(:push, {field_name.to_sym => value})
-        else
-          self.send("#{field_name}=", value)
-        end
-
       when RDF::URI
 
         # If the object is a URI for a model object, retrieve the object
@@ -72,23 +64,16 @@ module Ladder::Resource
           end
           return unless value
 
-          # TODO: clean this logic up if possible
-          if rel.relation.ancestors.include? Mongoid::Relations::Many
-#            self.send("#{field_name}").send("<<", value)
-            self.send(:push, {field_name.to_sym => value})
-          else
-            self.send("#{field_name}=", value)
-          end
+        end # end if
+      end # end case
 
-        # ELSE
-        else
-          value = data.object.to_s
-          self.send("#{field_name}=", data.object.to_s)
-        end
-
-      else
-        self.send("#{field_name}=", data.object.to_s)
+      if rel and rel.relation.ancestors.include? Mongoid::Relations::Many
+        sender = :push
+        value = {field_name.to_sym => value}
       end
+
+      self.send(sender ? sender : "#{field_name}=", value ? value : data.object.to_s)
+
     end
   end
 
@@ -156,28 +141,10 @@ module Ladder::Resource
       new_object = self.new
 
       graph.query([subject_uri]).each_statement do |statement|
-
         # If the object is a BNode or local URI, pass the subgraph
         subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
         statement.object = subgraph unless subgraph.empty?
-=begin
-        # If the object is a BNode, recursively build the subgraph
-        if statement.object.is_a? RDF::Node
 
-          # Determine the model class based on the defined relation for the predicate
-          field_name = resource_class.properties.select { |name, term| term.predicate == statement.predicate }.keys.first
-          next unless field_name
-
-          klass = relations[field_name][:class_name].constantize
-          subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
-
-          nfg = klass.new_from_graph subgraph
-          nfg.save
-
-          # Replace the BNode reference with the URI for the new object
-          statement.object = nfg.resource.rdf_subject
-        end
-=end
         new_object << statement
       end
 
