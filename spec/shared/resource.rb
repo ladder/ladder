@@ -154,8 +154,7 @@ shared_examples 'a Resource' do
     end
     
     it 'should populate the same properties' do
-      # FIXME: this will fail on a (valid) cloned embedded object due to ID differences
-      expect(new_subject.as_framed_jsonld.except('@id')).to eq subject.as_framed_jsonld.except('@id')
+      expect(new_subject.as_framed_jsonld).to eq subject.as_framed_jsonld
     end
     
   end

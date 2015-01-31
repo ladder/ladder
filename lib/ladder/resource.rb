@@ -32,50 +32,34 @@ module Ladder::Resource
 
   ##
   # Push RDF statement into resource
-  def <<(data)
+  def <<(statement, &block)
     # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
-    data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+    statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
     # Only push statement if the statement's predicate is defined on the class
-    if resource_class.properties.values.map(&:predicate).include? data.predicate
-      field_name = resource_class.properties.select { |name, term| term.predicate == data.predicate }.keys.first
-      return unless field_name # property is not defined, so ignore this statement
+    defined_prop = resource_class.properties.detect { |name, term| term.predicate == statement.predicate }
+    return unless defined_prop
+    
+    # Objects can be one of:
+    #
+    # 1. BNode
+    # 2. A URI
+    #    a. Internal model
+    #    b. External
+    # 3. A literal
+    #    a. Plain
+    #    b. Language-typed
 
-      rel = relations[field_name]
+    field_name = defined_prop.first
+#    rel = relations[field_name]
+    value = statement.object.to_s
+    value = yield(field_name) || value if block_given?
 
-      case data.object
-        
-        # Convert an RDF graph into model instances
-      when RDF::Graph
-        klass = rel.class_name.constantize
-        value = klass.new_from_graph data.object
-        return unless value
-
-      when RDF::URI
-
-        # If the object is a URI for a model object, retrieve the object
-        if rel
-          return unless object_id = data.object.to_s.match(/[0-9a-fA-F]{24}/)
-
-          # If this is an embedded object, we have to retrieve the parent
-          # FIXME: this seems unlikely and/or hacky
-          if embedded_relations[field_name]
-            value = rel.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) rescue nil
-          else
-            value = rel.class_name.constantize.find(object_id.to_s) rescue nil
-          end
-          return unless value
-
-        end # end if
-      end # end case
-
-      if rel and rel.relation.ancestors.include? Mongoid::Relations::Many
-        sender = :push
-        value = {field_name.to_sym => value}
-      end
-
-      self.send(sender ? sender : "#{field_name}=", value ? value : data.object.to_s)
-
+    # if rel and rel.relation.ancestors.include? Mongoid::Relations::Many
+    if self.send(field_name).is_a? Enumerable
+      self.send(:push, {field_name.to_sym => value})
+    else
+      self.send("#{field_name}=", value)
     end
   end
 
@@ -140,15 +124,93 @@ module Ladder::Resource
       # Get the first object in the graph with the same RDF type as this class
       return unless subject_uri = graph.query([nil, RDF.type, resource_class.type]).first_subject
 
+      # TODO: if the subject_uri is an existing model, just retrieve it?
       new_object = self.new
 
       graph.query([subject_uri]).each_statement do |statement|
-        # If the object is a BNode or local URI, pass the subgraph
-        subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
-        statement.object = subgraph unless subgraph.empty?
 
-        new_object << statement
-      end
+        case statement.object
+          when RDF::Node
+
+            # FIXME: this breaks when using a dynamic resource
+            new_object.send(:<<, statement) do |field_name|
+              return unless relation = relations[field_name]
+
+              klass = relation.class_name.constantize
+              subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
+              klass.new_from_graph subgraph
+            end
+=begin
+            # If the predicate is defined on the class
+            if defined_prop = resource_class.properties.detect { |name, term| term.predicate == statement.predicate }
+              field_name = defined_prop.first
+              rel = relations[field_name]
+            end
+
+            next unless defined_prop
+
+            klass = rel.class_name.constantize
+            subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
+            value = klass.new_from_graph subgraph
+            next unless value
+
+            if rel and rel.relation.ancestors.include? Mongoid::Relations::Many
+              new_object.send(:push, {field_name.to_sym => value})
+            else
+              new_object.send("#{field_name}=", value)
+            end
+=end
+          when RDF::URI
+
+            # FIXME: this breaks when using a dynamic resource
+            new_object.send(:<<, statement) do |field_name|
+              return unless relation = relations[field_name]
+
+              # If the object is a URI for a model object, retrieve the object
+              return unless object_id = statement.object.to_s.match(/[0-9a-fA-F]{24}/)
+
+              # If this is an embedded object, we have to retrieve the parent
+              # FIXME: this seems unlikely and/or hacky
+              if embedded_relations[field_name]
+                value = relation.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) rescue nil
+              else
+                value = relation.class_name.constantize.find(object_id.to_s) rescue nil
+              end
+
+            end
+=begin
+            # If the predicate is defined on the class
+            if defined_prop = resource_class.properties.detect { |name, term| term.predicate == statement.predicate }
+              field_name = defined_prop.first
+              rel = relations[field_name]
+            end
+            
+            next unless defined_prop
+
+            # If the object is a URI for a model object, retrieve the object
+            next unless object_id = statement.object.to_s.match(/[0-9a-fA-F]{24}/)
+
+            # If this is an embedded object, we have to retrieve the parent
+            # FIXME: this seems unlikely and/or hacky
+            if embedded_relations[field_name]
+              value = rel.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) rescue nil
+            else
+              value = rel.class_name.constantize.find(object_id.to_s) rescue nil
+            end
+            next unless value
+
+            if rel and rel.relation.ancestors.include? Mongoid::Relations::Many
+              new_object.send(:push, {field_name.to_sym => value})
+            else
+              new_object.send("#{field_name}=", value)
+            end
+=end
+          else
+            new_object << statement
+
+        end # end case
+
+      end # end each
 
       new_object
     end

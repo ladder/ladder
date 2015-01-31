@@ -57,8 +57,8 @@ module Ladder::Resource::Dynamic
       return unless self._types
 
       self._types.each do |rdf_type|
-        unless resource.type.include? uri = RDF::Vocabulary.find_term(rdf_type)
-          resource << RDF::Statement.new(rdf_subject, RDF.type, uri)
+        unless resource.type.include? term = RDF::Vocabulary.find_term(rdf_type)
+          resource << RDF::Statement.new(rdf_subject, RDF.type, term)
         end
       end
     end
@@ -88,7 +88,7 @@ module Ladder::Resource::Dynamic
     # Overload Ladder #<<
     #
     # @see Ladder::Resource
-    def <<(data)
+    def <<(data, &block)
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
 
@@ -111,7 +111,7 @@ module Ladder::Resource::Dynamic
         property field_name, predicate: data.predicate
       end
 
-      super(data)
+      super
     end
 
     private

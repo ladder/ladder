@@ -300,7 +300,7 @@ describe Ladder::Resource do
 
     before do
       class Genre
-        include Ladder::Resource::Dynamic
+        include Ladder::Resource#::Dynamic
         configure type: RDF::LC::MADS.GenreForm
       end
 
