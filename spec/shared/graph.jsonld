@@ -1,0 +1,31 @@
+{
+    "@context": {
+        "dc": "http://purl.org/dc/terms/",
+        "skos": "http://www.w3.org/2004/02/skos/core#"
+    },
+    "@id": "_:b1",
+    "@type": "dc:BibliographicResource",
+    "dc:alternative": "Mumintrollet pa kometjakt",
+    "dc:creator": {
+        "@id": "_:b2",
+        "@type": "dc:AgentClass",
+        "dc:relation": {
+            "@id": "_:b1"
+        }
+    },
+    "dc:hasPart": {
+        "@id": "_:b3",
+        "@type": "dc:PhysicalResource",
+        "dc:relation": {
+            "@id": "_:b1"
+        }
+    },
+    "dc:subject": {
+        "@id": "_:b4",
+        "@type": "skos:Concept"
+    },
+    "dc:title": {
+        "@value": "Comet in Moominland",
+        "@language": "en"
+    }
+}

@@ -130,7 +130,6 @@ module Ladder::Resource
 
         case statement.object
           when RDF::Node
-            # FIXME: this breaks when using a dynamic resource
             new_object.send(:<<, statement) do |field_name|
               return unless relation = relations[field_name]
 
@@ -140,7 +139,6 @@ module Ladder::Resource
             end
 
           when RDF::URI
-            # FIXME: this breaks when using a dynamic resource
             new_object.send(:<<, statement) do |field_name|
               return unless relation = relations[field_name]
 

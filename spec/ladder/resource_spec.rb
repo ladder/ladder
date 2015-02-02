@@ -101,23 +101,13 @@ describe Ladder::Resource do
   end
   
   context 'from JSON-LD' do
-    require 'modsrdf'
-
-    TEST_FILE ||= './spec/shared/modsrdf.jsonld'
+    TEST_FILE ||= './spec/shared/graph.jsonld'
 
     let(:subject) { Thing.new }
-    let(:source) { open(TEST_FILE).read }
 
-    before do
-      class Genre
-        include Ladder::Resource::Dynamic
-        configure type: RDF::LC::MADS.GenreForm
-      end
+    include_context 'with data'
+    include_context 'with relations'
 
-      subject.class.configure type: RDF::LC::MODS.ModsResource
-      subject.class.property :genre, predicate: RDF::LC::MODS.genre, class_name: 'Genre'
-    end
-    
     it 'should do something' do
       # TODO
       nfg = subject.class.new_from_graph RDF::Graph.load TEST_FILE
