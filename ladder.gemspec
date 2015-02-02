@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "mongoid", "~> 4.0"
   spec.add_dependency "mongoid-grid_fs", "~> 2.1"
 
+  spec.add_development_dependency "awesome_print", "~> 1.6"
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "mimemagic", "~> 0.2"
   spec.add_development_dependency "pry", "~> 0.10"
