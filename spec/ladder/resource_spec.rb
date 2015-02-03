@@ -38,7 +38,7 @@ describe Ladder::Resource do
     let(:person)  { Person.new }
     let(:concept) { Concept.new }
     let(:part)    { Part.new }
-    
+
     before do
       class Person
         include Ladder::Resource
@@ -99,7 +99,7 @@ describe Ladder::Resource do
     it_behaves_like 'a Resource'
     it_behaves_like 'a Resource with relations'
   end
-  
+
   context 'from JSON-LD' do
     TEST_FILE ||= './spec/shared/graph.jsonld'
 

@@ -15,5 +15,5 @@ module Ladder::Searchable
 
     include Ladder::Searchable::Resource if self.ancestors.include? Ladder::Resource
     include Ladder::Searchable::File     if self.ancestors.include? Ladder::File
-  end  
+  end
 end

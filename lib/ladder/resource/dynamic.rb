@@ -31,9 +31,9 @@ module Ladder::Resource::Dynamic
     # Dynamic field accessors (Mongoid)
     def create_accessors(field_name)
       define_singleton_method(field_name) { read_attribute(field_name) }
-      define_singleton_method("#{field_name}=") { |value| write_attribute(field_name, value) } 
+      define_singleton_method("#{field_name}=") { |value| write_attribute(field_name, value) }
     end
-    
+
     ##
     # Apply dynamic fields and properties to this instance
     def apply_context
@@ -50,7 +50,7 @@ module Ladder::Resource::Dynamic
         end
       end
     end
-    
+
     ##
     # Apply dynamic types to this instance
     def apply_types

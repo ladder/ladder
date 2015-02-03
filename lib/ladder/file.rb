@@ -23,7 +23,7 @@ module Ladder::File
   end
 
   attr_accessor :file
-  
+
   ##
   # Output content of object from stored file or readable input
   def data
@@ -33,13 +33,13 @@ module Ladder::File
     file.rewind if file.respond_to? :rewind
     file.read
   end
-  
+
   ##
   # Return an empty ActiveTriples resource for serializing related resources
   def update_resource
     resource
   end
-  
+
   private
 
     ##

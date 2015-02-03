@@ -1,6 +1,6 @@
 module Ladder::Searchable::Resource
   extend ActiveSupport::Concern
-  
+
   def as_indexed_json(opts = {})
     respond_to?(:serialized_json) ? serialized_json : as_json(except: [:id, :_id])
   end
@@ -15,5 +15,5 @@ module Ladder::Searchable::Resource
     end
 
   end
-    
+
 end

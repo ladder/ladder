@@ -39,7 +39,7 @@ module Ladder::Resource
     # Only push statement if the statement's predicate is defined on the class
     defined_prop = resource_class.properties.detect { |name, term| term.predicate == statement.predicate }
     return unless defined_prop
-    
+
     # Objects can be one of:
     #
     # 1. BNode
@@ -78,7 +78,7 @@ module Ladder::Resource
         self.send(name)
       end
     end
-    
+
     def update_from_relation(name, opts = {})
       objects = self.send(name).to_a
 
@@ -100,7 +100,7 @@ module Ladder::Resource
   public
 
   module ClassMethods
-    
+
     ##
     # Overload ActiveTriples #property
     #

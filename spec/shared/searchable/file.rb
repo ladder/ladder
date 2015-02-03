@@ -18,7 +18,7 @@ shared_context 'a Searchable File' do
       expect(results.first.fields.file.first).to include 'Moomin'
     end
   end
-  
+
   describe '#save with update' do
     before do
       subject.save

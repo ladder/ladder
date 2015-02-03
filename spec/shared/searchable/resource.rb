@@ -41,7 +41,7 @@ shared_examples 'a Searchable' do
         expect(results.count).to eq 1
         expect(results.first._source.to_hash).to eq subject.as_jsonld
       end
-    end  
+    end
 
   end
 
@@ -219,5 +219,5 @@ shared_examples 'a Searchable with related' do
       end
 
   end
-  
+
 end

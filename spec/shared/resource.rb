@@ -11,11 +11,11 @@ shared_examples 'a Resource' do
       it 'should return non-localized value' do
         expect(subject.alt).to eq 'Mumintrollet pa kometjakt'
       end
-      
+
       it 'should not be a localized hash' do
         expect(subject.attributes['alt']).to eq 'Mumintrollet pa kometjakt'
       end
-      
+
       it 'should have a valid predicate' do
         expect(subject.class.properties['alt'].predicate).to eq RDF::DC.alternative
       end
@@ -25,16 +25,16 @@ shared_examples 'a Resource' do
         expect(subject.class.properties['alt'].predicate).to eq RDF::DC.title
       end
     end
-    
+
     context 'with localized literal' do
       it 'should return localized value' do
         expect(subject.title).to eq 'Comet in Moominland'
       end
-      
+
       it 'should return all locales' do
         expect(subject.attributes['title']).to eq({'en' => 'Comet in Moominland'})
       end
-      
+
       it 'should have a valid predicate' do
         expect(subject.class.properties['title'].predicate).to eq RDF::DC.title
       end
@@ -56,7 +56,7 @@ shared_examples 'a Resource' do
         expect(s.object.to_s).to eq 'Comet in Moominland'
       end
     end
-    
+
     it 'should have a localized literal object' do
       subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.alternative).each_statement do |s|
         expect(s.object.to_s).to eq 'Mumintrollet pa kometjakt'
@@ -73,7 +73,7 @@ shared_examples 'a Resource' do
       before do
         subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
       end
-    
+
       it 'should update existing values' do
         expect(subject.title).to eq 'Kometen kommer'
       end
@@ -89,7 +89,7 @@ shared_examples 'a Resource' do
         expect(subject.resource.query(predicate: RDF::DC.description)).to be_empty
       end
     end
-    
+
     context 'with a RDF type' do
       before do
         subject << RDF::Statement(nil, RDF.type, RDF::DC.PhysicalResource)
@@ -106,7 +106,7 @@ shared_examples 'a Resource' do
         subject.class.property :identifier, predicate: RDF::DC.identifier
         subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
       end
-    
+
       it 'should store the URI as a string' do
         expect(subject.identifier).to eq 'http://some.uri'
       end
@@ -148,15 +148,15 @@ shared_examples 'a Resource' do
     end
 
     let(:new_subject)  { subject.class.new_from_graph subject.resource }
-    
+
     it 'should create a new object of the same class' do
       expect(new_subject.class).to eq subject.class
     end
-    
+
     it 'should populate the same properties' do
       expect(new_subject.as_framed_jsonld).to eq subject.as_framed_jsonld
     end
-    
+
   end
 
 end
@@ -185,7 +185,7 @@ shared_examples 'a Resource with relations' do
     describe '#as_framed_jsonld' do
       it 'should output a valid framed jsonld representation of itself and related' do
         framed_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_framed_jsonld)
-        related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)          
+        related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
         expect(framed_graph.to_hash).to eq related_graph.to_hash
       end
     end
@@ -262,7 +262,7 @@ shared_examples 'a Resource with relations' do
       expect(part.class.properties['thing'].predicate).to eq RDF::DC.relation
     end
   end
-  
+
   describe '#update_resource with related' do
     # TODO add tests for autosaved relations
     before do
@@ -308,7 +308,7 @@ shared_examples 'a Resource with relations' do
       query = person.resource.query(subject: person.rdf_subject, predicate: RDF::DC.relation)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
-      
+
       # one-sided has-many
       expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
@@ -330,7 +330,7 @@ shared_examples 'a Resource with relations' do
       expect(subject.resource.query(subject: person.rdf_subject)).to be_empty
       expect(subject.resource.query(subject: concept.rdf_subject)).to be_empty
     end
-    
+
     it 'should have embedded object relations' do
       query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
       expect(query.count).to eq 1
@@ -342,7 +342,7 @@ shared_examples 'a Resource with relations' do
       query = person.resource.query(subject: person.rdf_subject, predicate: RDF::DC.relation)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
-      
+
       # one-sided has-many
       expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
@@ -352,5 +352,5 @@ shared_examples 'a Resource with relations' do
       expect(query.first_object).to eq subject.rdf_subject
     end
   end
-  
+
 end

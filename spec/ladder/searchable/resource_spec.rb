@@ -48,7 +48,7 @@ describe Ladder::Searchable::Resource do
       person.class.property :things, predicate: RDF::DC.relation, class_name: 'Thing'
       subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
       subject.people << person
-    end    
+    end
   end
 
   context 'with data' do
@@ -62,7 +62,7 @@ describe Ladder::Searchable::Resource do
   context 'with relations' do
     let(:subject) { Thing.new }
     let(:person)  { Person.new }
-    
+
     before do
       class Person
         include Ladder::Resource

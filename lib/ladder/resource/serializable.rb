@@ -50,5 +50,5 @@ module Ladder::Resource::Serializable
 
     JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
   end
-  
+
 end
