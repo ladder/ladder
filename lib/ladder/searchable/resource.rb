@@ -6,14 +6,11 @@ module Ladder::Searchable::Resource
   end
 
   module ClassMethods
-
     ##
     # Specify type of serialization to use for indexing
     #
     def index_for_search(opts = {}, &block)
       define_method(:serialized_json, block)
     end
-
   end
-
 end

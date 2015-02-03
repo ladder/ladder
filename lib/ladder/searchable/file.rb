@@ -18,7 +18,7 @@ module Ladder::Searchable::File
     end
 
     # Explicitly set mapping definition on index
-    self.__elasticsearch__.create_index!
+    __elasticsearch__.create_index!
   end
 
   ##
@@ -26,5 +26,4 @@ module Ladder::Searchable::File
   def as_indexed_json(opts = {})
     { file: Base64.encode64(data) }
   end
-
 end

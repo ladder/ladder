@@ -32,7 +32,7 @@ shared_examples 'a Resource' do
       end
 
       it 'should return all locales' do
-        expect(subject.attributes['title']).to eq({'en' => 'Comet in Moominland'})
+        expect(subject.attributes['title']).to eq('en' => 'Comet in Moominland')
       end
 
       it 'should have a valid predicate' do
@@ -205,12 +205,12 @@ shared_examples 'a Resource with relations' do
 
   describe 'with many-to-many' do
     it 'should have a relation' do
-      expect(subject.relations['people'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
+      expect(subject.relations['people'].relation).to eq Mongoid::Relations::Referenced::ManyToMany
       expect(subject.people.to_a).to include person
     end
 
     it 'should have an inverse relation' do
-      expect(person.relations['things'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
+      expect(person.relations['things'].relation).to eq Mongoid::Relations::Referenced::ManyToMany
       expect(person.things.to_a).to include subject
     end
 
@@ -225,7 +225,7 @@ shared_examples 'a Resource with relations' do
 
   describe 'with one-sided has-many' do
     it 'should have a relation' do
-      expect(subject.relations['concepts'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
+      expect(subject.relations['concepts'].relation).to eq Mongoid::Relations::Referenced::ManyToMany
       expect(subject.concepts.to_a).to include concept
     end
 
@@ -245,12 +245,12 @@ shared_examples 'a Resource with relations' do
 
   describe 'with embedded-one' do
     it 'should have a relation' do
-      expect(subject.relations['part'].relation).to eq (Mongoid::Relations::Embedded::One)
+      expect(subject.relations['part'].relation).to eq Mongoid::Relations::Embedded::One
       expect(subject.part).to eq part
     end
 
     it 'should have an inverse relation' do
-      expect(part.relations['thing'].relation).to eq (Mongoid::Relations::Embedded::In)
+      expect(part.relations['thing'].relation).to eq Mongoid::Relations::Embedded::In
       expect(part.thing).to eq subject
     end
 
@@ -264,7 +264,7 @@ shared_examples 'a Resource with relations' do
   end
 
   describe '#update_resource with related' do
-    # TODO add tests for autosaved relations
+    # TODO: add tests for autosaved relations
     before do
       subject.update_resource(related: true)
     end
@@ -320,7 +320,7 @@ shared_examples 'a Resource with relations' do
   end
 
   describe '#update_resource with related and then without related' do
-    # TODO add tests for autosaved relations
+    # TODO: add tests for autosaved relations
     before do
       subject.update_resource(related: true)
       subject.update_resource # implicit false

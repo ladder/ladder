@@ -53,7 +53,7 @@ shared_examples 'a File' do
 
     it 'should have a #content_type' do
       source_type = MimeMagic.by_magic(source).to_s
-      expect(subject.content_type).to eq source_type.empty? ? "application/octet-stream" : source_type
+      expect(subject.content_type).to eq source_type.empty? ? 'application/octet-stream' : source_type
     end
   end
 

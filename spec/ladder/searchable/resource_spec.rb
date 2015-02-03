@@ -19,7 +19,7 @@ describe Ladder::Searchable::Resource do
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
+    Object.send(:remove_const, 'Thing') if Object
   end
 
   shared_context 'with data' do
@@ -71,7 +71,7 @@ describe Ladder::Searchable::Resource do
     end
 
     after do
-      Object.send(:remove_const, "Person") if Object
+      Object.send(:remove_const, 'Person') if Object
     end
 
     include_context 'with data'

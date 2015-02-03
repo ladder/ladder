@@ -17,7 +17,7 @@ describe Ladder::Resource::Dynamic do
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
+    Object.send(:remove_const, 'Thing') if Object
   end
 
   context 'with data' do
@@ -44,7 +44,7 @@ describe Ladder::Resource::Dynamic do
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({description: RDF::DC.description.to_uri.to_s})
+          expect(subject._context).to eq(description: RDF::DC.description.to_uri.to_s)
         end
 
         it 'should build an accessor' do
@@ -55,15 +55,15 @@ describe Ladder::Resource::Dynamic do
       context 'with conflicting property' do
         before do
           subject.property :title, predicate: RDF::DC11.title
-          subject.dc11_title = "Kometjakten"
+          subject.dc11_title = 'Kometjakten'
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({dc11_title: RDF::DC11.title.to_uri.to_s})
+          expect(subject._context).to eq(dc11_title: RDF::DC11.title.to_uri.to_s)
         end
 
         it 'should build an accessor' do
-          expect(subject.dc11_title).to eq "Kometjakten"
+          expect(subject.dc11_title).to eq 'Kometjakten'
         end
       end
     end
@@ -76,13 +76,13 @@ describe Ladder::Resource::Dynamic do
 
         # conflicting property
         subject.property :title, predicate: RDF::DC11.title
-        subject.dc11_title = "Kometjakten"
+        subject.dc11_title = 'Kometjakten'
 
         # defined field
         subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
 
         # conflicting property
-        subject << RDF::Statement(nil, RDF::DC.alternative, "Kometjakten")
+        subject << RDF::Statement(nil, RDF::DC.alternative, 'Kometjakten')
 
         # URI value
         subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
@@ -96,9 +96,9 @@ describe Ladder::Resource::Dynamic do
       it 'should have updated values' do
         expect(subject.resource.statements.count).to eq 7
         expect(subject.resource.query(predicate: RDF::DC.description, object: "Second in Tove Jansson's series of Moomin books").count).to eq 1
-        expect(subject.resource.query(predicate: RDF::DC11.title, object: "Kometjakten").count).to eq 1
+        expect(subject.resource.query(predicate: RDF::DC11.title, object: 'Kometjakten').count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC.title, object: RDF::Literal.new('Kometen kommer', language: :en)).count).to eq 1
-        expect(subject.resource.query(predicate: RDF::DC.alternative, object: "Kometjakten").count).to eq 1
+        expect(subject.resource.query(predicate: RDF::DC.alternative, object: 'Kometjakten').count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC.identifier, object: RDF::URI('http://some.uri')).count).to eq 1
       end
 
@@ -130,7 +130,7 @@ describe Ladder::Resource::Dynamic do
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({ description: RDF::DC.description.to_uri.to_s })
+          expect(subject._context).to eq(description: RDF::DC.description.to_uri.to_s)
         end
 
         it 'should build an accessor' do
@@ -140,15 +140,15 @@ describe Ladder::Resource::Dynamic do
 
       context 'with conflicting property' do
         before do
-          subject << RDF::Statement(nil, RDF::DC11.title, "Kometjakten")
+          subject << RDF::Statement(nil, RDF::DC11.title, 'Kometjakten')
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({ dc11_title: RDF::DC11.title.to_uri.to_s })
+          expect(subject._context).to eq(dc11_title: RDF::DC11.title.to_uri.to_s)
         end
 
         it 'should build an accessor' do
-          expect(subject.dc11_title).to eq "Kometjakten"
+          expect(subject.dc11_title).to eq 'Kometjakten'
         end
       end
 

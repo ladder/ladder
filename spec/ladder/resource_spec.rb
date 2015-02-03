@@ -16,7 +16,7 @@ describe Ladder::Resource do
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
+    Object.send(:remove_const, 'Thing') if Object
   end
 
   shared_context 'with data' do
@@ -76,7 +76,7 @@ describe Ladder::Resource do
     end
 
     after do
-      Object.send(:remove_const, "Person") if Object
+      Object.send(:remove_const, 'Person') if Object
       Object.send(:remove_const, 'Concept') if Object
       Object.send(:remove_const, 'Part') if Object
     end

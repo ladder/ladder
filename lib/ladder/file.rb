@@ -42,21 +42,20 @@ module Ladder::File
 
   private
 
-    ##
-    # Make save behave like Mongoid::Document as much as possible
-    def save_file(&block)
-      attributes[:content_type] = file.content_type if file.respond_to? :content_type
-      @grid_file ? @grid_file.save : !! @grid_file = self.class.grid.put(file, attributes.symbolize_keys)
+  ##
+  # Make save behave like Mongoid::Document as much as possible
+  def save_file(&block)
+    attributes[:content_type] = file.content_type if file.respond_to? :content_type
+    @grid_file ? @grid_file.save : !! @grid_file = self.class.grid.put(file, attributes.symbolize_keys)
 
-      persisted? ? run_callbacks(:update) : run_callbacks(:create)
-    end
+    persisted? ? run_callbacks(:update) : run_callbacks(:create)
+  end
 
   module ClassMethods
     ##
     # Create a namespaced GridFS module for this class
     def grid
-     @grid ||= Mongoid::GridFs.build_namespace_for name
+      @grid ||= Mongoid::GridFs.build_namespace_for name
     end
   end
-
 end

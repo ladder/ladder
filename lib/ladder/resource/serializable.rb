@@ -6,20 +6,20 @@ module Ladder::Resource::Serializable
   #
   # @see ActiveTriples::Resource#dump
   def as_jsonld(opts = {})
-    JSON.parse update_resource(opts.slice :related).dump(:jsonld, {standard_prefixes: true}.merge(opts))
+    JSON.parse update_resource(opts.slice :related).dump(:jsonld, { standard_prefixes: true }.merge(opts))
   end
 
   ##
   # Generate a qname-based JSON representation
   #
   def as_qname(opts = {})
-    qname_hash = type.empty? ? {} : {rdf: {type: type.first.pname }}
+    qname_hash = type.empty? ? {} : { rdf: { type: type.first.pname } }
 
     resource_class.properties.each do |field_name, property|
       ns, name = property.predicate.qname
       qname_hash[ns] ||= Hash.new
 
-      object = self.send(field_name)
+      object = send(field_name)
 
       if relations.keys.include? field_name
         if opts[:related]
@@ -45,10 +45,9 @@ module Ladder::Resource::Serializable
     json_hash = as_jsonld related: true
 
     context = json_hash['@context']
-    frame = {'@context' => context}
+    frame = { '@context' => context }
     frame['@type'] = type.first.pname unless type.empty?
 
     JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
   end
-
 end

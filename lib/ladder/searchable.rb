@@ -11,9 +11,9 @@ module Ladder::Searchable
 
   included do
     include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks unless self.ancestors.include? Ladder::Searchable::Background
+    include Elasticsearch::Model::Callbacks unless ancestors.include? Ladder::Searchable::Background
 
-    include Ladder::Searchable::Resource if self.ancestors.include? Ladder::Resource
-    include Ladder::Searchable::File     if self.ancestors.include? Ladder::File
+    include Ladder::Searchable::Resource if ancestors.include? Ladder::Resource
+    include Ladder::Searchable::File     if ancestors.include? Ladder::File
   end
 end
