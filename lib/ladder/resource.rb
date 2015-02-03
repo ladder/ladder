@@ -37,18 +37,8 @@ module Ladder::Resource
     statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
     # Only push statement if the statement's predicate is defined on the class
-    defined_prop = resource_class.properties.detect { |name, term| term.predicate == statement.predicate }
+    defined_prop = resource_class.properties.find { |name, term| term.predicate == statement.predicate }
     return unless defined_prop
-
-    # Objects can be one of:
-    #
-    # 1. BNode
-    # 2. A URI
-    #    a. Internal model
-    #    b. External
-    # 3. A literal
-    #    a. Plain
-    #    b. Language-typed
 
     field_name = defined_prop.first
 
@@ -127,6 +117,16 @@ module Ladder::Resource
       new_object = new
 
       graph.query([subject_uri]).each_statement do |statement|
+
+        # Objects can be one of:
+        #
+        # 1. BNode
+        # 2. A URI
+        #    a. Internal model
+        #    b. External
+        # 3. A literal
+        #    a. Plain
+        #    b. Language-typed
 
         case statement.object
         when RDF::Node
