@@ -109,9 +109,28 @@ describe Ladder::Resource do
     include_context 'with relations'
 
     it 'should do something' do
-      # TODO
-      nfg = subject.class.new_from_graph RDF::Graph.load TEST_FILE
-      binding.pry
+      # TODO: clean this up
+      def remove_ids(x)
+        if x.is_a?(Hash)
+          x.reduce({}) do |m, (k, v)|
+            m[k] = remove_ids(v) unless k == '@id'
+            m
+          end
+        else
+          x
+        end
+      end
+
+      graph = RDF::Graph.load TEST_FILE
+      new_subject = subject.class.new_from_graph(graph)
+
+      # Frame loaded RDF graph
+      json_hash = JSON.parse graph.dump(:jsonld, standard_prefixes: true)
+      context = json_hash['@context']
+      frame = { '@context' => context, '@type' => 'dc:BibliographicResource' }
+      framed_jsonld = JSON::LD::API.compact(JSON::LD::API.frame(json_hash, frame), context)
+
+      expect(remove_ids(new_subject.as_framed_jsonld)).to eq remove_ids(framed_jsonld)
     end
 
   end

@@ -124,15 +124,16 @@ module Ladder::Resource
       super
     end
 
-    def new_from_graph(graph)
+    def new_from_graph(graph, objects = {})
       # Get the first object in the graph with the same RDF type as this class
-      subject_id = graph.query([nil, RDF.type, resource_class.type]).first_subject
-      return unless subject_id
+      root_subject = graph.query([nil, RDF.type, resource_class.type]).first_subject
+      return unless root_subject
 
       # TODO: if the subject is an existing model, just retrieve it?
       new_object = new
+      objects[root_subject] = new_object
 
-      graph.query([subject_id]).each_statement do |statement|
+      graph.query([root_subject]).each_statement do |statement|
 
         # Objects can be one of:
         #
@@ -146,12 +147,18 @@ module Ladder::Resource
 
         if statement.object.is_a? RDF::Node
           new_object.send(:<<, statement) do |field_name|
-            relation = relations[field_name]
-            return unless relation
 
-            klass = relation.class_name.constantize
-            subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
-            klass.new_from_graph subgraph
+            # If we haven't processed this object before, do so now
+            unless objects[statement.object]
+              relation = relations[field_name]
+              return unless relation
+
+              # create the new object
+              klass = relation.class_name.constantize
+              objects[statement.object] = klass.new_from_graph(graph, objects)
+            end
+
+            objects[statement.object]
           end
         else
           new_object << statement
