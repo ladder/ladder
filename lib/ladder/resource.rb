@@ -129,6 +129,7 @@ module Ladder::Resource
         #    b. Language-typed
 
         case statement.object
+        # 1. BNode
         when RDF::Node
           new_object.send(:<<, statement) do |field_name|
             relation = relations[field_name]
@@ -139,6 +140,7 @@ module Ladder::Resource
             klass.new_from_graph subgraph
           end
 
+        # 2a. Internal model URI
         when RDF::URI
           new_object.send(:<<, statement) do |field_name|
             relation = relations[field_name]
@@ -157,10 +159,12 @@ module Ladder::Resource
             end
           end # end do
 
+        # 2b. External URI
+        # 3. A literal
         else new_object << statement
         end # end case
 
-      end # end each
+      end # end each_statement
 
       new_object
     end
