@@ -135,16 +135,7 @@ module Ladder
         objects[root_subject] = new_object
 
         graph.query([root_subject]).each_statement do |statement|
-          # Objects can be one of:
-          #
-          # 1. BNode
-          # 2. A URI
-          #    a. Internal model
-          #    b. External
-          # 3. A literal
-          #    a. Plain
-          #    b. Language-typed
-
+          # Dereference the object if it's a BNode
           if statement.object.is_a? RDF::Node
             new_object.send(:<<, statement) do |field_name|
               # If we haven't processed this object before, do so now

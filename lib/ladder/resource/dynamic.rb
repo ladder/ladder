@@ -3,8 +3,9 @@ module Ladder
     module Dynamic
       extend ActiveSupport::Concern
 
+      include Ladder::Resource
+
       included do
-        include Ladder::Resource
         include InstanceMethods
 
         field :_context, type: Hash
