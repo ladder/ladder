@@ -1,5 +1,4 @@
 shared_examples 'a Resource' do
-
   describe 'LADDER_BASE_URI' do
     it 'should automatically have a base URI' do
       expect(subject.rdf_subject.parent).to eq RDF::URI('http://example.org/things/')
@@ -96,7 +95,7 @@ shared_examples 'a Resource' do
       end
 
       it 'should only contain types defined on the class' do
-#        expect(subject.type.count).to eq 1
+        # expect(subject.type.count).to eq 1
         expect(subject.type).to include RDF::DC.BibliographicResource
       end
     end
@@ -126,7 +125,6 @@ shared_examples 'a Resource' do
   end
 
   context 'a serializable' do
-
     describe '#as_jsonld' do
       it 'should output a valid jsonld representation of itself' do
         graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
@@ -139,7 +137,6 @@ shared_examples 'a Resource' do
         # TODO
       end
     end
-
   end
 
   describe '#new_from_graph' do
@@ -168,13 +165,10 @@ shared_examples 'a Resource' do
 
       expect(remove_ids(new_subject.as_framed_jsonld)).to eq remove_ids(subject.as_framed_jsonld)
     end
-
   end
-
 end
 
 shared_examples 'a Resource with relations' do
-
   describe 'serializable' do
     # TODO: contexts with relations and without
     # expect(subject.as_jsonld(related: true)).to eq subject.as_jsonld
@@ -364,5 +358,4 @@ shared_examples 'a Resource with relations' do
       expect(query.first_object).to eq subject.rdf_subject
     end
   end
-
 end

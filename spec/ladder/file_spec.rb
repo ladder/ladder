@@ -59,7 +59,6 @@ describe Ladder::File do
         expect(subject.class.properties).to be_empty
       end
     end
-
   end
 
   context 'with data from file' do
@@ -85,5 +84,4 @@ describe Ladder::File do
     include_context 'with relations'
     it_behaves_like 'a File'
   end
-
 end

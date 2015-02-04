@@ -44,5 +44,4 @@ describe Ladder::Searchable::File do
     it_behaves_like 'a File'
     it_behaves_like 'a Searchable File'
   end
-
 end

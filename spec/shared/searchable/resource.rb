@@ -1,7 +1,5 @@
 shared_examples 'a Searchable' do
-
   describe '#index_for_search' do
-
     context 'with default' do
       before do
         subject.save
@@ -42,7 +40,6 @@ shared_examples 'a Searchable' do
         expect(results.first._source.to_hash).to eq subject.as_jsonld
       end
     end
-
   end
 
   describe '#save with update' do
@@ -72,13 +69,10 @@ shared_examples 'a Searchable' do
       expect(results).to be_empty
     end
   end
-
 end
 
 shared_examples 'a Searchable with related' do
-
   describe '#index_for_search related' do
-
     context 'with default' do
       before do
         subject.save
@@ -217,7 +211,5 @@ shared_examples 'a Searchable with related' do
         expect(results.first._source.to_hash).to eq JSON.parse(person.as_framed_jsonld.to_json)
       end
     end
-
   end
-
 end

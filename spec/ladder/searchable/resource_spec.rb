@@ -79,5 +79,4 @@ describe Ladder::Searchable::Resource do
 
     it_behaves_like 'a Searchable with related'
   end
-
 end

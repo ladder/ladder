@@ -1,7 +1,6 @@
 require 'mimemagic'
 
 shared_examples 'a File' do
-
   describe 'LADDER_BASE_URI' do
     it 'should automatically have a base URI' do
       expect(subject.rdf_subject.parent).to eq RDF::URI('http://example.org/datastreams/')
@@ -66,5 +65,4 @@ shared_examples 'a File' do
       expect(subject.update_resource.statements).to be_empty
     end
   end
-
 end

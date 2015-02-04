@@ -184,5 +184,4 @@ describe Ladder::Resource::Dynamic do
       end
     end
   end
-
 end

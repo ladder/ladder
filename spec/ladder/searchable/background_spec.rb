@@ -108,5 +108,4 @@ describe Ladder::Searchable::Background do
 
     it_behaves_like 'a Searchable File'
   end
-
 end

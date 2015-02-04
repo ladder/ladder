@@ -101,7 +101,7 @@ describe Ladder::Resource do
   end
 
   context 'from JSON-LD' do
-    TEST_FILE ||= './spec/shared/graph.jsonld'
+    TEST_GRAPH ||= './spec/shared/graph.jsonld'
 
     let(:subject) { Thing.new }
 
@@ -121,7 +121,7 @@ describe Ladder::Resource do
         end
       end
 
-      graph = RDF::Graph.load TEST_FILE
+      graph = RDF::Graph.load TEST_GRAPH
       new_subject = subject.class.new_from_graph(graph)
 
       # Frame loaded RDF graph
@@ -132,7 +132,5 @@ describe Ladder::Resource do
 
       expect(remove_ids(new_subject.as_framed_jsonld)).to eq remove_ids(framed_jsonld)
     end
-
   end
-
 end

@@ -1,5 +1,4 @@
 shared_context 'a Searchable File' do
-
   describe '#save' do
     before do
       subject.save
@@ -46,5 +45,4 @@ shared_context 'a Searchable File' do
       expect(results).to be_empty
     end
   end
-
 end
