@@ -42,7 +42,23 @@ module Ladder::Resource
 
     field_name = defined_prop.first
 
-    value = statement.object.to_s
+    # If the object is a URI for a model object, retrieve the object
+    if statement.object.is_a? RDF::URI
+      object_id = statement.object.to_s.match(/[0-9a-fA-F]{24}/)
+      relation = relations[field_name]
+
+      if object_id and relation
+        # If this is an embedded object, we have to retrieve the parent
+        # FIXME: this seems unlikely and/or hacky
+        if embedded_relations[field_name]
+          value = relation.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) rescue nil
+        else
+          value = relation.class_name.constantize.find(object_id.to_s) rescue nil
+        end
+      end
+    end
+
+    value ||= statement.object.to_s
     value = yield(field_name) || value if block_given?
 
     if send(field_name).is_a? Enumerable
@@ -110,13 +126,13 @@ module Ladder::Resource
 
     def new_from_graph(graph)
       # Get the first object in the graph with the same RDF type as this class
-      subject_uri = graph.query([nil, RDF.type, resource_class.type]).first_subject
-      return unless subject_uri
+      subject_id = graph.query([nil, RDF.type, resource_class.type]).first_subject
+      return unless subject_id
 
-      # TODO: if the subject_uri is an existing model, just retrieve it?
+      # TODO: if the subject is an existing model, just retrieve it?
       new_object = new
 
-      graph.query([subject_uri]).each_statement do |statement|
+      graph.query([subject_id]).each_statement do |statement|
 
         # Objects can be one of:
         #
@@ -128,9 +144,7 @@ module Ladder::Resource
         #    a. Plain
         #    b. Language-typed
 
-        case statement.object
-        # 1. BNode
-        when RDF::Node
+        if statement.object.is_a? RDF::Node
           new_object.send(:<<, statement) do |field_name|
             relation = relations[field_name]
             return unless relation
@@ -139,30 +153,9 @@ module Ladder::Resource
             subgraph = RDF::Graph.new.insert graph.query([statement.object]).statements
             klass.new_from_graph subgraph
           end
-
-        # 2a. Internal model URI
-        when RDF::URI
-          new_object.send(:<<, statement) do |field_name|
-            relation = relations[field_name]
-            return unless relation
-
-            # If the object is a URI for a model object, retrieve the object
-            object_id = statement.object.to_s.match(/[0-9a-fA-F]{24}/)
-            return unless object_id
-
-            # If this is an embedded object, we have to retrieve the parent
-            # FIXME: this seems unlikely and/or hacky
-            if embedded_relations[field_name]
-              relation.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) rescue nil
-            else
-              relation.class_name.constantize.find(object_id.to_s) rescue nil
-            end
-          end # end do
-
-        # 2b. External URI
-        # 3. A literal
-        else new_object << statement
-        end # end case
+        else
+          new_object << statement
+        end
 
       end # end each_statement
 
