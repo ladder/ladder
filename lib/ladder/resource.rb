@@ -48,7 +48,12 @@ module Ladder
       value = yield(field_name) if block_given?
       value ||= statement.object.to_s
 
-      send(field_name).is_a?(Enumerable) ? send(:push, field_name.to_sym => value) : send("#{field_name}=", value)
+      if send(field_name).is_a?(Enumerable)
+        enum = send("#{field_name}")
+        enum.send(:push, value) unless enum.include? value
+      else
+        send("#{field_name}=", value)
+      end
     end
 
     private
@@ -153,12 +158,12 @@ module Ladder
         if uri.to_s.include? klass.base_uri.to_s
           object_id = uri.to_s.match(/[0-9a-fA-F]{24}/).to_s
 
-          return klass.parent.find(object_id) if klass.parent.where(id: object_id).exists?
+          # Retrieve the object if it's persisted, otherwise return a new one (eg. embedded)
+          return klass.parent.where(id: object_id).exists? ? klass.parent.find(object_id) : klass.parent.new
         end
       end
 
       nil
     end
-
   end
 end
