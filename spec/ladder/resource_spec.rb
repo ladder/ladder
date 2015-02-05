@@ -60,15 +60,15 @@ describe Ladder::Resource do
       end
 
       # many-to-many
-      subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
+      Thing.property :people, predicate: RDF::DC.creator, class_name: 'Person'
 
       # one-sided has-many
-      subject.class.has_and_belongs_to_many :concepts, inverse_of: nil, autosave: true
-      subject.class.property :concepts, predicate: RDF::DC.subject, class_name: 'Concept'
+      Thing.has_and_belongs_to_many :concepts, inverse_of: nil, autosave: true
+      Thing.property :concepts, predicate: RDF::DC.subject, class_name: 'Concept'
 
       # embedded one
-      subject.class.embeds_one :part, cascade_callbacks: true
-      subject.class.property :part, predicate: RDF::DC.hasPart, class_name: 'Part'
+      Thing.embeds_one :part, cascade_callbacks: true
+      Thing.property :part, predicate: RDF::DC.hasPart, class_name: 'Part'
     end
 
     after do
@@ -107,6 +107,14 @@ describe Ladder::Resource do
     let(:subject) { Thing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }
 
     include_context 'with relations'
+
+    let(:person)  { subject.people.first }
+    let(:concept) { subject.concepts.first }
+    let(:part)    { subject.part }
+
+    before do
+      subject.save
+    end
 
     it_behaves_like 'a Resource'
     it_behaves_like 'a Resource with relations'
