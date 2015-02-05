@@ -53,8 +53,10 @@ module Ladder
           # FIXME: this seems unlikely and/or hacky
           if embedded_relations[field_name]
             value = relation.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) # rescue nil
+            # relation.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).exists?
           else
             value = relation.class_name.constantize.find(object_id.to_s) # rescue nil
+            # relation.class_name.constantize.where(id: object_id.to_s).exists?
           end
         end
       end
