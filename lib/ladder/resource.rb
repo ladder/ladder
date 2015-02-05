@@ -43,32 +43,12 @@ module Ladder
 
       field_name = defined_prop.first
 
-      # If the object is a URI for a model object, retrieve the object
-      if statement.object.is_a? RDF::URI
-        object_id = statement.object.to_s.match(/[0-9a-fA-F]{24}/)
-        relation = relations[field_name]
-
-        if object_id && relation
-          # If this is an embedded object, we have to retrieve the parent
-          # FIXME: this seems unlikely and/or hacky
-          if embedded_relations[field_name]
-            value = relation.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).first.send(field_name) # rescue nil
-            # relation.inverse_class_name.constantize.where("#{field_name}._id" => BSON::ObjectId.from_string(object_id.to_s)).exists?
-          else
-            value = relation.class_name.constantize.find(object_id.to_s) # rescue nil
-            # relation.class_name.constantize.where(id: object_id.to_s).exists?
-          end
-        end
-      end
-
+      # If the object is a URI, see if it is a retrievable model object
+      value = Ladder::Resource.new_from_uri(statement.object) if statement.object.is_a? RDF::URI
+      value = yield(field_name) if block_given?
       value ||= statement.object.to_s
-      value = yield(field_name) || value if block_given?
 
-      if send(field_name).is_a? Enumerable
-        send(:push, field_name.to_sym => value)
-      else
-        send("#{field_name}=", value)
-      end
+      send(field_name).is_a?(Enumerable) ? send(:push, field_name.to_sym => value) : send("#{field_name}=", value)
     end
 
     private
@@ -132,14 +112,18 @@ module Ladder
         root_subject = graph.query([nil, RDF.type, resource_class.type]).first_subject
         return unless root_subject
 
-        # TODO: if the subject is an existing model, just retrieve it?
-        new_object = new
+        # If the subject is an existing model, just retrieve it
+        new_object = Ladder::Resource.new_from_uri(root_subject) if root_subject.is_a? RDF::URI
+        new_object ||= new
+
+        # Add object to stack for recursion
         objects[root_subject] = new_object
 
         graph.query([root_subject]).each_statement do |statement|
           # Dereference the object if it's a BNode
           if statement.object.is_a? RDF::Node
             new_object.send(:<<, statement) do |field_name|
+
               # If we haven't processed this object before, do so now
               unless objects[statement.object]
                 relation = relations[field_name]
@@ -160,5 +144,21 @@ module Ladder
         new_object
       end
     end
+
+    # Factory method to instantiate a Resource from URI
+    def self.new_from_uri(uri)
+      klasses = ActiveTriples::Resource.descendants.select(&:name)
+
+      klasses.each do |klass|
+        if uri.to_s.include? klass.base_uri.to_s
+          object_id = uri.to_s.match(/[0-9a-fA-F]{24}/).to_s
+
+          return klass.parent.find(object_id) if klass.parent.where(id: object_id).exists?
+        end
+      end
+
+      nil
+    end
+
   end
 end
