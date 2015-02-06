@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.license       = 'APACHE2'
   spec.required_ruby_version = '>= 2.0.0'
 
-  spec.files         = `git ls-files -z`.split('\x0')
+  spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(/^bin/) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(/^(test|spec|features)/)
   spec.require_paths = ['lib']
