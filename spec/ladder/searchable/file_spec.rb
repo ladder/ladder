@@ -18,7 +18,7 @@ describe Ladder::Searchable::File do
   end
 
   after do
-    Object.send(:remove_const, "Datastream") if Object
+    Object.send(:remove_const, 'Datastream') if Object
   end
 
   context 'with data from file' do
@@ -32,8 +32,8 @@ describe Ladder::Searchable::File do
   end
 
   context 'with data from string after creation' do
-    data = "And so Moomintroll was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly to his velvet skin, but at the same time his nose caught a new smell. It was a more serious smell than any he had met before, and slightly frightening. But it made him wide awake and greatly interested."
-    
+    data = 'And so Moomintroll was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly to his velvet skin, but at the same time his nose caught a new smell. It was a more serious smell than any he had met before, and slightly frightening. But it made him wide awake and greatly interested.'
+
     let(:subject) { Datastream.new }
     let(:source) { data } # UTF-8 (string)
 
@@ -44,5 +44,4 @@ describe Ladder::Searchable::File do
     it_behaves_like 'a File'
     it_behaves_like 'a Searchable File'
   end
-
 end

@@ -10,12 +10,14 @@ describe Ladder::Resource::Dynamic do
 
     class Thing
       include Ladder::Resource::Dynamic
+
+      configure type: RDF::DC.BibliographicResource
     end
   end
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
+    Object.send(:remove_const, 'Thing') if Object
   end
 
   context 'with data' do
@@ -33,7 +35,7 @@ describe Ladder::Resource::Dynamic do
     end
 
     it_behaves_like 'a Resource'
-    
+
     describe '#property' do
       context 'with undefined property' do
         before do
@@ -42,9 +44,9 @@ describe Ladder::Resource::Dynamic do
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({description: RDF::DC.description.to_uri.to_s})
+          expect(subject._context).to eq(description: RDF::DC.description.to_uri.to_s)
         end
-      
+
         it 'should build an accessor' do
           expect(subject.description).to eq "Second in Tove Jansson's series of Moomin books"
         end
@@ -53,19 +55,19 @@ describe Ladder::Resource::Dynamic do
       context 'with conflicting property' do
         before do
           subject.property :title, predicate: RDF::DC11.title
-          subject.dc11_title = "Kometjakten"
+          subject.dc11_title = 'Kometjakten'
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({dc11_title: RDF::DC11.title.to_uri.to_s})
+          expect(subject._context).to eq(dc11_title: RDF::DC11.title.to_uri.to_s)
         end
-      
+
         it 'should build an accessor' do
-          expect(subject.dc11_title).to eq "Kometjakten"
+          expect(subject.dc11_title).to eq 'Kometjakten'
         end
       end
     end
-  
+
     describe '#update_resource' do
       before do
         # undefined property
@@ -74,27 +76,36 @@ describe Ladder::Resource::Dynamic do
 
         # conflicting property
         subject.property :title, predicate: RDF::DC11.title
-        subject.dc11_title = "Kometjakten"
+        subject.dc11_title = 'Kometjakten'
 
         # defined field
         subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
 
         # conflicting property
-        subject << RDF::Statement(nil, RDF::DC.alternative, "Kometjakten")
+        subject << RDF::Statement(nil, RDF::DC.alternative, 'Kometjakten')
 
         # URI value
         subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
 
+        # RDF type
+        subject << RDF::Statement(nil, RDF.type, RDF::DC.PhysicalResource)
+
         subject.update_resource
       end
-    
+
       it 'should have updated values' do
-        expect(subject.resource.statements.count).to eq 5
+        expect(subject.resource.statements.count).to eq 7
         expect(subject.resource.query(predicate: RDF::DC.description, object: "Second in Tove Jansson's series of Moomin books").count).to eq 1
-        expect(subject.resource.query(predicate: RDF::DC11.title, object: "Kometjakten").count).to eq 1
+        expect(subject.resource.query(predicate: RDF::DC11.title, object: 'Kometjakten').count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC.title, object: RDF::Literal.new('Kometen kommer', language: :en)).count).to eq 1
-        expect(subject.resource.query(predicate: RDF::DC.alternative, object: "Kometjakten").count).to eq 1
+        expect(subject.resource.query(predicate: RDF::DC.alternative, object: 'Kometjakten').count).to eq 1
         expect(subject.resource.query(predicate: RDF::DC.identifier, object: RDF::URI('http://some.uri')).count).to eq 1
+      end
+
+      it 'should contain both class and dynamic types' do
+        expect(subject.type.count).to eq 2
+        expect(subject.type).to include RDF::DC.BibliographicResource
+        expect(subject.type).to include RDF::DC.PhysicalResource
       end
     end
 
@@ -103,11 +114,11 @@ describe Ladder::Resource::Dynamic do
         before do
           subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
         end
-      
+
         it 'should not create a context' do
           expect(subject._context).to be nil
         end
-      
+
         it 'should update existing values' do
           expect(subject.title).to eq 'Kometen kommer'
         end
@@ -119,9 +130,9 @@ describe Ladder::Resource::Dynamic do
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({ description: RDF::DC.description.to_uri.to_s })
+          expect(subject._context).to eq(description: RDF::DC.description.to_uri.to_s)
         end
-      
+
         it 'should build an accessor' do
           expect(subject.description).to eq "Second in Tove Jansson's series of Moomin books"
         end
@@ -129,15 +140,15 @@ describe Ladder::Resource::Dynamic do
 
       context 'with conflicting property' do
         before do
-          subject << RDF::Statement(nil, RDF::DC11.title, "Kometjakten")
+          subject << RDF::Statement(nil, RDF::DC11.title, 'Kometjakten')
         end
 
         it 'should create a context' do
-          expect(subject._context).to eq({ dc11_title: RDF::DC11.title.to_uri.to_s })
+          expect(subject._context).to eq(dc11_title: RDF::DC11.title.to_uri.to_s)
         end
-      
+
         it 'should build an accessor' do
-          expect(subject.dc11_title).to eq "Kometjakten"
+          expect(subject.dc11_title).to eq 'Kometjakten'
         end
       end
 
@@ -145,7 +156,7 @@ describe Ladder::Resource::Dynamic do
         before do
           subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
         end
-      
+
         it 'should store the URI as a string' do
           expect(subject.identifier).to eq 'http://some.uri'
         end
@@ -157,7 +168,7 @@ describe Ladder::Resource::Dynamic do
         end
       end
     end
-    
+
     describe '#resource_class' do
       before do
         subject.property :description, predicate: RDF::DC.description
@@ -166,12 +177,11 @@ describe Ladder::Resource::Dynamic do
       it 'should have modified properties on the instance' do
         expect(subject.resource.class.properties.keys).to include 'description'
       end
-      
+
       it 'should not modify the global class properties' do
         expect(subject.class.resource_class.properties.keys).to_not include 'description'
         expect(subject.class.resource_class.properties).to eq subject.class.new.class.resource_class.properties
       end
     end
   end
-
 end

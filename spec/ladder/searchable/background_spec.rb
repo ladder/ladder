@@ -15,7 +15,7 @@ describe Ladder::Searchable::Background do
       include Ladder::Resource
       include Ladder::Searchable::Background
     end
-    
+
     class Datastream
       include Ladder::File
       include Ladder::Searchable::Background
@@ -24,8 +24,8 @@ describe Ladder::Searchable::Background do
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Thing") if Object
-    Object.send(:remove_const, "Datastream") if Object
+    Object.send(:remove_const, 'Thing') if Object
+    Object.send(:remove_const, 'Datastream') if Object
   end
 
   shared_context 'with data' do
@@ -54,7 +54,7 @@ describe Ladder::Searchable::Background do
       person.class.property :things, predicate: RDF::DC.relation, class_name: 'Thing'
       subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
       subject.people << person
-    end    
+    end
   end
 
   context 'with data' do
@@ -68,7 +68,7 @@ describe Ladder::Searchable::Background do
   context 'with relations' do
     let(:subject) { Thing.new }
     let(:person)  { Person.new }
-    
+
     before do
       class Person
         include Ladder::Resource
@@ -77,7 +77,7 @@ describe Ladder::Searchable::Background do
     end
 
     after do
-      Object.send(:remove_const, "Person") if Object
+      Object.send(:remove_const, 'Person') if Object
     end
 
     include_context 'with data'
@@ -97,8 +97,8 @@ describe Ladder::Searchable::Background do
   end
 
   context 'with data from string after creation' do
-    data = "And so Moomintroll was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly to his velvet skin, but at the same time his nose caught a new smell. It was a more serious smell than any he had met before, and slightly frightening. But it made him wide awake and greatly interested."
-    
+    data = 'And so Moomintroll was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly to his velvet skin, but at the same time his nose caught a new smell. It was a more serious smell than any he had met before, and slightly frightening. But it made him wide awake and greatly interested.'
+
     let(:subject) { Datastream.new }
     let(:source) { data } # UTF-8 (string)
 
@@ -108,5 +108,4 @@ describe Ladder::Searchable::Background do
 
     it_behaves_like 'a Searchable File'
   end
-
 end

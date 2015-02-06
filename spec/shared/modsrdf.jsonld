@@ -1,0 +1,215 @@
+{
+  "@context": {
+    "mads": "http://www.loc.gov/mads/rdf/v1#",
+    "mods": "http://www.loc.gov/mods/rdf/v1#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+  },
+  "@id": "mods:MODS123456",
+  "@type": [
+    "mods:ModsResource",
+    "http://id.loc.gov/vocabulary/resourceType#StillImage"
+  ],
+  "mods:languageOfResource": {
+    "@id": "http://id.loc.gov/vocabulary/language#eng"
+  },
+  "mods:abstract": "Item consists of a photographic slide with annotations including: \"Wpg.,\" \"Old St. Marys Church,\" \"1874-,\" \"4-93c,\" \"May/60.\"",
+  "mods:accessCondition": "",
+  "mods:genre": {
+    "@id": "_:b22",
+    "@type": "mads:GenreForm",
+    "mads:elementList": {
+      "@list": [
+        {
+          "@id": "_:b7",
+          "@type": "mads:GenreFormElement",
+          "mads:elementValue": "Photograph"
+        }
+      ]
+    },
+    "rdfs:label": "Photograph"
+  },
+  "mods:identifierGroup": {
+    "@id": "_:b13",
+    "@type": "http://www.w3.org/XML/1998/namespaceIdentifierGroup",
+    "http://www.w3.org/XML/1998/namespaceidentifierGroupType": "local",
+    "http://www.w3.org/XML/1998/namespaceidentifierGroupValue": "ASC16585"
+  },
+  "mods:locationOfResource": [
+    {
+      "@id": "_:b21",
+      "@type": "mods:Location",
+      "mods:locationPhysicalLocation": "2009-029 / 003 (04)"
+    },
+    {
+      "@id": "_:b0",
+      "@type": "mods:Location",
+      "mods:locationUrl": "http://archivesfa.library.yorku.ca/fonds/ON00370-f0000184.htm"
+    }
+  ],
+  "mods:name": {
+    "@id": "d1e9"
+  },
+  "mods:noteGroup": {
+    "@id": "_:b20",
+    "@type": "mods:NoteGroup",
+    "mods:noteGroupType": "",
+    "mods:noteGroupValue": "One slide scanned out of 421 in file."
+  },
+  "mods:physicalExtent": "1 photograph : colour positive ; 35 mm",
+  "mods:physicalForm": "projected graphic",
+  "mods:placeOfOrigin": [
+    {
+      "@id": "_:b15",
+      "@type": "mads:Geographic",
+      "mads:elementList": {
+        "@list": [
+          {
+            "@id": "_:b14",
+            "@type": "mads:GeographicElement",
+            "mads:elementValue": "Canada"
+          }
+        ]
+      },
+      "rdfs:label": "Canada"
+    },
+    {
+      "@id": "_:b12",
+      "@type": "mads:Geographic",
+      "mads:elementList": {
+        "@list": [
+          {
+            "@id": "_:b11",
+            "@type": "mads:GeographicElement",
+            "mads:elementValue": "Winnipeg, Manitoba"
+          }
+        ]
+      },
+      "rdfs:label": "Winnipeg, Manitoba"
+    }
+  ],
+  "mods:resourceDate": {
+    "@type": "xsd:string",
+    "@value": "May-60"
+  },
+  "mods:resourceDateIssued": {
+    "@type": "xsd:string",
+    "@value": "1960-05"
+  },
+  "mods:roleRelationship": {
+    "@id": "_:b9",
+    "@type": "mods:RoleRelationship",
+    "mods:roleRelationshipName": {
+      "@id": "d1e9",
+      "@type": "mads:PersonalName",
+      "mads:elementList": {
+        "@list": [
+          {
+            "@id": "_:b10",
+            "@type": "mads:FullNameElement",
+            "mads:elementValue": "John Warkentin"
+          }
+        ]
+      },
+      "rdfs:label": "John Warkentin"
+    },
+    "mods:roleRelationshipRole": "Creator"
+  },
+  "mods:subjectComplex": {
+    "@id": "_:b2",
+    "@type": "mads:ComplexSubject",
+    "mads:componentList": {
+      "@list": [
+        {
+          "@id": "_:b3",
+          "@type": "mads:Topic",
+          "mads:elementList": {
+            "@list": [
+              {
+                "@id": "_:b16",
+                "@type": "mads:TopicElement",
+                "mads:elementValue": "John Warkentin Photograph Collection"
+              }
+            ]
+          },
+          "rdfs:label": "John Warkentin Photograph Collection"
+        },
+        {
+          "@id": "_:b4",
+          "@type": "mads:Topic",
+          "mads:elementList": {
+            "@list": [
+              {
+                "@id": "_:b8",
+                "@type": "mads:TopicElement",
+                "mads:elementValue": "Institutions"
+              }
+            ]
+          },
+          "rdfs:label": "Institutions"
+        },
+        {
+          "@id": "_:b5",
+          "@type": "mads:Topic",
+          "mads:elementList": {
+            "@list": [
+              {
+                "@id": "_:b24",
+                "@type": "mads:TopicElement",
+                "mads:elementValue": "Religious"
+              }
+            ]
+          },
+          "rdfs:label": "Religious"
+        },
+        {
+          "@id": "_:b6",
+          "@type": "mads:Geographic",
+          "mads:elementList": {
+            "@list": [
+              {
+                "@id": "_:b23",
+                "@type": "mads:GeographicElement",
+                "mads:elementValue": "Winnipeg, Manitoba"
+              }
+            ]
+          },
+          "rdfs:label": "Winnipeg, Manitoba"
+        }
+      ]
+    },
+    "rdfs:label": "John Warkentin Photograph Collection. Institutions. Religious. Winnipeg, Manitoba. North America. Canada. Manitoba. Winnipeg Capital. Winnipeg. 49.890687, -97.143688. "
+  },
+  "mods:titlePrincipal": [
+    {
+      "@id": "_:b18",
+      "@type": "mads:Title",
+      "mads:elementList": {
+        "@list": [
+          {
+            "@id": "_:b17",
+            "@type": "mads:mainTitleElement",
+            "mads:elementValue": "[1874-built] Old St. Mary's Church"
+          }
+        ]
+      },
+      "rdfs:label": "[1874-built] Old St. Mary's Church"
+    },
+    {
+      "@id": "_:b19",
+      "@type": "mads:Title",
+      "mads:elementList": {
+        "@list": [
+          {
+            "@id": "_:b1",
+            "@type": "mads:mainTitleElement",
+            "mads:elementValue": "John Warkentin fonds (F0184)"
+          }
+        ]
+      },
+      "rdfs:label": "John Warkentin fonds (F0184)"
+    }
+  ],
+  "http://www.w3.org/XML/1998/namespacerelated": {
+    "@id": "mods:MODS123456"
+  }
+}

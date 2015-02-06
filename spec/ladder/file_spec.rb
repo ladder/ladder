@@ -15,7 +15,7 @@ describe Ladder::File do
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
-    Object.send(:remove_const, "Datastream") if Object
+    Object.send(:remove_const, 'Datastream') if Object
   end
 
   shared_context 'with relations' do
@@ -42,7 +42,7 @@ describe Ladder::File do
 
     context 'with one-sided has-many' do
       it 'should have a relation' do
-        expect(thing.relations['files'].relation).to eq (Mongoid::Relations::Referenced::ManyToMany)
+        expect(thing.relations['files'].relation).to eq Mongoid::Relations::Referenced::ManyToMany
         expect(thing.files.to_a).to include subject
       end
 
@@ -59,7 +59,6 @@ describe Ladder::File do
         expect(subject.class.properties).to be_empty
       end
     end
-
   end
 
   context 'with data from file' do
@@ -73,8 +72,8 @@ describe Ladder::File do
   end
 
   context 'with data from string after creation' do
-    data = "And so Moomintroll was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly to his velvet skin, but at the same time his nose caught a new smell. It was a more serious smell than any he had met before, and slightly frightening. But it made him wide awake and greatly interested."
-    
+    data = 'And so Moomintroll was helplessly thrown out into a strange and dangerous world and dropped up to his ears in the first snowdrift of his experience. It felt unpleasantly prickly to his velvet skin, but at the same time his nose caught a new smell. It was a more serious smell than any he had met before, and slightly frightening. But it made him wide awake and greatly interested.'
+
     let(:subject) { Datastream.new }
     let(:source) { data } # UTF-8 (string)
 
@@ -85,5 +84,4 @@ describe Ladder::File do
     include_context 'with relations'
     it_behaves_like 'a File'
   end
-
 end
