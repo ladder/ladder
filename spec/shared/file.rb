@@ -33,7 +33,9 @@ shared_examples 'a File' do
   end
 
   describe '#grid' do
-    # TODO
+    it 'should be an instance of a GridFS object' do
+      expect(subject.class.grid.parent.name).to eq 'Mongoid::GridFs'
+    end
   end
 
   describe '#attributes' do

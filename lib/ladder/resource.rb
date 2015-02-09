@@ -44,7 +44,7 @@ module Ladder
       field_name = defined_prop.first
 
       # If the object is a URI, see if it is a retrievable model object
-      value = Ladder::Resource.new_from_uri(statement.object) if statement.object.is_a? RDF::URI
+      value = Ladder::Resource.from_uri(statement.object) if statement.object.is_a? RDF::URI
       value = yield(field_name) if block_given?
       value ||= statement.object.to_s
 
@@ -101,13 +101,13 @@ module Ladder
       def property(name, opts = {})
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
-          opts.except!(*mongoid_opts.keys)
-
           has_and_belongs_to_many(name, mongoid_opts) unless relations.keys.include? name.to_s
         else
-          # TODO: allow disabling localization
-          field(name, localize: true) unless fields[name.to_s]
+          mongoid_opts = { localize: true }.merge(opts.except(:predicate, :multivalue))
+          field(name, mongoid_opts) unless fields[name.to_s]
         end
+
+        opts.except!(*mongoid_opts.keys)
 
         super
       end
@@ -118,7 +118,7 @@ module Ladder
         return unless root_subject
 
         # If the subject is an existing model, just retrieve it
-        new_object = Ladder::Resource.new_from_uri(root_subject) if root_subject.is_a? RDF::URI
+        new_object = Ladder::Resource.from_uri(root_subject) if root_subject.is_a? RDF::URI
         new_object ||= new
 
         # Add object to stack for recursion
@@ -151,7 +151,7 @@ module Ladder
     end
 
     # Factory method to instantiate a Resource from URI
-    def self.new_from_uri(uri)
+    def self.from_uri(uri)
       klasses = ActiveTriples::Resource.descendants.select(&:name)
 
       klasses.each do |klass|
