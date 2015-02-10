@@ -38,22 +38,28 @@ module Ladder
       statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
       # Only push statement if the statement's predicate is defined on the class
-      defined_prop = resource_class.properties.find { |_name, term| term.predicate == statement.predicate }
-      return unless defined_prop
-
-      field_name = defined_prop.first
+      field_name = field_from_predicate(statement.predicate)
+      return unless field_name
 
       # If the object is a URI, see if it is a retrievable model object
       value = Ladder::Resource.from_uri(statement.object) if statement.object.is_a? RDF::URI
       value = yield(field_name) if block_given?
       value ||= statement.object.to_s
 
-      if send(field_name).is_a?(Enumerable)
-        enum = send("#{field_name}")
+      enum = send(field_name)
+
+      if enum.is_a?(Enumerable)
         enum.send(:push, value) unless enum.include? value
       else
         send("#{field_name}=", value)
       end
+    end
+
+    def field_from_predicate(predicate)
+      defined_prop = resource_class.properties.find { |_name, term| term.predicate == predicate }
+      return unless defined_prop
+
+      defined_prop.first
     end
 
     private
@@ -125,22 +131,16 @@ module Ladder
         objects[root_subject] = new_object
 
         graph.query([root_subject]).each_statement do |statement|
-          # Dereference the object if it's a BNode
+          # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node
+            next unless new_object.field_from_predicate(statement.predicate)
 
-            new_object.send(:<<, statement) do |field_name|
-              #binding.pry unless relation
-              relation = relations[field_name]
-              next unless relation
-
-              # If we haven't processed this object before, do so now
-              unless objects[statement.object]
+            unless objects[statement.object]
+              new_object.send(:<<, statement) do |field_name|
                 # create the new object
-                klass = relation.class_name.constantize
+                klass = relations[field_name].class_name.constantize
                 objects[statement.object] = klass.new_from_graph(graph, objects)
               end
-
-              objects[statement.object]
             end
           else
             new_object << statement

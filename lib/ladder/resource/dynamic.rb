@@ -22,7 +22,10 @@ module Ladder
         self._context ||= Hash.new(nil)
 
         # Ensure new field name is unique
-        field_name = opts.first[:predicate].qname.join('_').to_sym if respond_to?(field_name) || :name == field_name
+        # FIXME: #respond_to gets modified when class properties are added; check object properties directly, eg.
+        #        subject.class.property :identifier, predicate: RDF::DC.identifier
+        #        subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
+        field_name = opts.first[:predicate].qname.join('_').to_sym if respond_to?(field_name)
         self._context[field_name] = opts.first[:predicate].to_s
 
         apply_context
@@ -90,7 +93,7 @@ module Ladder
         # Overload Ladder #<<
         #
         # @see Ladder::Resource
-        def <<(data, &block)
+        def <<(data)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
 
@@ -103,15 +106,8 @@ module Ladder
             return
           end
 
-          # If we have an undefined predicate, then dynamically defne it
-          unless resource_class.properties.values.map(&:predicate).include? data.predicate
-            # Generate a dynamic field name
-            qname = data.predicate.qname
-            field_name = (respond_to?(qname.last) || :name == qname.last) ? qname.join('_').to_sym : qname.last
-
-            # Define property on object
-            property field_name, predicate: data.predicate
-          end
+          # If we have an undefined predicate, then dynamically define it
+          property data.predicate.qname.last, predicate: data.predicate unless field_from_predicate data.predicate
 
           super
         end
