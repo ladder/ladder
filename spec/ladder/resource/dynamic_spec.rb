@@ -35,6 +35,7 @@ describe Ladder::Resource::Dynamic do
     end
 
     it_behaves_like 'a Resource'
+    it_behaves_like 'a Dynamic Resource'
 
     describe '#property' do
       context 'with undefined property' do
@@ -195,6 +196,7 @@ describe Ladder::Resource::Dynamic do
     end
 
     it_behaves_like 'a Resource'
+    it_behaves_like 'a Dynamic Resource'
   end
 =end
 end
