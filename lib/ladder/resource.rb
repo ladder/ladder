@@ -33,7 +33,7 @@ module Ladder
 
     ##
     # Push RDF statement into resource
-    def <<(statement, &block)
+    def <<(statement)
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
@@ -128,7 +128,6 @@ module Ladder
           # Dereference the object if it's a BNode
           if statement.object.is_a? RDF::Node
             new_object.send(:<<, statement) do |field_name|
-
               # If we haven't processed this object before, do so now
               unless objects[statement.object]
                 relation = relations[field_name]

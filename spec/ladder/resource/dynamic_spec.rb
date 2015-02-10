@@ -12,7 +12,7 @@ describe Ladder::Resource::Dynamic do
       include Ladder::Resource::Dynamic
       configure type: RDF::DC.BibliographicResource
 
-      field    :alt
+      field :alt
       property :alt, predicate: RDF::DC.alternative # non-localized literal
       property :title, predicate: RDF::DC.title     # localized literal
     end
@@ -185,7 +185,7 @@ describe Ladder::Resource::Dynamic do
     end
   end
 
-  # TODO: complete this test
+# TODO: complete this test
 =begin
   context 'from JSON-LD' do
     let(:subject) { Thing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }

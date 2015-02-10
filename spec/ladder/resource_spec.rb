@@ -12,7 +12,7 @@ describe Ladder::Resource do
       include Ladder::Resource
       configure type: RDF::DC.BibliographicResource
 
-      field    :alt
+      field :alt
       property :alt, predicate: RDF::DC.alternative # non-localized literal
       property :title, predicate: RDF::DC.title     # localized literal
     end
