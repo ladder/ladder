@@ -24,16 +24,6 @@ describe Ladder::Resource do
     Object.send(:remove_const, 'Thing') if Object
   end
 
-  shared_context 'with data' do
-    before do
-      # non-localized literal
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.title = 'Comet in Moominland'
-    end
-  end
-
   shared_context 'with relations' do
     let(:person)  { Person.new }
     let(:concept) { Concept.new }

@@ -1,3 +1,10 @@
+shared_context 'with data' do
+  before do
+    subject.alt = 'Mumintrollet pa kometjakt' # non-localized literal
+    subject.title = 'Comet in Moominland'     # localized literal
+  end
+end
+
 shared_examples 'a Dynamic Resource' do
   describe '#property' do
     context 'with undefined property' do

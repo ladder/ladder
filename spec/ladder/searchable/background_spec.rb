@@ -33,16 +33,6 @@ describe Ladder::Searchable::Background do
     Object.send(:remove_const, 'Datastream') if Object
   end
 
-  shared_context 'with data' do
-    before do
-      # non-localized literal
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.title = 'Comet in Moominland'
-    end
-  end
-
   shared_context 'with relations' do
     let(:person)  { Person.new }
 
@@ -77,11 +67,11 @@ describe Ladder::Searchable::Background do
     include_context 'with relations'
 
     before do
+      # many-to-many relation
+      Thing.property :people, predicate: RDF::DC.creator, class_name: 'Person'
+
       # related object
       person.foaf_name = 'Tove Jansson'
-
-      # many-to-many relation
-      subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
       subject.people << person
     end
 
