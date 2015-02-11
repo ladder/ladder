@@ -252,7 +252,6 @@ shared_examples 'a Resource' do
 
     context 'with a URI value' do
       before do
-        subject.class.property :identifier, predicate: RDF::DC.identifier
         subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
       end
 

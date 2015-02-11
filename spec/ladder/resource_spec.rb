@@ -15,6 +15,7 @@ describe Ladder::Resource do
       field :alt
       property :alt, predicate: RDF::DC.alternative # non-localized literal
       property :title, predicate: RDF::DC.title     # localized literal
+      property :identifier, predicate: RDF::DC.identifier
     end
   end
 

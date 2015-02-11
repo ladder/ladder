@@ -22,10 +22,7 @@ module Ladder
         self._context ||= Hash.new(nil)
 
         # Ensure new field name is unique
-        # FIXME: #respond_to gets modified when class properties are added; check object properties directly, eg.
-        #        subject.class.property :identifier, predicate: RDF::DC.identifier
-        #        subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
-        field_name = opts.first[:predicate].qname.join('_').to_sym if respond_to?(field_name)
+        field_name = opts.first[:predicate].qname.join('_').to_sym if resource_class.properties.symbolize_keys.keys.include? field_name
         self._context[field_name] = opts.first[:predicate].to_s
 
         apply_context
