@@ -17,14 +17,21 @@ module Ladder
 
       ##
       # Dynamic field definition
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def property(field_name, *opts)
         # Store context information
         self._context ||= Hash.new(nil)
 
         # Ensure new field name is unique
-        field_name = opts.first[:predicate].qname.join('_').to_sym if resource_class.properties.symbolize_keys.keys.include? field_name
-        self._context[field_name] = opts.first[:predicate].to_s
+        if resource_class.properties.symbolize_keys.keys.include? field_name
+          field_name = opts.first[:predicate].qname.join('_').to_sym
+        end
 
+        self._context[field_name] = opts.first[:predicate].to_s
         apply_context
       end
 
@@ -32,6 +39,11 @@ module Ladder
 
       ##
       # Dynamic field accessors (Mongoid)
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def create_accessors(field_name)
         define_singleton_method(field_name) { read_attribute(field_name) }
         define_singleton_method("#{field_name}=") { |value| write_attribute(field_name, value) }
@@ -39,6 +51,11 @@ module Ladder
 
       ##
       # Apply dynamic fields and properties to this instance
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def apply_context
         return unless self._context
 
@@ -56,6 +73,11 @@ module Ladder
 
       ##
       # Apply dynamic types to this instance
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def apply_types
         return unless _types
 
@@ -71,6 +93,11 @@ module Ladder
         # Overload Ladder #update_resource
         #
         # @see Ladder::Resource
+        #
+        # TODO: documentation
+        # @param [Type] name1 more information
+        # @param [Type] name2 more information
+        # @return [Type, nil] describe return value(s)
         def update_resource(opts = {})
           # NB: super has to go first or AT clobbers properties
           super(opts)
@@ -90,6 +117,11 @@ module Ladder
         # Overload Ladder #<<
         #
         # @see Ladder::Resource
+        #
+        # TODO: documentation
+        # @param [Type] name1 more information
+        # @param [Type] name2 more information
+        # @return [Type, nil] describe return value(s)
         def <<(data)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
@@ -115,6 +147,11 @@ module Ladder
         # Overload ActiveTriples #resource_class
         #
         # @see ActiveTriples::Identifiable
+        #
+        # TODO: documentation
+        # @param [Type] name1 more information
+        # @param [Type] name2 more information
+        # @return [Type, nil] describe return value(s)
         def resource_class
           @modified_resource_class ||= self.class.resource_class.clone
         end

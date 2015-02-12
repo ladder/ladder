@@ -18,6 +18,11 @@ module Ladder
 
       private
 
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def enqueue(operation)
         # Force autosave of related documents before queueing for indexing or updating
         methods.select { |i| i[/autosave_documents/] }.each { |m| send m } unless :delete == operation
@@ -28,6 +33,11 @@ module Ladder
       class Indexer < ActiveJob::Base
         queue_as :elasticsearch
 
+        #
+        # TODO: documentation
+        # @param [Type] name1 more information
+        # @param [Type] name2 more information
+        # @return [Type, nil] describe return value(s)
         def perform(operation, model)
           case operation
           when 'index' then model.__elasticsearch__.index_document

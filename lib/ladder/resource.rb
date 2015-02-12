@@ -20,6 +20,11 @@ module Ladder
 
     ##
     # Populate resource properties from ActiveModel
+    #
+    # TODO: documentation
+    # @param [Type] name1 more information
+    # @param [Type] name2 more information
+    # @return [Type, nil] describe return value(s)
     def update_resource(opts = {})
       resource_class.properties.each do |name, property|
         value = update_from_field(name) if fields[name]
@@ -33,6 +38,11 @@ module Ladder
 
     ##
     # Push RDF statement into resource
+    #
+    # TODO: documentation
+    # @param [Type] name1 more information
+    # @param [Type] name2 more information
+    # @return [Type, nil] describe return value(s)
     def <<(statement)
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
@@ -55,6 +65,11 @@ module Ladder
       end
     end
 
+    #
+    # TODO: documentation
+    # @param [Type] name1 more information
+    # @param [Type] name2 more information
+    # @return [Type, nil] describe return value(s)
     def field_from_predicate(predicate)
       defined_prop = resource_class.properties.find { |_name, term| term.predicate == predicate }
       return unless defined_prop
@@ -64,6 +79,11 @@ module Ladder
 
     private
 
+    #
+    # TODO: documentation
+    # @param [Type] name1 more information
+    # @param [Type] name2 more information
+    # @return [Type, nil] describe return value(s)
     def update_from_field(name)
       if fields[name].localized?
         localized_hash = read_attribute(name)
@@ -79,6 +99,11 @@ module Ladder
       end
     end
 
+    #
+    # TODO: documentation
+    # @param [Type] name1 more information
+    # @param [Type] name2 more information
+    # @return [Type, nil] describe return value(s)
     def update_from_relation(name, opts = {})
       objects = send(name).to_a
 
@@ -104,6 +129,11 @@ module Ladder
       # Overload ActiveTriples #property
       #
       # @see ActiveTriples::Properties
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def property(name, opts = {})
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
@@ -118,6 +148,11 @@ module Ladder
         super
       end
 
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def new_from_graph(graph, objects = {})
         # Get the first object in the graph with the same RDF type as this class
         root_subject = graph.query([nil, RDF.type, resource_class.type]).first_subject
@@ -152,6 +187,11 @@ module Ladder
     end
 
     # Factory method to instantiate a Resource from URI
+    #
+    # TODO: documentation
+    # @param [Type] name1 more information
+    # @param [Type] name2 more information
+    # @return [Type, nil] describe return value(s)
     def self.from_uri(uri)
       klasses = ActiveTriples::Resource.descendants.select(&:name)
 

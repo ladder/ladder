@@ -25,6 +25,11 @@ module Ladder
 
       ##
       # Return a Base64-encoded copy of data
+      #
+      # TODO: documentation
+      # @param [Type] name1 more information
+      # @param [Type] name2 more information
+      # @return [Type, nil] describe return value(s)
       def as_indexed_json(*)
         { file: Base64.encode64(data) }
       end
