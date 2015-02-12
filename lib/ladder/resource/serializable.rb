@@ -53,11 +53,10 @@ module Ladder
           qname_hash[ns] ||= Hash.new
 
           if relations.keys.include? field_name
-            object = send(field_name)
             if opts[:related]
-              qname_hash[ns][name] = object.to_a.map(&:as_qname)
+              qname_hash[ns][name] = send(field_name).to_a.map(&:as_qname)
             else
-              qname_hash[ns][name] = object.to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
+              qname_hash[ns][name] = send(field_name).to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
             end
           elsif fields.keys.include? field_name
             qname_hash[ns][name] = read_attribute(field_name)

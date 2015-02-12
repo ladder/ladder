@@ -169,13 +169,12 @@ module Ladder
           # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node
             next unless new_object.field_from_predicate(statement.predicate)
+            next if objects[statement.object]
 
-            unless objects[statement.object]
-              new_object.send(:<<, statement) do |field_name|
-                # create the new object
-                klass = relations[field_name].class_name.constantize
-                objects[statement.object] = klass.new_from_graph(graph, objects)
-              end
+            new_object.send(:<<, statement) do |field_name|
+              # create the new object
+              klass = relations[field_name].class_name.constantize
+              objects[statement.object] = klass.new_from_graph(graph, objects)
             end
           else
             new_object << statement

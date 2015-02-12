@@ -27,9 +27,7 @@ module Ladder
         self._context ||= Hash.new(nil)
 
         # Ensure new field name is unique
-        if resource_class.properties.symbolize_keys.keys.include? field_name
-          field_name = opts.first[:predicate].qname.join('_').to_sym
-        end
+        field_name = opts.first[:predicate].qname.join('_').to_sym if resource_class.properties.symbolize_keys.keys.include? field_name
 
         self._context[field_name] = opts.first[:predicate].to_s
         apply_context
