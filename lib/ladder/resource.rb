@@ -168,14 +168,19 @@ module Ladder
         graph.query([root_subject]).each_statement do |statement|
           # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node
-            next unless new_object.field_from_predicate(statement.predicate)
             next if objects[statement.object]
 
-            new_object.send(:<<, statement) do |field_name|
-              # create the new object
-              klass = relations[field_name].class_name.constantize
-              objects[statement.object] = klass.new_from_graph(graph, objects)
-            end
+            field_name = new_object.field_from_predicate(statement.predicate)
+            next unless field_name
+
+            klass = new_object.relations[field_name].class_name.constantize
+            next unless klass
+
+            object = klass.new_from_graph(graph, objects)
+            next unless object
+
+            objects[statement.object] = object
+            new_object.send(:<<, statement) { object }
           else
             new_object << statement
           end
