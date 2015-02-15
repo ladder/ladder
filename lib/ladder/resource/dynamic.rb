@@ -125,6 +125,9 @@ module Ladder
           data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
 
           if RDF.type == data.predicate
+            # Don't store statically-defined types
+            return if resource_class.type == data.object
+
             # Store type information
             self._types ||= []
             self._types << data.object.to_s
@@ -134,6 +137,7 @@ module Ladder
           end
 
           # If we have an undefined predicate, then dynamically define it
+          return unless data.predicate.qname
           property data.predicate.qname.last, predicate: data.predicate unless field_from_predicate data.predicate
 
           super
