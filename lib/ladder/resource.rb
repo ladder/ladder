@@ -153,9 +153,11 @@ module Ladder
       # @param [Type] name1 more information
       # @param [Type] name2 more information
       # @return [Type, nil] describe return value(s)
-      def new_from_graph(graph, objects = {})
-        # Get the first object in the graph with the same RDF type as this class
-        root_subject = graph.query([nil, RDF.type, resource_class.type]).first_subject
+      def new_from_graph(graph, objects = {}, root_selector = nil)
+        # Default to getting the first object in the graph with the same RDF type as this class
+        root_selector ||= [nil, RDF.type, resource_class.type]
+
+        root_subject = graph.query(root_selector).first_subject
         return unless root_subject
 
         # If the subject is an existing model, just retrieve it
@@ -166,6 +168,10 @@ module Ladder
         objects[root_subject] = new_object
 
         graph.query([root_subject]).each_statement do |statement|
+          # TODO: If the object is a list, process members individually
+          list = RDF::List.new statement.object, graph
+#          binding.pry unless list.empty?
+
           # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node
             next if objects[statement.object]
