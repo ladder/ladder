@@ -50,7 +50,7 @@ module Ladder
 
         resource_class.properties.each do |field_name, property|
           ns, name = property.predicate.qname
-          qname_hash[ns] ||= Hash.new
+          qname_hash[ns] ||= {}
 
           if relations.keys.include? field_name
             if opts[:related]
@@ -61,6 +61,9 @@ module Ladder
           elsif fields.keys.include? field_name
             qname_hash[ns][name] = read_attribute(field_name)
           end
+
+          # Remove empty/null values
+          qname_hash[ns].delete_if { |k,v| v.blank? }
         end
 
         qname_hash

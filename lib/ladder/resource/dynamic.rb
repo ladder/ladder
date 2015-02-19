@@ -124,10 +124,10 @@ module Ladder
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
 
-          if RDF.type == data.predicate
-            # Don't store statically-defined types
-            return if resource_class.type == data.object
+          # Don't store statically-defined types
+          return if resource_class.type == data.object
 
+          if RDF.type == data.predicate
             # Store type information
             self._types ||= []
             self._types << data.object.to_s
