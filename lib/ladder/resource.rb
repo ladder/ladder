@@ -40,6 +40,10 @@ module Ladder
     # Push RDF statement into resource
     #
     # TODO: documentation
+    # subject (RDF::Term) - A symbol is converted to an interned Node.
+    # predicate (RDF::URI)
+    # object (RDF::Resource) - if not a Resource, it is coerced to Literal or Node
+    #                depending on if it is a symbol or something other than a Term.
     # @param [Type] name1 more information
     # @param [Type] name2 more information
     # @return [Type, nil] describe return value(s)
@@ -53,7 +57,7 @@ module Ladder
 
       # If the object is a URI, see if it is a retrievable model object
       value = Ladder::Resource.from_uri(statement.object) if statement.object.is_a? RDF::URI
-      value = yield(field_name) if block_given?
+      value = yield if block_given?
       value ||= statement.object.to_s
 
       enum = send(field_name)
@@ -70,14 +74,29 @@ module Ladder
     # @param [Type] name1 more information
     # @param [Type] name2 more information
     # @return [Type, nil] describe return value(s)
+    def klass_from_predicate(predicate)
+      field_name = field_from_predicate(predicate)
+      return unless field_name
+
+      relation = relations[field_name]
+      return unless relation
+
+      relation.class_name.constantize
+    end
+
+    private
+
+    #
+    # TODO: documentation
+    # @param [Type] name1 more information
+    # @param [Type] name2 more information
+    # @return [Type, nil] describe return value(s)
     def field_from_predicate(predicate)
       defined_prop = resource_class.properties.find { |_name, term| term.predicate == predicate }
       return unless defined_prop
 
       defined_prop.first
     end
-
-    private
 
     #
     # TODO: documentation
@@ -169,17 +188,14 @@ module Ladder
 
         graph.query([root_subject]).each_statement do |statement|
           # TODO: If the object is a list, process members individually
-          list = RDF::List.new statement.object, graph
+#          list = RDF::List.new statement.object, graph
 #          binding.pry unless list.empty?
 
           # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node
             next if objects[statement.object]
 
-            field_name = new_object.field_from_predicate(statement.predicate)
-            next unless field_name
-
-            klass = new_object.relations[field_name].class_name.constantize
+            klass = new_object.klass_from_predicate(statement.predicate)
             next unless klass
 
             object = klass.new_from_graph(graph, objects)

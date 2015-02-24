@@ -63,7 +63,7 @@ module Ladder
           end
 
           # Remove empty/null values
-          qname_hash[ns].delete_if { |k,v| v.blank? }
+          qname_hash[ns].delete_if { |k, v| v.blank? }
         end
 
         qname_hash
