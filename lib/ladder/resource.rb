@@ -187,14 +187,14 @@ module Ladder
         objects[root_subject] = new_object
 
         graph.query([root_subject]).each_statement do |statement|
+          next if objects[statement.object]
+
           # TODO: If the object is a list, process members individually
 #          list = RDF::List.new statement.object, graph
 #          binding.pry unless list.empty?
 
           # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node
-            next if objects[statement.object]
-
             klass = new_object.klass_from_predicate(statement.predicate)
             next unless klass
 
