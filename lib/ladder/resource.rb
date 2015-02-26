@@ -22,7 +22,8 @@ module Ladder
     # Update the delegated ActiveTriples::Resource from
     # ActiveModel properties & relations
     #
-    # @param optional [Hash] opts options to pass to Mongoid / ActiveTriples
+    # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+    # @option opts [Boolean] :related whether to include related resources
     # @return [ActiveTriples::Resource] resource for the object
     def update_resource(opts = {})
       resource_class.properties.each do |field_name, property|
@@ -72,7 +73,7 @@ module Ladder
     # Retrieve the class for a relation, based on its defined RDF predicate
     #
     # @param [RDF::URI] predicate a URI for the RDF::Term
-    # @return [Class, nil] related class, typically a {Ladder::Resource} or {Ladder::File}
+    # @return [Ladder::Resource, Ladder::File, nil] related class
     def klass_from_predicate(predicate)
       field_name = field_from_predicate(predicate)
       return unless field_name
@@ -153,7 +154,7 @@ module Ladder
       # @see ActiveTriples::Properties
       #
       # @param [String] field_name ActiveModel attribute name for the field
-      # @param optional [Hash] opts options to pass to Mongoid / ActiveTriples
+      # @param [Hash] opts options to pass to Mongoid / ActiveTriples
       # @return [ActiveTriples::Resource] a modified resource
       def property(field_name, opts = {})
         if opts[:class_name]
@@ -182,8 +183,8 @@ module Ladder
       # prevent infinite traversal in the case of cyclic graphs.
       #
       # @param [RDF::Graph] graph an RDF::Graph to traverse
-      # @param optional [Hash] objects a keyed Hash of already-created objects in the graph
-      # @param optional [RDF::Query, RDF::Statement, Array(RDF::Term), Hash] pattern a query pattern
+      # @param [Hash] objects a keyed Hash of already-created objects in the graph
+      # @param [RDF::Query, RDF::Statement, Array(RDF::Term), Hash] pattern a query pattern
       # @return [Ladder::Resource, nil] an instance of this class
       def new_from_graph(graph, objects = {}, pattern = nil)
         # Default to getting the first object in the graph with the same RDF type as this class
@@ -232,7 +233,7 @@ module Ladder
     # If there is no persisted instance for the URI, but the class
     # is identifiable, then return a new instance of that class
     #
-    # @param [RDF::URI] RDF subject URI for the resource
+    # @param [RDF::URI] uri RDF subject URI for the resource
     # @return [Ladder::Resource] a resource instance
     def self.from_uri(uri)
       klasses = ActiveTriples::Resource.descendants.select(&:name)

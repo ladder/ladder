@@ -6,7 +6,10 @@ module Ladder
       ##
       # Return a JSON-LD representation for the resource
       #
-      # @param optional [Hash] opts options to pass to {ActiveTriples::Resource#dump}
+      # @see ActiveTriples::Resource#dump
+      #
+      # @param [Hash] opts options to pass to ActiveTriples
+      # @option opts [Boolean] :related whether to include related resources
       # @return [Hash] a serialized JSON-LD version of the resource
       def as_jsonld(opts = {})
         JSON.parse update_resource(opts.slice :related).dump(:jsonld, { standard_prefixes: true }.merge(opts))
@@ -33,7 +36,8 @@ module Ladder
       ##
       # Return a qname-based JSON representation
       #
-      # @param optional [Hash] opts options for serializaiton; typically :related
+      # @param [Hash] opts options for serializaiton
+      # @option opts [Boolean] :related whether to include related resources
       # @return [Hash] a serialized 'qname' version of the resource
       def as_qname(opts = {})
         qname_hash = type.empty? ? {} : { rdf: { type: type.first.pname } }

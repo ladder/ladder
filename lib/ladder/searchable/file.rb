@@ -28,7 +28,6 @@ module Ladder
       #
       # @see Elasticsearch::Model::Serializing#as_indexed_json
       #
-      # @param optional [Hash] options (unused)
       # @return [Hash] a serialized version of the file
       def as_indexed_json(*)
         { file: Base64.encode64(data) }

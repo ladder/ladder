@@ -64,7 +64,7 @@ end
 
 steve = Person.new(first_name: 'Steve', description: 'Funny-looking')
 => #<Person _id: 542f0c124169720ea0000000, first_name: {"en"=>"Steve"}, description: {"en"=>"Funny-looking"}>
-	
+
 steve.as_document
 => {"_id"=>BSON::ObjectId('542f0c124169720ea0000000'),
  "first_name"=>{"en"=>"Steve"},
@@ -190,7 +190,7 @@ class Place
 
   property :city, predicate: RDF::VCARD.locality
   property :country, predicate: RDF::VCARD.send('country-name')
-  
+
   embedded_in :resident, class_name: 'Person', inverse_of: :address
   property :resident, predicate: RDF::VCARD.agent
 end
@@ -448,8 +448,8 @@ results = Person.search 'shay'
  # #<Elasticsearch::Model::Searching::SearchRequest:0x007fa2ca830a58
  #  @definition={:index=>"people", :type=>"person", :q=>"Shay"},
  #  @klass=[PROXY] Person,
- #  @options={}>>
- 
+ #  @params={}>>
+
 results.count
 => 1
 
@@ -677,8 +677,8 @@ results = OCR.search 'Moomintroll'
  # #<Elasticsearch::Model::Searching::SearchRequest:0x007fa2ca830a58
  #  @definition={:index=>"ocrs", :type=>"ocr", :q=>"Moomintroll"},
  #  @klass=[PROXY] OCR,
- #  @options={}>>
- 
+ #  @params={}>>
+
 results.count
 => 1
 
@@ -708,8 +708,8 @@ results = OCR.search 'Moomintroll', fields: '*'
  # #<Elasticsearch::Model::Searching::SearchRequest:0x007fc36cadab10
  #  @definition={:index=>"ocrs", :type=>"ocr", :body=>{:query=>{:query_string=>{:query=>"Moomintroll"}}, :fields=>"*"}},
  #  @klass=[PROXY] OCR,
- #  @options={}>>
- 
+ #  @params={}>>
+
 results.count
 => 1
 
@@ -734,8 +734,8 @@ results = OCR.search query: { query_string: { query: 'his' } }, highlight: { fie
  #  @definition={:index=>"ocrs", :type=>"ocr", :body=>{:query=>{:query_string=>"Moomintroll"},
  #  :highlight=>{:fields=>{:file=>{}}}}},
  #  @klass=[PROXY] OCR,
- #  @options={}>>
- 
+ #  @params={}>>
+
 results.count
 => 1
 
@@ -760,7 +760,7 @@ class OCR
 end
 
  # ...
- 
+
 class Person
   include Ladder::Resource
   include Ladder::Searchable::Background

@@ -8,7 +8,6 @@ module Ladder
       #
       # @see Elasticsearch::Model::Serializing#as_indexed_json
       #
-      # @param optional [Hash] options (unused)
       # @return [Hash] a serialized version of the resource
       def as_indexed_json(*)
         respond_to?(:serialized_json) ? serialized_json : as_json(except: [:id, :_id])
