@@ -3,25 +3,27 @@ module Ladder
     module Resource
       extend ActiveSupport::Concern
 
+      ##
+      # Serialize the resource as JSON for indexing
       #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @see Elasticsearch::Model::Serializing#as_indexed_json
+      #
+      # @param optional [Hash] options (unused)
+      # @return [Hash] a serialized version of the resource
       def as_indexed_json(*)
         respond_to?(:serialized_json) ? serialized_json : as_json(except: [:id, :_id])
       end
 
       module ClassMethods
         ##
-        # Specify type of serialization to use for indexing
+        # Specify type of serialization to use for indexing;
+        # if a block is provided, it is expected to return a Hash
+        # that will be used in lieu of {#as_indexed_json} for
+        # serializing the resource in the index
         #
-        # TODO: documentation
-        # @param [Type] name1 more information
-        # @param [Type] name2 more information
-        # @return [Type, nil] describe return value(s)
-        def index_for_search(*, &block)
-          define_method(:serialized_json, block)
+        # @return [void]
+        def index_for_search(&block)
+          define_method(:serialized_json, block) if block_given?
         end
       end
     end

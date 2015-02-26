@@ -24,12 +24,12 @@ module Ladder
       end
 
       ##
-      # Return a Base64-encoded copy of data
+      # Serialize a Base64-encoded version of data for indexing
       #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @see Elasticsearch::Model::Serializing#as_indexed_json
+      #
+      # @param optional [Hash] options (unused)
+      # @return [Hash] a serialized version of the file
       def as_indexed_json(*)
         { file: Base64.encode64(data) }
       end
