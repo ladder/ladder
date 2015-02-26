@@ -22,7 +22,7 @@ module Ladder
       # @see Ladder::Resource#property
       #
       # @param [String] field_name ActiveModel attribute name for the field
-      # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+      # @param optional [Hash] opts options to pass to Mongoid / ActiveTriples
       # @return [Hash] an updated context for the object
       def property(field_name, opts = {})
         # Store context information
@@ -89,7 +89,7 @@ module Ladder
         #
         # @see Ladder::Resource#update_resource
         #
-        # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+        # @param optional [Hash] opts options to pass to Mongoid / ActiveTriples
         # @return [ActiveTriples::Resource] resource for the object
         def update_resource(opts = {})
           # NB: super has to go first or AT clobbers properties

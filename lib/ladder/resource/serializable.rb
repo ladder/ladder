@@ -4,14 +4,10 @@ module Ladder
   module Resource
     module Serializable
       ##
-      # Return JSON-LD representation
+      # Return a JSON-LD representation for the resource
       #
-      # @see ActiveTriples::Resource#dump
-      #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @param optional [Hash] opts options to pass to {ActiveTriples::Resource#dump}
+      # @return [Hash] a serialized JSON-LD version of the resource
       def as_jsonld(opts = {})
         JSON.parse update_resource(opts.slice :related).dump(:jsonld, { standard_prefixes: true }.merge(opts))
       end
@@ -23,10 +19,7 @@ module Ladder
       # NB: Will NOT embed related objects with same @type.
       # Spec under discussion, see https://github.com/json-ld/json-ld.org/issues/110
       #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @return [Hash] a serialized JSON-LD version of the resource
       def as_framed_jsonld
         json_hash = as_jsonld related: true
 
@@ -38,13 +31,10 @@ module Ladder
       end
 
       ##
-      # Generate a qname-based JSON representation
+      # Return a qname-based JSON representation
       #
-      #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @param optional [Hash] opts options for serializaiton; typically :related
+      # @return [Hash] a serialized 'qname' version of the resource
       def as_qname(opts = {})
         qname_hash = type.empty? ? {} : { rdf: { type: type.first.pname } }
 

@@ -22,7 +22,7 @@ module Ladder
     # Update the delegated ActiveTriples::Resource from
     # ActiveModel properties & relations
     #
-    # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+    # @param optional [Hash] opts options to pass to Mongoid / ActiveTriples
     # @return [ActiveTriples::Resource] resource for the object
     def update_resource(opts = {})
       resource_class.properties.each do |field_name, property|
@@ -153,7 +153,7 @@ module Ladder
       # @see ActiveTriples::Properties
       #
       # @param [String] field_name ActiveModel attribute name for the field
-      # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+      # @param optional [Hash] opts options to pass to Mongoid / ActiveTriples
       # @return [ActiveTriples::Resource] a modified resource
       def property(field_name, opts = {})
         if opts[:class_name]
@@ -227,10 +227,13 @@ module Ladder
 
     ##
     # Return a persisted instance of a Ladder::Resource from its
-    # RDF subject URI, without knowing the resource class
+    # RDF subject URI, without knowing the resource class.
+    #
+    # If there is no persisted instance for the URI, but the class
+    # is identifiable, then return a new instance of that class
     #
     # @param [RDF::URI] RDF subject URI for the resource
-    # @return [Ladder::Resource] a persisted resource instance
+    # @return [Ladder::Resource] a resource instance
     def self.from_uri(uri)
       klasses = ActiveTriples::Resource.descendants.select(&:name)
       klass = klasses.find { |k| uri.to_s.include? k.base_uri.to_s }
