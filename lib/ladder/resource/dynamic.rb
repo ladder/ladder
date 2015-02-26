@@ -49,8 +49,6 @@ module Ladder
         define_singleton_method("#{field_name}=") { |value| write_attribute(field_name, value) }
       end
 
-      private
-
       ##
       # Apply dynamic fields and properties to this instance
       #
@@ -113,27 +111,27 @@ module Ladder
         #
         # @see Ladder::Resource#<<
         #
-        # @param [RDF::Statement, Hash, Array] data more information
+        # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
         # @return [void]
-        def <<(data)
+        def <<(statement)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
-          data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+          statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
           # Don't store statically-defined types
-          return if resource_class.type == data.object
+          return if resource_class.type == statement.object
 
-          if RDF.type == data.predicate
+          if RDF.type == statement.predicate
             # Store type information
             self._types ||= []
-            self._types << data.object.to_s
+            self._types << statement.object.to_s
 
             apply_types
             return
           end
 
           # If we have an undefined predicate, then dynamically define it
-          return unless data.predicate.qname
-          property data.predicate.qname.last, predicate: data.predicate unless field_from_predicate data.predicate
+          return unless statement.predicate.qname
+          property statement.predicate.qname.last, predicate: statement.predicate unless field_from_predicate statement.predicate
 
           super
         end
