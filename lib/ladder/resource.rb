@@ -190,8 +190,8 @@ module Ladder
           next if objects[statement.object]
 
           # TODO: If the object is a list, process members individually
-#          list = RDF::List.new statement.object, graph
-#          binding.pry unless list.empty?
+          # list = RDF::List.new statement.object, graph
+          # binding.pry unless list.empty?
 
           # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node
@@ -220,17 +220,14 @@ module Ladder
     # @return [Type, nil] describe return value(s)
     def self.from_uri(uri)
       klasses = ActiveTriples::Resource.descendants.select(&:name)
+      klass = klasses.find { |k| uri.to_s.include? k.base_uri.to_s }
 
-      klasses.each do |klass|
-        if uri.to_s.include? klass.base_uri.to_s
-          object_id = uri.to_s.match(/[0-9a-fA-F]{24}/).to_s
+      if klass
+        object_id = uri.to_s.match(/[0-9a-fA-F]{24}/).to_s
 
-          # Retrieve the object if it's persisted, otherwise return a new one (eg. embedded)
-          return klass.parent.where(id: object_id).exists? ? klass.parent.find(object_id) : klass.parent.new
-        end
+        # Retrieve the object if it's persisted, otherwise return a new one (eg. embedded)
+        return klass.parent.where(id: object_id).exists? ? klass.parent.find(object_id) : klass.parent.new
       end
-
-      nil
     end
   end
 end

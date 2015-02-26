@@ -1,8 +1,0 @@
-LineLength:
-  Max: 150
-
-MethodLength:
-  Max: 15
-
-Documentation:
-  Enabled: false
