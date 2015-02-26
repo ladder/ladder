@@ -18,6 +18,11 @@ module Ladder
 
       private
 
+      ##
+      # Queue an index operation for asynchronous execution
+      #
+      # @param [Symbol] operation the kind of operation to perform: index, delete, update
+      # @return [void]
       def enqueue(operation)
         # Force autosave of related documents before queueing for indexing or updating
         methods.select { |i| i[/autosave_documents/] }.each { |m| send m } unless :delete == operation
@@ -28,6 +33,12 @@ module Ladder
       class Indexer < ActiveJob::Base
         queue_as :elasticsearch
 
+        ##
+        # Perform a queued index operation
+        #
+        # @param [String] operation the kind of operation to perform: index, delete, update
+        # @param [Ladder::Resource, Ladder::File] model the object instance to modify in the index
+        # @return [void]
         def perform(operation, model)
           case operation
           when 'index' then model.__elasticsearch__.index_document

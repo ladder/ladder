@@ -16,22 +16,35 @@ module Ladder
       end
 
       ##
-      # Dynamic field definition
-      def property(field_name, *opts)
+      # Dynamically define a field on the object instance; in addition to
+      # (or overloading) class-level properties
+      #
+      # @see Ladder::Resource#property
+      #
+      # @param [String] field_name ActiveModel attribute name for the field
+      # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+      # @option opts [RDF::Term] :predicate RDF predicate for this property
+      # @return [Hash] an updated context for the object
+      def property(field_name, opts = {})
         # Store context information
         self._context ||= Hash.new(nil)
 
         # Ensure new field name is unique
-        field_name = opts.first[:predicate].qname.join('_').to_sym if respond_to?(field_name) || :name == field_name
-        self._context[field_name] = opts.first[:predicate].to_s
+        field_name = opts[:predicate].qname.join('_').to_sym if resource_class.properties.symbolize_keys.keys.include? field_name
 
+        self._context[field_name] = opts[:predicate].to_s
         apply_context
       end
 
       private
 
       ##
-      # Dynamic field accessors (Mongoid)
+      # Dynamically define field accessors
+      #
+      # @see http://mongoid.org/en/mongoid/v3/documents.html#dynamic_fields Mongoid Dynamic Fields
+      #
+      # @param [String] field_name ActiveModel attribute name for the field
+      # @return [void]
       def create_accessors(field_name)
         define_singleton_method(field_name) { read_attribute(field_name) }
         define_singleton_method("#{field_name}=") { |value| write_attribute(field_name, value) }
@@ -39,6 +52,8 @@ module Ladder
 
       ##
       # Apply dynamic fields and properties to this instance
+      #
+      # @return [void]
       def apply_context
         return unless self._context
 
@@ -56,6 +71,8 @@ module Ladder
 
       ##
       # Apply dynamic types to this instance
+      #
+      # @return [void]
       def apply_types
         return unless _types
 
@@ -68,9 +85,13 @@ module Ladder
 
       module InstanceMethods
         ##
-        # Overload Ladder #update_resource
+        # Update the delegated ActiveTriples::Resource from
+        # ActiveModel properties & relations
         #
-        # @see Ladder::Resource
+        # @see Ladder::Resource#update_resource
+        #
+        # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+        # @return [ActiveTriples::Resource] resource for the object
         def update_resource(opts = {})
           # NB: super has to go first or AT clobbers properties
           super(opts)
@@ -87,31 +108,31 @@ module Ladder
         end
 
         ##
-        # Overload Ladder #<<
+        # Push an RDF::Statement into the object
         #
-        # @see Ladder::Resource
-        def <<(data, &block)
+        # @see Ladder::Resource#<<
+        #
+        # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
+        # @return [void]
+        def <<(statement)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
-          data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
+          statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
-          if RDF.type == data.predicate
+          # Don't store statically-defined types
+          return if resource_class.type == statement.object
+
+          if RDF.type == statement.predicate
             # Store type information
             self._types ||= []
-            self._types << data.object.to_s
+            self._types << statement.object.to_s
 
             apply_types
             return
           end
 
-          # If we have an undefined predicate, then dynamically defne it
-          unless resource_class.properties.values.map(&:predicate).include? data.predicate
-            # Generate a dynamic field name
-            qname = data.predicate.qname
-            field_name = (respond_to?(qname.last) || :name == qname.last) ? qname.join('_').to_sym : qname.last
-
-            # Define property on object
-            property field_name, predicate: data.predicate
-          end
+          # If we have an undefined predicate, then dynamically define it
+          return unless statement.predicate.qname
+          property statement.predicate.qname.last, predicate: statement.predicate unless field_from_predicate statement.predicate
 
           super
         end
@@ -119,9 +140,12 @@ module Ladder
         private
 
         ##
-        # Overload ActiveTriples #resource_class
+        # Return a cloned, mutatable copy of the
+        # ActiveTriples::Resource class for this instance
         #
-        # @see ActiveTriples::Identifiable
+        # @see ActiveTriples::Identifiable#resource_class
+        #
+        # @return [Class] a GeneratedResourceSchema for this class
         def resource_class
           @modified_resource_class ||= self.class.resource_class.clone
         end

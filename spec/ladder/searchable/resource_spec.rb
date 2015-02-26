@@ -14,6 +14,11 @@ describe Ladder::Searchable::Resource do
     class Thing
       include Ladder::Resource
       include Ladder::Searchable
+      configure type: RDF::DC.BibliographicResource
+
+      field :alt
+      property :alt, predicate: RDF::DC.alternative # non-localized literal
+      property :title, predicate: RDF::DC.title     # localized literal
     end
   end
 
@@ -22,32 +27,22 @@ describe Ladder::Searchable::Resource do
     Object.send(:remove_const, 'Thing') if Object
   end
 
-  shared_context 'with data' do
-    before do
-      subject.class.configure type: RDF::DC.BibliographicResource
-
-      # non-localized literal
-      subject.class.field :alt
-      subject.class.property :alt, predicate: RDF::DC.alternative
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.class.property :title, predicate: RDF::DC.title
-      subject.title = 'Comet in Moominland'
-    end
-  end
-
   shared_context 'with relations' do
-    before do
-      # related object
-      person.class.configure type: RDF::FOAF.Person
-      person.class.property :foaf_name, predicate: RDF::FOAF.name
-      person.foaf_name = 'Tove Jansson'
+    let(:person)  { Person.new }
 
-      # many-to-many relation
-      person.class.property :things, predicate: RDF::DC.relation, class_name: 'Thing'
-      subject.class.property :people, predicate: RDF::DC.creator, class_name: 'Person'
-      subject.people << person
+    before do
+      class Person
+        include Ladder::Resource
+        include Ladder::Searchable
+        configure type: RDF::FOAF.Person
+
+        property :foaf_name, predicate: RDF::FOAF.name
+        property :things, predicate: RDF::DC.relation, class_name: 'Thing'
+      end
+    end
+
+    after do
+      Object.send(:remove_const, 'Person') if Object
     end
   end
 
@@ -61,22 +56,20 @@ describe Ladder::Searchable::Resource do
 
   context 'with relations' do
     let(:subject) { Thing.new }
-    let(:person)  { Person.new }
-
-    before do
-      class Person
-        include Ladder::Resource
-        include Ladder::Searchable
-      end
-    end
-
-    after do
-      Object.send(:remove_const, 'Person') if Object
-    end
 
     include_context 'with data'
     include_context 'with relations'
 
+    before do
+      # many-to-many relation
+      Thing.property :people, predicate: RDF::DC.creator, class_name: 'Person'
+
+      # related object
+      person.foaf_name = 'Tove Jansson'
+      subject.people << person
+    end
+
+    it_behaves_like 'a Searchable'
     it_behaves_like 'a Searchable with related'
   end
 end

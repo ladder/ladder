@@ -27,6 +27,8 @@ module Ladder
 
     ##
     # Output content of object from stored file or readable input
+    #
+    # @return [String] string-encoded copy of binary data
     def data
       @grid_file ||= self.class.grid.get(id) if persisted?
       return @grid_file.data if @grid_file
@@ -37,6 +39,8 @@ module Ladder
 
     ##
     # Return an empty ActiveTriples resource for serializing related resources
+    #
+    # @return [ActiveTriples::Resource] resource for the object
     def update_resource
       resource
     end
@@ -45,6 +49,8 @@ module Ladder
 
     ##
     # Make save behave like Mongoid::Document as much as possible
+    #
+    # @return result of #run_callbacks, @see ActiveSupport::Callbacks
     def save_file
       attributes[:content_type] = file.content_type if file.respond_to? :content_type
       @grid_file ? @grid_file.save : @grid_file = self.class.grid.put(file, attributes.symbolize_keys)
@@ -55,6 +61,8 @@ module Ladder
     module ClassMethods
       ##
       # Create a namespaced GridFS module for this class
+      #
+      # @return [Module] a Mongoid::GridFs module for this class
       def grid
         @grid ||= Mongoid::GridFs.build_namespace_for name
       end

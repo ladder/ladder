@@ -12,25 +12,16 @@ describe Ladder::Resource do
       include Ladder::Resource
       configure type: RDF::DC.BibliographicResource
 
-      field    :alt
+      field :alt
       property :alt, predicate: RDF::DC.alternative # non-localized literal
       property :title, predicate: RDF::DC.title     # localized literal
+      property :identifier, predicate: RDF::DC.identifier
     end
   end
 
   after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
     Object.send(:remove_const, 'Thing') if Object
-  end
-
-  shared_context 'with data' do
-    before do
-      # non-localized literal
-      subject.alt = 'Mumintrollet pa kometjakt'
-
-      # localized literal
-      subject.title = 'Comet in Moominland'
-    end
   end
 
   shared_context 'with relations' do
