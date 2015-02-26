@@ -26,9 +26,9 @@ module Ladder
     # @param [Type] name2 more information
     # @return [Type, nil] describe return value(s)
     def update_resource(opts = {})
-      resource_class.properties.each do |name, property|
-        value = update_from_field(name) if fields[name]
-        value = update_from_relation(name, opts) if relations[name]
+      resource_class.properties.each do |field_name, property|
+        value = update_from_field(field_name) if fields[field_name]
+        value = update_from_relation(field_name, opts) if relations[field_name]
 
         resource.set_value(property.predicate, value) # if value
       end
@@ -92,7 +92,7 @@ module Ladder
     # @param [Type] name2 more information
     # @return [Type, nil] describe return value(s)
     def field_from_predicate(predicate)
-      defined_prop = resource_class.properties.find { |_name, term| term.predicate == predicate }
+      defined_prop = resource_class.properties.find { |_field_name, term| term.predicate == predicate }
       return unless defined_prop
 
       defined_prop.first
@@ -103,9 +103,9 @@ module Ladder
     # @param [Type] name1 more information
     # @param [Type] name2 more information
     # @return [Type, nil] describe return value(s)
-    def update_from_field(name)
-      if fields[name].localized?
-        localized_hash = read_attribute(name)
+    def update_from_field(field_name)
+      if fields[field_name].localized?
+        localized_hash = read_attribute(field_name)
 
         unless localized_hash.nil?
           localized_hash.map do |lang, value|
@@ -114,7 +114,7 @@ module Ladder
           end
         end
       else
-        send(name)
+        send(field_name)
       end
     end
 
@@ -123,15 +123,15 @@ module Ladder
     # @param [Type] name1 more information
     # @param [Type] name2 more information
     # @return [Type, nil] describe return value(s)
-    def update_from_relation(name, opts = {})
-      objects = send(name).to_a
+    def update_from_relation(field_name, opts = {})
+      objects = send(field_name).to_a
 
-      if opts[:related] || embedded_relations[name]
+      if opts[:related] || embedded_relations[field_name]
         # Force autosave of related documents to ensure correct serialization
         methods.select { |i| i[/autosave_documents/] }.each { |m| send m }
 
         # update inverse relation properties
-        relation_def = relations[name]
+        relation_def = relations[field_name]
         objects.each { |object| object.resource.set_value(relation_def.inverse, rdf_subject) } if relation_def.inverse
         objects.map(&:update_resource)
       else
@@ -153,13 +153,13 @@ module Ladder
       # @param [Type] name1 more information
       # @param [Type] name2 more information
       # @return [Type, nil] describe return value(s)
-      def property(name, opts = {})
+      def property(field_name, opts = {})
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
-          has_and_belongs_to_many(name, mongoid_opts) unless relations.keys.include? name.to_s
+          has_and_belongs_to_many(field_name, mongoid_opts) unless relations.keys.include? field_name.to_s
         else
           mongoid_opts = { localize: true }.merge(opts.except(:predicate, :multivalue))
-          field(name, mongoid_opts) unless fields[name.to_s]
+          field(field_name, mongoid_opts) unless fields[field_name.to_s]
         end
 
         opts.except!(*mongoid_opts.keys)

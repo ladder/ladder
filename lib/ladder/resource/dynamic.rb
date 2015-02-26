@@ -16,44 +16,45 @@ module Ladder
       end
 
       ##
-      # Dynamic field definition
+      # Dynamically define a field on the object instance; in addition to
+      # (or overloading) class-level properties
       #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
-      def property(field_name, *opts)
+      # @see Ladder::Resource#property
+      #
+      # @param [String] field_name ActiveModel attribute name for the field
+      # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+      # @return [Hash] an updated context for the object
+      def property(field_name, opts = {})
         # Store context information
         self._context ||= Hash.new(nil)
 
         # Ensure new field name is unique
-        field_name = opts.first[:predicate].qname.join('_').to_sym if resource_class.properties.symbolize_keys.keys.include? field_name
+        field_name = opts[:predicate].qname.join('_').to_sym if resource_class.properties.symbolize_keys.keys.include? field_name
 
-        self._context[field_name] = opts.first[:predicate].to_s
+        self._context[field_name] = opts[:predicate].to_s
         apply_context
       end
 
       private
 
       ##
-      # Dynamic field accessors (Mongoid)
+      # Dynamically define field accessors
       #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @see http://mongoid.org/en/mongoid/v3/documents.html#dynamic_fields Mongoid Dynamic Fields
+      #
+      # @param [String] field_name ActiveModel attribute name for the field
+      # @return [void]
       def create_accessors(field_name)
         define_singleton_method(field_name) { read_attribute(field_name) }
         define_singleton_method("#{field_name}=") { |value| write_attribute(field_name, value) }
       end
 
+      private
+
       ##
       # Apply dynamic fields and properties to this instance
       #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @return [void]
       def apply_context
         return unless self._context
 
@@ -72,10 +73,7 @@ module Ladder
       ##
       # Apply dynamic types to this instance
       #
-      # TODO: documentation
-      # @param [Type] name1 more information
-      # @param [Type] name2 more information
-      # @return [Type, nil] describe return value(s)
+      # @return [void]
       def apply_types
         return unless _types
 
@@ -88,14 +86,13 @@ module Ladder
 
       module InstanceMethods
         ##
-        # Overload Ladder #update_resource
+        # Update the delegated ActiveTriples::Resource from
+        # ActiveModel properties & relations
         #
-        # @see Ladder::Resource
+        # @see Ladder::Resource#update_resource
         #
-        # TODO: documentation
-        # @param [Type] name1 more information
-        # @param [Type] name2 more information
-        # @return [Type, nil] describe return value(s)
+        # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+        # @return [ActiveTriples::Resource] resource for the object
         def update_resource(opts = {})
           # NB: super has to go first or AT clobbers properties
           super(opts)
@@ -112,14 +109,12 @@ module Ladder
         end
 
         ##
-        # Overload Ladder #<<
+        # Push an RDF::Statement into the object
         #
-        # @see Ladder::Resource
+        # @see Ladder::Resource#<<
         #
-        # TODO: documentation
-        # @param [Type] name1 more information
-        # @param [Type] name2 more information
-        # @return [Type, nil] describe return value(s)
+        # @param [RDF::Statement, Hash, Array] data more information
+        # @return [void]
         def <<(data)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           data = RDF::Statement.from(data) unless data.is_a? RDF::Statement
@@ -146,14 +141,12 @@ module Ladder
         private
 
         ##
-        # Overload ActiveTriples #resource_class
+        # Return a cloned, mutatable copy of the
+        # ActiveTriples::Resource class for this instance
         #
-        # @see ActiveTriples::Identifiable
+        # @see ActiveTriples::Identifiable#resource_class
         #
-        # TODO: documentation
-        # @param [Type] name1 more information
-        # @param [Type] name2 more information
-        # @return [Type, nil] describe return value(s)
+        # @return [Class] a GeneratedResourceSchema for this class
         def resource_class
           @modified_resource_class ||= self.class.resource_class.clone
         end
