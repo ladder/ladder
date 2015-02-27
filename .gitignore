@@ -14,5 +14,5 @@
 mkmf.log
 *.gem
 .rubocop_todo.yml
-
 .rubocop.yml
+.ruby-version
