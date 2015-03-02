@@ -12,9 +12,7 @@ module Ladder
     include ActiveTriples::Identifiable
     include Ladder::Resource::Serializable
 
-    included do
-      configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
-    end
+    included { configure_base_uri }
 
     delegate :rdf_label, to: :update_resource
 
@@ -180,7 +178,8 @@ module Ladder
       #
       # As nodes are traversed in the graph, the instantiated objects
       # will be added to a Hash that is passed recursively, in order to
-      # prevent infinite traversal in the case of cyclic graphs.
+      # prevent infinite traversal in the case of cyclic graphs (ie.
+      # mark-and-sweep graph traversal).
       #
       # @param [RDF::Graph] graph an RDF::Graph to traverse
       # @param [Hash] objects a keyed Hash of already-created objects in the graph
@@ -223,6 +222,30 @@ module Ladder
         end # end each_statement
 
         new_object
+      end
+
+      protected
+
+      ##
+      # Set a default base URI based on the global LADDER_BASE_URI
+      # constant if it is defined
+      #
+      # @return [void]
+      def configure_base_uri
+        configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
+      end
+
+      ##
+      # Propagate base uri and properties to subclasses
+      #
+      # @return [void]
+      def inherited(subclass)
+        # Copy properties from parent to subclass
+        resource_class.properties.each do |_name, config|
+          subclass.property config.term, predicate: config.predicate, class_name: config.class_name
+        end
+
+        subclass.configure_base_uri
       end
     end
 

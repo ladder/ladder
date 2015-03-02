@@ -158,7 +158,7 @@ end
 shared_examples 'a Resource' do
   describe 'LADDER_BASE_URI' do
     it 'should automatically have a base URI' do
-      expect(subject.resource.rdf_subject.parent).to eq RDF::URI('http://example.org/things/')
+      expect(subject.resource.rdf_subject.parent).to eq RDF::URI.new(LADDER_BASE_URI) / subject.class.name.underscore.pluralize + '/'
     end
   end
 

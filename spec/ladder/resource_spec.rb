@@ -69,6 +69,25 @@ describe Ladder::Resource do
     end
   end
 
+  context 'with subclass' do
+    before do
+      class Subthing < Thing
+        # types are not inherited, so we must set it explicitly
+        configure type: RDF::DC.BibliographicResource
+      end
+    end
+
+    after do
+      Object.send(:remove_const, 'Subthing') if Object
+    end
+
+    let(:subject) { Subthing.new }
+
+    include_context 'with data'
+
+    it_behaves_like 'a Resource'
+  end
+
   context 'with data' do
     let(:subject) { Thing.new }
 
