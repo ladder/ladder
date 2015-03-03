@@ -73,7 +73,8 @@ module Ladder
           qname_hash[ns].delete_if { |_k, v| v.blank? }
         end
 
-        qname_hash
+        # Insert labels for boosting search score
+        { rdfs: { label: update_resource(opts.slice :related).rdf_label } }.merge qname_hash
       end
     end
   end

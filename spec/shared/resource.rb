@@ -290,7 +290,7 @@ shared_examples 'a Resource' do
 
     describe '#as_qname' do
       it 'should output a valid qname representation of itself' do
-        # TODO
+        # TODO: check rdfs:label
       end
     end
   end
