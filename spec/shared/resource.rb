@@ -281,6 +281,13 @@ shared_examples 'a Resource' do
   end
 
   context 'a serializable' do
+    describe '#as_turtle' do
+      it 'should output a valid turtle representation of itself' do
+        graph = RDF::Graph.new << RDF::Turtle::Reader.new(subject.as_turtle)
+        expect(subject.update_resource.to_hash).to eq graph.to_hash
+      end
+    end
+
     describe '#as_jsonld' do
       it 'should output a valid jsonld representation of itself' do
         graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
