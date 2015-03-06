@@ -1,3 +1,23 @@
+shared_context 'configure_thing' do
+  before do
+    class Thing
+      property :alt,        predicate: RDF::DC.alternative, # non-localized String
+                            localize: false
+      property :title,      predicate: RDF::DC.title        # localized String
+#      property :references, predicate: RDF::DC.references   # Array
+      property :is_valid,   predicate: RDF::DC.valid        # Boolean
+      property :date,       predicate: RDF::DC.date         # Date
+      property :issued,     predicate: RDF::DC.issued       # DateTime
+      property :spatial,    predicate: RDF::DC.spatial      # Float
+#      property :conformsTo, predicate: RDF::DC.conformsTo   # Hash
+      property :identifier, predicate: RDF::DC.identifier   # Integer
+#      property :license,    predicate: RDF::DC.license      # Range
+      property :source,     predicate: RDF::DC.source       # Symbol
+      property :created,    predicate: RDF::DC.created      # Time
+    end
+  end
+end
+
 shared_context 'with data' do
   before do
     subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String

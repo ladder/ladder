@@ -18,4 +18,20 @@ RSpec.configure do |config|
 
   # Use the specified formatter
   config.formatter = :documentation
+
+  config.before do
+    Mongoid.load!('mongoid.yml', :development)
+    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
+
+    LADDER_BASE_URI ||= 'http://example.org'
+  end
+
+  config.before :each do
+    Mongoid.purge!
+  end
+
+  config.after do
+    Object.send(:remove_const, :LADDER_BASE_URI) if Object
+  end
+
 end
