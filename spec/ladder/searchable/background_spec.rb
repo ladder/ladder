@@ -7,7 +7,6 @@ describe Ladder::Searchable::Background do
     class Thing
       include Ladder::Resource
       include Ladder::Searchable::Background
-      configure type: RDF::DC.BibliographicResource
     end
 
     class Datastream
@@ -22,7 +21,7 @@ describe Ladder::Searchable::Background do
   end
 
   shared_context 'with relations' do
-    let(:person)  { Person.new }
+    let(:person) { Person.new }
 
     before do
       class Person

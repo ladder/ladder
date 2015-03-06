@@ -7,7 +7,6 @@ describe Ladder::Searchable::Resource do
     class Thing
       include Ladder::Resource
       include Ladder::Searchable
-      configure type: RDF::DC.BibliographicResource
     end
   end
 

@@ -12,7 +12,7 @@ describe Ladder::File do
   end
 
   shared_context 'with relations' do
-    let(:thing)    { Thing.new }
+    let(:thing) { Thing.new }
 
     before do
       class Thing

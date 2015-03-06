@@ -4,7 +4,6 @@ describe Ladder::Resource do
   before do
     class Thing
       include Ladder::Resource
-      configure type: RDF::DC.BibliographicResource
     end
   end
 

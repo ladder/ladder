@@ -4,7 +4,6 @@ describe Ladder::Resource::Dynamic do
   before do
     class Thing
       include Ladder::Resource::Dynamic
-      configure type: RDF::DC.BibliographicResource
     end
   end
 
