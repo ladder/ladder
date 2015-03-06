@@ -56,7 +56,7 @@ module Ladder
       # object (RDF::Resource) - if not a Resource, it is coerced to Literal or Node
       #                depending on if it is a symbol or something other than a Term.
       value = yield if block_given?
-      value ||= statement.object.to_s
+      value ||= statement.object.is_a?(RDF::Literal) ? statement.object.object : statement.object.to_s
 
       enum = send(field_name)
 
@@ -106,6 +106,7 @@ module Ladder
       if fields[field_name].localized?
         localized_hash = read_attribute(field_name)
 
+        # FIXME: cast (date, time) values properly from database
         unless localized_hash.nil?
           localized_hash.map do |lang, value|
             cast_uri = RDF::URI.new(value)
