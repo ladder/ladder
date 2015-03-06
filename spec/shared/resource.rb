@@ -3,8 +3,8 @@ shared_context 'with data' do
     subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String
     subject.title      = 'Comet in Moominland'        # localized String
 #    subject.references = ['something', 'another']    # Array
-    subject.is_valid   = true                         # Boolean
-    subject.date       = Date.new(1946)               # Date
+    subject.is_valid   = true                         # Boolean -> xsd:boolean
+    subject.date       = Date.new(1946)               # Date -> xsd:date
     subject.issued     = DateTime.new(1951)           # DateTime -> xsd:date
     subject.spatial    = 12.345                       # Float -> xsd:double
 #    subject.conformsTo = {'key' => 'value'}           # Hash

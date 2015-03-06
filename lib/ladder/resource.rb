@@ -116,8 +116,9 @@ module Ladder
         cast_uri = RDF::URI.new(value)
         cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
       when Time
+        # Cast DateTimes with 00:00:00 or Date stored as Times in Mongoid to xsd:date
         # FIXME: this should only be applied for fields that are untyped (fields[].type is Object)
-        value.midnight == value ? RDF::Literal.new(value.to_date, opts) : RDF::Literal.new(value.to_datetime, opts)
+        value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
       else
         RDF::Literal.new(value, opts)
       end
