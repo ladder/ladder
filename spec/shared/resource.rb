@@ -1,7 +1,17 @@
 shared_context 'with data' do
   before do
-    subject.alt = 'Mumintrollet pa kometjakt' # non-localized literal
-    subject.title = 'Comet in Moominland'     # localized literal
+    subject.alt        = 'Mumintrollet pa kometjakt' # non-localized String
+    subject.title      = 'Comet in Moominland'       # localized String
+#    subject.references = ['something', 'another']    # Array
+    subject.is_valid   = true                         # Boolean
+    subject.date       = Date.new(1946)               # Date
+    subject.issued     = DateTime.new(1951)           # DateTime
+    subject.spatial    = 12.345                       # Float
+#    subject.conformsTo = {'key' => 'value'}           # Hash
+    subject.identifier = 16589991                     # Integer
+#    subject.license    = 1..10                        # Range
+    subject.source     = :something                   # Symbol
+    subject.created    = Time.new.beginning_of_day    # Time
   end
 end
 

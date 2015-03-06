@@ -2,7 +2,6 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'ladder'
-require 'mongoid'
 require 'awesome_print'
 require 'pry'
 require 'simplecov'
