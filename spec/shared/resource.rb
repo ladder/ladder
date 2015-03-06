@@ -12,8 +12,6 @@ shared_context 'with data' do
 #    subject.license    = 1..10                        # Range
     subject.source     = :something                   # Symbol -> xsd:token
     subject.created    = Time.new.beginning_of_hour   # Time
-
-binding.pry
   end
 end
 

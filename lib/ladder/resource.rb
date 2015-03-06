@@ -110,6 +110,12 @@ module Ladder
       end
     end
 
+    ##
+    # Cast values from Mongoid types to RDF types
+    #
+    # @param [Object] value ActiveModel attribute to be cast
+    # @param [Hash] opts options to pass to RDF::Literal
+    # @return [RDF::Literal, RDF::URI]
     def cast_value(value, opts = {})
       case value
       when String
@@ -117,7 +123,7 @@ module Ladder
         cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
       when Time
         # Cast DateTimes with 00:00:00 or Date stored as Times in Mongoid to xsd:date
-        # FIXME: this should only be applied for fields that are untyped (fields[].type is Object)
+        # FIXME: this should NOT be applied for fields that are typed as Time
         value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
       else
         RDF::Literal.new(value, opts)
