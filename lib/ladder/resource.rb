@@ -104,17 +104,22 @@ module Ladder
     # @return [void]
     def update_from_field(field_name)
       if fields[field_name].localized?
-        localized_hash = read_attribute(field_name)
-
-        # FIXME: cast (date, time) values properly from database
-        unless localized_hash.nil?
-          localized_hash.map do |lang, value|
-            cast_uri = RDF::URI.new(value)
-            cast_uri.valid? ? cast_uri : RDF::Literal.new(value, language: lang)
-          end
-        end
+        read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }
       else
-        send(field_name)
+        cast_value send(field_name)
+      end
+    end
+
+    def cast_value(value, opts = {})
+      case value
+      when String
+        cast_uri = RDF::URI.new(value)
+        cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
+      when Time
+        # FIXME: this should only be applied for fields that are untyped (fields[].type is Object)
+        value.midnight == value ? RDF::Literal.new(value.to_date, opts) : RDF::Literal.new(value.to_datetime, opts)
+      else
+        RDF::Literal.new(value, opts)
       end
     end
 
