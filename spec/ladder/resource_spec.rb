@@ -78,6 +78,14 @@ describe Ladder::Resource do
     end
   end
 
+  context 'with data' do
+    let(:subject) { Thing.new }
+
+    include_context 'with data'
+
+    it_behaves_like 'a Resource'
+  end
+
   context 'with subclass' do
     before do
       class Subthing < Thing
@@ -91,14 +99,6 @@ describe Ladder::Resource do
     end
 
     let(:subject) { Subthing.new }
-
-    include_context 'with data'
-
-    it_behaves_like 'a Resource'
-  end
-
-  context 'with data' do
-    let(:subject) { Thing.new }
 
     include_context 'with data'
 
