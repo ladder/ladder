@@ -59,7 +59,8 @@ module Ladder
       value ||= statement.object.is_a?(RDF::Literal) ? statement.object.object : statement.object.to_s
 
       enum = send(field_name)
-
+#      enum = read_attribute(field_name)
+#binding.pry if 'title' == field_name
       if enum.is_a?(Enumerable)
         enum.send(:push, value) unless enum.include? value
       else
@@ -106,6 +107,8 @@ module Ladder
       if fields[field_name].localized?
         read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }
       else
+        # TODO: IMPLEMENT
+        # binding.pry if send(field_name).is_a? Enumerable
         cast_value send(field_name)
       end
     end

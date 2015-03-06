@@ -53,8 +53,14 @@
         "@id": "_:b4",
         "@type": "skos:Concept"
     },
-    "dc:title": {
-        "@value": "Comet in Moominland",
-        "@language": "en"
-    }
+    "dc:title": [
+		{
+	        "@value": "Comet in Moominland",
+	        "@language": "en"
+	    },
+		{
+	        "@value": "Kometen kommer",
+	        "@language": "sv"
+	    }
+	]
 }
