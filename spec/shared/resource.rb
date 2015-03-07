@@ -6,15 +6,15 @@ shared_context 'configure_thing' do
       property :title,      predicate: RDF::DC.title        # localized String
       property :alt,        predicate: RDF::DC.alternative, # non-localized String
                             localize: false
-#      property :references, predicate: RDF::DC.references,   # Array
-#                            localize: false, type: Array
+      property :references, predicate: RDF::DC.references   # Array
+      #                     , localize: false, type: Array
       property :is_valid,   predicate: RDF::DC.valid        # Boolean
       property :date,       predicate: RDF::DC.date         # Date
       property :issued,     predicate: RDF::DC.issued       # DateTime
       property :spatial,    predicate: RDF::DC.spatial      # Float
-#      property :conformsTo, predicate: RDF::DC.conformsTo   # Hash
+      # property :conformsTo, predicate: RDF::DC.conformsTo   # Hash
       property :identifier, predicate: RDF::DC.identifier   # Integer
-#      property :license,    predicate: RDF::DC.license      # Range
+      # property :license,    predicate: RDF::DC.license      # Range
       property :source,     predicate: RDF::DC.source       # Symbol
       property :created,    predicate: RDF::DC.created      # Time
     end
@@ -30,18 +30,16 @@ shared_context 'with data' do
     subject.title      = 'Kometen kommer'             # localized String
     I18n.locale = :en
     subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String
-#    subject.references = ['something', 'another']    # Array
+    # subject.references = ['something', 'another']    # Array
     subject.is_valid   = true                         # Boolean -> xsd:boolean
     subject.date       = Date.new(1946)               # Date -> xsd:date
     subject.issued     = DateTime.new(1951)           # DateTime -> xsd:date
     subject.spatial    = 12.345                       # Float -> xsd:double
-#    subject.conformsTo = {'key' => 'value'}           # Hash
+    # subject.conformsTo = {'key' => 'value'}          # Hash
     subject.identifier = 16589991                     # Integer -> xsd:integer
-#    subject.license    = 1..10                        # Range
+    # subject.license    = 1..10                       # Range
     subject.source     = :something                   # Symbol -> xsd:token
     subject.created    = Time.new.beginning_of_hour   # Time
-
-#binding.pry
   end
 end
 
@@ -87,7 +85,7 @@ shared_examples 'a Dynamic Resource' do
       # conflicting property
       subject.property :title, predicate: RDF::DC11.title
       subject.dc11_title = 'Kometjakten'
-binding.pry
+
       # defined field
       subject << RDF::Statement(nil, RDF::DC.title, RDF::Literal.new('Kometen kommer', language: :sv))
 
@@ -95,21 +93,21 @@ binding.pry
       subject << RDF::Statement(nil, RDF::DC.alternative, 'Kometjakten')
 
       # URI value
-      subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
+      subject << RDF::Statement(nil, RDF::DC.references, RDF::URI('http://some.uri'))
 
       # RDF type
       subject << RDF::Statement(nil, RDF.type, RDF::DC.PhysicalResource)
-#binding.pry
+
       subject.update_resource
     end
 
     it 'should have updated values' do
-#      expect(subject.resource.statements.count).to eq 7
+      # expect(subject.resource.statements.count).to eq 7
       expect(subject.resource.query(predicate: RDF::DC.description, object: "Second in Tove Jansson's series of Moomin books").count).to eq 1
       expect(subject.resource.query(predicate: RDF::DC11.title, object: 'Kometjakten').count).to eq 1
       expect(subject.resource.query(predicate: RDF::DC.title, object: RDF::Literal.new('Kometen kommer', language: :sv)).count).to eq 1
       expect(subject.resource.query(predicate: RDF::DC.alternative, object: 'Kometjakten').count).to eq 1
-      expect(subject.resource.query(predicate: RDF::DC.identifier, object: RDF::URI('http://some.uri')).count).to eq 1
+      expect(subject.resource.query(predicate: RDF::DC.references, object: RDF::URI('http://some.uri')).count).to eq 1
     end
 
     it 'should contain both class and dynamic types' do
@@ -164,16 +162,16 @@ binding.pry
 
     context 'with a URI value' do
       before do
-        subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
+        subject << RDF::Statement(nil, RDF::DC.references, RDF::URI('http://some.uri'))
       end
 
       it 'should store the URI as a string' do
-        expect(subject.identifier).to eq 'http://some.uri'
+        expect(subject.references).to eq 'http://some.uri'
       end
 
       it 'should cast a URI into the resource' do
         subject.update_resource
-        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.identifier)
+        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.references)
         expect(query.first_object).to be_a_kind_of RDF::URI
       end
     end
@@ -224,15 +222,13 @@ shared_examples 'a Resource' do
 
     context 'with localized literal' do
       it 'should return localized value' do
-#        expect(subject.title).to eq 'Comet in Moominland'
         expect(['Comet in Moominland', 'Kometen kommer']).to include subject.title
       end
 
       it 'should return all locales' do
         expect(subject.attributes['title']).to eq('en' => 'Comet in Moominland', 'sv' => 'Kometen kommer') \
-                                            or eq('en' => 'Comet in Moominland') \
-                                            or eq('sv' => 'Kometen kommer')
-#        expect({'en' => 'Comet in Moominland', 'sv' => 'Kometen kommer'}).to include subject.attributes['title']
+                                            || eq('en' => 'Comet in Moominland') \
+                                            || eq('sv' => 'Kometen kommer')
       end
 
       it 'should have a valid predicate' do
@@ -254,7 +250,6 @@ shared_examples 'a Resource' do
     it 'should have a non-localized literal object' do
       subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.title).each_statement do |s|
         expect(['Comet in Moominland', 'Kometen kommer']).to include s.object.to_s
-#        expect(s.object.to_s).to eq 'Comet in Moominland'
       end
     end
 
@@ -304,16 +299,16 @@ shared_examples 'a Resource' do
 
     context 'with a URI value' do
       before do
-        subject << RDF::Statement(nil, RDF::DC.identifier, RDF::URI('http://some.uri'))
+        subject << RDF::Statement(nil, RDF::DC.references, RDF::URI('http://some.uri'))
       end
 
       it 'should store the URI as a string' do
-        expect(subject.identifier).to eq 'http://some.uri'
+        expect(subject.references).to eq 'http://some.uri'
       end
 
       it 'should cast a URI into the resource' do
         subject.update_resource
-        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.identifier)
+        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.references)
         expect(query.first_object).to be_a_kind_of RDF::URI
       end
     end
@@ -370,7 +365,6 @@ shared_examples 'a Resource' do
           x
         end
       end
-#binding.pry
       expect(remove_ids(new_subject.as_framed_jsonld)).to eq remove_ids(subject.as_framed_jsonld)
     end
   end
@@ -486,7 +480,6 @@ shared_examples 'a Resource with relations' do
     it 'should have a literal object' do
       query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.title)
       expect(['Comet in Moominland', 'Kometen kommer']).to include query.first_object.to_s
-#      expect(query.first_object.to_s).to eq 'Comet in Moominland'
     end
 
     it 'should have an embedded object' do

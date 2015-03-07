@@ -47,20 +47,32 @@ module Ladder
       field_name = field_from_predicate(statement.predicate)
       return unless field_name
 
-      # If the object is a URI, see if it is a retrievable model object
-      value = Ladder::Resource.from_uri(statement.object) if statement.object.is_a? RDF::URI
+      case statement.object
+      when RDF::URI
+        set_value field_name, Ladder::Resource.from_uri(statement.object) || statement.object.to_s
+      when RDF::Literal
+        if statement.object.has_language?
+          # FIXME: this doesn't seem canonical Mongoid
+          locale = I18n.locale
+          I18n.locale = statement.object.language
+          set_value field_name, statement.object.object
+          I18n.locale = locale
+        else
+          set_value field_name, statement.object.object
+        end
+      when RDF::Node # A block should be provided containing the instantiated Node object
+        set_value field_name, yield if block_given?
+      else # TODO: what cases would be here?
+        set_value field_name, statement.object.to_s
+      end
+    end
 
-      # TODO: tidy this code
-      # subject (RDF::Term) - A symbol is converted to an interned Node.
-      # predicate (RDF::URI)
-      # object (RDF::Resource) - if not a Resource, it is coerced to Literal or Node
-      #                depending on if it is a symbol or something other than a Term.
-      value = yield if block_given?
-      value ||= statement.object.is_a?(RDF::Literal) ? statement.object.object : statement.object.to_s
+    # TODO: documentation, make internal etc.
+    def set_value(field_name, value)
+      return if value.nil?
 
-      enum = send(field_name)
-#      enum = read_attribute(field_name)
-#binding.pry if 'title' == field_name
+      enum = send(field_name) # read_attribute(field_name)
+
       if enum.is_a?(Enumerable)
         enum.send(:push, value) unless enum.include? value
       else

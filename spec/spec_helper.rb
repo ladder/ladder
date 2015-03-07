@@ -33,5 +33,4 @@ RSpec.configure do |config|
   config.after do
     Object.send(:remove_const, :LADDER_BASE_URI) if Object
   end
-
 end
