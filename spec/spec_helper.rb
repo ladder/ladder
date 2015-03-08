@@ -24,6 +24,8 @@ RSpec.configure do |config|
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
 
     LADDER_BASE_URI ||= 'http://example.org'
+
+    I18n.enforce_available_locales = false
   end
 
   config.before :each do

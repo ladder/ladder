@@ -52,7 +52,7 @@ module Ladder
         set_value field_name, Ladder::Resource.from_uri(statement.object) || statement.object.to_s
       when RDF::Literal
         if statement.object.has_language?
-          # FIXME: this doesn't seem canonical Mongoid
+          # FIXME: this doesn't seem like canonical Mongoid
           locale = I18n.locale
           I18n.locale = statement.object.language
           set_value field_name, statement.object.object
@@ -60,10 +60,9 @@ module Ladder
         else
           set_value field_name, statement.object.object
         end
-      when RDF::Node # A block should be provided containing the instantiated Node object
+      when RDF::Node
+        # A block should be provided containing the instantiated Node object
         set_value field_name, yield if block_given?
-      else # TODO: what cases would be here?
-        set_value field_name, statement.object.to_s
       end
     end
 
@@ -71,10 +70,10 @@ module Ladder
     def set_value(field_name, value)
       return if value.nil?
 
-      enum = send(field_name) # read_attribute(field_name)
+      field = send(field_name)
 
-      if enum.is_a?(Enumerable)
-        enum.send(:push, value) unless enum.include? value
+      if Mongoid::Relations::Targets::Enumerable == field.class
+        field.send(:push, value) unless field.include? value
       else
         send("#{field_name}=", value)
       end
