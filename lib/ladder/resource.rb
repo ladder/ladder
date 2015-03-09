@@ -52,30 +52,14 @@ module Ladder
         set_value field_name, Ladder::Resource.from_uri(statement.object) || statement.object.to_s
       when RDF::Literal
         if statement.object.has_language?
-          # FIXME: this doesn't seem like canonical Mongoid
-          locale = I18n.locale
-          I18n.locale = statement.object.language
-          set_value field_name, statement.object.object
-          I18n.locale = locale
+          trans = send("#{field_name}_translations")
+          send("#{field_name}_translations=", trans.merge({statement.object.language => statement.object.object}))
         else
           set_value field_name, statement.object.object
         end
       when RDF::Node
         # A block should be provided containing the instantiated Node object
         set_value field_name, yield if block_given?
-      end
-    end
-
-    # TODO: documentation, make internal etc.
-    def set_value(field_name, value)
-      return if value.nil?
-
-      field = send(field_name)
-
-      if Mongoid::Relations::Targets::Enumerable == field.class
-        field.send(:push, value) unless field.include? value
-      else
-        send("#{field_name}=", value)
       end
     end
 
@@ -110,17 +94,21 @@ module Ladder
     end
 
     ##
-    # Update the delegated ActiveTriples::Resource from a field
+    # Set values on a field or relation
     #
     # @param [String] field_name ActiveModel attribute name for the field
+    # @param [Object] value ActiveModel attribute to be set
     # @return [void]
-    def update_from_field(field_name)
-      if fields[field_name].localized?
-        read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }
+    # @return [RDF::Literal, RDF::URI]
+    def set_value(field_name, value)
+      return if value.nil?
+
+      field = send(field_name)
+
+      if Mongoid::Relations::Targets::Enumerable == field.class
+        field.send(:push, value) unless field.include? value
       else
-        # TODO: IMPLEMENT
-        # binding.pry if send(field_name).is_a? Enumerable
-        cast_value send(field_name)
+        send("#{field_name}=", value)
       end
     end
 
@@ -141,6 +129,21 @@ module Ladder
         value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
       else
         RDF::Literal.new(value, opts)
+      end
+    end
+
+    ##
+    # Update the delegated ActiveTriples::Resource from a field
+    #
+    # @param [String] field_name ActiveModel attribute name for the field
+    # @return [void]
+    def update_from_field(field_name)
+      if fields[field_name].localized?
+        read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }
+      else
+        # TODO: IMPLEMENT
+        # binding.pry if send(field_name).is_a? Enumerable
+        cast_value send(field_name)
       end
     end
 

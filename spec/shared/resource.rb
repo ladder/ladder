@@ -7,15 +7,14 @@ shared_context 'configure_thing' do
       property :alt,        predicate: RDF::DC.alternative,    # non-localized String
                             localize: false
       property :references, predicate: RDF::DC.references      # URI
-      property :referenced, predicate: RDF::DC.isReferencedBy, # Array
-                            localize: false, type: Array
+      # property :referenced, predicate: RDF::DC.isReferencedBy  # Array
       property :is_valid,   predicate: RDF::DC.valid           # Boolean
       property :date,       predicate: RDF::DC.date            # Date
       property :issued,     predicate: RDF::DC.issued          # DateTime
       property :spatial,    predicate: RDF::DC.spatial         # Float
-      property :conformsTo, predicate: RDF::DC.conformsTo      # Hash
+      # property :conformsTo, predicate: RDF::DC.conformsTo      # Hash
       property :identifier, predicate: RDF::DC.identifier      # Integer
-      # property :license,    predicate: RDF::DC.license        # Range
+      # property :license,    predicate: RDF::DC.license         # Range
       property :source,     predicate: RDF::DC.source          # Symbol
       property :created,    predicate: RDF::DC.created         # Time
     end
@@ -24,20 +23,18 @@ end
 
 shared_context 'with data' do
   before do
-    I18n.default_locale = :en
-    subject.title      = 'Comet in Moominland'        # non-localized String
-    I18n.locale = :sv
-    subject.title      = 'Kometen kommer'             # localized String
-    I18n.locale = :en
+    subject.title_translations = {'en' => 'Comet in Moominland', # localized String
+                                  'sv' => 'Kometen kommer'}
     subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String
-    subject.referenced = %w(something another)        # Array
+    subject.references = 'http://foo.com'             # URI
+    # subject.referenced = %w(something another)        # Array
     subject.is_valid   = true                         # Boolean -> xsd:boolean
     subject.date       = Date.new(1946)               # Date -> xsd:date
     subject.issued     = DateTime.new(1951)           # DateTime -> xsd:date
     subject.spatial    = 12.345                       # Float -> xsd:double
-    subject.conformsTo = { 'key' => 'value' }         # Hash
+    # subject.conformsTo = { 'key' => 'value' }         # Hash
     subject.identifier = 16_589_991                   # Integer -> xsd:integer
-    # subject.license    = 1..10                       # Range
+    # subject.license    = 1..10                        # Range
     subject.source     = :something                   # Symbol -> xsd:token
     subject.created    = Time.new.beginning_of_hour   # Time
   end
