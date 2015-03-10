@@ -105,6 +105,7 @@ describe Ladder::Resource do
   context 'from JSON-LD' do
     let(:subject) { Thing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }
 
+#    include_context 'with data'
     include_context 'with relations'
 
     let(:person)  { subject.people.first }

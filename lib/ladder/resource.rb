@@ -51,25 +51,34 @@ module Ladder
 
       value = statement.object.is_a?(RDF::Node) && block_given? ? yield : statement.object
 
-      test_method(field_name, value)
+      uncast_value(field_name, value)
     end
 
-    # TODO
-    def test_method(field_name, obj)
-      case obj
+    ##
+    # Cast values from RDF types to persistable Mongoid types
+    #
+    # @param [String] field_name ActiveModel attribute name for the field
+    # @param [Object] obj object (usually RDF::Term) to be cast
+    # @return [Object]
+    def uncast_value(field_name, obj)
+      opts = {}
+
+      value = case obj
       when RDF::URI
-        set_value field_name, Ladder::Resource.from_uri(obj) || obj.to_s
+        Ladder::Resource.from_uri(obj) || obj.to_s
       when RDF::Literal
-        if obj.has_language?
-          set_value field_name, obj.object, { language: obj.language }
-        else
-          set_value field_name, obj.object
-        end
+        opts[:language] = obj.language.to_s if obj.has_language?
+        obj.object
+        # FIXME: this returns the value with the language stripped
       when Array
-        set_value field_name, obj.map { |item| test_method(field_name, item.object) }
+        obj.map { |item| uncast_value(field_name, item.object) }
       else
-        set_value field_name, obj
+        obj
       end
+
+      set_value(field_name, value, opts)
+
+      value
     end
 
     ##
@@ -87,16 +96,11 @@ module Ladder
         field.send(:push, value) unless field.include? value
       elsif opts[:language]
         trans = send("#{field_name}_translations")
-        hash = { opts[:language] => value }
-#        hash = trans.merge(hash)
-        send("#{field_name}_translations=", hash)
+        send("#{field_name}_translations=", { opts[:language] => value })
       else
         send("#{field_name}=", value)
       end
-
-      value
     end
-#
 
     ##
     # Retrieve the class for a relation, based on its defined RDF predicate
@@ -254,7 +258,7 @@ module Ladder
           if s.size > 1
             # field_name = new_object.field_from_predicate statement.predicate
             st = RDF::Statement(statement.subject, statement.predicate, RDF::List(s))
-#binding.pry
+# binding.pry
             new_object.send(:<<, st) { s.to_a }
             next
           end
