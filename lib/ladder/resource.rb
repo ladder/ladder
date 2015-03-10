@@ -28,7 +28,7 @@ module Ladder
         value = update_from_field(field_name) if fields[field_name]
         value = update_from_relation(field_name, opts[:related]) if relations[field_name]
 
-        resource.set_value(property.predicate, value) # if value
+        [*value].each { |v| resource.set_value(property.predicate, v) }
       end
 
       resource
@@ -39,6 +39,8 @@ module Ladder
     #
     # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
     # @return [void]
+    #
+    # @note This method will overwrite existing statements with the same predicate from the object
     def <<(statement)
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
@@ -78,8 +80,6 @@ module Ladder
       relation.class_name.constantize
     end
 
-    private
-
     ##
     # Retrieve the attribute name for a field or relation,
     # based on its defined RDF predicate
@@ -92,6 +92,8 @@ module Ladder
 
       defined_prop.first
     end
+
+    private
 
     ##
     # Set values on a field or relation
@@ -120,6 +122,8 @@ module Ladder
     # @return [RDF::Literal, RDF::URI]
     def cast_value(value, opts = {})
       case value
+      when Array
+        value.map { |v| cast_value(v, opts) }
       when String
         cast_uri = RDF::URI.new(value)
         cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
@@ -141,8 +145,6 @@ module Ladder
       if fields[field_name].localized?
         read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }
       else
-        # TODO: IMPLEMENT
-        # binding.pry if send(field_name).is_a? Enumerable
         cast_value send(field_name)
       end
     end
@@ -231,10 +233,6 @@ module Ladder
 
         graph.query([root_subject]).each_statement do |statement|
           next if objects[statement.object]
-
-          # TODO: If the object is a list, process members individually
-          # list = RDF::List.new statement.object, graph
-          # binding.pry unless list.empty?
 
           # If the object is a BNode, dereference the relation
           if statement.object.is_a? RDF::Node

@@ -26,6 +26,16 @@
         "@type": "xsd:integer",
         "@value": "16589991"
     },
+	"dc:isReferencedBy": [
+		{
+			"@value":"something",
+			"@language":"en"
+		},
+		{
+			"@value":"another",
+			"@language":"en"
+		}
+	],
     "dc:issued": {
         "@type": "xsd:date",
         "@value": "1951-01-01"

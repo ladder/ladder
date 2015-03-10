@@ -7,7 +7,7 @@ shared_context 'configure_thing' do
       property :alt,        predicate: RDF::DC.alternative,    # non-localized String
                             localize: false
       property :references, predicate: RDF::DC.references      # URI
-      # property :referenced, predicate: RDF::DC.isReferencedBy  # Array
+      property :referenced, predicate: RDF::DC.isReferencedBy  # Array
       property :is_valid,   predicate: RDF::DC.valid           # Boolean
       property :date,       predicate: RDF::DC.date            # Date
       property :issued,     predicate: RDF::DC.issued          # DateTime
@@ -27,7 +27,7 @@ shared_context 'with data' do
                                   'sv' => 'Kometen kommer'}
     subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String
     subject.references = 'http://foo.com'             # URI
-    # subject.referenced = %w(something another)        # Array
+    subject.referenced = %w(something another)        # Array
     subject.is_valid   = true                         # Boolean -> xsd:boolean
     subject.date       = Date.new(1946)               # Date -> xsd:date
     subject.issued     = DateTime.new(1951)           # DateTime -> xsd:date
