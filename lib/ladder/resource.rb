@@ -101,7 +101,6 @@ module Ladder
     # @param [String] field_name ActiveModel attribute name for the field
     # @param [Object] value ActiveModel attribute to be set
     # @return [void]
-    # @return [RDF::Literal, RDF::URI]
     def set_value(field_name, value)
       return if value.nil?
 
@@ -119,7 +118,7 @@ module Ladder
     #
     # @param [Object] value ActiveModel attribute to be cast
     # @param [Hash] opts options to pass to RDF::Literal
-    # @return [RDF::Literal, RDF::URI]
+    # @return [RDF::Term]
     def cast_value(value, opts = {})
       case value
       when Array
