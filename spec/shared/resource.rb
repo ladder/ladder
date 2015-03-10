@@ -219,11 +219,11 @@ shared_examples 'a Resource' do
 
     context 'with localized literal' do
       it 'should return localized value' do
-        expect(['Comet in Moominland', 'Kometen kommer']).to include subject.title
+        expect(['Comet in Moominland', 'Kometen kommer']).to include(subject.title).or eq(subject.title)
       end
 
       it 'should return all locales' do
-        expect('en' => 'Comet in Moominland', 'sv' => 'Kometen kommer').to include subject.attributes['title']
+        expect('en' => 'Comet in Moominland', 'sv' => 'Kometen kommer').to include(subject.attributes['title']).or eq(subject.attributes['title'])
       end
 
       it 'should have a valid predicate' do

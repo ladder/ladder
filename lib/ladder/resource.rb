@@ -25,10 +25,10 @@ module Ladder
     # @return [ActiveTriples::Resource] resource for the object
     def update_resource(opts = {})
       resource_class.properties.each do |field_name, property|
-        value = update_from_field(field_name) if fields[field_name]
-        value = update_from_relation(field_name, opts[:related]) if relations[field_name]
+        values = update_from_field(field_name) if fields[field_name]
+        values = update_from_relation(field_name, opts[:related]) if relations[field_name]
 
-        [*value].each { |v| resource.set_value(property.predicate, v) }
+        [*values].each { |value| resource.set_value(property.predicate, value) }
       end
 
       resource
@@ -49,21 +49,54 @@ module Ladder
       field_name = field_from_predicate(statement.predicate)
       return unless field_name
 
-      case statement.object
+      value = statement.object.is_a?(RDF::Node) && block_given? ? yield : statement.object
+
+      test_method(field_name, value)
+    end
+
+    # TODO
+    def test_method(field_name, obj)
+      case obj
       when RDF::URI
-        set_value field_name, Ladder::Resource.from_uri(statement.object) || statement.object.to_s
+        set_value field_name, Ladder::Resource.from_uri(obj) || obj.to_s
       when RDF::Literal
-        if statement.object.has_language?
-          trans = send("#{field_name}_translations")
-          send("#{field_name}_translations=", trans.merge({statement.object.language => statement.object.object}))
+        if obj.has_language?
+          set_value field_name, obj.object, { language: obj.language }
         else
-          set_value field_name, statement.object.object
+          set_value field_name, obj.object
         end
-      when RDF::Node
-        # A block should be provided containing the instantiated Node object
-        set_value field_name, yield if block_given?
+      when Array
+        set_value field_name, obj.map { |item| test_method(field_name, item.object) }
+      else
+        set_value field_name, obj
       end
     end
+
+    ##
+    # Set values on a field or relation
+    #
+    # @param [String] field_name ActiveModel attribute name for the field
+    # @param [Object] value ActiveModel attribute to be set
+    # @return [void]
+    def set_value(field_name, value, opts = {})
+      return if value.nil?
+
+      field = send(field_name)
+
+      if Mongoid::Relations::Targets::Enumerable == field.class
+        field.send(:push, value) unless field.include? value
+      elsif opts[:language]
+        trans = send("#{field_name}_translations")
+        hash = { opts[:language] => value }
+#        hash = trans.merge(hash)
+        send("#{field_name}_translations=", hash)
+      else
+        send("#{field_name}=", value)
+      end
+
+      value
+    end
+#
 
     ##
     # Retrieve the class for a relation, based on its defined RDF predicate
@@ -96,24 +129,6 @@ module Ladder
     private
 
     ##
-    # Set values on a field or relation
-    #
-    # @param [String] field_name ActiveModel attribute name for the field
-    # @param [Object] value ActiveModel attribute to be set
-    # @return [void]
-    def set_value(field_name, value)
-      return if value.nil?
-
-      field = send(field_name)
-
-      if Mongoid::Relations::Targets::Enumerable == field.class
-        field.send(:push, value) unless field.include? value
-      else
-        send("#{field_name}=", value)
-      end
-    end
-
-    ##
     # Cast values from Mongoid types to RDF types
     #
     # @param [Object] value ActiveModel attribute to be cast
@@ -139,7 +154,7 @@ module Ladder
     # Update the delegated ActiveTriples::Resource from a field
     #
     # @param [String] field_name ActiveModel attribute name for the field
-    # @return [void]
+    # @return [Object]
     def update_from_field(field_name)
       if fields[field_name].localized?
         read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }
@@ -153,7 +168,7 @@ module Ladder
     #
     # @param [String] field_name ActiveModel attribute name for the relation
     # @param [Boolean] related whether to include related objects
-    # @return [void]
+    # @return [Enumerable]
     def update_from_relation(field_name, related = false)
       objects = send(field_name).to_a
 
@@ -230,7 +245,20 @@ module Ladder
         # Add object to stack for recursion
         objects[root_subject] = new_object
 
-        graph.query([root_subject]).each_statement do |statement|
+        subgraph = graph.query([root_subject])
+
+        subgraph.each_statement do |statement|
+          # See if there are multiple statements for this predicate
+          s = subgraph.query([root_subject, statement.predicate])
+
+          if s.size > 1
+            # field_name = new_object.field_from_predicate statement.predicate
+            st = RDF::Statement(statement.subject, statement.predicate, RDF::List(s))
+#binding.pry
+            new_object.send(:<<, st) { s.to_a }
+            next
+          end
+
           next if objects[statement.object]
 
           # If the object is a BNode, dereference the relation
