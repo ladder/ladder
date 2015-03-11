@@ -463,7 +463,7 @@ shared_examples 'a Resource with relations' do
     end
 
     it 'should have a valid inverse predicate' do
-      expect(part.class.properties['thing'].predicate).to eq RDF::DC.relation
+      expect(part.class.properties['thing'].predicate).to eq RDF::DC.isPartOf
     end
   end
 
@@ -485,7 +485,7 @@ shared_examples 'a Resource with relations' do
     end
 
     it 'should have an embedded object relation' do
-      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end
@@ -517,7 +517,7 @@ shared_examples 'a Resource with relations' do
       expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
       # embedded-one
-      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end
@@ -536,7 +536,7 @@ shared_examples 'a Resource with relations' do
     end
 
     it 'should have embedded object relations' do
-      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end
@@ -551,7 +551,7 @@ shared_examples 'a Resource with relations' do
       expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
       # embedded-one
-      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end

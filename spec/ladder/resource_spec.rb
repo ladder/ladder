@@ -34,7 +34,7 @@ describe Ladder::Resource do
         configure type: RDF::DC.PhysicalResource
 
         embedded_in :thing
-        property :thing, predicate: RDF::DC.relation, class_name: 'Thing'
+        property :thing, predicate: RDF::DC.isPartOf, class_name: 'Thing'
       end
 
       # many-to-many
