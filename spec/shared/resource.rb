@@ -223,7 +223,6 @@ shared_examples 'a Resource' do
       end
 
       it 'should return all locales' do
-        # binding.pry
         expect('en' => 'Comet in Moominland', 'sv' => 'Kometen kommer').to include(subject.attributes['title']).or eq(subject.attributes['title'])
       end
 
