@@ -23,8 +23,8 @@ end
 
 shared_context 'with data' do
   before do
-    subject.title_translations = {'en' => 'Comet in Moominland', # localized String
-                                  'sv' => 'Kometen kommer'}
+    subject.title_translations = { 'en' => 'Comet in Moominland', # localized String
+                                   'sv' => 'Kometen kommer' }
     subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String
     subject.references = 'http://foo.com'             # URI
     subject.referenced = %w(something another)        # Array
@@ -223,7 +223,7 @@ shared_examples 'a Resource' do
       end
 
       it 'should return all locales' do
-# binding.pry
+        # binding.pry
         expect('en' => 'Comet in Moominland', 'sv' => 'Kometen kommer').to include(subject.attributes['title']).or eq(subject.attributes['title'])
       end
 
@@ -267,7 +267,7 @@ shared_examples 'a Resource' do
       end
 
       it 'should update existing values' do
-        expect(subject.title_translations).to eq({'sv' => 'Kometen kommer'})
+        expect(subject.title_translations).to eq('sv' => 'Kometen kommer')
       end
     end
 

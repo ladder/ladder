@@ -38,7 +38,7 @@ module Ladder
     # Push an RDF::Statement into the object
     #
     # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
-    # @return [void]
+    # @return [Object, nil] the value inserted into the object
     #
     # @note This method will overwrite existing statements with the same predicate from the object
     def <<(statement)
@@ -71,7 +71,8 @@ module Ladder
         obj.object
         # FIXME: this returns the value with the language stripped
       when Array
-        obj.map { |item| uncast_value(field_name, item.object) }
+        # Should be an Array of RDF::Term objects
+        obj.map { |item| uncast_value(field_name, item) }
       else
         obj
       end
@@ -88,15 +89,15 @@ module Ladder
     # @param [Object] value ActiveModel attribute to be set
     # @return [void]
     def set_value(field_name, value, opts = {})
-      return if value.nil?
+      return unless value
 
       field = send(field_name)
 
       if Mongoid::Relations::Targets::Enumerable == field.class
         field.send(:push, value) unless field.include? value
       elsif opts[:language]
-        trans = send("#{field_name}_translations")
-        send("#{field_name}_translations=", { opts[:language] => value })
+        # trans = send("#{field_name}_translations")
+        send("#{field_name}_translations=", opts[:language] => value)
       else
         send("#{field_name}=", value)
       end
@@ -252,29 +253,20 @@ module Ladder
         subgraph = graph.query([root_subject])
 
         subgraph.each_statement do |statement|
+          next if objects[statement.object]
+
           # See if there are multiple statements for this predicate
           s = subgraph.query([root_subject, statement.predicate])
 
           if s.size > 1
-            # field_name = new_object.field_from_predicate statement.predicate
-            st = RDF::Statement(statement.subject, statement.predicate, RDF::List(s))
-# binding.pry
-            new_object.send(:<<, st) { s.to_a }
-            next
-          end
-
-          next if objects[statement.object]
-
-          # If the object is a BNode, dereference the relation
-          if statement.object.is_a? RDF::Node
-            klass = new_object.klass_from_predicate(statement.predicate)
-            next unless klass
-
-            object = klass.new_from_graph(graph, objects)
-            next unless object
-
-            objects[statement.object] = object
-            new_object.send(:<<, statement) { object }
+            statement.object = RDF::Node.new
+            new_object.send(:<<, statement) { s.objects.to_a }
+          elsif statement.object.is_a? RDF::Node
+            # If the object is a BNode, dereference the relation
+            objects[statement.object] = new_object.send(:<<, statement) do
+              klass = new_object.klass_from_predicate(statement.predicate)
+              klass.new_from_graph(graph, objects, [statement.object]) if klass
+            end
           else
             new_object << statement
           end
