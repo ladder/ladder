@@ -6,7 +6,7 @@
 
 Ladder is a dynamic framework for [Linked Data](http://en.wikipedia.org/wiki/Linked_data) modelling, persistence, and full-text indexing. It is implemented as a series of Ruby modules that can be used individually and incorporated within existing ActiveModel frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
-Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+Although conceptually similar to [Spira](https://github.com/ruby-rdf/spira), Ladder takes the opposite approach: instead of making RDF repositories (triple stores) behave like ActiveModel, it allows ActiveModel objects to behave like RDF resources.  Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
 
 ### Components
 
