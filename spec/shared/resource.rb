@@ -23,8 +23,8 @@ end
 
 shared_context 'with data' do
   before do
-    subject.title_translations = {'en' => 'Comet in Moominland', # localized String
-                                  'sv' => 'Kometen kommer'}
+    subject.title_translations = { 'en' => 'Comet in Moominland', # localized String
+                                   'sv' => 'Kometen kommer' }
     subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String
     subject.references = 'http://foo.com'             # URI
     subject.referenced = %w(something another)        # Array
@@ -117,7 +117,7 @@ shared_examples 'a Dynamic Resource' do
   describe '#<<' do
     context 'with defined field' do
       before do
-        subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
+        subject << RDF::Statement(nil, RDF::DC.title, RDF::Literal.new('Kometen kommer', language: :sv))
       end
 
       it 'should not create a context' do
@@ -219,11 +219,11 @@ shared_examples 'a Resource' do
 
     context 'with localized literal' do
       it 'should return localized value' do
-        expect(['Comet in Moominland', 'Kometen kommer']).to include subject.title
+        expect(['Comet in Moominland', 'Kometen kommer']).to include(subject.title).or eq(subject.title)
       end
 
       it 'should return all locales' do
-        expect('en' => 'Comet in Moominland', 'sv' => 'Kometen kommer').to include subject.attributes['title']
+        expect('en' => 'Comet in Moominland', 'sv' => 'Kometen kommer').to include(subject.attributes['title']).or eq(subject.attributes['title'])
       end
 
       it 'should have a valid predicate' do
@@ -262,11 +262,11 @@ shared_examples 'a Resource' do
   describe '#<<' do
     context 'with defined field' do
       before do
-        subject << RDF::Statement(nil, RDF::DC.title, 'Kometen kommer')
+        subject << RDF::Statement(nil, RDF::DC.title, RDF::Literal.new('Kometen kommer', language: :sv))
       end
 
       it 'should update existing values' do
-        expect(subject.title).to eq 'Kometen kommer'
+        expect(subject.title_translations).to eq('sv' => 'Kometen kommer')
       end
     end
 
@@ -462,7 +462,7 @@ shared_examples 'a Resource with relations' do
     end
 
     it 'should have a valid inverse predicate' do
-      expect(part.class.properties['thing'].predicate).to eq RDF::DC.relation
+      expect(part.class.properties['thing'].predicate).to eq RDF::DC.isPartOf
     end
   end
 
@@ -484,7 +484,7 @@ shared_examples 'a Resource with relations' do
     end
 
     it 'should have an embedded object relation' do
-      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end
@@ -516,7 +516,7 @@ shared_examples 'a Resource with relations' do
       expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
       # embedded-one
-      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end
@@ -535,7 +535,7 @@ shared_examples 'a Resource with relations' do
     end
 
     it 'should have embedded object relations' do
-      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end
@@ -550,7 +550,7 @@ shared_examples 'a Resource with relations' do
       expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
 
       # embedded-one
-      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.relation)
+      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
       expect(query.count).to eq 1
       expect(query.first_object).to eq subject.rdf_subject
     end

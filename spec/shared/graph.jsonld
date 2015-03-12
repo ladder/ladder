@@ -55,7 +55,7 @@
     "dc:hasPart": {
         "@id": "_:b3",
         "@type": "dc:PhysicalResource",
-        "dc:relation": {
+        "dc:isPartOf": {
             "@id": "_:b1"
         }
     },
