@@ -113,7 +113,9 @@ module Ladder
         # @see Ladder::Resource#<<
         #
         # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
-        # @return [void]
+        # @return [Object, nil] the value inserted into the object
+        #
+        # @note This method will overwrite existing statements with the same predicate from the object
         def <<(statement)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
@@ -130,9 +132,15 @@ module Ladder
             return
           end
 
+          # We (currently) cannot handle embedded nodes (relations), so delegate to parent
+          return super if statement.object.is_a? RDF::Node
+
           # If we have an undefined predicate, then dynamically define it
-          return unless statement.predicate.qname
           property statement.predicate.qname.last, predicate: statement.predicate unless field_from_predicate statement.predicate
+
+          if self._context && self._context.values.include?(statement.predicate.to_s)
+            send("#{self._context.key(statement.predicate.to_s)}=", statement.object.to_s)
+          end
 
           super
         end
