@@ -40,13 +40,13 @@ Or install it yourself as:
 ## Usage
 
 * [Resources](#resources)
-  * [Configuring Resources](#configuring-resources)
   * [Dynamic Resources](#dynamic-resources)
 * [Files](#files)
 * [Indexing](#indexing)
   * [Indexing Resources](#indexing-resources)
   * [Indexing Files](#indexing-files)
   * [Background Indexing](#background-indexing)
+* [Configuration](#configuration)
 
 ### Resources
 
@@ -241,20 +241,6 @@ steve.as_jsonld
 ```
 
 Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled.
-
-#### Configuring Resources
-
-If the LADDER_BASE_URI global constant is set, base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples:
-
-```ruby
-LADDER_BASE_URI = 'http://example.org'
-
-Person.resource_class.base_uri
-=> #<RDF::URI:0x3fecf69da274 URI:http://example.org/people>
-
-Person.configure base_uri: 'http://some.other.uri/'
-=> "http://some.other.uri/"
-```
 
 #### Dynamic Resources
 
@@ -780,6 +766,22 @@ ActiveJob::Base.queue_adapter = :sidekiq
 ```
 
 For more information on available queueing adapters and their features, see the [ActiveJob documentation](http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters.html).
+
+### Configuration
+
+***[TODO]***
+
+Base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples:
+
+```ruby
+Ladder::Config.settings[:base_uri] = 'http://example.org'
+
+Person.resource_class.base_uri
+=> #<RDF::URI:0x3fecf69da274 URI:http://example.org/people>
+
+Person.configure base_uri: 'http://some.other.uri/'
+=> "http://some.other.uri/"
+```
 
 ## Contributing
 
