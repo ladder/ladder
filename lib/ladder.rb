@@ -1,4 +1,5 @@
 require 'ladder/version'
+require 'ladder/config'
 
 module Ladder
   autoload :File,       'ladder/file'

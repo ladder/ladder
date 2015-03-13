@@ -23,7 +23,7 @@ RSpec.configure do |config|
     Mongoid.load!('mongoid.yml', :development)
     Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
 
-    LADDER_BASE_URI ||= 'http://example.org'
+    Ladder::Config.settings[:base_uri] = 'http://example.org'
 
     require 'i18n/backend/fallbacks'
     I18n::Backend::Simple.send(:include, I18n::Backend::Fallbacks)
@@ -33,9 +33,5 @@ RSpec.configure do |config|
 
   config.before :each do
     Mongoid.purge!
-  end
-
-  config.after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
   end
 end

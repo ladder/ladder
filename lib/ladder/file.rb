@@ -9,7 +9,9 @@ module Ladder
     include ActiveTriples::Identifiable
 
     included do
-      configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
+      # TODO: extract to configurable
+      Ladder::Config.register_model self unless Ladder::Config.models.include? self
+      configure base_uri: RDF::URI.new(Ladder::Config.settings[:base_uri]) / name.underscore.pluralize
 
       store_in collection: "#{ grid.prefix }.files"
 

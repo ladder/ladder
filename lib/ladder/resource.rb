@@ -12,7 +12,7 @@ module Ladder
     include ActiveTriples::Identifiable
     include Ladder::Resource::Serializable
 
-    included { configure_base_uri }
+    included { configure_model }
 
     delegate :rdf_label, to: :update_resource
 
@@ -280,12 +280,13 @@ module Ladder
       protected
 
       ##
-      # Set a default base URI based on the global LADDER_BASE_URI
-      # constant if it is defined
+      # Set a default base URI based on the Ladder::Config settings
       #
       # @return [void]
-      def configure_base_uri
-        configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
+      def configure_model
+        # TODO: extract to configurable
+        Ladder::Config.register_model self unless Ladder::Config.models.include? self
+        configure base_uri: RDF::URI.new(Ladder::Config.settings[:base_uri]) / name.underscore.pluralize
       end
 
       ##
@@ -298,7 +299,7 @@ module Ladder
           subclass.property config.term, predicate: config.predicate, class_name: config.class_name
         end
 
-        subclass.configure_base_uri
+        subclass.configure_model
       end
     end
 
@@ -312,14 +313,13 @@ module Ladder
     # @param [RDF::URI] uri RDF subject URI for the resource
     # @return [Ladder::Resource] a resource instance
     def self.from_uri(uri)
-      klasses = ActiveTriples::Resource.descendants.select(&:name)
-      klass = klasses.find { |k| uri.to_s.include? k.base_uri.to_s }
+      klass = Ladder::Config.models.find { |k| uri.to_s.include? k.resource_class.base_uri.to_s }
 
       if klass
         object_id = uri.to_s.match(/[0-9a-fA-F]{24}/).to_s
 
         # Retrieve the object if it's persisted, otherwise return a new one (eg. embedded)
-        return klass.parent.where(id: object_id).exists? ? klass.parent.find(object_id) : klass.parent.new
+        return klass.where(id: object_id).exists? ? klass.find(object_id) : klass.new
       end
     end
   end
