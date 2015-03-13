@@ -93,16 +93,13 @@ module Ladder
       # Should be an Array of RDF::Term objects
       return unless obj
 
-      field = send(field_name)
+      obj.map! { |item| item.is_a?(RDF::URI) ? Ladder::Resource.from_uri(item) : item }
+      relation = send(field_name)
 
-      if Mongoid::Relations::Targets::Enumerable == field.class
-        obj.map do |item|
-          item = Ladder::Resource.from_uri(item) if item.is_a? RDF::URI
-          field.send(:push, item) unless field.include? item
-        end
+      if Mongoid::Relations::Targets::Enumerable == relation.class
+        obj.map { |item| relation.send(:push, item) unless relation.include? item }
       else
-        objects = obj.map { |item| item.is_a?(RDF::URI) ? Ladder::Resource.from_uri(item) : item }
-        send("#{field_name}=", objects.size > 1 ? objects : objects.first)
+        send("#{field_name}=", obj.size > 1 ? obj : obj.first)
       end
     end
 
@@ -122,13 +119,13 @@ module Ladder
 
         obj.each do |item|
           lang = item.is_a?(RDF::Literal) && item.has_language? ? item.language.to_s : I18n.locale.to_s
-          value = item.is_a?(RDF::URI) ? item.to_s : item.object
+          value = item.is_a?(RDF::URI) ? item.to_s : item.object # TODO: tidy this up
           trans[lang] = trans[lang] ? [*trans[lang]] << value : value
         end
 
         send("#{field_name}_translations=", trans) unless trans.empty?
       else
-        objects = obj.map { |item| item.is_a?(RDF::URI) ? item.to_s : item.object }
+        objects = obj.map { |item| item.is_a?(RDF::URI) ? item.to_s : item.object } # TODO: tidy this up
         send("#{field_name}=", objects.size > 1 ? objects : objects.first)
       end
     end
@@ -182,8 +179,8 @@ module Ladder
         methods.select { |i| i[/autosave_documents/] }.each { |m| send m }
 
         # update inverse relation properties
-        relation_def = relations[field_name]
-        objects.each { |object| object.resource.set_value(relation_def.inverse, rdf_subject) } if relation_def.inverse
+        relation = relations[field_name]
+        objects.each { |object| object.resource.set_value(relation.inverse, rdf_subject) } if relation.inverse
         objects.map(&:update_resource)
       else
         # remove inverse relation properties
