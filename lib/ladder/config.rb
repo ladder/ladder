@@ -9,9 +9,9 @@ module Ladder
 
     LOCK = Mutex.new
 
-    option :base_uri, default: URI('urn:x-ladder')
-    option :localize_fields, default: false    # self-explanatory
-    option :has_many_relations, default: false # otherwise HABTM
+    option :base_uri,           default: URI('urn:x-ladder') # typically a URL (configured)
+    option :localize_fields,    default: false               # self-explanatory
+    option :has_many_relations, default: false               # otherwise HABTM
 
     # Get all the models in the application - this is everything that includes
     # Mongoid::Document.
