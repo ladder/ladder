@@ -2,25 +2,12 @@ require 'spec_helper'
 
 describe Ladder::Resource do
   before do
-    Mongoid.load!('mongoid.yml', :development)
-    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
-    Mongoid.purge!
-
-    LADDER_BASE_URI ||= 'http://example.org'
-
     class Thing
       include Ladder::Resource
-      configure type: RDF::DC.BibliographicResource
-
-      field :alt
-      property :alt, predicate: RDF::DC.alternative # non-localized literal
-      property :title, predicate: RDF::DC.title     # localized literal
-      property :identifier, predicate: RDF::DC.identifier
     end
   end
 
   after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
     Object.send(:remove_const, 'Thing') if Object
   end
 
@@ -47,7 +34,7 @@ describe Ladder::Resource do
         configure type: RDF::DC.PhysicalResource
 
         embedded_in :thing
-        property :thing, predicate: RDF::DC.relation, class_name: 'Thing'
+        property :thing, predicate: RDF::DC.isPartOf, class_name: 'Thing'
       end
 
       # many-to-many
@@ -69,6 +56,16 @@ describe Ladder::Resource do
     end
   end
 
+  include_context 'configure_thing'
+
+  context 'with data' do
+    let(:subject) { Thing.new }
+
+    include_context 'with data'
+
+    it_behaves_like 'a Resource'
+  end
+
   context 'with subclass' do
     before do
       class Subthing < Thing
@@ -82,14 +79,6 @@ describe Ladder::Resource do
     end
 
     let(:subject) { Subthing.new }
-
-    include_context 'with data'
-
-    it_behaves_like 'a Resource'
-  end
-
-  context 'with data' do
-    let(:subject) { Thing.new }
 
     include_context 'with data'
 

@@ -59,13 +59,11 @@ module Ladder
           ns, name = property.predicate.qname
           qname_hash[ns] ||= {}
 
-          if relations.keys.include? field_name
-            if opts[:related]
-              qname_hash[ns][name] = send(field_name).to_a.map(&:as_qname)
-            else
-              qname_hash[ns][name] = send(field_name).to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
-            end
-          elsif fields.keys.include? field_name
+          if relations[field_name]
+            qname_hash[ns][name] = opts[:related] ? send(field_name).to_a.map(&:as_qname) : send(field_name).to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
+          end
+
+          if fields[field_name]
             qname_hash[ns][name] = read_attribute(field_name)
           end
 

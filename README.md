@@ -6,7 +6,7 @@
 
 Ladder is a dynamic framework for [Linked Data](http://en.wikipedia.org/wiki/Linked_data) modelling, persistence, and full-text indexing. It is implemented as a series of Ruby modules that can be used individually and incorporated within existing ActiveModel frameworks (eg. [Project Hydra](http://projecthydra.org)), or combined as a comprehensive stack.
 
-Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+Although conceptually similar to [Spira](https://github.com/ruby-rdf/spira), Ladder takes the opposite approach: instead of making RDF repositories (triple stores) behave like ActiveModel, it allows ActiveModel objects to behave like RDF resources.
 
 ### Components
 
@@ -17,7 +17,9 @@ Ladder is intended to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(in
 
 ## History
 
-Ladder was loosely conceived over the course of several years prior to 2011.  In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
+Ladder was loosely conceived over the course of several years prior to 2011 as a way to encourage the [GLAM](http://en.wikipedia.org/wiki/GLAM_(industry_sector)) community to think less dogmatically about established (often monolithic and/or niche) tools and instead embrace a broader vision of adopting more widely-used technologies.
+
+In early 2012, Ladder began existence as an opportunity to escape from a decade of LAMP development and become familiar with Ruby.  From 2012 to late 2013, a closed prototype was built under the auspices of [Deliberate Data](http://deliberatedata.com) as a proof-of-concept to test the feasibility of the design.  For those interested in the historical code, the original [prototype](https://github.com/ladder/ladder/tree/prototype) branch is available, as is an [experimental](https://github.com/ladder/ladder/tree/l2) branch.
 
 ## Installation
 

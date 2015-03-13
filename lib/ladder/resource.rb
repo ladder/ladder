@@ -25,10 +25,10 @@ module Ladder
     # @return [ActiveTriples::Resource] resource for the object
     def update_resource(opts = {})
       resource_class.properties.each do |field_name, property|
-        value = update_from_field(field_name) if fields[field_name]
-        value = update_from_relation(field_name, opts[:related]) if relations[field_name]
+        values = update_from_field(field_name) if fields[field_name]
+        values = update_from_relation(field_name, opts[:related]) if relations[field_name]
 
-        resource.set_value(property.predicate, value) # if value
+        resource.set_value(property.predicate, values)
       end
 
       resource
@@ -38,7 +38,7 @@ module Ladder
     # Push an RDF::Statement into the object
     #
     # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
-    # @return [void]
+    # @return [Object, nil] the value inserted into the object
     def <<(statement)
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
@@ -47,24 +47,10 @@ module Ladder
       field_name = field_from_predicate(statement.predicate)
       return unless field_name
 
-      # If the object is a URI, see if it is a retrievable model object
-      value = Ladder::Resource.from_uri(statement.object) if statement.object.is_a? RDF::URI
+      objects = statement.object.is_a?(RDF::Node) && block_given? ? yield : statement.object
 
-      # TODO: tidy this code
-      # subject (RDF::Term) - A symbol is converted to an interned Node.
-      # predicate (RDF::URI)
-      # object (RDF::Resource) - if not a Resource, it is coerced to Literal or Node
-      #                depending on if it is a symbol or something other than a Term.
-      value = yield if block_given?
-      value ||= statement.object.to_s
-
-      enum = send(field_name)
-
-      if enum.is_a?(Enumerable)
-        enum.send(:push, value) unless enum.include? value
-      else
-        send("#{field_name}=", value)
-      end
+      update_field(field_name, *objects) if fields[field_name]
+      update_relation(field_name, *objects) if relations[field_name]
     end
 
     ##
@@ -82,8 +68,6 @@ module Ladder
       relation.class_name.constantize
     end
 
-    private
-
     ##
     # Retrieve the attribute name for a field or relation,
     # based on its defined RDF predicate
@@ -97,23 +81,87 @@ module Ladder
       defined_prop.first
     end
 
+    private
+
+    ##
+    # Set values on a defined relation
+    #
+    # @param [String] field_name ActiveModel attribute name for the field
+    # @param [Array<Object>] obj objects (usually Ladder::Resources) to be set
+    # @return [Ladder::Resource, nil]
+    def update_relation(field_name, *obj)
+      # Should be an Array of RDF::Term objects
+      return unless obj
+
+      obj.map! { |item| item.is_a?(RDF::URI) ? Ladder::Resource.from_uri(item) : item }
+      relation = send(field_name)
+
+      if Mongoid::Relations::Targets::Enumerable == relation.class
+        obj.map { |item| relation.send(:push, item) unless relation.include? item }
+      else
+        send("#{field_name}=", obj.size > 1 ? obj : obj.first)
+      end
+    end
+
+    ##
+    # Set values on a field; this will cast values
+    # from RDF types to persistable Mongoid types
+    #
+    # @param [String] field_name ActiveModel attribute name for the field
+    # @param [Array<Object>] obj objects (usually RDF::Terms) to be set
+    # @return [Object, nil]
+    def update_field(field_name, *obj)
+      # Should be an Array of RDF::Term objects
+      return unless obj
+
+      if fields[field_name].localized?
+        trans = {}
+
+        obj.each do |item|
+          lang = item.is_a?(RDF::Literal) && item.has_language? ? item.language.to_s : I18n.locale.to_s
+          value = item.is_a?(RDF::URI) ? item.to_s : item.object # TODO: tidy this up
+          trans[lang] = trans[lang] ? [*trans[lang]] << value : value
+        end
+
+        send("#{field_name}_translations=", trans) unless trans.empty?
+      else
+        objects = obj.map { |item| item.is_a?(RDF::URI) ? item.to_s : item.object } # TODO: tidy this up
+        send("#{field_name}=", objects.size > 1 ? objects : objects.first)
+      end
+    end
+
+    ##
+    # Cast values from Mongoid types to RDF types
+    #
+    # @param [Object] value ActiveModel attribute to be cast
+    # @param [Hash] opts options to pass to RDF::Literal
+    # @return [RDF::Term]
+    def cast_value(value, opts = {})
+      case value
+      when Array
+        value.map { |v| cast_value(v, opts) }
+      when String
+        cast_uri = RDF::URI.new(value)
+        cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
+      when Time
+        # Cast DateTimes with 00:00:00 or Date stored as Times in Mongoid to xsd:date
+        # FIXME: this should NOT be applied for fields that are typed as Time
+        value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
+      else
+        RDF::Literal.new(value, opts)
+      end
+    end
+
     ##
     # Update the delegated ActiveTriples::Resource from a field
     #
     # @param [String] field_name ActiveModel attribute name for the field
-    # @return [void]
+    # @return [Object]
     def update_from_field(field_name)
       if fields[field_name].localized?
-        localized_hash = read_attribute(field_name)
-
-        unless localized_hash.nil?
-          localized_hash.map do |lang, value|
-            cast_uri = RDF::URI.new(value)
-            cast_uri.valid? ? cast_uri : RDF::Literal.new(value, language: lang)
-          end
-        end
+        read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }.flatten
       else
-        send(field_name)
+        cast_value send(field_name)
       end
     end
 
@@ -122,7 +170,7 @@ module Ladder
     #
     # @param [String] field_name ActiveModel attribute name for the relation
     # @param [Boolean] related whether to include related objects
-    # @return [void]
+    # @return [Enumerable]
     def update_from_relation(field_name, related = false)
       objects = send(field_name).to_a
 
@@ -131,8 +179,8 @@ module Ladder
         methods.select { |i| i[/autosave_documents/] }.each { |m| send m }
 
         # update inverse relation properties
-        relation_def = relations[field_name]
-        objects.each { |object| object.resource.set_value(relation_def.inverse, rdf_subject) } if relation_def.inverse
+        relation = relations[field_name]
+        objects.each { |object| object.resource.set_value(relation.inverse, rdf_subject) } if relation.inverse
         objects.map(&:update_resource)
       else
         # remove inverse relation properties
@@ -157,7 +205,7 @@ module Ladder
       def property(field_name, opts = {})
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
-          has_and_belongs_to_many(field_name, mongoid_opts) unless relations.keys.include? field_name.to_s
+          has_and_belongs_to_many(field_name, mongoid_opts) unless relations[field_name.to_s]
         else
           mongoid_opts = { localize: true }.merge(opts.except(:predicate, :multivalue))
           field(field_name, mongoid_opts) unless fields[field_name.to_s]
@@ -199,25 +247,30 @@ module Ladder
         # Add object to stack for recursion
         objects[root_subject] = new_object
 
-        graph.query([root_subject]).each_statement do |statement|
-          next if objects[statement.object]
+        subgraph = graph.query([root_subject])
 
-          # TODO: If the object is a list, process members individually
-          # list = RDF::List.new statement.object, graph
-          # binding.pry unless list.empty?
+        subgraph.each_statement do |statement|
+          # Group statements for this predicate
+          stmts = subgraph.query([root_subject, statement.predicate])
 
-          # If the object is a BNode, dereference the relation
-          if statement.object.is_a? RDF::Node
-            klass = new_object.klass_from_predicate(statement.predicate)
-            next unless klass
+          if stmts.size > 1
+            # We have already set this value in a prior pass
+            next if new_object.read_attribute new_object.field_from_predicate statement.predicate
 
-            object = klass.new_from_graph(graph, objects)
-            next unless object
+            # If there are multiple statements for this predicate, pass an array
+            statement.object = RDF::Node.new
+            new_object.send(:<<, statement) { stmts.objects.to_a } # TODO: implement #set_value instead
 
-            objects[statement.object] = object
-            new_object.send(:<<, statement) { object }
-          else
-            new_object << statement
+          elsif statement.object.is_a? RDF::Node
+            next if objects[statement.object]
+
+            # If the object is a BNode, dereference the relation
+            objects[statement.object] = new_object.send(:<<, statement) do  # TODO: implement #set_value instead
+              klass = new_object.klass_from_predicate(statement.predicate)
+              klass.new_from_graph(graph, objects, [statement.object]) if klass
+            end
+
+          else new_object << statement
           end
         end # end each_statement
 

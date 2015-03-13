@@ -58,14 +58,13 @@ module Ladder
         return unless self._context
 
         self._context.each do |field_name, uri|
-          next if fields.keys.include? field_name
+          next if fields[field_name]
+          next unless RDF::Vocabulary.find_term(uri)
 
-          if RDF::Vocabulary.find_term(uri)
-            create_accessors field_name
+          create_accessors field_name
 
-            # Update resource properties
-            resource_class.property(field_name.to_sym, predicate: RDF::Vocabulary.find_term(uri))
-          end
+          # Apply instance properties to resource
+          resource_class.property(field_name.to_sym, predicate: RDF::Vocabulary.find_term(uri))
         end
       end
 
@@ -113,13 +112,15 @@ module Ladder
         # @see Ladder::Resource#<<
         #
         # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
-        # @return [void]
+        # @return [Object, nil] the value inserted into the object
         def <<(statement)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
-          # Don't store statically-defined types
-          return if resource_class.type == statement.object
+          case statement.object
+          when resource_class.type then return # Don't store statically-defined types
+          when RDF::Node then return super # Delegate nodes (relations) to parent
+          end
 
           if RDF.type == statement.predicate
             # Store type information
@@ -131,8 +132,11 @@ module Ladder
           end
 
           # If we have an undefined predicate, then dynamically define it
-          return unless statement.predicate.qname
           property statement.predicate.qname.last, predicate: statement.predicate unless field_from_predicate statement.predicate
+
+          if self._context && self._context.values.include?(statement.predicate.to_s)
+            send("#{self._context.key(statement.predicate.to_s)}=", statement.object.to_s)
+          end
 
           super
         end

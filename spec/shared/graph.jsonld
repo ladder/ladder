@@ -1,7 +1,8 @@
 {
     "@context": {
         "dc": "http://purl.org/dc/terms/",
-        "skos": "http://www.w3.org/2004/02/skos/core#"
+        "skos": "http://www.w3.org/2004/02/skos/core#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
     },
     "@id": "_:b1",
     "@type": "dc:BibliographicResource",
@@ -13,10 +14,48 @@
             "@id": "_:b1"
         }
     },
+    "dc:created": {
+        "@type": "xsd:dateTime",
+        "@value": "2015-03-06T16:00:00Z"
+    },
+    "dc:date": {
+        "@type": "xsd:date",
+        "@value": "1946-01-01"
+    },
+    "dc:identifier": {
+        "@type": "xsd:integer",
+        "@value": "16589991"
+    },
+	"dc:isReferencedBy": [
+		{
+			"@value":"something",
+			"@language":"en"
+		},
+		{
+			"@value":"another",
+			"@language":"en"
+		}
+	],
+    "dc:issued": {
+        "@type": "xsd:date",
+        "@value": "1951-01-01"
+    },
+    "dc:source": {
+        "@type": "xsd:token",
+        "@value": "something"
+    },
+    "dc:spatial": {
+        "@type": "xsd:double",
+        "@value": "1.2345E1"
+    },
+    "dc:valid": {
+        "@type": "xsd:boolean",
+        "@value": "true"
+    },
     "dc:hasPart": {
         "@id": "_:b3",
         "@type": "dc:PhysicalResource",
-        "dc:relation": {
+        "dc:isPartOf": {
             "@id": "_:b1"
         }
     },
@@ -24,8 +63,14 @@
         "@id": "_:b4",
         "@type": "skos:Concept"
     },
-    "dc:title": {
-        "@value": "Comet in Moominland",
-        "@language": "en"
-    }
+    "dc:title": [
+		{
+	        "@value": "Comet in Moominland",
+	        "@language": "en"
+	    },
+		{
+	        "@value": "Kometen kommer",
+	        "@language": "sv"
+	    }
+	]
 }

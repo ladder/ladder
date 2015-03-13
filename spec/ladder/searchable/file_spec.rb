@@ -2,14 +2,7 @@ require 'spec_helper'
 
 describe Ladder::Searchable::File do
   before do
-    Mongoid.load!('mongoid.yml', :development)
-    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
-    Mongoid.purge!
-
-    Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
-    Elasticsearch::Model.client.indices.delete index: '_all'
-
-    LADDER_BASE_URI ||= 'http://example.org'
+    Elasticsearch::Client.new(host: 'localhost:9200', log: true).indices.delete index: '_all'
 
     class Datastream
       include Ladder::File

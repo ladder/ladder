@@ -2,23 +2,11 @@ require 'spec_helper'
 
 describe Ladder::Searchable::Background do
   before do
-    Mongoid.load!('mongoid.yml', :development)
-    Mongoid.logger.level = Moped.logger.level = Logger::DEBUG
-    Mongoid.purge!
-
-    Elasticsearch::Model.client = Elasticsearch::Client.new host: 'localhost:9200', log: true
-    Elasticsearch::Model.client.indices.delete index: '_all'
-
-    LADDER_BASE_URI ||= 'http://example.org'
+    Elasticsearch::Client.new(host: 'localhost:9200', log: true).indices.delete index: '_all'
 
     class Thing
       include Ladder::Resource
       include Ladder::Searchable::Background
-      configure type: RDF::DC.BibliographicResource
-
-      field :alt
-      property :alt, predicate: RDF::DC.alternative # non-localized literal
-      property :title, predicate: RDF::DC.title     # localized literal
     end
 
     class Datastream
@@ -28,13 +16,12 @@ describe Ladder::Searchable::Background do
   end
 
   after do
-    Object.send(:remove_const, :LADDER_BASE_URI) if Object
     Object.send(:remove_const, 'Thing') if Object
     Object.send(:remove_const, 'Datastream') if Object
   end
 
   shared_context 'with relations' do
-    let(:person)  { Person.new }
+    let(:person) { Person.new }
 
     before do
       class Person
@@ -51,6 +38,8 @@ describe Ladder::Searchable::Background do
       Object.send(:remove_const, 'Person') if Object
     end
   end
+
+  include_context 'configure_thing'
 
   context 'with data' do
     let(:subject) { Thing.new }
