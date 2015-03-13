@@ -191,10 +191,13 @@ shared_examples 'a Dynamic Resource' do
 end
 
 shared_examples 'a Resource' do
-  describe 'LADDER_BASE_URI' do
+  describe '#configure_model' do
     it 'should automatically have a base URI' do
-      expect(subject.resource.rdf_subject.parent).to eq RDF::URI.new(LADDER_BASE_URI) / subject.class.name.underscore.pluralize + '/'
+      expect([RDF::URI('http://example.org/things/'),
+              RDF::URI('http://example.org/subthings/')]).to include subject.rdf_subject.parent
     end
+
+    # TODO: it should be registered
   end
 
   describe '#property' do
