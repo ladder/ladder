@@ -59,13 +59,12 @@ module Ladder
 
         self._context.each do |field_name, uri|
           next if fields.keys.include? field_name
+          next unless RDF::Vocabulary.find_term(uri)
 
-          if RDF::Vocabulary.find_term(uri)
-            create_accessors field_name
+          create_accessors field_name
 
-            # Update resource properties
-            resource_class.property(field_name.to_sym, predicate: RDF::Vocabulary.find_term(uri))
-          end
+          # Apply instance properties to resource
+          resource_class.property(field_name.to_sym, predicate: RDF::Vocabulary.find_term(uri))
         end
       end
 
@@ -118,8 +117,10 @@ module Ladder
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
-          # Don't store statically-defined types
-          return if resource_class.type == statement.object
+          case statement.object
+          when resource_class.type then return # Don't store statically-defined types
+          when RDF::Node then return super # Delegate nodes (relations) to parent
+          end
 
           if RDF.type == statement.predicate
             # Store type information
@@ -129,9 +130,6 @@ module Ladder
             apply_types
             return
           end
-
-          # We (currently) cannot handle embedded nodes (relations), so delegate to parent
-          return super if statement.object.is_a? RDF::Node
 
           # If we have an undefined predicate, then dynamically define it
           property statement.predicate.qname.last, predicate: statement.predicate unless field_from_predicate statement.predicate

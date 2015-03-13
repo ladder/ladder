@@ -101,7 +101,7 @@ module Ladder
           field.send(:push, item) unless field.include? item
         end
       else
-        objects = obj.map{ |item| item.is_a?(RDF::URI) ? Ladder::Resource.from_uri(item) : item }
+        objects = obj.map { |item| item.is_a?(RDF::URI) ? Ladder::Resource.from_uri(item) : item }
         send("#{field_name}=", objects.size > 1 ? objects : objects.first)
       end
     end
@@ -128,7 +128,7 @@ module Ladder
 
         send("#{field_name}_translations=", trans) unless trans.empty?
       else
-        objects = obj.map{ |item| item.is_a?(RDF::URI) ? item.to_s : item.object }
+        objects = obj.map { |item| item.is_a?(RDF::URI) ? item.to_s : item.object }
         send("#{field_name}=", objects.size > 1 ? objects : objects.first)
       end
     end
