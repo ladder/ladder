@@ -68,8 +68,6 @@ module Ladder
       relation.class_name.constantize
     end
 
-    private
-
     ##
     # Retrieve the attribute name for a field or relation,
     # based on its defined RDF predicate
@@ -82,6 +80,8 @@ module Ladder
 
       defined_prop.first
     end
+
+    private
 
     ##
     # Set values on a defined relation
@@ -205,7 +205,7 @@ module Ladder
       def property(field_name, opts = {})
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
-          has_and_belongs_to_many(field_name, mongoid_opts) unless relations.keys.include? field_name.to_s
+          has_and_belongs_to_many(field_name, mongoid_opts) unless relations[field_name.to_s]
         else
           mongoid_opts = { localize: true }.merge(opts.except(:predicate, :multivalue))
           field(field_name, mongoid_opts) unless fields[field_name.to_s]
@@ -254,16 +254,18 @@ module Ladder
           stmts = subgraph.query([root_subject, statement.predicate])
 
           if stmts.size > 1
-            # FIXME: track so this block is only called once
+            # We have already set this value in a prior pass
+            next if new_object.read_attribute new_object.field_from_predicate statement.predicate
+
             # If there are multiple statements for this predicate, pass an array
             statement.object = RDF::Node.new
-            new_object.send(:<<, statement) { stmts.objects.to_a }
+            new_object.send(:<<, statement) { stmts.objects.to_a } # TODO: implement #set_value instead
 
           elsif statement.object.is_a? RDF::Node
             next if objects[statement.object]
 
             # If the object is a BNode, dereference the relation
-            objects[statement.object] = new_object.send(:<<, statement) do
+            objects[statement.object] = new_object.send(:<<, statement) do  # TODO: implement #set_value instead
               klass = new_object.klass_from_predicate(statement.predicate)
               klass.new_from_graph(graph, objects, [statement.object]) if klass
             end

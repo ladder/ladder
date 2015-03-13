@@ -349,17 +349,11 @@ shared_examples 'a Resource' do
     end
 
     it 'should populate the same properties' do
-      # TODO: clean this up
-      def remove_ids(x)
-        if x.is_a?(Hash)
-          x.reduce({}) do |m, (k, v)|
-            m[k] = remove_ids(v) unless k == '@id'
-            m
-          end
-        else
-          x
-        end
+      def remove_ids(hash)
+        hash.delete '@id'
+        hash.each_value { |value| remove_ids(value) if value.is_a? Hash }
       end
+
       expect(remove_ids(new_subject.as_framed_jsonld)).to eq remove_ids(subject.as_framed_jsonld)
     end
   end

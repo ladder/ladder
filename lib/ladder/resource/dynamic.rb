@@ -58,7 +58,7 @@ module Ladder
         return unless self._context
 
         self._context.each do |field_name, uri|
-          next if fields.keys.include? field_name
+          next if fields[field_name]
           next unless RDF::Vocabulary.find_term(uri)
 
           create_accessors field_name
