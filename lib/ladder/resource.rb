@@ -205,9 +205,12 @@ module Ladder
       def property(field_name, opts = {})
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
+          # TODO: add/fix tests for this behaviour when true
+          mongoid_opts[:inverse_of] = nil if Ladder::Config.settings[:one_sided_relations]
+
           has_and_belongs_to_many(field_name, mongoid_opts) unless relations[field_name.to_s]
         else
-          mongoid_opts = { localize: true }.merge(opts.except(:predicate, :multivalue))
+          mongoid_opts = { localize: Ladder::Config.settings[:base_uri] }.merge(opts.except(:predicate, :multivalue))
           field(field_name, mongoid_opts) unless fields[field_name.to_s]
         end
 
