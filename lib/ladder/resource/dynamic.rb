@@ -114,8 +114,6 @@ module Ladder
         #
         # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
         # @return [Object, nil] the value inserted into the object
-        #
-        # @note This method will overwrite existing statements with the same predicate from the object
         def <<(statement)
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement

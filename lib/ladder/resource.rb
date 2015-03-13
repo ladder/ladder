@@ -28,7 +28,7 @@ module Ladder
         values = update_from_field(field_name) if fields[field_name]
         values = update_from_relation(field_name, opts[:related]) if relations[field_name]
 
-        [*values].each { |value| resource.set_value(property.predicate, value) }
+        resource.set_value(property.predicate, values)
       end
 
       resource
@@ -39,8 +39,6 @@ module Ladder
     #
     # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
     # @return [Object, nil] the value inserted into the object
-    #
-    # @note This method will overwrite existing statements with the same predicate from the object
     def <<(statement)
       # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
       statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
@@ -70,6 +68,8 @@ module Ladder
       relation.class_name.constantize
     end
 
+    private
+
     ##
     # Retrieve the attribute name for a field or relation,
     # based on its defined RDF predicate
@@ -82,8 +82,6 @@ module Ladder
 
       defined_prop.first
     end
-
-    private
 
     ##
     # Set values on a defined relation
@@ -164,7 +162,7 @@ module Ladder
     # @return [Object]
     def update_from_field(field_name)
       if fields[field_name].localized?
-        read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }
+        read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }.flatten
       else
         cast_value send(field_name)
       end
