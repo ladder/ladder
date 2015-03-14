@@ -1,6 +1,6 @@
 shared_context 'configure_thing' do
   before do
-    class Thing
+    subject.class.class_eval do
       configure type: RDF::DC.BibliographicResource
 
       property :title,      predicate: RDF::DC.title           # localized String
@@ -44,6 +44,7 @@ shared_examples 'a Resource' do
   describe '#configure_model' do
     it 'should automatically have a base URI' do
       expect([RDF::URI('http://example.org/things/'),
+              RDF::URI('http://example.org/dynamic_things/'),
               RDF::URI('http://example.org/subthings/')]).to include subject.rdf_subject.parent
     end
 

@@ -8,8 +8,11 @@ describe Ladder::Resource do
   end
 
   after do
+    Ladder::Config.models.delete Thing
     Object.send(:remove_const, 'Thing') if Object
   end
+
+  include_context 'configure_thing'
 
   shared_context 'with relations' do
     let(:person)  { Person.new }
@@ -50,13 +53,16 @@ describe Ladder::Resource do
     end
 
     after do
+      Ladder::Config.models.delete Person
       Object.send(:remove_const, 'Person') if Object
+
+      Ladder::Config.models.delete Concept
       Object.send(:remove_const, 'Concept') if Object
+
+      Ladder::Config.models.delete Part
       Object.send(:remove_const, 'Part') if Object
     end
   end
-
-  include_context 'configure_thing'
 
   context 'with data' do
     let(:subject) { Thing.new }
@@ -75,6 +81,7 @@ describe Ladder::Resource do
     end
 
     after do
+      Ladder::Config.models.delete Subthing
       Object.send(:remove_const, 'Subthing') if Object
     end
 

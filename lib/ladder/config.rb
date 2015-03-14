@@ -14,7 +14,7 @@ module Ladder
     option :one_sided_relations, default: false               # otherwise HABTM
 
     # Get all the models in the application - this is everything that includes
-    # Mongoid::Document.
+    # Ladder::Resource or Ladder::File.
     #
     # @example Get all the models.
     #   config.models
@@ -26,7 +26,7 @@ module Ladder
       @models ||= []
     end
 
-    # Register a model in the application with Mongoid.
+    # Register a model in the application with Ladder.
     #
     # @example Register a model.
     #   config.register_model(Band)
