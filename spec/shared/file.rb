@@ -3,10 +3,11 @@ require 'mimemagic'
 shared_examples 'a File' do
   describe '#configure_model' do
     it 'should automatically have a base URI' do
-      expect(subject.rdf_subject.parent).to eq RDF::URI('http://example.org/datastreams/')
+      expect([RDF::URI('http://example.org/datastreams/'),
+              RDF::URI('http://example.org/searchable_datastreams/')]).to include subject.rdf_subject.parent
     end
 
-    # TODO: it should be registered
+    # TODO: it should be registered in Ladder::Config
   end
 
   describe '#initialize' do

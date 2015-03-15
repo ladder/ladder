@@ -1,26 +1,3 @@
-shared_context 'configure_thing' do
-  before do
-    subject.class.class_eval do
-      configure type: RDF::DC.BibliographicResource
-
-      property :title,      predicate: RDF::DC.title           # localized String
-      property :alt,        predicate: RDF::DC.alternative,    # non-localized String
-                            localize: false
-      property :references, predicate: RDF::DC.references      # URI
-      property :referenced, predicate: RDF::DC.isReferencedBy  # Array
-      property :is_valid,   predicate: RDF::DC.valid           # Boolean
-      property :date,       predicate: RDF::DC.date            # Date
-      property :issued,     predicate: RDF::DC.issued          # DateTime
-      property :spatial,    predicate: RDF::DC.spatial         # Float
-      # property :conformsTo, predicate: RDF::DC.conformsTo      # Hash
-      property :identifier, predicate: RDF::DC.identifier      # Integer
-      # property :license,    predicate: RDF::DC.license         # Range
-      property :source,     predicate: RDF::DC.source          # Symbol
-      property :created,    predicate: RDF::DC.created         # Time
-    end
-  end
-end
-
 shared_context 'with data' do
   before do
     subject.title_translations = { 'en' => 'Comet in Moominland', # localized String
@@ -48,7 +25,7 @@ shared_examples 'a Resource' do
               RDF::URI('http://example.org/subthings/')]).to include subject.rdf_subject.parent
     end
 
-    # TODO: it should be registered
+    # TODO: it should be registered in Ladder::Config
   end
 
   describe '#property' do

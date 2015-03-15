@@ -7,6 +7,25 @@ describe Ladder::Searchable::Background do
     class BackgroundSearchableThing
       include Ladder::Resource
       include Ladder::Searchable::Background
+
+      # FIXME: DRY out this block
+      configure type: RDF::DC.BibliographicResource
+
+      property :title,      predicate: RDF::DC.title           # localized String
+      property :alt,        predicate: RDF::DC.alternative,    # non-localized String
+                            localize: false
+      property :references, predicate: RDF::DC.references      # URI
+      property :referenced, predicate: RDF::DC.isReferencedBy  # Array
+      property :is_valid,   predicate: RDF::DC.valid           # Boolean
+      property :date,       predicate: RDF::DC.date            # Date
+      property :issued,     predicate: RDF::DC.issued          # DateTime
+      property :spatial,    predicate: RDF::DC.spatial         # Float
+      # property :conformsTo, predicate: RDF::DC.conformsTo      # Hash
+      property :identifier, predicate: RDF::DC.identifier      # Integer
+      # property :license,    predicate: RDF::DC.license         # Range
+      property :source,     predicate: RDF::DC.source          # Symbol
+      property :created,    predicate: RDF::DC.created         # Time
+      ###
     end
 
     class BackgroundSearchableDatastream
@@ -22,8 +41,6 @@ describe Ladder::Searchable::Background do
     Ladder::Config.models.delete BackgroundSearchableDatastream
     Object.send(:remove_const, 'BackgroundSearchableDatastream') if Object
   end
-
-  include_context 'configure_thing'
 
   shared_context 'with relations' do
     let(:person) { BackgroundSearchablePerson.new }
@@ -61,7 +78,7 @@ describe Ladder::Searchable::Background do
 
     before do
       # many-to-many relation
-      Thing.property :people, predicate: RDF::DC.creator, class_name: 'BackgroundSearchablePerson'
+      BackgroundSearchableThing.property :people, predicate: RDF::DC.creator, class_name: 'BackgroundSearchablePerson'
 
       # related object
       person.foaf_name = 'Tove Jansson'
