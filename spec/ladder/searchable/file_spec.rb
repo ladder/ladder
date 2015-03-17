@@ -4,21 +4,21 @@ describe Ladder::Searchable::File do
   before do
     Elasticsearch::Client.new(host: 'localhost:9200', log: true).indices.delete index: '_all'
 
-    class SearchableDatastream
+    class Datastream
       include Ladder::File
       include Ladder::Searchable
     end
   end
 
   after do
-    Ladder::Config.models.delete SearchableDatastream
-    Object.send(:remove_const, 'SearchableDatastream') if Object
+    Ladder::Config.models.delete Datastream
+    Object.send(:remove_const, 'Datastream') if Object
   end
 
   context 'with data from file' do
     TEST_FILE ||= './spec/shared/moomin.pdf'
 
-    let(:subject) { SearchableDatastream.new file: open(TEST_FILE) }
+    let(:subject) { Datastream.new file: open(TEST_FILE) }
     let(:source) { open(TEST_FILE).read } # ASCII-8BIT (binary)
 
     it_behaves_like 'a File'
@@ -32,7 +32,7 @@ describe Ladder::Searchable::File do
             than any he had met before, and slightly frightening. But it made him wide awake and greatly
             interested.'
 
-    let(:subject) { SearchableDatastream.new }
+    let(:subject) { Datastream.new }
     let(:source) { data } # UTF-8 (string)
 
     before do

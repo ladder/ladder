@@ -4,7 +4,7 @@ describe Ladder::Searchable::Resource do
   before do
     Elasticsearch::Client.new(host: 'localhost:9200', log: true).indices.delete index: '_all'
 
-    class SearchableThing
+    class Thing
       include Ladder::Resource
       include Ladder::Searchable
 
@@ -30,32 +30,32 @@ describe Ladder::Searchable::Resource do
   end
 
   after do
-    Ladder::Config.models.delete SearchableThing
-    Object.send(:remove_const, 'SearchableThing') if Object
+    Ladder::Config.models.delete Thing
+    Object.send(:remove_const, 'Thing') if Object
   end
 
   shared_context 'with relations' do
-    let(:person)  { SearchablePerson.new }
+    let(:person)  { Person.new }
 
     before do
-      class SearchablePerson
+      class Person
         include Ladder::Resource
         include Ladder::Searchable
         configure type: RDF::FOAF.Person
 
         property :foaf_name, predicate: RDF::FOAF.name
-        property :things, predicate: RDF::DC.relation, class_name: 'SearchableThing'
+        property :things, predicate: RDF::DC.relation, class_name: 'Thing'
       end
     end
 
     after do
-      Ladder::Config.models.delete SearchablePerson
-      Object.send(:remove_const, 'SearchablePerson') if Object
+      Ladder::Config.models.delete Person
+      Object.send(:remove_const, 'Person') if Object
     end
   end
 
   context 'with data' do
-    let(:subject) { SearchableThing.new }
+    let(:subject) { Thing.new }
 
     include_context 'with data'
 
@@ -63,14 +63,14 @@ describe Ladder::Searchable::Resource do
   end
 
   context 'with relations' do
-    let(:subject) { SearchableThing.new }
+    let(:subject) { Thing.new }
 
     include_context 'with data'
     include_context 'with relations'
 
     before do
       # many-to-many relation
-      SearchableThing.property :people, predicate: RDF::DC.creator, class_name: 'SearchablePerson'
+      Thing.property :people, predicate: RDF::DC.creator, class_name: 'Person'
 
       # related object
       person.foaf_name = 'Tove Jansson'

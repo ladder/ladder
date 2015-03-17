@@ -71,12 +71,11 @@ describe Ladder::Resource do
 
     after do
       Ladder::Config.models.delete Person
-      Object.send(:remove_const, 'Person') if Object
-
       Ladder::Config.models.delete Concept
-      Object.send(:remove_const, 'Concept') if Object
-
       Ladder::Config.models.delete Part
+
+      Object.send(:remove_const, 'Person') if Object
+      Object.send(:remove_const, 'Concept') if Object
       Object.send(:remove_const, 'Part') if Object
     end
   end

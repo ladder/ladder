@@ -21,7 +21,6 @@ shared_examples 'a Resource' do
   describe '#configure_model' do
     it 'should automatically have a base URI' do
       expect([RDF::URI('http://example.org/things/'),
-              RDF::URI('http://example.org/dynamic_things/'),
               RDF::URI('http://example.org/subthings/')]).to include subject.rdf_subject.parent
     end
 

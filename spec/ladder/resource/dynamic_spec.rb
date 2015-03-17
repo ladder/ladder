@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Ladder::Resource::Dynamic do
   before do
-    class DynamicThing
+    class Thing
       include Ladder::Resource::Dynamic
 
       # FIXME: DRY out this block
@@ -27,12 +27,12 @@ describe Ladder::Resource::Dynamic do
   end
 
   after do
-    Ladder::Config.models.delete DynamicThing
-    Object.send(:remove_const, 'DynamicThing') if Object
+    Ladder::Config.models.delete Thing
+    Object.send(:remove_const, 'Thing') if Object
   end
 
   context 'with data' do
-    let(:subject) { DynamicThing.new }
+    let(:subject) { Thing.new }
 
     include_context 'with data'
 
@@ -41,7 +41,7 @@ describe Ladder::Resource::Dynamic do
   end
 
   context 'from JSON-LD' do
-    let(:subject) { DynamicThing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }
+    let(:subject) { Thing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }
 
     it_behaves_like 'a Resource'
     it_behaves_like 'a Dynamic Resource'

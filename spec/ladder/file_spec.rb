@@ -13,10 +13,10 @@ describe Ladder::File do
   end
 
   shared_context 'with relations' do
-    let(:thing) { FileThing.new }
+    let(:thing) { Thing.new }
 
     before do
-      class FileThing
+      class Thing
         include Ladder::Resource
       end
 
@@ -31,8 +31,8 @@ describe Ladder::File do
     end
 
     after do
-      Ladder::Config.models.delete FileThing
-      Object.send(:remove_const, 'FileThing') if Object
+      Ladder::Config.models.delete Thing
+      Object.send(:remove_const, 'Thing') if Object
     end
 
     context 'with one-sided has-many' do
