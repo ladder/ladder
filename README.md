@@ -91,6 +91,8 @@ steve.as_jsonld
  # }
 ```
 
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.
+
 By default, URIs are dynamically generated based on the name of the model class and the configured base URI.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
 
 ```ruby
@@ -100,8 +102,6 @@ Person.base_uri
 Person.configure base_uri: 'http://some.other.uri/'
 => "http://some.other.uri/"
 ```
-
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.
 
 See the [configuration](#configuration) section for more information on configuring default behaviour.
 
@@ -781,12 +781,9 @@ For more information on available queueing adapters and their features, see the 
 
 ### Configuration
 
-Ladder uses a configuration module similar to [Mongoid's](http://mongoid.org/en/mongoid/docs/installation.html#configuration).  However, configuration options are set directly on the `Ladder::Config` singleton through the `#settings` method, eg:
+Configuration options are set using `Ladder::Config#settings`, eg:
 
 ```ruby
-Ladder::Config.settings
-=> {:base_uri=>#<URI::Generic:0x007fadec6a48b0 URL:urn:x-ladder>, :localize_fields=>false, :one_sided_relations=>false}
-
 Ladder::Config.settings[:base_uri] = 'http://example.org'
 => "http://example.org"
 
