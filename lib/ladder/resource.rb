@@ -10,9 +10,10 @@ module Ladder
 
     include Mongoid::Document
     include ActiveTriples::Identifiable
+    include Ladder::Configurable
     include Ladder::Resource::Serializable
 
-    included { configure_base_uri }
+    included { configure_model }
 
     delegate :rdf_label, to: :update_resource
 
@@ -205,9 +206,12 @@ module Ladder
       def property(field_name, opts = {})
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
+          # TODO: add/fix tests for this behaviour when true
+          mongoid_opts[:inverse_of] = nil if Ladder::Config.settings[:one_sided_relations]
+
           has_and_belongs_to_many(field_name, mongoid_opts) unless relations[field_name.to_s]
         else
-          mongoid_opts = { localize: true }.merge(opts.except(:predicate, :multivalue))
+          mongoid_opts = { localize: Ladder::Config.settings[:base_uri] }.merge(opts.except(:predicate, :multivalue))
           field(field_name, mongoid_opts) unless fields[field_name.to_s]
         end
 
@@ -280,16 +284,7 @@ module Ladder
       protected
 
       ##
-      # Set a default base URI based on the global LADDER_BASE_URI
-      # constant if it is defined
-      #
-      # @return [void]
-      def configure_base_uri
-        configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
-      end
-
-      ##
-      # Propagate base uri and properties to subclasses
+      # Propagate base URI and properties to subclasses
       #
       # @return [void]
       def inherited(subclass)
@@ -298,7 +293,7 @@ module Ladder
           subclass.property config.term, predicate: config.predicate, class_name: config.class_name
         end
 
-        subclass.configure_base_uri
+        subclass.configure_model
       end
     end
 
@@ -312,14 +307,13 @@ module Ladder
     # @param [RDF::URI] uri RDF subject URI for the resource
     # @return [Ladder::Resource] a resource instance
     def self.from_uri(uri)
-      klasses = ActiveTriples::Resource.descendants.select(&:name)
-      klass = klasses.find { |k| uri.to_s.include? k.base_uri.to_s }
+      klass = Ladder::Config.models.find { |k| uri.to_s.include? k.resource_class.base_uri.to_s }
 
       if klass
         object_id = uri.to_s.match(/[0-9a-fA-F]{24}/).to_s
 
         # Retrieve the object if it's persisted, otherwise return a new one (eg. embedded)
-        return klass.parent.where(id: object_id).exists? ? klass.parent.find(object_id) : klass.parent.new
+        return klass.where(id: object_id).exists? ? klass.find(object_id) : klass.new
       end
     end
   end

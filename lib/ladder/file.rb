@@ -7,14 +7,23 @@ module Ladder
 
     include Mongoid::Document
     include ActiveTriples::Identifiable
+    include Ladder::Configurable
 
     included do
-      configure base_uri: RDF::URI.new(LADDER_BASE_URI) / name.underscore.pluralize if defined? LADDER_BASE_URI
+      configure_model
 
       store_in collection: "#{ grid.prefix }.files"
 
       # Define accessor methods for attributes
       define_method(:content_type) { read_attribute(:contentType) }
+
+      # Attributes are:
+      # length      -> RDF::DC.extent
+      # chunkSize   -> (internal) ?
+      # uploadDate  -> RDF::DC.created
+      # md5         -> premis:hasMessageDigest ? with premis:hasMessageDigestAlgorithm = 'MD5'
+      # contentType -> RDF::DC.format
+      # filename    -> RDF::RDFS.label
 
       grid::File.fields.keys.map(&:to_sym).each do |attr|
         define_method(attr) { read_attribute(attr) }

@@ -8,6 +8,7 @@ describe Ladder::File do
   end
 
   after do
+    Ladder::Config.models.delete Datastream
     Object.send(:remove_const, 'Datastream') if Object
   end
 
@@ -30,6 +31,7 @@ describe Ladder::File do
     end
 
     after do
+      Ladder::Config.models.delete Thing
       Object.send(:remove_const, 'Thing') if Object
     end
 

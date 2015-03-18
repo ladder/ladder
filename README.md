@@ -40,13 +40,13 @@ Or install it yourself as:
 ## Usage
 
 * [Resources](#resources)
-  * [Configuring Resources](#configuring-resources)
   * [Dynamic Resources](#dynamic-resources)
 * [Files](#files)
 * [Indexing](#indexing)
   * [Indexing Resources](#indexing-resources)
   * [Indexing Files](#indexing-files)
   * [Background Indexing](#background-indexing)
+* [Configuration](#configuration)
 
 ### Resources
 
@@ -91,7 +91,17 @@ steve.as_jsonld
  # }
 ```
 
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values are localized by default.  Properties with a supplied `class_name:` will create a has-and-belongs-to-many (HABTM) relation:
+By default, URIs are dynamically generated based on the name of the model class and the configured base URI.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
+
+```
+Person.base_uri
+=> #<RDF::URI:0x3fecf69da274 URI:http://example.org/people>
+
+Person.configure base_uri: 'http://some.other.uri/'
+=> "http://some.other.uri/"
+```
+
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.  See the [configuration][configuration] section for more information on configuring default behaviour.
 
 ```ruby
 class Person
@@ -242,20 +252,6 @@ steve.as_jsonld
 
 Note in this case that both objects are included in the RDF graph, thanks to embedded relations. This can be useful to avoid additional queries to the database for objects that are tightly coupled.
 
-#### Configuring Resources
-
-If the LADDER_BASE_URI global constant is set, base URIs are dynamically generated based on the name of the model class.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples:
-
-```ruby
-LADDER_BASE_URI = 'http://example.org'
-
-Person.resource_class.base_uri
-=> #<RDF::URI:0x3fecf69da274 URI:http://example.org/people>
-
-Person.configure base_uri: 'http://some.other.uri/'
-=> "http://some.other.uri/"
-```
-
 #### Dynamic Resources
 
 In line with ActiveTriples' [Open Model](https://github.com/ActiveTriples/ActiveTriples#open-model) design, you can define properties on any Resource instance similarly to how you would on the class:
@@ -365,7 +361,7 @@ class Image
 end
 ```
 
-Similar to Resources, using `#property` will create a has-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required. Note that due to the way GridFS is designed, Files **can not** be embedded.
+As with Resources, using `#property` will create a many-to-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required (unless the `one_sided_relations` [configuration][configuration] option is set). Note that due to the way GridFS is designed, Files **can not** be embedded.
 
 ```ruby
 steve = Person.new(first_name: 'Steve')
@@ -780,6 +776,27 @@ ActiveJob::Base.queue_adapter = :sidekiq
 ```
 
 For more information on available queueing adapters and their features, see the [ActiveJob documentation](http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters.html).
+
+### Configuration
+
+Ladder uses a configuration module similar to [Mongoid's](http://mongoid.org/en/mongoid/docs/installation.html#configuration).  However, instead of a YAML file, configuration options are set directly on the `Ladder::Config` singleton through the `#settings` method, eg:
+
+```ruby
+Ladder::Config.settings
+=> {:base_uri=>#<URI::Generic:0x007fadec6a48b0 URL:urn:x-ladder>, :localize_fields=>false, :one_sided_relations=>false}
+
+Ladder::Config.settings[:base_uri] = 'http://example.org'
+=> "http://example.org"
+
+Ladder::Config.settings
+=> {:base_uri=>"http://example.org", :localize_fields=>false, :one_sided_relations=>false}
+```
+
+Ladder currently supports the following configuration options (defaults in parentheses):
+
+* `base_uri` ('urn:x-ladder'): Tells Ladder the base (root) URI to use for generating model URIs.  For a Rack-based linked data application, this will typically be the HTTP(S) URL, eg. "http://some.domain/my_application/"
+* `localize_fields` (false): When set to true, Ladder will set fields defined using `#property` to be localized by default.
+* `one_sided_relations` (false): When set to true, Ladder will set relations defined using `#property` to be a [one-sided many-to-many](http://mongoid.org/en/mongoid/docs/relations.html#has_and_belongs_to_many) relation. Otherwise it will define has-and-belongs-to-many (HABTM) relations.
 
 ## Contributing
 

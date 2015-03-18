@@ -11,6 +11,7 @@ describe Ladder::Searchable::File do
   end
 
   after do
+    Ladder::Config.models.delete Datastream
     Object.send(:remove_const, 'Datastream') if Object
   end
 
