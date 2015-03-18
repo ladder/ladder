@@ -7,11 +7,10 @@ module Ladder
 
     include Mongoid::Document
     include ActiveTriples::Identifiable
+    include Ladder::Configurable
 
     included do
-      # TODO: extract to configurable
-      Ladder::Config.register_model self unless Ladder::Config.models.include? self
-      configure base_uri: RDF::URI.new(Ladder::Config.settings[:base_uri]) / name.underscore.pluralize
+      configure_model
 
       store_in collection: "#{ grid.prefix }.files"
 
