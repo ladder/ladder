@@ -101,7 +101,9 @@ Person.configure base_uri: 'http://some.other.uri/'
 => "http://some.other.uri/"
 ```
 
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.  See the [configuration](#configuration) section for more information on configuring default behaviour.
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.
+
+See the [configuration](#configuration) section for more information on configuring default behaviour.
 
 ```ruby
 class Person
@@ -779,7 +781,7 @@ For more information on available queueing adapters and their features, see the 
 
 ### Configuration
 
-Ladder uses a configuration module similar to [Mongoid's](http://mongoid.org/en/mongoid/docs/installation.html#configuration).  However, instead of a YAML file, configuration options are set directly on the `Ladder::Config` singleton through the `#settings` method, eg:
+Ladder uses a configuration module similar to [Mongoid's](http://mongoid.org/en/mongoid/docs/installation.html#configuration).  However, configuration options are set directly on the `Ladder::Config` singleton through the `#settings` method, eg:
 
 ```ruby
 Ladder::Config.settings
@@ -794,9 +796,9 @@ Ladder::Config.settings
 
 Ladder currently supports the following configuration options (defaults in parentheses):
 
-* `base_uri` ('urn:x-ladder'): Tells Ladder the base (root) URI to use for generating model URIs.  For a Rack-based linked data application, this will typically be the HTTP(S) URL, eg. "http://some.domain/my_application/"
-* `localize_fields` (false): When set to true, Ladder will set fields defined using `#property` to be localized by default.
-* `one_sided_relations` (false): When set to true, Ladder will set relations defined using `#property` to be a [one-sided many-to-many](http://mongoid.org/en/mongoid/docs/relations.html#has_and_belongs_to_many) relation. Otherwise it will define has-and-belongs-to-many (HABTM) relations.
+* `:base_uri ('urn:x-ladder')`: Tells Ladder the base (root) URI to use for generating model URIs.  For a Rack-based linked data application, this will typically be the HTTP(S) URL, eg. "http://some.domain/my_application/"
+* `:localize_fields (false)`: When set to `true`, Ladder will set fields defined using `#property` to be localized by default.
+* `:one_sided_relations (false)`: When set to `true`, Ladder will set relations defined using `#property` to be [one-sided many-to-many](http://mongoid.org/en/mongoid/docs/relations.html#has_and_belongs_to_many) relations. Otherwise, it will define has-and-belongs-to-many (HABTM) relations.
 
 ## Contributing
 
