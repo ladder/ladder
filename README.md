@@ -93,7 +93,7 @@ steve.as_jsonld
 
 By default, URIs are dynamically generated based on the name of the model class and the configured base URI.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
 
-```
+```ruby
 Person.base_uri
 => #<RDF::URI:0x3fecf69da274 URI:http://example.org/people>
 
@@ -101,7 +101,7 @@ Person.configure base_uri: 'http://some.other.uri/'
 => "http://some.other.uri/"
 ```
 
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.  See the [configuration][configuration] section for more information on configuring default behaviour.
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.  See the [configuration](#configuration) section for more information on configuring default behaviour.
 
 ```ruby
 class Person
@@ -361,7 +361,7 @@ class Image
 end
 ```
 
-As with Resources, using `#property` will create a many-to-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required (unless the `one_sided_relations` [configuration][configuration] option is set). Note that due to the way GridFS is designed, Files **can not** be embedded.
+As with Resources, using `#property` will create a many-to-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required (unless the `one_sided_relations` [configuration](#configuration) option is set). Note that due to the way GridFS is designed, Files **can not** be embedded.
 
 ```ruby
 steve = Person.new(first_name: 'Steve')
