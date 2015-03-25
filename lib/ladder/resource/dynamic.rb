@@ -4,6 +4,7 @@ module Ladder
       extend ActiveSupport::Concern
 
       include Ladder::Resource
+      include Mongoid::Attributes::Dynamic
 
       included do
         include InstanceMethods
@@ -97,9 +98,7 @@ module Ladder
 
           if self._context
             self._context.each do |field_name, uri|
-              value = send(field_name)
-              cast_uri = RDF::URI.new(value)
-              resource.set_value(RDF::Vocabulary.find_term(uri), cast_uri.valid? ? cast_uri : value)
+              resource.set_value(RDF::Vocabulary.find_term(uri), cast_value(send(field_name)))
             end
           end
 
@@ -117,13 +116,11 @@ module Ladder
           # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
           statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
-          case statement.object
-          when resource_class.type then return # Don't store statically-defined types
-          when RDF::Node then return super # Delegate nodes (relations) to parent
-          end
-
+          # Store type information
           if RDF.type == statement.predicate
-            # Store type information
+            # Don't store statically-defined types
+            return if resource_class.type == statement.object
+
             self._types ||= []
             self._types << statement.object.to_s
 
@@ -134,8 +131,10 @@ module Ladder
           # If we have an undefined predicate, then dynamically define it
           property statement.predicate.qname.last, predicate: statement.predicate unless field_from_predicate statement.predicate
 
-          if self._context && self._context.values.include?(statement.predicate.to_s)
-            send("#{self._context.key(statement.predicate.to_s)}=", statement.object.to_s)
+          unless statement.object.is_a? RDF::Node # Delegate nodes (relations) to parent
+            if self._context && self._context.values.include?(statement.predicate.to_s)
+              update_field(self._context.key(statement.predicate.to_s), statement.object)
+            end
           end
 
           super

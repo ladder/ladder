@@ -12,7 +12,7 @@ module Ladder
       # @param [Hash] opts options to pass to ActiveTriples
       # @option opts [Boolean] :related whether to include related resources (default: false)
       # @return [String] a serialized Turtle version of the resource
-      def as_turtle(opts = { related: false })
+      def as_turtle(opts = { related: Ladder::Config.settings[:with_relations] })
         update_resource(opts.slice :related).dump(:ttl, { standard_prefixes: true }.merge(opts))
       end
 
@@ -24,7 +24,7 @@ module Ladder
       # @param [Hash] opts options to pass to ActiveTriples
       # @option opts [Boolean] :related whether to include related resources (default: false)
       # @return [Hash] a serialized JSON-LD version of the resource
-      def as_jsonld(opts = { related: false })
+      def as_jsonld(opts = { related: Ladder::Config.settings[:with_relations] })
         JSON.parse update_resource(opts.slice :related).dump(:jsonld, { standard_prefixes: true }.merge(opts))
       end
 

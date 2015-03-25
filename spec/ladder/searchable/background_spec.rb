@@ -11,7 +11,8 @@ describe Ladder::Searchable::Background do
       # FIXME: DRY out this block
       configure type: RDF::DC.BibliographicResource
 
-      property :title,      predicate: RDF::DC.title           # localized String
+      property :title,      predicate: RDF::DC.title,          # localized String
+                            localize: true
       property :alt,        predicate: RDF::DC.alternative,    # non-localized String
                             localize: false
       property :references, predicate: RDF::DC.references      # URI

@@ -12,6 +12,7 @@ module Ladder
     option :base_uri,            default: URI('urn:x-ladder') # typically a URL (configured)
     option :localize_fields,     default: false               # self-explanatory
     option :one_sided_relations, default: false               # otherwise HABTM
+    option :with_relations,      default: false               # include related objects in serialization
 
     # Get all the models in the application - this is everything that includes
     # Ladder::Resource or Ladder::File.

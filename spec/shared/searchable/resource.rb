@@ -112,7 +112,7 @@ shared_examples 'a Searchable with related' do
       end
 
       it 'should include the related object in the index' do
-        results = person.class.search('foaf.name.en:tove')
+        results = person.class.search('foaf.name.en:tove OR foaf.name:tove')
         expect(results.count).to eq 1
         expect(results.first._source.to_hash).to eq JSON.parse(person.as_qname.to_json)
       end
@@ -132,7 +132,7 @@ shared_examples 'a Searchable with related' do
       end
 
       it 'should contain a embedded related object' do
-        results = subject.class.search('dc.creator.foaf.name.en:tove')
+        results = subject.class.search('dc.creator.foaf.name.en:tove OR dc.creator.foaf.name:tove')
         expect(results.count).to eq 1
         expect(results.first._source.to_hash).to eq JSON.parse(subject.as_qname(related: true).to_json)
       end
@@ -159,7 +159,7 @@ shared_examples 'a Searchable with related' do
       end
 
       it 'should include the related object in the index' do
-        results = person.class.search('foaf\:name.@value:tove')
+        results = person.class.search('foaf\:name.@value:tove OR foaf\:name:tove')
         expect(results.count).to eq 1
         expect(results.first._source.to_hash).to eq person.as_jsonld
       end
@@ -179,7 +179,7 @@ shared_examples 'a Searchable with related' do
       end
 
       it 'should contain a embedded related object' do
-        results = subject.class.search('@graph.foaf\:name.@value:tove')
+        results = subject.class.search('@graph.foaf\:name.@value:tove OR @graph.foaf\:name:tove')
         expect(results.count).to eq 1
         expect(results.first._source.to_hash).to eq JSON.parse(subject.as_jsonld(related: true).to_json)
       end
@@ -200,7 +200,7 @@ shared_examples 'a Searchable with related' do
       end
 
       it 'should contain a embedded related object' do
-        results = subject.class.search('dc\:creator.foaf\:name.@value:tove')
+        results = subject.class.search('dc\:creator.foaf\:name.@value:tove OR dc\:creator.foaf\:name:tove')
         expect(results.count).to eq 1
         expect(results.first._source.to_hash).to eq JSON.parse(subject.as_framed_jsonld.to_json)
       end

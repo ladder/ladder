@@ -27,7 +27,8 @@ module Ladder
     def update_resource(opts = {})
       resource_class.properties.each do |field_name, property|
         values = update_from_field(field_name) if fields[field_name]
-        values = update_from_relation(field_name, opts[:related]) if relations[field_name]
+        # TODO: add/fix tests for this behaviour when true
+        values = update_from_relation(field_name, opts[:related] || Ladder::Config.settings[:with_relations]) if relations[field_name]
 
         resource.set_value(property.predicate, values)
       end
@@ -115,7 +116,7 @@ module Ladder
       # Should be an Array of RDF::Term objects
       return unless obj
 
-      if fields[field_name].localized?
+      if fields[field_name] && fields[field_name].localized?
         trans = {}
 
         obj.each do |item|
@@ -172,7 +173,8 @@ module Ladder
     # @param [String] field_name ActiveModel attribute name for the relation
     # @param [Boolean] related whether to include related objects
     # @return [Enumerable]
-    def update_from_relation(field_name, related = false)
+    # TODO: add/fix tests for this behaviour when true
+    def update_from_relation(field_name, related = Ladder::Config.settings[:with_relations])
       objects = send(field_name).to_a
 
       if related || embedded_relations[field_name]
@@ -211,7 +213,7 @@ module Ladder
 
           has_and_belongs_to_many(field_name, mongoid_opts) unless relations[field_name.to_s]
         else
-          mongoid_opts = { localize: Ladder::Config.settings[:base_uri] }.merge(opts.except(:predicate, :multivalue))
+          mongoid_opts = { localize: Ladder::Config.settings[:localize_fields] }.merge(opts.except(:predicate, :multivalue))
           field(field_name, mongoid_opts) unless fields[field_name.to_s]
         end
 
