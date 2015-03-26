@@ -1,6 +1,8 @@
 ![Ladder logo](https://github.com/ladder/ladder/blob/master/logo.png)
 
-[![Gem Version](http://img.shields.io/gem/v/ladder.svg?style=flat)](https://rubygems.org/gems/ladder)  [![Inline docs](http://inch-ci.org/github/ladder/ladder.svg?branch=master)](http://inch-ci.org/github/ladder/ladder)  [![Build Status](https://travis-ci.org/ladder/ladder.svg)](https://travis-ci.org/ladder/ladder)
+[![Gem Version](https://badge.fury.io/rb/ladder.svg)](https://rubygems.org/gems/ladder)
+[![Inline docs](http://inch-ci.org/github/ladder/ladder.svg)](http://inch-ci.org/github/ladder/ladder)
+[![Build Status](https://travis-ci.org/ladder/ladder.svg)](https://travis-ci.org/ladder/ladder)
 
 # Ladder
 
@@ -11,8 +13,8 @@ Although conceptually similar to [Spira](https://github.com/ruby-rdf/spira), Lad
 ### Components
 
 - [Mongoid](http://mongoid.org) for persistence
+- [ActiveTriples](https://github.com/no-reply/ActiveTriples) for RDF handling
 - [ElasticSearch](http://www.elasticsearch.org) for full-text indexing
-- [ActiveTriples](https://github.com/no-reply/ActiveTriples) for linked data
 - [ActiveJob](https://github.com/rails/rails/tree/master/activejob) for background job execution
 
 ## History
@@ -23,19 +25,9 @@ In early 2012, Ladder began existence as an opportunity to escape from a decade 
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add `gem "ladder"` to your Gemfile and run `bundle`.
 
-```ruby
-gem 'ladder'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install ladder
+Or install manually with `gem install ladder`.
 
 ## Usage
 
@@ -50,7 +42,7 @@ Or install it yourself as:
 
 ### Resources
 
-Much like ActiveTriples, Resources are the core of Ladder.  Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require and include the main module in your class:
+Ladder::Resources implement all the functionality of a Mongoid::Document and an ActiveTriples::Resource.  To add Ladder integration for your model, require and include the main module in your class:
 
 ```ruby
 require 'ladder'
@@ -91,7 +83,7 @@ steve.as_jsonld
  # }
 ```
 
-The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with literal values (Mongoid fields) can be localized by default.  Properties with a supplied `class_name:` will create a many-to-many relation.
+The `#property` method takes care of setting both Mongoid fields and ActiveTriples properties.  Properties with a supplied `class_name:` will create a many-to-many relation.
 
 By default, URIs are dynamically generated based on the name of the model class and the configured base URI.  However, you can still set the base URI for a class explicitly just as you would in ActiveTriples, eg:
 
@@ -342,7 +334,7 @@ steve.as_jsonld
  #	}
 ```
 
-Note that due to the way Mongoid handles dynamic fields, dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain the related object's URI.
+Dynamic properties **can not** be localized.  They can be any kind of literal, but they **can not** be a related object. They can, however, contain the related object's URI.
 
 ### Files
 
@@ -363,7 +355,7 @@ class Image
 end
 ```
 
-As with Resources, using `#property` will create a many-to-many relation for a File by default; however, because Files must be the target of a one-way relation, the `inverse_of: nil` option is required (unless the `one_sided_relations` [configuration](#configuration) option is set). Note that due to the way GridFS is designed, Files **can not** be embedded.
+Because Files must be the target of a one-way relation, the `inverse_of: nil` option is required on the property  (unless the `one_sided_relations` [configuration](#configuration) option is set). Note that Files **can not** be embedded.
 
 ```ruby
 steve = Person.new(first_name: 'Steve')
@@ -501,158 +493,7 @@ kimchy.as_indexed_json
  # }
 ```
 
-You can also index related objects as framed JSON-LD using `#as_framed_jsonld` or by using the `related: true` option with `#as_qname`:
-
-```ruby
-class Project
-  include Ladder::Resource
-  include Ladder::Searchable
-
-  configure type: RDF::DOAP.Project
-
-  property :project_name, predicate: RDF::DOAP.name
-  property :description, predicate: RDF::DC.description
-  property :developers, predicate: RDF::DOAP.developer, class_name: 'Person'
-end
-
-Person.property :projects, predicate: RDF::FOAF.made, class_name: 'Project'
-
-es = Project.new(project_name: 'ElasticSearch', description: 'You know, for search')
-=> #<Project _id: 544562c24169728b4e010000, project_name: {"en"=>"ElasticSearch"}, description: {"en"=>"You know, for search"}, developer_ids: nil>
-
-es.developers << kimchy
-=> [#<Person _id: 543b457b41697231c5000000, first_name: {"en"=>"Shay"}, description: {"en"=>"Real genius"}, project_ids: [BSON::ObjectId('544562c24169728b4e010000')]>]
-
-Person.index_for_search { as_framed_jsonld }
-=> :as_indexed_json
-
-Project.index_for_search { as_framed_jsonld }
-=> :as_indexed_json
-
-kimchy.as_indexed_json
- # => {
- #    "@context": {
- #        "dc": "http://purl.org/dc/terms/",
- #        "doap": "http://usefulinc.com/ns/doap#",
- #        "foaf": "http://xmlns.com/foaf/0.1/"
- #    },
- #    "@id": "http://example.org/people/543b457b41697231c5000000",
- #    "@type": "foaf:Person",
- #    "dc:description": {
- #        "@language": "en",
- #        "@value": "Real genius"
- #    },
- #    "foaf:made": {
- #        "@id": "http://example.org/projects/544562c24169728b4e010000",
- #        "@type": "doap:Project",
- #        "dc:description": {
- #            "@language": "en",
- #            "@value": "You know, for search"
- #        },
- #        "doap:developer": {
- #            "@id": "http://example.org/people/543b457b41697231c5000000"
- #        },
- #        "doap:name": {
- #            "@language": "en",
- #            "@value": "ElasticSearch"
- #        }
- #    },
- #    "foaf:name": {
- #        "@language": "en",
- #        "@value": "Shay"
- #    }
- # }
-
-es.as_indexed_json
- # => {
- #    "@context": {
- #        "dc": "http://purl.org/dc/terms/",
- #        "doap": "http://usefulinc.com/ns/doap#",
- #        "foaf": "http://xmlns.com/foaf/0.1/"
- #    },
- #    "@id": "http://example.org/projects/544562c24169728b4e010000",
- #    "@type": "doap:Project",
- #    "dc:description": {
- #        "@language": "en",
- #        "@value": "You know, for search"
- #    },
- #    "doap:developer": {
- #        "@id": "http://example.org/people/543b457b41697231c5000000",
- #        "@type": "foaf:Person",
- #        "dc:description": {
- #            "@language": "en",
- #            "@value": "Real genius"
- #        },
- #        "foaf:made": {
- #            "@id": "http://example.org/projects/544562c24169728b4e010000"
- #        },
- #        "foaf:name": {
- #            "@language": "en",
- #            "@value": "Shay"
- #        }
- #    },
- #    "doap:name": {
- #        "@language": "en",
- #        "@value": "ElasticSearch"
- #    }
- # }
-
-Person.index_for_search { as_qname related: true }
-=> :as_indexed_json
-
-Project.index_for_search { as_qname related: true }
-=> :as_indexed_json
-
-kimchy.as_indexed_json
- # => {
- #    "dc": {
- #        "description": { "en": "Real genius" }
- #    },
- #    "foaf": {
- #        "made": {
- #            "dc": {
- #                "description": { "en": "You know, for search" }
- #            },
- #            "doap": {
- #                "developer": [ "people:544562b14169728b4e000000" ],
- #                "name": { "en": "ElasticSearch" }
- #            },
- #            "rdf": {
- #                "type": "doap:Project"
- #            }
- #        },
- #        "name": { "en": "Shay" }
- #    },
- #    "rdf": {
- #        "type": "foaf:Person"
- #    }
- # }
-
-es.as_indexed_json
- # => {
- #    "dc": {
- #        "description": { "en": "You know, for search" }
- #    },
- #    "doap": {
- #        "developer": {
- #            "dc": {
- #                "description": { "en": "Real genius" }
- #            },
- #            "foaf": {
- #                "made": [ "projects:544562c24169728b4e010000" ],
- #                "name": { "en": "Shay" }
- #            },
- #            "rdf": {
- #                "type": "foaf:Person"
- #            }
- #        },
- #        "name": { "en": "ElasticSearch" }
- #    },
- #    "rdf": {
- #        "type": "doap:Project"
- #    }
- # }
-```
+You can also index related objects as framed JSON-LD using `#as_framed_jsonld` or by using the `related: true` option with `#as_qname` or `#as_jsonld`.  Related objects can be serialized by default using the `:with_relations` [configuration](#configuration) option.
 
 #### Indexing Files
 
@@ -796,6 +637,7 @@ Ladder currently supports the following configuration options (defaults in paren
 * `:base_uri ('urn:x-ladder')`: Tells Ladder the base (root) URI to use for generating model URIs.  For a Rack-based linked data application, this will typically be the HTTP(S) URL, eg. "http://some.domain/my_application/"
 * `:localize_fields (false)`: When set to `true`, Ladder will set fields defined using `#property` to be localized by default.
 * `:one_sided_relations (false)`: When set to `true`, Ladder will set relations defined using `#property` to be [one-sided many-to-many](http://mongoid.org/en/mongoid/docs/relations.html#has_and_belongs_to_many) relations. Otherwise, it will define has-and-belongs-to-many (HABTM) relations.
+* `:with_relations`: When set to `true`, Ladder will always include directly related objects when serializing JSON-LD.
 
 ## Contributing
 
