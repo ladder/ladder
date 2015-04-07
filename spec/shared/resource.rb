@@ -1,19 +1,45 @@
 shared_context 'with data' do
   before do
+    klass.configure type: RDF::DC.BibliographicResource
+
+    klass.property :title,      predicate: RDF::DC.title,          # localized String
+                                localize: true
+    klass.property :alt,        predicate: RDF::DC.alternative,    # non-localized String
+                                localize: false
+    klass.property :references, predicate: RDF::DC.references      # URI
+    klass.property :referenced, predicate: RDF::DC.isReferencedBy  # Array
+    klass.property :is_valid,   predicate: RDF::DC.valid           # Boolean
+    klass.property :date,       predicate: RDF::DC.date            # Date
+    klass.property :issued,     predicate: RDF::DC.issued          # DateTime
+    klass.property :spatial,    predicate: RDF::DC.spatial         # Float
+    # klass.property :conformsTo, predicate: RDF::DC.conformsTo      # Hash
+    klass.property :identifier, predicate: RDF::DC.identifier      # Integer
+    # klass.property :license,    predicate: RDF::DC.license         # Range
+    klass.property :source,     predicate: RDF::DC.source          # Symbol
+    klass.property :created,    predicate: RDF::DC.created         # Time
+  end
+
+  attrs_hash = {
+    title: 'Comet in Moominland',       # localized String
+    alt: 'Mumintrollet pa kometjakt',   # non-localized String
+    references: 'http://foo.com',       # URI
+    referenced: %w(something another),  # Array
+    is_valid: true,                     # Boolean -> xsd:boolean
+    date: Date.new(1946),               # Date -> xsd:date
+    issued: DateTime.new(1951),         # DateTime -> xsd:date
+    spatial: 12.345,                    # Float -> xsd:double
+    # conformsTo: { 'key' => 'value' }, # Hash
+    identifier: 16_589_991,             # Integer -> xsd:integer
+    # license: 1..10,                   # Range
+    source: :something,                 # Symbol -> xsd:token
+    created: Time.new.beginning_of_hour # Time
+  }
+
+  let(:subject) { klass.new(attrs_hash) }
+
+  after do
     subject.title_translations = { 'en' => 'Comet in Moominland', # localized String
                                    'sv' => 'Kometen kommer' }
-    subject.alt        = 'Mumintrollet pa kometjakt'  # non-localized String
-    subject.references = 'http://foo.com'             # URI
-    subject.referenced = %w(something another)        # Array
-    subject.is_valid   = true                         # Boolean -> xsd:boolean
-    subject.date       = Date.new(1946)               # Date -> xsd:date
-    subject.issued     = DateTime.new(1951)           # DateTime -> xsd:date
-    subject.spatial    = 12.345                       # Float -> xsd:double
-    # subject.conformsTo = { 'key' => 'value' }         # Hash
-    subject.identifier = 16_589_991                   # Integer -> xsd:integer
-    # subject.license    = 1..10                        # Range
-    subject.source     = :something                   # Symbol -> xsd:token
-    subject.created    = Time.new.beginning_of_hour   # Time
   end
 end
 
