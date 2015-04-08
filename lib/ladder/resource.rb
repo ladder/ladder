@@ -3,6 +3,8 @@ require 'active_triples'
 require 'ladder/resource/pushable'
 require 'ladder/resource/serializable'
 
+require_relative '../rdf/model/uri'
+
 module Ladder
   module Resource
     autoload :Dynamic, 'ladder/resource/dynamic'
@@ -12,7 +14,7 @@ module Ladder
     include Mongoid::Document
     include ActiveTriples::Identifiable
     include Ladder::Configurable
-    include Ladder::Resource::Pushable
+#    include Ladder::Resource::Pushable
     include Ladder::Resource::Serializable
 
     delegate :rdf_label, to: :update_resource
@@ -136,7 +138,7 @@ module Ladder
         # update inverse relation properties
         relation = relations[field_name]
         objects.each { |object| object.resource.set_value(relation.inverse, rdf_subject) } if relation.inverse
-        # TODO: mark-and-sweep
+
 #        objects.map(&:update_resource)
       else
         # remove inverse relation properties
