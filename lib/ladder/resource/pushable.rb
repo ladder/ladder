@@ -48,6 +48,26 @@ module Ladder
         end
       end
 
+      ##
+      # Set values on a defined relation
+      #
+      # @param [String] field_name ActiveModel attribute name for the field
+      # @param [Array<Object>] obj objects (usually Ladder::Resources) to be set
+      # @return [Ladder::Resource, nil]
+      def update_relation(field_name, *obj)
+        # Should be an Array of RDF::Term objects
+        return unless obj
+
+        obj.map! { |item| item.is_a?(RDF::URI) ? Ladder::Resource.from_uri(item) : item }
+        relation = send(field_name)
+
+        if Mongoid::Relations::Targets::Enumerable == relation.class
+          obj.map { |item| relation.send(:push, item) unless relation.include? item }
+        else
+          send("#{field_name}=", obj.size > 1 ? obj : obj.first)
+        end
+      end
+
     end
   end
 end

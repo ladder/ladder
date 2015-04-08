@@ -24,14 +24,25 @@ module Ladder
     # ActiveModel properties & relations
     #
     # @param [Hash] opts options to pass to Mongoid / ActiveTriples
-    # @option opts [Boolean] :related whether to include related resources
     # @return [ActiveTriples::Resource] resource for the object
     def update_resource
-      resource_class.properties.each do |field_name, property|
-        values = update_from_field(field_name) if fields[field_name]
-        values = update_from_relation(field_name) if relations[field_name]
+      # Delete existing statements for the object
+      resource.delete [rdf_subject]
 
-        resource.set_value(property.predicate, values)
+      resource_class.properties.each do |field_name, property|
+        object = case read_attribute(field_name)
+        when send(field_name) # Regular field
+           cast_value send(field_name)
+        when nil # Relation
+           send(field_name).to_a.map(&:rdf_subject)
+        else # Localized field
+          read_attribute(field_name).map { |lang, value| cast_value(value, language: lang) }
+        end
+
+        # TODO: For fields with 00:00:00 that are NOT typed as Time, cast to xsd:date
+        # value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
+
+        resource.set_value(property.predicate, object)
       end
 
       resource
@@ -68,26 +79,6 @@ module Ladder
     private
 
     ##
-    # Set values on a defined relation
-    #
-    # @param [String] field_name ActiveModel attribute name for the field
-    # @param [Array<Object>] obj objects (usually Ladder::Resources) to be set
-    # @return [Ladder::Resource, nil]
-    def update_relation(field_name, *obj)
-      # Should be an Array of RDF::Term objects
-      return unless obj
-
-      obj.map! { |item| item.is_a?(RDF::URI) ? Ladder::Resource.from_uri(item) : item }
-      relation = send(field_name)
-
-      if Mongoid::Relations::Targets::Enumerable == relation.class
-        obj.map { |item| relation.send(:push, item) unless relation.include? item }
-      else
-        send("#{field_name}=", obj.size > 1 ? obj : obj.first)
-      end
-    end
-
-    ##
     # Cast values from Mongoid types to RDF types
     #
     # @param [Object] value ActiveModel attribute to be cast
@@ -101,49 +92,9 @@ module Ladder
         cast_uri = RDF::URI.new(value)
         cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
       when Time
-        # Cast DateTimes with 00:00:00 or Date stored as Times in Mongoid to xsd:date
-        # FIXME: this should NOT be applied for fields that are typed as Time
-        value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
+        RDF::Literal.new(value.to_datetime)
       else
         RDF::Literal.new(value, opts)
-      end
-    end
-
-    ##
-    # Update the delegated ActiveTriples::Resource from a field
-    #
-    # @param [String] field_name ActiveModel attribute name for the field
-    # @return [Object]
-    def update_from_field(field_name)
-      if fields[field_name].localized?
-        read_attribute(field_name).to_a.map { |lang, value| cast_value(value, language: lang) }.flatten
-      else
-        cast_value send(field_name)
-      end
-    end
-
-    ##
-    # Update the delegated ActiveTriples::Resource from a relation
-    #
-    # @param [String] field_name ActiveModel attribute name for the relation
-    # @param [Boolean] related whether to include related objects
-    # @return [Enumerable]
-    def update_from_relation(field_name)
-      objects = send(field_name).to_a
-
-      if relations[field_name]
-        # Force autosave of related documents to ensure correct serialization
-#        methods.select { |i| i[/autosave_documents/] }.each { |m| send m }
-
-        # update inverse relation properties
-        relation = relations[field_name]
-        objects.each { |object| object.resource.set_value(relation.inverse, rdf_subject) } if relation.inverse
-
-#        objects.map(&:update_resource)
-      else
-        # remove inverse relation properties
-        objects.each { |object| resource.delete [object.rdf_subject] }
-        objects.map(&:rdf_subject)
       end
     end
 
