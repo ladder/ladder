@@ -10,10 +10,9 @@ module Ladder
       # @see ActiveTriples::Resource#dump
       #
       # @param [Hash] opts options to pass to ActiveTriples
-      # @option opts [Boolean] :related whether to include related resources (default: false)
       # @return [String] a serialized Turtle version of the resource
-      def as_turtle(opts = { related: Ladder::Config.settings[:with_relations] })
-        update_resource(opts.slice :related).dump(:ttl, { standard_prefixes: true }.merge(opts))
+      def as_turtle(opts = { })
+        update_resource.dump(:ttl, { standard_prefixes: true }.merge(opts))
       end
 
       ##
@@ -22,10 +21,9 @@ module Ladder
       # @see ActiveTriples::Resource#dump
       #
       # @param [Hash] opts options to pass to ActiveTriples
-      # @option opts [Boolean] :related whether to include related resources (default: false)
       # @return [Hash] a serialized JSON-LD version of the resource
-      def as_jsonld(opts = { related: Ladder::Config.settings[:with_relations] })
-        JSON.parse update_resource(opts.slice :related).dump(:jsonld, { standard_prefixes: true }.merge(opts))
+      def as_jsonld(opts = { })
+        JSON.parse update_resource.dump(:jsonld, { standard_prefixes: true }.merge(opts))
       end
 
       ##
@@ -37,7 +35,7 @@ module Ladder
       #
       # @return [Hash] a serialized JSON-LD version of the resource
       def as_framed_jsonld
-        json_hash = as_jsonld related: true
+        json_hash = as_jsonld
 
         context = json_hash['@context']
         frame = { '@context' => context }
@@ -50,7 +48,6 @@ module Ladder
       # Return a qname-based JSON representation
       #
       # @param [Hash] opts options for serializaiton
-      # @option opts [Boolean] :related whether to include related resources
       # @return [Hash] a serialized 'qname' version of the resource
       def as_qname(opts = {})
         qname_hash = type.empty? ? {} : { rdf: { type: type.first.pname } }
@@ -59,20 +56,15 @@ module Ladder
           ns, name = property.predicate.qname
           qname_hash[ns] ||= {}
 
-          if relations[field_name]
-            qname_hash[ns][name] = opts[:related] ? send(field_name).to_a.map(&:as_qname) : send(field_name).to_a.map { |obj| "#{obj.class.name.underscore.pluralize}:#{obj.id}" }
-          end
-
-          if fields[field_name]
-            qname_hash[ns][name] = read_attribute(field_name)
-          end
+          qname_hash[ns][name] = send(field_name).to_a.map(&:as_qname) if relations[field_name]
+          qname_hash[ns][name] = read_attribute(field_name) if fields[field_name]
 
           # Remove empty/null values
           qname_hash[ns].delete_if { |_k, v| v.blank? }
         end
 
         # Insert labels for boosting search score
-        { rdfs: { label: update_resource(opts.slice :related).rdf_label } }.merge qname_hash
+        { rdfs: { label: update_resource.rdf_label } }.merge qname_hash
       end
     end
   end

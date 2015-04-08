@@ -1,19 +1,19 @@
 require 'mongoid'
 require 'active_triples'
+require 'ladder/resource/pushable'
+require 'ladder/resource/serializable'
 
 module Ladder
   module Resource
     autoload :Dynamic, 'ladder/resource/dynamic'
-    autoload :Serializable, 'ladder/resource/serializable'
 
     extend ActiveSupport::Concern
 
     include Mongoid::Document
     include ActiveTriples::Identifiable
     include Ladder::Configurable
+    include Ladder::Resource::Pushable
     include Ladder::Resource::Serializable
-
-    included { configure_model }
 
     delegate :rdf_label, to: :update_resource
 
@@ -24,35 +24,15 @@ module Ladder
     # @param [Hash] opts options to pass to Mongoid / ActiveTriples
     # @option opts [Boolean] :related whether to include related resources
     # @return [ActiveTriples::Resource] resource for the object
-    def update_resource(opts = {})
+    def update_resource
       resource_class.properties.each do |field_name, property|
         values = update_from_field(field_name) if fields[field_name]
-        # TODO: add/fix tests for this behaviour when true
-        values = update_from_relation(field_name, opts[:related] || Ladder::Config.settings[:with_relations]) if relations[field_name]
+        values = update_from_relation(field_name) if relations[field_name]
 
         resource.set_value(property.predicate, values)
       end
 
       resource
-    end
-
-    ##
-    # Push an RDF::Statement into the object
-    #
-    # @param [RDF::Statement, Hash, Array] statement @see RDF::Statement#from
-    # @return [Object, nil] the value inserted into the object
-    def <<(statement)
-      # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
-      statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
-
-      # Only push statement if the statement's predicate is defined on the class
-      field_name = field_from_predicate(statement.predicate)
-      return unless field_name
-
-      objects = statement.object.is_a?(RDF::Node) && block_given? ? yield : statement.object
-
-      update_field(field_name, *objects) if fields[field_name]
-      update_relation(field_name, *objects) if relations[field_name]
     end
 
     ##
@@ -106,33 +86,6 @@ module Ladder
     end
 
     ##
-    # Set values on a field; this will cast values
-    # from RDF types to persistable Mongoid types
-    #
-    # @param [String] field_name ActiveModel attribute name for the field
-    # @param [Array<Object>] obj objects (usually RDF::Terms) to be set
-    # @return [Object, nil]
-    def update_field(field_name, *obj)
-      # Should be an Array of RDF::Term objects
-      return unless obj
-
-      if fields[field_name] && fields[field_name].localized?
-        trans = {}
-
-        obj.each do |item|
-          lang = item.is_a?(RDF::Literal) && item.has_language? ? item.language.to_s : I18n.locale.to_s
-          value = item.is_a?(RDF::URI) ? item.to_s : item.object # TODO: tidy this up
-          trans[lang] = trans[lang] ? [*trans[lang]] << value : value
-        end
-
-        send("#{field_name}_translations=", trans) unless trans.empty?
-      else
-        objects = obj.map { |item| item.is_a?(RDF::URI) ? item.to_s : item.object } # TODO: tidy this up
-        send("#{field_name}=", objects.size > 1 ? objects : objects.first)
-      end
-    end
-
-    ##
     # Cast values from Mongoid types to RDF types
     #
     # @param [Object] value ActiveModel attribute to be cast
@@ -173,18 +126,18 @@ module Ladder
     # @param [String] field_name ActiveModel attribute name for the relation
     # @param [Boolean] related whether to include related objects
     # @return [Enumerable]
-    # TODO: add/fix tests for this behaviour when true
-    def update_from_relation(field_name, related = Ladder::Config.settings[:with_relations])
+    def update_from_relation(field_name)
       objects = send(field_name).to_a
 
-      if related || embedded_relations[field_name]
+      if relations[field_name]
         # Force autosave of related documents to ensure correct serialization
-        methods.select { |i| i[/autosave_documents/] }.each { |m| send m }
+#        methods.select { |i| i[/autosave_documents/] }.each { |m| send m }
 
         # update inverse relation properties
         relation = relations[field_name]
         objects.each { |object| object.resource.set_value(relation.inverse, rdf_subject) } if relation.inverse
-        objects.map(&:update_resource)
+        # TODO: mark-and-sweep
+#        objects.map(&:update_resource)
       else
         # remove inverse relation properties
         objects.each { |object| resource.delete [object.rdf_subject] }
@@ -283,20 +236,6 @@ module Ladder
         new_object
       end
 
-      protected
-
-      ##
-      # Propagate base URI and properties to subclasses
-      #
-      # @return [void]
-      def inherited(subclass)
-        # Copy properties from parent to subclass
-        resource_class.properties.each do |_name, config|
-          subclass.property config.term, predicate: config.predicate, class_name: config.class_name
-        end
-
-        subclass.configure_model
-      end
     end
 
     ##

@@ -26,6 +26,9 @@
         "@type": "xsd:integer",
         "@value": "16589991"
     },
+	"dc:references" : {
+		"@id": "http://foo.com"
+	},
 	"dc:isReferencedBy": [
 		{
 			"@value":"something",

@@ -93,28 +93,6 @@ shared_examples 'a Resource' do
     end
   end
 
-  describe '#update_resource' do
-    before do
-      subject.update_resource
-    end
-
-    it 'should have a non-localized literal object' do
-      subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.title).each_statement do |s|
-        expect(['Comet in Moominland', 'Kometen kommer']).to include s.object.to_s
-      end
-    end
-
-    it 'should have a localized literal object' do
-      subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.alternative).each_statement do |s|
-        expect(s.object.to_s).to eq 'Mumintrollet pa kometjakt'
-      end
-    end
-
-    it 'should not have related objects' do
-      expect(subject.resource.query(object: subject)).to be_empty
-    end
-  end
-
   describe '#<<' do
     context 'with defined field' do
       before do
@@ -195,7 +173,7 @@ shared_examples 'a Resource' do
 
   describe '#new_from_graph' do
     before do
-      subject.update_resource(related: true)
+      subject.update_resource
     end
 
     let(:new_subject)  { subject.class.new_from_graph subject.resource }
@@ -217,19 +195,15 @@ end
 
 shared_examples 'a Resource with relations' do
   describe 'serializable' do
-    # TODO: contexts with relations and without
-    # expect(subject.as_jsonld(related: true)).to eq subject.as_jsonld
-    # expect(subject.as_qname(related: true)).to eq subject.as_qname
-    # expect(subject.as_framed_jsonld).to eq subject.as_jsonld
 
-    describe '#as_jsonld related: true' do
+    describe '#as_jsonld' do
       it 'should output a valid jsonld representation of itself and related' do
-        graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
-        expect(subject.update_resource(related: true).to_hash).to eq graph.to_hash
+        graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
+        expect(subject.update_resource.to_hash).to eq graph.to_hash
       end
     end
 
-    describe '#as_qname related: true' do
+    describe '#as_qname' do
       it 'should output a valid qname representation of itself and related' do
         # TODO
       end
@@ -238,7 +212,7 @@ shared_examples 'a Resource with relations' do
     describe '#as_framed_jsonld' do
       it 'should output a valid framed jsonld representation of itself and related' do
         framed_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_framed_jsonld)
-        related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld related: true)
+        related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
         expect(framed_graph.to_hash).to eq related_graph.to_hash
       end
     end
@@ -319,12 +293,17 @@ shared_examples 'a Resource with relations' do
   describe '#update_resource with related' do
     # TODO: add tests for autosaved relations
     before do
-      subject.update_resource(related: true)
+      subject.update_resource
     end
 
-    it 'should have a literal object' do
+    it 'should have a (non-localized?) literal object' do
       query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.title)
       expect(['Comet in Moominland', 'Kometen kommer']).to include query.first_object.to_s
+    end
+
+    it 'should have a localized literal object' do
+      query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.alternative)
+      expect('Mumintrollet pa kometjakt').to eq query.first_object.to_s
     end
 
     it 'should have an embedded object' do
@@ -354,40 +333,6 @@ shared_examples 'a Resource with relations' do
       query_part = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.hasPart)
       expect(query_part.count).to eq 1
       expect(query_part.first_object).to eq part.rdf_subject
-    end
-
-    it 'should have related object relations' do
-      # many-to-many
-      query = person.resource.query(subject: person.rdf_subject, predicate: RDF::DC.relation)
-      expect(query.count).to eq 1
-      expect(query.first_object).to eq subject.rdf_subject
-
-      # one-sided has-many
-      expect(concept.resource.query(object: subject.rdf_subject)).to be_empty
-
-      # embedded-one
-      query = part.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
-      expect(query.count).to eq 1
-      expect(query.first_object).to eq subject.rdf_subject
-    end
-  end
-
-  describe '#update_resource with related and then without related' do
-    # TODO: add tests for autosaved relations
-    before do
-      subject.update_resource(related: true)
-      subject.update_resource # implicit false
-    end
-
-    it 'should not have related objects' do
-      expect(subject.resource.query(subject: person.rdf_subject)).to be_empty
-      expect(subject.resource.query(subject: concept.rdf_subject)).to be_empty
-    end
-
-    it 'should have embedded object relations' do
-      query = subject.resource.query(subject: part.rdf_subject, predicate: RDF::DC.isPartOf)
-      expect(query.count).to eq 1
-      expect(query.first_object).to eq subject.rdf_subject
     end
 
     it 'should have related object relations' do
