@@ -13,6 +13,8 @@ describe Ladder::Resource do
   end
 
   shared_context 'with relations' do
+    include_context 'with data'
+
     let(:person)  { Person.new }
     let(:concept) { Concept.new }
     let(:part)    { Part.new }
@@ -65,7 +67,6 @@ describe Ladder::Resource do
     let(:klass) { Thing }
 
     include_context 'with data'
-
     it_behaves_like 'a Resource'
   end
 
@@ -85,14 +86,12 @@ describe Ladder::Resource do
     let(:klass) { Subthing }
 
     include_context 'with data'
-
     it_behaves_like 'a Resource'
   end
 
   context 'with relations' do
     let(:klass) { Thing }
 
-    include_context 'with data'
     include_context 'with relations'
 
     before do
@@ -102,14 +101,12 @@ describe Ladder::Resource do
       subject.save
     end
 
-    it_behaves_like 'a Resource'
     it_behaves_like 'a Resource with relations'
   end
 
   context 'from JSON-LD' do
     let(:klass) { Thing }
 
-    include_context 'with data'
     include_context 'with relations'
 
     let(:subject) { Thing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }
@@ -122,7 +119,6 @@ describe Ladder::Resource do
       subject.save
     end
 
-    it_behaves_like 'a Resource'
     it_behaves_like 'a Resource with relations'
   end
 end

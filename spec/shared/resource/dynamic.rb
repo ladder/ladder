@@ -146,4 +146,6 @@ shared_examples 'a Dynamic Resource' do
       expect(subject.class.resource_class.properties).to eq subject.class.new.class.resource_class.properties
     end
   end
+
+  it_behaves_like 'a Resource'
 end

@@ -53,6 +53,12 @@ shared_examples 'a Resource' do
     # TODO: it should be registered in Ladder::Config
   end
 
+  describe '#rdf_label' do
+    it 'should return the default label' do
+      expect(['Comet in Moominland', 'Kometen kommer']).to include subject.rdf_label.first
+    end
+  end
+
   describe '#property' do
     context 'with non-localized literal' do
       it 'should return non-localized value' do
@@ -93,84 +99,6 @@ shared_examples 'a Resource' do
     end
   end
 
-  describe '#<<' do
-    context 'with defined field' do
-      before do
-        subject << RDF::Statement(nil, RDF::DC.title, RDF::Literal.new('Kometen kommer', language: :sv))
-      end
-
-      it 'should update existing values' do
-        expect(subject.title_translations).to eq('sv' => 'Kometen kommer')
-      end
-    end
-
-    context 'with undefined field' do
-      before do
-        subject << RDF::Statement(nil, RDF::DC.description, "Second in Tove Jansson's series of Moomin books")
-      end
-
-      it 'should ignore undefined properties' do
-        expect(subject.fields['description']).to be_nil
-        expect(subject.resource.query(predicate: RDF::DC.description)).to be_empty
-      end
-    end
-
-    context 'with a RDF type' do
-      before do
-        subject << RDF::Statement(nil, RDF.type, RDF::DC.PhysicalResource)
-      end
-
-      it 'should only contain types defined on the class' do
-        # expect(subject.type.count).to eq 1
-        expect(subject.type).to include RDF::DC.BibliographicResource
-      end
-    end
-
-    context 'with a URI value' do
-      before do
-        subject << RDF::Statement(nil, RDF::DC.references, RDF::URI('http://some.uri'))
-      end
-
-      it 'should store the URI as a string' do
-        expect(subject.references).to eq 'http://some.uri'
-      end
-
-      it 'should cast a URI into the resource' do
-        subject.update_resource
-        query = subject.resource.query(subject: subject.rdf_subject, predicate: RDF::DC.references)
-        expect(query.first_object).to be_a_kind_of RDF::URI
-      end
-    end
-  end
-
-  describe '#rdf_label' do
-    it 'should return the default label' do
-      expect(['Comet in Moominland', 'Kometen kommer']).to include subject.rdf_label.first
-    end
-  end
-
-  context 'a serializable' do
-    describe '#as_turtle' do
-      it 'should output a valid turtle representation of itself' do
-        graph = RDF::Graph.new << RDF::Turtle::Reader.new(subject.as_turtle)
-        expect(subject.update_resource.to_hash).to eq graph.to_hash
-      end
-    end
-
-    describe '#as_jsonld' do
-      it 'should output a valid jsonld representation of itself' do
-        graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
-        expect(subject.update_resource.to_hash).to eq graph.to_hash
-      end
-    end
-
-    describe '#as_qname' do
-      it 'should output a valid qname representation of itself' do
-        # TODO: check rdfs:label
-      end
-    end
-  end
-
   describe '#new_from_graph' do
     before do
       subject.update_resource
@@ -191,33 +119,12 @@ shared_examples 'a Resource' do
       expect(remove_ids(new_subject.as_framed_jsonld)).to eq remove_ids(subject.as_framed_jsonld)
     end
   end
+
+  it_behaves_like 'a Serializable'
+  it_behaves_like 'a Pushable'
 end
 
 shared_examples 'a Resource with relations' do
-  describe 'serializable' do
-
-    describe '#as_jsonld' do
-      it 'should output a valid jsonld representation of itself and related' do
-        graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
-        expect(subject.update_resource.to_hash).to eq graph.to_hash
-      end
-    end
-
-    describe '#as_qname' do
-      it 'should output a valid qname representation of itself and related' do
-        # TODO
-      end
-    end
-
-    describe '#as_framed_jsonld' do
-      it 'should output a valid framed jsonld representation of itself and related' do
-        framed_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_framed_jsonld)
-        related_graph = RDF::Graph.new << JSON::LD::API.toRdf(subject.as_jsonld)
-        expect(framed_graph.to_hash).to eq related_graph.to_hash
-      end
-    end
-  end
-
   it 'should have relations' do
     expect(subject.people.to_a).to include person
     expect(subject.concepts.to_a).to include concept
@@ -293,7 +200,7 @@ shared_examples 'a Resource with relations' do
   describe '#update_resource (with related)' do
     # TODO: add tests for autosaved relations
     before do
-      subject.update_resource
+      subject.update_resource related: true
     end
 
     it 'should have a (non-localized?) literal object' do
@@ -350,4 +257,6 @@ shared_examples 'a Resource with relations' do
       expect(query.first_object).to eq subject.rdf_subject
     end
   end
+
+  it_behaves_like 'a Resource'
 end

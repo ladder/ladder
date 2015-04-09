@@ -17,7 +17,6 @@ describe Ladder::Resource::Dynamic do
 
     include_context 'with data'
 
-    it_behaves_like 'a Resource'
     it_behaves_like 'a Dynamic Resource'
   end
 
@@ -29,7 +28,6 @@ describe Ladder::Resource::Dynamic do
 
     let(:subject) { Thing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }
 
-    it_behaves_like 'a Resource'
     it_behaves_like 'a Dynamic Resource'
   end
 end
