@@ -212,4 +212,6 @@ shared_examples 'a Searchable with related' do
       end
     end
   end
+
+  it_behaves_like 'a Searchable'
 end

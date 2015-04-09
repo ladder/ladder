@@ -24,6 +24,8 @@ describe Ladder::Searchable::Background do
   end
 
   shared_context 'with relations' do
+    include_context 'with data'
+
     let(:person) { Person.new }
 
     before do
@@ -47,14 +49,12 @@ describe Ladder::Searchable::Background do
     let(:klass) { Thing }
 
     include_context 'with data'
-
     it_behaves_like 'a Searchable'
   end
 
   context 'with relations' do
     let(:klass) { Thing }
 
-    include_context 'with data'
     include_context 'with relations'
 
     before do
@@ -66,7 +66,6 @@ describe Ladder::Searchable::Background do
       subject.people << person
     end
 
-    it_behaves_like 'a Searchable'
     it_behaves_like 'a Searchable with related'
   end
 
