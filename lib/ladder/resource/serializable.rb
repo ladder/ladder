@@ -10,9 +10,10 @@ module Ladder
       # @see ActiveTriples::Resource#dump
       #
       # @param [Hash] opts options to pass to ActiveTriples
+      # @option opts [Boolean] :related whether to include related resources (default: false)
       # @return [String] a serialized Turtle version of the resource
       def as_turtle(opts = {})
-        update_resource(opts).dump(:ttl, { standard_prefixes: true }.merge(opts))
+        update_resource(opts.slice :related).dump(:ttl, { standard_prefixes: true }.merge(opts))
       end
 
       ##
@@ -21,9 +22,10 @@ module Ladder
       # @see ActiveTriples::Resource#dump
       #
       # @param [Hash] opts options to pass to ActiveTriples
+      # @option opts [Boolean] :related whether to include related resources (default: false)
       # @return [Hash] a serialized JSON-LD version of the resource
       def as_jsonld(opts = {})
-        JSON.parse update_resource(opts).dump(:jsonld, { standard_prefixes: true }.merge(opts))
+        JSON.parse update_resource(opts.slice :related).dump(:jsonld, { standard_prefixes: true }.merge(opts))
       end
 
       ##
