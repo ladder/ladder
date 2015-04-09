@@ -14,7 +14,7 @@ module Ladder
     include Mongoid::Document
     include ActiveTriples::Identifiable
     include Ladder::Configurable
-#    include Ladder::Resource::Pushable
+    # include Ladder::Resource::Pushable
     include Ladder::Resource::Serializable
 
     delegate :rdf_label, to: :update_resource
@@ -28,20 +28,17 @@ module Ladder
     def update_resource
       # Delete existing statements for the object
       resource.delete [rdf_subject]
+      resource.set_value(RDF.type, resource_class.type)
 
       resource_class.properties.each do |field_name, property|
-        object = case read_attribute(field_name)
-        when send(field_name) # Regular field
-           cast_value send(field_name)
-        when nil # Relation
-           send(field_name).to_a.map(&:rdf_subject)
-        else # Localized field
-          read_attribute(field_name).map { |lang, value| cast_value(value, language: lang) }
+        if fields[field_name] && fields[field_name].localized?
+          object = read_attribute(field_name).map { |lang, value| cast_value(value, language: lang) }
+        else
+          object = cast_value send(field_name)
         end
 
         # TODO: For fields with 00:00:00 that are NOT typed as Time, cast to xsd:date
         # value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
-
         resource.set_value(property.predicate, object)
       end
 
@@ -85,14 +82,15 @@ module Ladder
     # @param [Hash] opts options to pass to RDF::Literal
     # @return [RDF::Term]
     def cast_value(value, opts = {})
-      case value
-      when Array
-        value.map { |v| cast_value(v, opts) }
-      when String
+      if value.is_a? String
         cast_uri = RDF::URI.new(value)
         cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
-      when Time
+      elsif value.is_a? Time
         RDF::Literal.new(value.to_datetime)
+      elsif value.is_a? Enumerable
+        value.map { |v| cast_value(v, opts) }
+      elsif value.is_a? ActiveTriples::Identifiable
+        value.rdf_subject
       else
         RDF::Literal.new(value, opts)
       end

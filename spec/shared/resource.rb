@@ -176,7 +176,7 @@ shared_examples 'a Resource' do
       subject.update_resource
     end
 
-    let(:new_subject)  { subject.class.new_from_graph subject.resource }
+    let(:new_subject)  { klass.new_from_graph subject.resource }
 
     it 'should create a new object of the same class' do
       expect(new_subject.class).to eq subject.class
