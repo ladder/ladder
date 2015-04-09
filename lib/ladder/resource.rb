@@ -42,8 +42,9 @@ module Ladder
     # attributes on the document, suitable for creating
     # RDF::Statements or sending to ActiveTriples::Resource#set_value
     #
-    # @param [Hash] opts options to pass to Mongoid / RDF::Literal
-    # @return [Array<RDF::Term>] resource for the object
+    # @param [Hash] opts options to pass to RDF::Literal
+    # @option opts [Boolean] :related whether to include related resources (default: false)
+    # @return [Array<RDF::Term, RDF::Resource>] an array of RDF::Terms
     def attributes_to_statements(opts = {})
       resource_class.properties.map do |field_name, property|
         if fields[field_name] && fields[field_name].localized?
@@ -63,7 +64,8 @@ module Ladder
     #
     # @param [Object] value ActiveModel attribute value to be cast
     # @param [Hash] opts options to pass to RDF::Literal
-    # @return [RDF::Term]
+    # @option opts [Boolean] :language language to use for language-typed RDF::Literals
+    # @return [Array<RDF::Term>, RDF::Term] a cast value(s)
     def attribute_to_rdf(value, opts = {})
       if value.is_a? Enumerable
         value.map { |v| attribute_to_rdf(v, opts) }
