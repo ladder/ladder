@@ -30,22 +30,33 @@ module Ladder
       resource.delete [rdf_subject]
       resource.set_value(RDF.type, resource_class.type)
 
-      resource_class.properties.each do |field_name, property|
-        if fields[field_name] && fields[field_name].localized?
-          object = read_attribute(field_name).map { |lang, value| attribute_to_rdf(value, language: lang) }
-        elsif embedded_relations[field_name] || (relations[field_name] && opts[:related])
-          object = attribute_to_rdf(send(field_name), related: true)
-        else
-          object = attribute_to_rdf(send(field_name))
-        end
-
-        resource.set_value(rdf_subject, property.predicate, object)
-      end
+      attributes_to_statements(opts).each { |statement| resource.set_value(*statement) }
 
       resource
     end
 
     private
+
+    ##
+    # Generate a list of subject, predicate, object arrays from
+    # attributes on the document, suitable for creating
+    # RDF::Statements or sending to ActiveTriples::Resource#set_value
+    #
+    # @param [Hash] opts options to pass to Mongoid / RDF::Literal
+    # @return [Array<RDF::Term>] resource for the object
+    def attributes_to_statements(opts = {})
+      resource_class.properties.map do |field_name, property|
+        if fields[field_name] && fields[field_name].localized?
+          object = read_attribute(field_name).map { |lang, value| attribute_to_rdf(value, language: lang) }
+        elsif embedded_relations[field_name] || (relations[field_name] && opts[:related])
+          object = send(field_name).to_a.map(&:update_resource)
+        else
+          object = attribute_to_rdf(send(field_name))
+        end
+
+        [rdf_subject, property.predicate, object]
+      end
+    end
 
     ##
     # Cast values from Mongoid types to RDF types
@@ -57,7 +68,7 @@ module Ladder
       if value.is_a? Enumerable
         value.map { |v| attribute_to_rdf(v, opts) }
       elsif value.is_a? ActiveTriples::Identifiable
-        opts[:related] ? value.update_resource : value.rdf_subject
+        value.rdf_subject
       elsif value.is_a? String
         RDF::URI.intern(value).valid? ? RDF::URI.intern(value) : RDF::Literal.new(value, opts)
       elsif value.is_a? Time
