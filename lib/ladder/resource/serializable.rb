@@ -11,8 +11,8 @@ module Ladder
       #
       # @param [Hash] opts options to pass to ActiveTriples
       # @return [String] a serialized Turtle version of the resource
-      def as_turtle(opts = { })
-        update_resource.dump(:ttl, { standard_prefixes: true }.merge(opts))
+      def as_turtle(opts = {})
+        update_resource(opts).dump(:ttl, { standard_prefixes: true }.merge(opts))
       end
 
       ##
@@ -22,8 +22,8 @@ module Ladder
       #
       # @param [Hash] opts options to pass to ActiveTriples
       # @return [Hash] a serialized JSON-LD version of the resource
-      def as_jsonld(opts = { })
-        JSON.parse update_resource.dump(:jsonld, { standard_prefixes: true }.merge(opts))
+      def as_jsonld(opts = {})
+        JSON.parse update_resource(opts).dump(:jsonld, { standard_prefixes: true }.merge(opts))
       end
 
       ##
@@ -35,7 +35,7 @@ module Ladder
       #
       # @return [Hash] a serialized JSON-LD version of the resource
       def as_framed_jsonld
-        json_hash = as_jsonld
+        json_hash = as_jsonld related: true
 
         context = json_hash['@context']
         frame = { '@context' => context }

@@ -290,7 +290,7 @@ shared_examples 'a Resource with relations' do
     end
   end
 
-  describe '#update_resource with related' do
+  describe '#update_resource (with related)' do
     # TODO: add tests for autosaved relations
     before do
       subject.update_resource

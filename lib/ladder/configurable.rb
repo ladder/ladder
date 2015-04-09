@@ -10,7 +10,7 @@ module Ladder
       #
       # @return [RDF::URI]
       def base_uri
-        RDF::URI.new(Ladder::Config.settings[:base_uri]) / name.underscore.pluralize
+        RDF::URI.intern(Ladder::Config.settings[:base_uri]) / name.underscore.pluralize
       end
 
       protected

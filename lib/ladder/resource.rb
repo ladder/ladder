@@ -1,8 +1,7 @@
 require 'mongoid'
 require 'active_triples'
-require 'ladder/resource/pushable'
 require 'ladder/resource/serializable'
-
+# require 'ladder/resource/pushable'
 require_relative '../rdf/model/uri'
 
 module Ladder
@@ -14,8 +13,8 @@ module Ladder
     include Mongoid::Document
     include ActiveTriples::Identifiable
     include Ladder::Configurable
-    # include Ladder::Resource::Pushable
     include Ladder::Resource::Serializable
+    # include Ladder::Resource::Pushable
 
     delegate :rdf_label, to: :update_resource
 
@@ -25,7 +24,7 @@ module Ladder
     #
     # @param [Hash] opts options to pass to Mongoid / ActiveTriples
     # @return [ActiveTriples::Resource] resource for the object
-    def update_resource
+    def update_resource(opts = {})
       # Delete existing statements for the object
       resource.delete [rdf_subject]
       resource.set_value(RDF.type, resource_class.type)
@@ -33,12 +32,12 @@ module Ladder
       resource_class.properties.each do |field_name, property|
         if fields[field_name] && fields[field_name].localized?
           object = read_attribute(field_name).map { |lang, value| cast_value(value, language: lang) }
+        elsif embedded_relations[field_name] || (relations[field_name] && opts[:related])
+          object = cast_value(send(field_name), related: true)
         else
-          object = cast_value send(field_name)
+          object = cast_value(send(field_name))
         end
 
-        # TODO: For fields with 00:00:00 that are NOT typed as Time, cast to xsd:date
-        # value.midnight == value ? RDF::Literal.new(value.to_date) : RDF::Literal.new(value.to_datetime)
         resource.set_value(property.predicate, object)
       end
 
@@ -78,25 +77,22 @@ module Ladder
     ##
     # Cast values from Mongoid types to RDF types
     #
-    # @param [Object] value ActiveModel attribute to be cast
+    # @param [Object] value ActiveModel attribute value to be cast
     # @param [Hash] opts options to pass to RDF::Literal
     # @return [RDF::Term]
     def cast_value(value, opts = {})
-      if value.is_a? String
-        cast_uri = RDF::URI.new(value)
-        cast_uri.valid? ? cast_uri : RDF::Literal.new(value, opts)
-      elsif value.is_a? Time
-        RDF::Literal.new(value.to_datetime)
-      elsif value.is_a? Enumerable
+      if value.is_a? Enumerable
         value.map { |v| cast_value(v, opts) }
       elsif value.is_a? ActiveTriples::Identifiable
-        value.rdf_subject
+        opts[:related] ? value.update_resource : value.rdf_subject
+      elsif value.is_a? String
+        RDF::URI.intern(value).valid? ? RDF::URI.intern(value) : RDF::Literal.new(value, opts)
+      elsif value.is_a? Time
+        RDF::Literal.new(value.to_datetime)
       else
         RDF::Literal.new(value, opts)
       end
     end
-
-    public
 
     module ClassMethods
       ##
