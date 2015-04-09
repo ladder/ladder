@@ -96,6 +96,8 @@ module Ladder
           # NB: super has to go first or AT clobbers properties
           super(opts)
 
+          apply_types
+
           if self._context
             self._context.each do |field_name, uri|
               resource.set_value(RDF::Vocabulary.find_term(uri), attribute_to_rdf(send(field_name)))
