@@ -98,7 +98,7 @@ module Ladder
 
           if self._context
             self._context.each do |field_name, uri|
-              resource.set_value(RDF::Vocabulary.find_term(uri), cast_value(send(field_name)))
+              resource.set_value(RDF::Vocabulary.find_term(uri), attribute_to_rdf(send(field_name)))
             end
           end
 

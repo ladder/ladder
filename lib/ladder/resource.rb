@@ -1,6 +1,7 @@
 require 'mongoid'
 require 'active_triples'
 require 'ladder/resource/serializable'
+require 'ladder/resource/persistable'
 require 'ladder/resource/pushable'
 
 module Ladder
@@ -31,14 +32,14 @@ module Ladder
 
       resource_class.properties.each do |field_name, property|
         if fields[field_name] && fields[field_name].localized?
-          object = read_attribute(field_name).map { |lang, value| cast_value(value, language: lang) }
+          object = read_attribute(field_name).map { |lang, value| attribute_to_rdf(value, language: lang) }
         elsif embedded_relations[field_name] || (relations[field_name] && opts[:related])
-          object = cast_value(send(field_name), related: true)
+          object = attribute_to_rdf(send(field_name), related: true)
         else
-          object = cast_value(send(field_name))
+          object = attribute_to_rdf(send(field_name))
         end
 
-        resource.set_value(property.predicate, object)
+        resource.set_value(rdf_subject, property.predicate, object)
       end
 
       resource
@@ -52,9 +53,9 @@ module Ladder
     # @param [Object] value ActiveModel attribute value to be cast
     # @param [Hash] opts options to pass to RDF::Literal
     # @return [RDF::Term]
-    def cast_value(value, opts = {})
+    def attribute_to_rdf(value, opts = {})
       if value.is_a? Enumerable
-        value.map { |v| cast_value(v, opts) }
+        value.map { |v| attribute_to_rdf(v, opts) }
       elsif value.is_a? ActiveTriples::Identifiable
         opts[:related] ? value.update_resource : value.rdf_subject
       elsif value.is_a? String
@@ -81,7 +82,7 @@ module Ladder
         if opts[:class_name]
           mongoid_opts = { autosave: true, index: true }.merge(opts.except(:predicate, :multivalue))
           # TODO: add/fix tests for this behaviour when true
-          mongoid_opts[:inverse_of] = nil if Ladder::Config.settings[:one_sided_relations]
+          # mongoid_opts[:inverse_of] = nil if Ladder::Config.settings[:one_sided_relations]
 
           has_and_belongs_to_many(field_name, mongoid_opts) unless relations[field_name.to_s]
         else
