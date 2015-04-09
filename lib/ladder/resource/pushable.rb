@@ -1,7 +1,6 @@
 module Ladder
   module Resource
     module Pushable
-
       ##
       # Push an RDF::Statement into the object
       #

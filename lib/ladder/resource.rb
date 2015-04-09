@@ -1,5 +1,6 @@
 require 'mongoid'
 require 'active_triples'
+
 require 'ladder/resource/serializable'
 require 'ladder/resource/persistable'
 require 'ladder/resource/pushable'
@@ -13,6 +14,8 @@ module Ladder
     include Mongoid::Document
     include ActiveTriples::Identifiable
     include Ladder::Configurable
+
+    # TODO: gross.
     include Ladder::Resource::Serializable
     include Ladder::Resource::Persistable
     include Ladder::Resource::Pushable

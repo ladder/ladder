@@ -32,7 +32,6 @@ module Ladder
       end
 
       module ClassMethods
-
         ##
         # Create a new instance of this class, populated with values
         # and related objects from a given RDF::Graph for this model.

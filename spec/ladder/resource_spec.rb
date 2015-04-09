@@ -12,57 +12,6 @@ describe Ladder::Resource do
     Object.send(:remove_const, 'Thing') if Object
   end
 
-  shared_context 'with relations' do
-    include_context 'with data'
-
-    let(:person)  { Person.new }
-    let(:concept) { Concept.new }
-    let(:part)    { Part.new }
-
-    before do
-      class Person
-        include Ladder::Resource
-        configure type: RDF::DC.AgentClass
-
-        property :things, predicate: RDF::DC.relation, class_name: 'Thing'
-      end
-
-      class Concept
-        include Ladder::Resource
-        configure type: RDF::SKOS.Concept
-      end
-
-      class Part
-        include Ladder::Resource
-        configure type: RDF::DC.PhysicalResource
-
-        embedded_in :thing
-        property :thing, predicate: RDF::DC.isPartOf, class_name: 'Thing'
-      end
-
-      # many-to-many
-      Thing.property :people, predicate: RDF::DC.creator, class_name: 'Person'
-
-      # one-sided has-many
-      Thing.has_and_belongs_to_many :concepts, inverse_of: nil, autosave: true
-      Thing.property :concepts, predicate: RDF::DC.subject, class_name: 'Concept'
-
-      # embedded one
-      Thing.embeds_one :part, cascade_callbacks: true
-      Thing.property :part, predicate: RDF::DC.hasPart, class_name: 'Part'
-    end
-
-    after do
-      Ladder::Config.models.delete Person
-      Ladder::Config.models.delete Concept
-      Ladder::Config.models.delete Part
-
-      Object.send(:remove_const, 'Person') if Object
-      Object.send(:remove_const, 'Concept') if Object
-      Object.send(:remove_const, 'Part') if Object
-    end
-  end
-
   context 'with data' do
     let(:klass) { Thing }
 

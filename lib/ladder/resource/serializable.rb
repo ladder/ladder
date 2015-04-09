@@ -49,9 +49,8 @@ module Ladder
       ##
       # Return a qname-based JSON representation
       #
-      # @param [Hash] opts options for serializaiton
       # @return [Hash] a serialized 'qname' version of the resource
-      def as_qname(opts = {})
+      def as_qname
         qname_hash = type.empty? ? {} : { rdf: { type: type.first.pname } }
 
         resource_class.properties.each do |field_name, property|

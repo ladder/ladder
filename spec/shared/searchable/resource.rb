@@ -121,15 +121,6 @@ shared_examples 'a Searchable with related' do
         results = person.class.search('dc.relation:' + subject.id)
         expect(results.count).to eq 1
       end
-    end
-
-    context 'with as_qname related' do
-      before do
-        person.class.index_for_search { as_qname related: true }
-        subject.class.index_for_search { as_qname related: true }
-        subject.save
-        Elasticsearch::Model.client.indices.flush
-      end
 
       it 'should contain a embedded related object' do
         results = subject.class.search('dc.creator.foaf.name.en:tove OR dc.creator.foaf.name:tove')

@@ -16,15 +16,13 @@ describe Ladder::Resource::Dynamic do
     let(:klass) { Thing }
 
     include_context 'with data'
-
     it_behaves_like 'a Dynamic Resource'
   end
 
   context 'from JSON-LD' do
     let(:klass) { Thing }
 
-    include_context 'with data'
-#    include_context 'with relations'
+    include_context 'with relations'
 
     let(:subject) { Thing.new_from_graph(RDF::Graph.load './spec/shared/graph.jsonld') }
 
