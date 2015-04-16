@@ -49,17 +49,21 @@ module Ladder
     # @option opts [Boolean] :related whether to include related resources (default: false)
     # @return [Array<RDF::Term, RDF::Resource>] an array of RDF::Terms
     def attributes_to_statements(opts = {})
-      resource_class.properties.map do |field_name, property|
+      statements = []
+
+      resource_class.properties.each do |field_name, property|
         if fields[field_name] && fields[field_name].localized?
-          object = read_attribute(field_name).map { |lang, value| attribute_to_rdf(value, language: lang) }
+          objects = read_attribute(field_name).map { |lang, value| attribute_to_rdf(value, language: lang) }
         elsif embedded_relations[field_name] || (relations[field_name] && opts[:related])
-          object = send(field_name).to_a.map(&:update_resource)
+          objects = send(field_name).to_a.map(&:update_resource)
         else
-          object = attribute_to_rdf(send(field_name))
+          objects = attribute_to_rdf(send(field_name))
         end
 
-        [rdf_subject, property.predicate, object]
+        [*objects].each { |object| statements << [rdf_subject, property.predicate, object] }
       end
+
+      statements
     end
 
     ##
