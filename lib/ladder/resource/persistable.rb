@@ -3,35 +3,87 @@ module Ladder
     module Persistable
       extend ActiveSupport::Concern
 
-      ##
-      # Retrieve the class for a relation, based on its defined RDF predicate
-      #
-      # @param [RDF::URI] predicate a URI for the RDF::Term
-      # @return [Ladder::Resource, Ladder::File, nil] related class
-      def klass_from_predicate(predicate)
-        field_name = field_from_predicate(predicate)
-        return unless field_name
-
-        relation = relations[field_name]
-        return unless relation
-
-        relation.class_name.constantize
-      end
-
-      ##
-      # Retrieve the attribute name for a field or relation,
-      # based on its defined RDF predicate
-      #
-      # @param [RDF::URI] predicate a URI for the RDF::Term
-      # @return [String, nil] name for the attribute
-      def field_from_predicate(predicate)
-        defined_prop = resource_class.properties.find { |_field_name, term| term.predicate == predicate }
-        return unless defined_prop
-
-        defined_prop.first
-      end
+      # FIXME: for backwards-compatibility
+      delegate :klass_from_predicate, :field_from_predicate, to: self.class
 
       module ClassMethods
+        ##
+        # Retrieve the attribute name for a field or relation,
+        # based on its defined RDF predicate
+        #
+        # @param [RDF::URI] predicate a URI for the RDF::Term
+        # @return [String, nil] name for the attribute
+        def field_from_predicate(predicate)
+          defined_prop = resource_class.properties.find { |_field_name, term| term.predicate == predicate }
+          return unless defined_prop
+
+          defined_prop.first
+        end
+
+        ##
+        # Retrieve the class for a relation, based on its defined RDF predicate
+        #
+        # @param [RDF::URI] predicate a URI for the RDF::Term
+        # @return [Ladder::Resource, Ladder::File, nil] related class
+        def klass_from_predicate(predicate)
+          field_name = field_from_predicate(predicate)
+          return unless field_name
+
+          relation = relations[field_name]
+          return unless relation
+
+          relation.class_name.constantize
+        end
+
+        #
+        def rdf_to_attribute(value, opts = {})
+          if value.is_a? Enumerable
+            value.map { |v| rdf_to_attribute(v, opts) }
+          elsif value.is_a? RDF::Literal
+            # TODO: handle localized values
+            value.object
+          elsif value.is_a? RDF::Node
+            # TODO
+            # opts[:graph].query([value]).to_hash
+            # graph_to_hash(opts[:graph], opts[:objects], [value])
+            # klass = klass_from_predicate opts[:graph].query([nil, nil, value]).first_predicate
+            # klass.nfg opts[:graph]
+            # binding.pry
+            nil
+          else # RDF::URI
+            value.to_s
+          end
+        end
+
+        #
+        def graph_to_hash(graph, objects = {}, pattern = [nil, RDF.type, resource_class.type])
+          root_subject = graph.query(pattern).first_subject
+          return unless root_subject
+
+          subgraph = graph.query([root_subject])
+
+          rdf_hash_to_attributes(subgraph.to_hash.values.first)
+        end
+
+        #
+        def rdf_hash_to_attributes(hash)
+          attr_hash = {}
+
+          hash.each do |term, value| # NB: value will always be an Array
+            field_name = field_from_predicate(term)
+            next unless field_name
+
+            value = value.first if 1 == value.count
+            attr_hash[field_name] = rdf_to_attribute(value)#, graph: graph, objects: objects)
+          end
+
+          attr_hash
+        end
+
+        def nfg(graph)
+          new graph_to_hash(graph)
+        end
+
         ##
         # Create a new instance of this class, populated with values
         # and related objects from a given RDF::Graph for this model.
