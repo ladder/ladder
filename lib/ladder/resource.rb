@@ -2,7 +2,7 @@ require 'mongoid'
 require 'active_triples'
 
 require 'ladder/resource/serializable'
-require 'ladder/resource/persistable'
+#require 'ladder/resource/persistable'
 require 'ladder/resource/pushable'
 
 module Ladder
@@ -15,9 +15,8 @@ module Ladder
     include ActiveTriples::Identifiable
     include Ladder::Configurable
 
-    # TODO: gross.
     include Ladder::Resource::Serializable
-    include Ladder::Resource::Persistable
+#    include Ladder::Resource::Persistable
     include Ladder::Resource::Pushable
 
     delegate :rdf_label, to: :update_resource
@@ -33,7 +32,7 @@ module Ladder
       resource.delete [rdf_subject]
       resource.set_value(RDF.type, resource_class.type)
 
-      attributes_to_statements(opts).each { |statement| resource.set_value(*statement) }
+      attributes_to_statements(opts).each { |statement| resource << statement }
 
       resource
     end
@@ -54,13 +53,17 @@ module Ladder
       resource_class.properties.each do |field_name, property|
         if fields[field_name] && fields[field_name].localized?
           objects = read_attribute(field_name).map { |lang, value| attribute_to_rdf(value, language: lang) }
-        elsif embedded_relations[field_name] || (relations[field_name] && opts[:related])
-          objects = send(field_name).to_a.map(&:update_resource)
         else
           objects = attribute_to_rdf(send(field_name))
         end
 
         [*objects].each { |object| statements << [rdf_subject, property.predicate, object] }
+
+        if embedded_relations[field_name] || (relations[field_name] && opts[:related])
+          send(field_name).to_a.each do |related_object|
+            related_object.update_resource.statements.each { |statement| statements << statement }
+          end
+        end
       end
 
       statements

@@ -3,57 +3,71 @@ module Ladder
     module Persistable
       extend ActiveSupport::Concern
 
-      # FIXME: for backwards-compatibility
-      delegate :klass_from_predicate, :field_from_predicate, to: self.class
+      ##
+      # Update ActiveModel properties & relations from
+      # the delegated ActiveTriples::Resource
+      #
+      # @param [Hash] opts options to pass to Mongoid / ActiveTriples
+      # @return [ActiveTriples::Resource] resource for the object
+      def update_from_resource
+        resource.query([rdf_subject]).statements.each { |statement| update_from_statement(statement) }
+      end
+
+      private
+
+      def update_from_statement(statement)
+        # Only allow statements valid for this model instance
+        return unless statement.subject == rdf_subject
+
+        # Don't set rdf:type on an instance
+        return if RDF.type == statement.predicate
+
+        field_name = field_from_predicate(statement.predicate)
+        return unless field_name
+
+        set_attribute(field_name, statement.object)
+      end
+
+      def set_attribute(field_name, value)
+        binding.pry
+      end
+
+      #
+      def rdf_to_attribute(value, opts = {})
+        if value.is_a? Enumerable
+          value.map { |v| rdf_to_attribute(v, opts) }
+        elsif value.is_a? RDF::Literal
+          # TODO: handle localized values
+          value.object
+        elsif value.is_a? RDF::Node
+          # TODO
+          # opts[:graph].query([value]).to_hash
+          # graph_to_hash(opts[:graph], opts[:objects], [value])
+          # klass = klass_from_predicate opts[:graph].query([nil, nil, value]).first_predicate
+          # klass.new_from_graph opts[:graph]
+          # binding.pry
+          nil
+        else # RDF::URI
+          value.to_s
+        end
+      end
+
+      ##
+      # Retrieve the class for a relation, based on its defined RDF predicate
+      #
+      # @param [RDF::URI] predicate a URI for the RDF::Term
+      # @return [Ladder::Resource, Ladder::File, nil] related class
+      def klass_from_predicate(predicate)
+        field_name = field_from_predicate(predicate)
+        return unless field_name
+
+        relation = relations[field_name]
+        return unless relation
+
+        relation.class_name.constantize
+      end
 
       module ClassMethods
-        ##
-        # Retrieve the attribute name for a field or relation,
-        # based on its defined RDF predicate
-        #
-        # @param [RDF::URI] predicate a URI for the RDF::Term
-        # @return [String, nil] name for the attribute
-        def field_from_predicate(predicate)
-          defined_prop = resource_class.properties.find { |_field_name, term| term.predicate == predicate }
-          return unless defined_prop
-
-          defined_prop.first
-        end
-
-        ##
-        # Retrieve the class for a relation, based on its defined RDF predicate
-        #
-        # @param [RDF::URI] predicate a URI for the RDF::Term
-        # @return [Ladder::Resource, Ladder::File, nil] related class
-        def klass_from_predicate(predicate)
-          field_name = field_from_predicate(predicate)
-          return unless field_name
-
-          relation = relations[field_name]
-          return unless relation
-
-          relation.class_name.constantize
-        end
-
-        #
-        def rdf_to_attribute(value, opts = {})
-          if value.is_a? Enumerable
-            value.map { |v| rdf_to_attribute(v, opts) }
-          elsif value.is_a? RDF::Literal
-            # TODO: handle localized values
-            value.object
-          elsif value.is_a? RDF::Node
-            # TODO
-            # opts[:graph].query([value]).to_hash
-            # graph_to_hash(opts[:graph], opts[:objects], [value])
-            # klass = klass_from_predicate opts[:graph].query([nil, nil, value]).first_predicate
-            # klass.nfg opts[:graph]
-            # binding.pry
-            nil
-          else # RDF::URI
-            value.to_s
-          end
-        end
 
         #
         def graph_to_hash(graph, objects = {}, pattern = [nil, RDF.type, resource_class.type])
@@ -78,10 +92,6 @@ module Ladder
           end
 
           attr_hash
-        end
-
-        def nfg(graph)
-          new graph_to_hash(graph)
         end
 
         ##
@@ -144,6 +154,7 @@ module Ladder
 
           new_object
         end
+
       end
     end
   end

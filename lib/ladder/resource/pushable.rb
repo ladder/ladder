@@ -10,14 +10,32 @@ module Ladder
         # ActiveTriples::Resource expects: RDF::Statement, Hash, or Array
         statement = RDF::Statement.from(statement) unless statement.is_a? RDF::Statement
 
+        # TODO: set of guards
+        # - predicate must be defined
+        # - subject OR object must be the object's rdf_subject
+
         # Only push statement if the statement's predicate is defined on the class
         field_name = field_from_predicate(statement.predicate)
         return unless field_name
 
+        # FIXME
         objects = statement.object.is_a?(RDF::Node) && block_given? ? yield : statement.object
 
-        update_field(field_name, *objects) if fields[field_name]
-        update_relation(field_name, *objects) if relations[field_name]
+        update_field(field_name, *objects) if fields[field_name] # statement.object
+        update_relation(field_name, *objects) if relations[field_name] # RDF::Node / block
+      end
+
+      ##
+      # Retrieve the attribute name for a field or relation,
+      # based on its defined RDF predicate
+      #
+      # @param [RDF::URI] predicate a URI for the RDF::Term
+      # @return [String, nil] name for the attribute
+      def field_from_predicate(predicate)
+        defined_prop = resource_class.properties.find { |_field_name, term| term.predicate == predicate }
+        return unless defined_prop
+
+        defined_prop.first
       end
 
       ##
