@@ -19,6 +19,7 @@ describe Ladder::Resource::Dynamic do
     it_behaves_like 'a Dynamic Resource'
   end
 
+=begin
   context 'from JSON-LD' do
     let(:klass) { Thing }
 
@@ -28,4 +29,5 @@ describe Ladder::Resource::Dynamic do
 
     it_behaves_like 'a Dynamic Resource'
   end
+=end
 end

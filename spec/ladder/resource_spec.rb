@@ -53,6 +53,7 @@ describe Ladder::Resource do
     it_behaves_like 'a Resource with relations'
   end
 
+=begin
   context 'from JSON-LD' do
     let(:klass) { Thing }
 
@@ -70,4 +71,5 @@ describe Ladder::Resource do
 
     it_behaves_like 'a Resource with relations'
   end
+=end
 end

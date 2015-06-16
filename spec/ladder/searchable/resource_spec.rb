@@ -41,7 +41,7 @@ describe Ladder::Searchable::Resource do
     let(:klass) { Thing }
 
     include_context 'with data'
-    it_behaves_like 'a Searchable'
+    it_behaves_like 'a Searchable Resource'
   end
 
   context 'with relations' do
@@ -58,6 +58,6 @@ describe Ladder::Searchable::Resource do
       subject.people << person
     end
 
-    it_behaves_like 'a Searchable with related'
+    it_behaves_like 'a Searchable Resource with related'
   end
 end

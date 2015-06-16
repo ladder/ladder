@@ -1,4 +1,4 @@
-shared_examples 'a Searchable' do
+shared_examples 'a Searchable Resource' do
   describe '#index_for_search' do
     context 'with default' do
       before do
@@ -71,7 +71,7 @@ shared_examples 'a Searchable' do
   end
 end
 
-shared_examples 'a Searchable with related' do
+shared_examples 'a Searchable Resource with related' do
   describe '#index_for_search related' do
     context 'with default' do
       before do
@@ -97,6 +97,7 @@ shared_examples 'a Searchable with related' do
       end
     end
 
+=begin
     context 'with as qname' do
       before do
         person.class.index_for_search { as_qname }
@@ -125,15 +126,16 @@ shared_examples 'a Searchable with related' do
       it 'should contain a embedded related object' do
         results = subject.class.search('dc.creator.foaf.name.en:tove OR dc.creator.foaf.name:tove')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_qname(related: true).to_json)
+        expect(results.first._source.to_hash).to eq JSON.parse(subject.as_qname.to_json)
       end
 
       it 'should contain an embedded subject in the related object' do
         results = person.class.search('dc.relation.dc.title.en:moomin*')
         expect(results.count).to eq 1
-        expect(results.first._source.to_hash).to eq JSON.parse(person.as_qname(related: true).to_json)
+        expect(results.first._source.to_hash).to eq JSON.parse(person.as_qname.to_json)
       end
     end
+=end
 
     context 'with as_jsonld' do
       before do
@@ -161,6 +163,7 @@ shared_examples 'a Searchable with related' do
       end
     end
 
+=begin
     context 'with as_jsonld related' do
       before do
         person.class.index_for_search { as_jsonld related: true }
@@ -181,6 +184,7 @@ shared_examples 'a Searchable with related' do
         expect(results.first._source.to_hash).to eq JSON.parse(person.as_jsonld(related: true).to_json)
       end
     end
+=end
 
     context 'with as_framed_jsonld' do
       before do
@@ -204,5 +208,5 @@ shared_examples 'a Searchable with related' do
     end
   end
 
-  it_behaves_like 'a Searchable'
+  it_behaves_like 'a Searchable Resource'
 end

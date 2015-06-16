@@ -49,7 +49,7 @@ describe Ladder::Searchable::Background do
     let(:klass) { Thing }
 
     include_context 'with data'
-    it_behaves_like 'a Searchable'
+    it_behaves_like 'a Searchable Resource'
   end
 
   context 'with relations' do
@@ -66,7 +66,7 @@ describe Ladder::Searchable::Background do
       subject.people << person
     end
 
-    it_behaves_like 'a Searchable with related'
+    it_behaves_like 'a Searchable Resource with related'
   end
 
   context 'with data from file' do
