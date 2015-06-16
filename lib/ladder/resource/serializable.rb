@@ -57,7 +57,8 @@ module Ladder
           ns, name = property.predicate.qname
           qname_hash[ns] ||= {}
 
-          qname_hash[ns][name] = send(field_name).to_a.map(&:as_qname) if relations[field_name]
+#          qname_hash[ns][name] = send(field_name).to_a.map(&:as_qname) if relations[field_name]
+          qname_hash[ns][name] = send(field_name).to_a.map(&:id).map(&:to_s) if relations[field_name]
           qname_hash[ns][name] = read_attribute(field_name) if fields[field_name]
 
           # Remove empty/null values
