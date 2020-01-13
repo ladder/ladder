@@ -32,6 +32,7 @@ Or install manually with `gem install ladder`.
 ## Usage
 
 * [Resources](#resources)
+  * [Relations](#relations)
   * [Dynamic Resources](#dynamic-resources)
 * [Files](#files)
 * [Indexing](#indexing)
@@ -97,6 +98,8 @@ Person.configure base_uri: 'http://some.other.uri/'
 
 See the [configuration](#configuration) section for more information on configuring default behaviour.
 
+#### Relations
+
 ```ruby
 class Person
   include Ladder::Resource
@@ -139,7 +142,7 @@ b.as_jsonld
  # }
 ```
 
-You'll notice that only the RDF node for the Book object on which `#as_jsonld` was called is serialized.  To include the entire graph for related objects, use the `related: true` option:
+You'll notice that only the RDF node for the Book object on which `#as_jsonld` was called is serialized.  To include the entire graph for related nodes, use the `related: true` option:
 
 ```ruby
 b.as_jsonld related: true
